@@ -1,0 +1,69 @@
+{
+  "name": "Agentic Accounts Payable Orchestrator",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/powershell:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    },
+    "ghcr.io/devcontainers/features/node:1": { "version": "lts" }
+  },
+
+  "postCreateCommand": "bash -lc 'pip install uv && uv venv .venv && . .venv/bin/activate && uv pip install -r requirements.txt && az bicep install'",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-bicep",
+        "ms-azuretools.vscode-azurefunctions",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.azurecli",
+        "github.copilot",
+        "github.copilot-chat",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "tamasfe.even-better-toml",
+        "charliermarsh.ruff"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.python",
+        "[bicep]": {
+          "editor.defaultFormatter": "ms-azuretools.vscode-bicep"
+        }
+      }
+    }
+  },
+
+  "remoteEnv": {
+    "PYTHONUNBUFFERED": "1",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "AZURE_SUBSCRIPTION_ID": "${localEnv:AZURE_SUBSCRIPTION_ID}",
+    "AZURE_RESOURCE_GROUP": "${localEnv:AZURE_RESOURCE_GROUP}",
+    "AZURE_LOCATION": "${localEnv:AZURE_LOCATION}",
+    "AZURE_OPENAI_ENDPOINT": "${localEnv:AZURE_OPENAI_ENDPOINT}",
+    "AZURE_OPENAI_API_VERSION": "${localEnv:AZURE_OPENAI_API_VERSION}",
+    "AZURE_OPENAI_CHAT_DEPLOYMENT": "${localEnv:AZURE_OPENAI_CHAT_DEPLOYMENT}",
+    "AZURE_SEARCH_ENDPOINT": "${localEnv:AZURE_SEARCH_ENDPOINT}",
+    "AZURE_SEARCH_INDEX": "${localEnv:AZURE_SEARCH_INDEX}",
+    "AZURE_POSTGRES_HOST": "${localEnv:AZURE_POSTGRES_HOST}",
+    "AZURE_POSTGRES_PORT": "${localEnv:AZURE_POSTGRES_PORT}",
+    "AZURE_POSTGRES_DB": "${localEnv:AZURE_POSTGRES_DB}",
+    "AZURE_POSTGRES_USER": "${localEnv:AZURE_POSTGRES_USER}",
+    "AZURE_STORAGE_ACCOUNT_URL": "${localEnv:AZURE_STORAGE_ACCOUNT_URL}",
+    "AZURE_STORAGE_CONTAINER": "${localEnv:AZURE_STORAGE_CONTAINER}",
+    "AZURE_KEY_VAULT_URI": "${localEnv:AZURE_KEY_VAULT_URI}",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "${localEnv:APPLICATIONINSIGHTS_CONNECTION_STRING}",
+    "LANGSMITH_API_KEY": "${localEnv:LANGSMITH_API_KEY}",
+    "LANGSMITH_PROJECT": "${localEnv:LANGSMITH_PROJECT}",
+    "AZURE_TENANT_ID": "${localEnv:AZURE_TENANT_ID}",
+    "AZURE_CLIENT_ID": "${localEnv:AZURE_CLIENT_ID}",
+    "AZURE_CLIENT_SECRET": "${localEnv:AZURE_CLIENT_SECRET}"
+  }
+}

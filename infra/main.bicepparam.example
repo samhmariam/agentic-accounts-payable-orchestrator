@@ -1,0 +1,17 @@
+using './main.bicep'
+
+// Compatibility alias for the default core Day 0 template.
+// Copy to infra/main.bicepparam or, preferably, use infra/core.bicepparam.example instead.
+
+param location = '<azure-region>'
+param storageAccountName = '<storage-account-name>'
+param storageContainerName = 'documents'
+param searchName = '<search-service-name>'
+param searchIndexName = 'documents'
+param openAiName = '<azure-openai-name>'
+param openAiApiVersion = '2024-08-01-preview'
+param openAiChatDeploymentName = 'chat'
+param openAiChatModelName = '<azure-openai-model-name>'
+param openAiChatModelVersion = '<azure-openai-model-version>'
+param openAiChatSkuName = 'Standard'
+param openAiChatCapacity = 1

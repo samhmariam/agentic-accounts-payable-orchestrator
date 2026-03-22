@@ -1,0 +1,17 @@
+using './core.bicep'
+
+// Copy to infra/core.bicepparam for local use.
+// The recommended Day 0 path uses this file with scripts/provision-core.ps1.
+
+param location = '<azure-region>'
+param storageAccountName = '<storage-account-name>'
+param storageContainerName = 'documents'
+param searchName = '<search-service-name>'
+param searchIndexName = 'documents'
+param openAiName = '<azure-openai-name>'
+param openAiApiVersion = '2024-08-01-preview'
+param openAiChatDeploymentName = 'chat'
+param openAiChatModelName = '<azure-openai-model-name>'
+param openAiChatModelVersion = '<azure-openai-model-version>'
+param openAiChatSkuName = 'Standard'
+param openAiChatCapacity = 1

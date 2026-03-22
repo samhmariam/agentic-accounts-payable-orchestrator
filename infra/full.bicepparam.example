@@ -1,0 +1,24 @@
+using './full.bicep'
+
+// Copy to infra/full.bicepparam for local use.
+// scripts/provision-full.ps1 injects the PostgreSQL Entra admin parameters at deploy time.
+
+param location = '<azure-region>'
+param storageAccountName = '<storage-account-name>'
+param storageContainerName = 'documents'
+param acrName = '<acr-name>'
+param searchName = '<search-service-name>'
+param searchIndexName = 'documents'
+param postgresServerName = '<postgres-server-name>'
+param postgresDatabaseName = 'aegisap'
+param keyVaultName = '<key-vault-name>'
+param openAiName = '<azure-openai-name>'
+param openAiApiVersion = '2024-08-01-preview'
+param openAiChatDeploymentName = 'chat'
+param openAiChatModelName = '<azure-openai-model-name>'
+param openAiChatModelVersion = '<azure-openai-model-version>'
+param openAiChatSkuName = 'Standard'
+param openAiChatCapacity = 1
+param logAnalyticsName = '<log-analytics-name>'
+param appInsightsName = '<application-insights-name>'
+param containerAppsEnvName = '<container-apps-environment-name>'

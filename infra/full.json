@@ -1,0 +1,484 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "11602449143995829008"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Primary region"
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Storage account name"
+      }
+    },
+    "storageContainerName": {
+      "type": "string",
+      "defaultValue": "documents",
+      "metadata": {
+        "description": "Blob container name for source documents"
+      }
+    },
+    "acrName": {
+      "type": "string",
+      "metadata": {
+        "description": "Container registry name"
+      }
+    },
+    "searchName": {
+      "type": "string",
+      "metadata": {
+        "description": "Search service name"
+      }
+    },
+    "searchIndexName": {
+      "type": "string",
+      "defaultValue": "documents",
+      "metadata": {
+        "description": "Starter search index name for Day 0"
+      }
+    },
+    "postgresServerName": {
+      "type": "string",
+      "metadata": {
+        "description": "PostgreSQL server name"
+      }
+    },
+    "postgresDatabaseName": {
+      "type": "string",
+      "defaultValue": "aegisap",
+      "metadata": {
+        "description": "PostgreSQL application database name"
+      }
+    },
+    "keyVaultName": {
+      "type": "string",
+      "metadata": {
+        "description": "Key Vault name"
+      }
+    },
+    "openAiName": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure OpenAI account name"
+      }
+    },
+    "openAiApiVersion": {
+      "type": "string",
+      "defaultValue": "2024-08-01-preview",
+      "metadata": {
+        "description": "Azure OpenAI data-plane API version exported into the local environment"
+      }
+    },
+    "openAiChatDeploymentName": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure OpenAI chat deployment name exported into the local environment"
+      }
+    },
+    "openAiChatModelName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional Azure OpenAI chat model name for automatic deployment creation"
+      }
+    },
+    "openAiChatModelVersion": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional Azure OpenAI chat model version for automatic deployment creation"
+      }
+    },
+    "openAiChatSkuName": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "metadata": {
+        "description": "Optional Azure OpenAI deployment SKU name"
+      }
+    },
+    "openAiChatCapacity": {
+      "type": "int",
+      "defaultValue": 0,
+      "metadata": {
+        "description": "Optional Azure OpenAI deployment capacity"
+      }
+    },
+    "logAnalyticsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Log Analytics workspace name"
+      }
+    },
+    "appInsightsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Application Insights name"
+      }
+    },
+    "containerAppsEnvName": {
+      "type": "string",
+      "metadata": {
+        "description": "Container Apps environment name"
+      }
+    },
+    "postgresEntraAdminObjectId": {
+      "type": "string",
+      "metadata": {
+        "description": "Object ID of the PostgreSQL Microsoft Entra admin principal"
+      }
+    },
+    "postgresEntraAdminName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the PostgreSQL Microsoft Entra admin principal"
+      }
+    },
+    "postgresEntraAdminType": {
+      "type": "string",
+      "defaultValue": "User",
+      "allowedValues": [
+        "User",
+        "ServicePrincipal",
+        "Group",
+        "Unknown"
+      ],
+      "metadata": {
+        "description": "Principal type for the PostgreSQL Microsoft Entra admin"
+      }
+    },
+    "workloadIdentityName": {
+      "type": "string",
+      "defaultValue": "id-aegisap-workload",
+      "metadata": {
+        "description": "User-assigned managed identity name for future workload use"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2025-06-01",
+      "name": "[parameters('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "allowBlobPublicAccess": false,
+        "allowSharedKeyAccess": false,
+        "defaultToOAuthAuthentication": true,
+        "minimumTlsVersion": "TLS1_2",
+        "supportsHttpsTrafficOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2025-06-01",
+      "name": "[format('{0}/{1}', parameters('storageAccountName'), 'default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2025-06-01",
+      "name": "[format('{0}/{1}/{2}', parameters('storageAccountName'), 'default', parameters('storageContainerName'))]",
+      "properties": {
+        "publicAccess": "None"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2023-07-01",
+      "name": "[parameters('acrName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "adminUserEnabled": false
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2023-09-01",
+      "name": "[parameters('logAnalyticsName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[parameters('appInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[parameters('workloadIdentityName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2024-03-01",
+      "name": "[parameters('containerAppsEnvName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName')), '2023-09-01').customerId]",
+            "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName')), '2023-09-01').primarySharedKey]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Search/searchServices",
+      "apiVersion": "2025-05-01",
+      "name": "[parameters('searchName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "basic"
+      },
+      "properties": {
+        "disableLocalAuth": true,
+        "hostingMode": "Default",
+        "partitionCount": 1,
+        "publicNetworkAccess": "enabled",
+        "replicaCount": 1
+      }
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+      "apiVersion": "2024-08-01",
+      "name": "[parameters('postgresServerName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_B1ms",
+        "tier": "Burstable"
+      },
+      "properties": {
+        "authConfig": {
+          "activeDirectoryAuth": "Enabled",
+          "passwordAuth": "Disabled",
+          "tenantId": "[subscription().tenantId]"
+        },
+        "network": {
+          "publicNetworkAccess": "Enabled"
+        },
+        "storage": {
+          "storageSizeGB": 128
+        },
+        "version": "16"
+      }
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/administrators",
+      "apiVersion": "2024-08-01",
+      "name": "[format('{0}/{1}', parameters('postgresServerName'), parameters('postgresEntraAdminObjectId'))]",
+      "properties": {
+        "principalName": "[parameters('postgresEntraAdminName')]",
+        "principalType": "[parameters('postgresEntraAdminType')]",
+        "tenantId": "[subscription().tenantId]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('postgresServerName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+      "apiVersion": "2024-08-01",
+      "name": "[format('{0}/{1}', parameters('postgresServerName'), parameters('postgresDatabaseName'))]",
+      "properties": {
+        "charset": "UTF8",
+        "collation": "en_US.utf8"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('postgresServerName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2023-07-01",
+      "name": "[parameters('keyVaultName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "enableRbacAuthorization": true,
+        "publicNetworkAccess": "Enabled",
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]"
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[parameters('openAiName')]",
+      "location": "[parameters('location')]",
+      "kind": "OpenAI",
+      "sku": {
+        "name": "S0"
+      },
+      "properties": {
+        "disableLocalAuth": true,
+        "publicNetworkAccess": "Enabled"
+      }
+    }
+  ],
+  "outputs": {
+    "acrId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName'))]"
+    },
+    "appInsightsConnectionString": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').ConnectionString]"
+    },
+    "keyVaultId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+    },
+    "keyVaultUri": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2023-07-01').vaultUri]"
+    },
+    "location": {
+      "type": "string",
+      "value": "[parameters('location')]"
+    },
+    "openAiApiVersion": {
+      "type": "string",
+      "value": "[parameters('openAiApiVersion')]"
+    },
+    "openAiChatCapacity": {
+      "type": "int",
+      "value": "[parameters('openAiChatCapacity')]"
+    },
+    "openAiChatDeploymentName": {
+      "type": "string",
+      "value": "[parameters('openAiChatDeploymentName')]"
+    },
+    "openAiChatModelName": {
+      "type": "string",
+      "value": "[parameters('openAiChatModelName')]"
+    },
+    "openAiChatModelVersion": {
+      "type": "string",
+      "value": "[parameters('openAiChatModelVersion')]"
+    },
+    "openAiChatSkuName": {
+      "type": "string",
+      "value": "[parameters('openAiChatSkuName')]"
+    },
+    "openAiEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName')), '2024-10-01').endpoint]"
+    },
+    "openAiId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName'))]"
+    },
+    "openAiName": {
+      "type": "string",
+      "value": "[parameters('openAiName')]"
+    },
+    "postgresDatabaseName": {
+      "type": "string",
+      "value": "[parameters('postgresDatabaseName')]"
+    },
+    "postgresHost": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('postgresServerName')), '2024-08-01').fullyQualifiedDomainName]"
+    },
+    "postgresServerId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('postgresServerName'))]"
+    },
+    "postgresServerName": {
+      "type": "string",
+      "value": "[parameters('postgresServerName')]"
+    },
+    "postgresUser": {
+      "type": "string",
+      "value": "[parameters('postgresEntraAdminName')]"
+    },
+    "searchEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Search/searchServices', parameters('searchName')), '2025-05-01').endpoint]"
+    },
+    "searchIndexName": {
+      "type": "string",
+      "value": "[parameters('searchIndexName')]"
+    },
+    "searchName": {
+      "type": "string",
+      "value": "[parameters('searchName')]"
+    },
+    "searchServiceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Search/searchServices', parameters('searchName'))]"
+    },
+    "storageAccountId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[parameters('storageAccountName')]"
+    },
+    "storageAccountUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2025-06-01').primaryEndpoints.blob]"
+    },
+    "storageContainerName": {
+      "type": "string",
+      "value": "[parameters('storageContainerName')]"
+    },
+    "workloadIdentityClientId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('workloadIdentityName')), '2023-01-31').clientId]"
+    },
+    "workloadIdentityPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('workloadIdentityName')), '2023-01-31').principalId]"
+    },
+    "workloadIdentityResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('workloadIdentityName'))]"
+    }
+  }
+}

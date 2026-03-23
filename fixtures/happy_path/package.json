@@ -1,0 +1,13 @@
+{
+  "message_id": "msg-happy-001",
+  "email_subject": "Invoice INV-1007 from Contoso Ltd",
+  "email_body": "Hello AP team,\nPlease find attached invoice INV-1007 from Contoso Ltd for PO-7781.\nGross total is GBP 1500.00.\nRegards,\nContoso Billing",
+  "attachments": [
+    {
+      "filename": "INV-1007.pdf",
+      "content_type": "application/pdf",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "extracted_text": "Supplier: Contoso Ltd\nInvoice Number: INV-1007\nInvoice Date: 14/03/2026\nCurrency: GBP\nNet Amount: 1250.00 GBP\nVAT Amount: 250.00 GBP\nGross Amount: 1500.00 GBP\nPO Reference: PO-7781\nBank Details: IBAN GB29NWBK60161331926819\n"
+    }
+  ]
+}

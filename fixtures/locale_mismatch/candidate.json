@@ -1,0 +1,18 @@
+{
+  "supplier_name_text": "Rhein Energie GmbH",
+  "invoice_number_text": "RE-2026-041",
+  "invoice_date_text": "13/03/2026",
+  "currency_text": "EUR",
+  "net_amount": {
+    "pdf_text": "1.000,00 EUR"
+  },
+  "vat_amount": {
+    "pdf_text": "250,00 EUR"
+  },
+  "gross_amount": {
+    "pdf_text": "1.250,00 EUR",
+    "email_text": "EUR 1250"
+  },
+  "po_reference_text": "PO-9001",
+  "bank_details_text": "IBAN DE89370400440532013000"
+}

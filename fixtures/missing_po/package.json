@@ -1,0 +1,13 @@
+{
+  "message_id": "msg-missingpo-001",
+  "email_subject": "Invoice SW-3309 from Northwind Services",
+  "email_body": "Hi team,\nAttached is invoice SW-3309 from Northwind Services.\nGross amount is USD 480.00.\nPlease process this week.\nThanks.",
+  "attachments": [
+    {
+      "filename": "SW-3309.pdf",
+      "content_type": "application/pdf",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "extracted_text": "Supplier: Northwind Services\nInvoice Number: SW-3309\nInvoice Date: 12/03/2026\nCurrency: USD\nNet Amount: 400.00 USD\nVAT Amount: 80.00 USD\nGross Amount: 480.00 USD\nBank Details: IBAN US64SVBKUS6S3300958879\n"
+    }
+  ]
+}

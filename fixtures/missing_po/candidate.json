@@ -1,0 +1,18 @@
+{
+  "supplier_name_text": "Northwind Services",
+  "invoice_number_text": "SW-3309",
+  "invoice_date_text": "12/03/2026",
+  "currency_text": "USD",
+  "net_amount": {
+    "pdf_text": "400.00 USD"
+  },
+  "vat_amount": {
+    "pdf_text": "80.00 USD"
+  },
+  "gross_amount": {
+    "pdf_text": "480.00 USD",
+    "email_text": "USD 480.00"
+  },
+  "po_reference_text": null,
+  "bank_details_text": "IBAN US64SVBKUS6S3300958879"
+}

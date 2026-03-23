@@ -1,0 +1,13 @@
+{
+  "message_id": "msg-day2-high-value-001",
+  "email_subject": "Invoice HV-2026-009 from Contoso Ltd",
+  "email_body": "Hello AP team,\nPlease process invoice HV-2026-009 from Contoso Ltd for PO-90010.\nGross total is GBP 54250.00.\nRegards,\nContoso Billing",
+  "attachments": [
+    {
+      "filename": "HV-2026-009.pdf",
+      "content_type": "application/pdf",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "extracted_text": "Supplier: Contoso Ltd\nInvoice Number: HV-2026-009\nInvoice Date: 20/03/2026\nCurrency: GBP\nNet Amount: 50000.00 GBP\nVAT Amount: 4250.00 GBP\nGross Amount: 54250.00 GBP\nPO Reference: PO-90010\nBank Details: IBAN GB29NWBK60161331926819\n"
+    }
+  ]
+}

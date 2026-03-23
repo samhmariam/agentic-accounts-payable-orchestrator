@@ -1,0 +1,18 @@
+{
+  "supplier_name_text": "Contoso Ltd",
+  "invoice_number_text": "INV-1007",
+  "invoice_date_text": "14/03/2026",
+  "currency_text": "GBP",
+  "net_amount": {
+    "pdf_text": "1250.00 GBP"
+  },
+  "vat_amount": {
+    "pdf_text": "250.00 GBP"
+  },
+  "gross_amount": {
+    "pdf_text": "1500.00 GBP",
+    "email_text": "GBP 1500.00"
+  },
+  "po_reference_text": "PO-7781",
+  "bank_details_text": "IBAN GB29NWBK60161331926819"
+}

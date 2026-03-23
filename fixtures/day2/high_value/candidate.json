@@ -1,0 +1,18 @@
+{
+  "supplier_name_text": "Contoso Ltd",
+  "invoice_number_text": "HV-2026-009",
+  "invoice_date_text": "20/03/2026",
+  "currency_text": "GBP",
+  "net_amount": {
+    "pdf_text": "50000.00 GBP"
+  },
+  "vat_amount": {
+    "pdf_text": "4250.00 GBP"
+  },
+  "gross_amount": {
+    "pdf_text": "54250.00 GBP",
+    "email_text": "GBP 54250.00"
+  },
+  "po_reference_text": "PO-90010",
+  "bank_details_text": "IBAN GB29NWBK60161331926819"
+}

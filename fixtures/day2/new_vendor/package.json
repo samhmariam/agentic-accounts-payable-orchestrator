@@ -1,0 +1,13 @@
+{
+  "message_id": "msg-day2-new-vendor-001",
+  "email_subject": "Invoice BL-2026-071 from Blueleaf Advisory",
+  "email_body": "Hello AP team,\nPlease process invoice BL-2026-071 from Blueleaf Advisory for PO-61342.\nGross total is GBP 2750.00.\nRegards,\nBlueleaf Advisory",
+  "attachments": [
+    {
+      "filename": "BL-2026-071.pdf",
+      "content_type": "application/pdf",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "extracted_text": "Supplier: Blueleaf Advisory\nInvoice Number: BL-2026-071\nInvoice Date: 20/03/2026\nCurrency: GBP\nNet Amount: 2500.00 GBP\nVAT Amount: 250.00 GBP\nGross Amount: 2750.00 GBP\nPO Reference: PO-61342\nBank Details: IBAN GB12BARC20060512345678\n"
+    }
+  ]
+}

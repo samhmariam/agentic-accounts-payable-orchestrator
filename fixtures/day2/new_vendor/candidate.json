@@ -1,0 +1,18 @@
+{
+  "supplier_name_text": "Blueleaf Advisory",
+  "invoice_number_text": "BL-2026-071",
+  "invoice_date_text": "20/03/2026",
+  "currency_text": "GBP",
+  "net_amount": {
+    "pdf_text": "2500.00 GBP"
+  },
+  "vat_amount": {
+    "pdf_text": "250.00 GBP"
+  },
+  "gross_amount": {
+    "pdf_text": "2750.00 GBP",
+    "email_text": "GBP 2750.00"
+  },
+  "po_reference_text": "PO-61342",
+  "bank_details_text": "IBAN GB12BARC20060512345678"
+}

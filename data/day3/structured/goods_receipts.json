@@ -1,0 +1,16 @@
+[
+  {
+    "po_number": "PO-9001",
+    "receipt_date": "2026-02-25",
+    "ingest_date": "2026-02-25",
+    "all_received": true,
+    "received_total": 12500.0
+  },
+  {
+    "po_number": "PO-9002",
+    "receipt_date": "2026-02-24",
+    "ingest_date": "2026-02-24",
+    "all_received": false,
+    "received_total": 2400.0
+  }
+]

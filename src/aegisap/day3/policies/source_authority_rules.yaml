@@ -1,0 +1,24 @@
+authority_weights:
+  1: 1.6    # system of record is amplified
+  3: 0.75   # email is discounted
+  4: 0.4    # analyst note is heavily discounted
+  2: 1.25   # policy document is slightly amplified
+ 
+
+recency_half_life_days:
+  mutable_fact: 90    # bank details go stale fast
+  policy: 365         # policies are stable for a year
+  reference: 730      # POs are stable for two years
+
+exact_match_bonus: 0.15
+
+staleness_labels:
+  bank_account: bank_account_last4
+
+authority_rules:
+  bank_account_last4:
+    preferred_source_types:
+      - erp_vendor_master
+      - approved_bank_change
+      - policy_doc
+

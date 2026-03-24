@@ -1,0 +1,11 @@
+cases:
+  - case_id: CASE-3001
+    description: Happy path with stale onboarding email present in retrieval results
+    expected_recommendation: approve
+    expected_vendor_risk_status: pass
+    expected_po_status: pass
+  - case_id: CASE-3002
+    description: Missing PO should still fail PO control even if vendor risk passes
+    expected_recommendation: manual_review
+    expected_vendor_risk_status: pass
+    expected_po_status: missing_po

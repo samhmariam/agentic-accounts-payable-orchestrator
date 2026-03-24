@@ -1,0 +1,34 @@
+[
+  {
+    "po_number": "PO-9001",
+    "vendor_id": "VEND-001",
+    "amount": 12500.0,
+    "currency": "GBP",
+    "approval_date": "2026-02-20",
+    "ingest_date": "2026-02-20",
+    "lines": [
+      {
+        "line_number": 1,
+        "description": "Office furniture order",
+        "quantity": 50,
+        "unit_price": 250.0
+      }
+    ]
+  },
+  {
+    "po_number": "PO-9002",
+    "vendor_id": "VEND-002",
+    "amount": 4800.0,
+    "currency": "GBP",
+    "approval_date": "2026-02-18",
+    "ingest_date": "2026-02-18",
+    "lines": [
+      {
+        "line_number": 1,
+        "description": "Warehouse delivery services",
+        "quantity": 1,
+        "unit_price": 4800.0
+      }
+    ]
+  }
+]

@@ -9,10 +9,18 @@ description = "Day 1 implementation for AegisAP intake and canonicalization"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+  "fastapi==0.135.1",
   "pydantic>=2.7",
+  "uvicorn==0.42.0",
+  "langsmith==0.7.22",
   "openai==2.29.0",
+  "azure-monitor-opentelemetry==1.8.7",
   "azure-identity==1.25.3",
+  "azure-keyvault-secrets==4.10.0",
+  "azure-search-documents==11.6.0",
+  "azure-storage-blob==12.28.0",
   "langgraph>=0.2.0",
+  "psycopg[binary]==3.3.3",
 ]
 
 [project.optional-dependencies]

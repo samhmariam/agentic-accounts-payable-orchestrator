@@ -7,6 +7,8 @@ param(
     [string]$ParameterFile = (Join-Path $PSScriptRoot ".." "infra" "full.bicepparam"),
     [string]$OutputsFile = (Join-Path $PSScriptRoot ".." ".day0" "full.json"),
     [string]$SearchIndexScript = (Join-Path $PSScriptRoot "ensure_search_index.py"),
+    [string]$Day3SearchIndexScript = (Join-Path $PSScriptRoot "ensure_day3_search_index.py"),
+    [string]$Day3SearchIndexName = "day3-evidence",
     [string]$DeveloperPrincipalId,
     [string]$DeveloperPrincipalName,
     [ValidateSet("User", "ServicePrincipal", "Group", "Unknown")]
@@ -35,6 +37,7 @@ if (-not (Test-Path -LiteralPath $ParameterFile)) {
 $ParameterFile = Resolve-ExistingPath -PathValue $ParameterFile -Name "ParameterFile"
 Assert-NoPlaceholderParameters -ParameterFile $ParameterFile
 $SearchIndexScript = Resolve-ExistingPath -PathValue $SearchIndexScript -Name "SearchIndexScript"
+$Day3SearchIndexScript = Resolve-ExistingPath -PathValue $Day3SearchIndexScript -Name "Day3SearchIndexScript"
 $OutputsFile = [IO.Path]::GetFullPath($OutputsFile)
 
 Invoke-AzText -Arguments @("account", "show", "-o", "none") | Out-Null
@@ -111,6 +114,12 @@ Ensure-SearchIndex `
     -IndexName (Get-OutputValue -Outputs $outputs -Name "searchIndexName") `
     -SearchIndexScript $SearchIndexScript
 
+Ensure-SearchIndex `
+    -RepoRoot $repoRoot `
+    -SearchEndpoint (Get-OutputValue -Outputs $outputs -Name "searchEndpoint") `
+    -IndexName $Day3SearchIndexName `
+    -SearchIndexScript $Day3SearchIndexScript
+
 $environment = [ordered]@{
     AZURE_SUBSCRIPTION_ID = $SubscriptionId
     AZURE_RESOURCE_GROUP = $ResourceGroup
@@ -120,6 +129,7 @@ $environment = [ordered]@{
     AZURE_OPENAI_CHAT_DEPLOYMENT = Get-OutputValue -Outputs $outputs -Name "openAiChatDeploymentName"
     AZURE_SEARCH_ENDPOINT = Get-OutputValue -Outputs $outputs -Name "searchEndpoint"
     AZURE_SEARCH_INDEX = Get-OutputValue -Outputs $outputs -Name "searchIndexName"
+    AZURE_SEARCH_DAY3_INDEX = $Day3SearchIndexName
     AZURE_STORAGE_ACCOUNT_URL = Get-OutputValue -Outputs $outputs -Name "storageAccountUrl"
     AZURE_STORAGE_CONTAINER = Get-OutputValue -Outputs $outputs -Name "storageContainerName"
     AZURE_POSTGRES_HOST = Get-OutputValue -Outputs $outputs -Name "postgresHost"
@@ -133,6 +143,7 @@ $environment = [ordered]@{
 $resources = [ordered]@{
     openAiName = Get-OutputValue -Outputs $outputs -Name "openAiName"
     searchName = Get-OutputValue -Outputs $outputs -Name "searchName"
+    searchDay3IndexName = $Day3SearchIndexName
     storageAccountName = Get-OutputValue -Outputs $outputs -Name "storageAccountName"
     postgresServerName = Get-OutputValue -Outputs $outputs -Name "postgresServerName"
     keyVaultUri = Get-OutputValue -Outputs $outputs -Name "keyVaultUri"
@@ -155,3 +166,5 @@ Write-Host "Full Day 0 provisioning complete." -ForegroundColor Green
 Write-Host "State file: $OutputsFile"
 Write-Host "Next: . ./scripts/setup-env.ps1 -Track full"
 Write-Host "Then: python scripts/verify_env.py --track full"
+Write-Host "Optional Day 3 live ingest: python scripts/ingest_day3_search_docs.py"
+Write-Host "Optional Day 3 live verify: python scripts/verify_day3_live_retrieval.py"

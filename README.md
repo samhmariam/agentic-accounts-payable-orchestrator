@@ -161,6 +161,8 @@ Provisioning writes local, ignored state files:
 
 `scripts/setup-env.sh` does the same for the current `bash` process, which is the recommended path when running `uv run ...` commands from the devcontainer terminal.
 
+The generated environment also includes `AZURE_SEARCH_DAY3_INDEX` for the dedicated Day 3 live-retrieval index.
+
 ### `.env.example`
 
 `.env.example` documents the resulting environment contract for both tracks, but it is not the primary bootstrap path. The preferred flow is provision -> setup-env -> verify.
@@ -195,6 +197,11 @@ Useful local development roles:
 The default Day 0 success condition is:
 
 - `uv run python scripts/verify_env.py --track core` completes without failures
+
+Optional Day 3 live retrieval follow-up:
+
+- `python scripts/ingest_day3_search_docs.py` indexes the Day 3 unstructured evidence into the dedicated Search index
+- `python scripts/verify_day3_live_retrieval.py` runs one live Day 3 smoke case against Azure AI Search
 
 Full-track success adds:
 

@@ -1,0 +1,5 @@
+expected_scores:
+  CASE-3001:
+    faithfulness: 1.0
+    completeness: 1.0
+    policy_grounding: 1.0

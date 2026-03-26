@@ -17,3 +17,9 @@ A valid invoice package where the PDF uses continental formatting (`1.250,00 EUR
 
 ### missing_po
 An invalid invoice package with no PO reference in the source package. The candidate leaves `po_reference_text` as `null`, and canonicalization must reject it.
+
+## Additional training sets
+
+- `day4/` contains explicit planning fixtures.
+- `day06/` contains graceful refusal and policy review fixtures.
+- `golden_thread/` contains the primary Day 0 to Day 6 walkthrough case.

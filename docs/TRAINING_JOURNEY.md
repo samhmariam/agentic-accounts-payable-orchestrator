@@ -47,6 +47,18 @@ The case pauses at a controller approval gate. The state is written to durable
 storage, the process can die, and the workflow later resumes from the latest
 checkpoint without replaying side effects.
 
+### Day 6
+
+The case now faces a hard safety gate. The system no longer optimizes for
+completion. It emits one typed outcome:
+
+- `approved_to_proceed`
+- `needs_human_review`
+- `not_authorised_to_continue`
+
+The refusal path is now a first-class, auditable product outcome rather than an
+implicit failure.
+
 ## Learning Contract
 
 Every day should end with:

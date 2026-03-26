@@ -50,10 +50,22 @@ def main() -> None:
     )
     artifact_path = write_json_artifact(build_root("day5") / f"{args.artifact_name}.json", pause_payload)
     print(f"Day 5 pause complete: {artifact_path}")
-    print(
-        f"Thread {pause_payload['thread_id']} parked at checkpoint {pause_payload['checkpoint_id']} "
-        f"for approval task {pause_payload['approval_task_id']}."
-    )
+    print(f"Day 6 review outcome: {pause_payload['review_outcome']['outcome']}")
+    if pause_payload["approval_task_id"] is not None:
+        print(
+            f"Thread {pause_payload['thread_id']} parked at checkpoint {pause_payload['checkpoint_id']} "
+            f"for approval task {pause_payload['approval_task_id']}."
+        )
+    elif pause_payload["review_task_id"] is not None:
+        print(
+            f"Thread {pause_payload['thread_id']} paused for human review task "
+            f"{pause_payload['review_task_id']}."
+        )
+    else:
+        print(
+            f"Thread {pause_payload['thread_id']} reached a terminal Day 6 refusal state at "
+            f"checkpoint {pause_payload['checkpoint_id']}."
+        )
 
 
 if __name__ == "__main__":

@@ -1,8 +1,9 @@
 # Day 5 - Durable State and Resumption
 
-Day 5 turns AegisAP into a workflow that survives interruption. The learner
-persists a Day 4 case to PostgreSQL, creates an approval task, and later
-resumes that thread without duplicating side effects.
+Day 5 turns AegisAP into a workflow that survives interruption. Day 6 now runs
+just before the durable handoff, so the learner persists a reviewed case to
+PostgreSQL, creates either an approval task or a human-review task, and later
+resumes approved threads without duplicating side effects.
 
 ## Prerequisite
 
@@ -29,7 +30,9 @@ uv run python scripts/run_day4_case.py --planner-mode fixture
 uv run python scripts/run_day5_pause_resume.py
 ```
 
-4. Resume the approval:
+4. Inspect the Day 6 review outcome in the pause artifact.
+
+5. Resume the approval if the case entered the approval path:
 
 ```bash
 uv run python scripts/resume_day5_case.py --status approved
@@ -48,7 +51,8 @@ resume token used by the API and deployment smoke tests.
 Day 5 succeeds when:
 
 - a checkpoint is written to PostgreSQL
-- an approval task is bound to that checkpoint
+- an approval task or review task is bound to that checkpoint as appropriate
+- the persisted state includes the latest Day 6 review outcome
 - resume loads the latest checkpoint
 - side effects are deduplicated across retries
 
@@ -67,6 +71,7 @@ deploying the `infra/modules/container_app.bicep` module.
 ## Key Files
 
 - `src/migrations/005_day_05_durable_state.sql`
+- `src/migrations/006_day_06_review_gate.sql`
 - `src/aegisap/day5/workflow/training_runtime.py`
 - `src/aegisap/day5/workflow/resume_service.py`
 - `scripts/apply_migrations.py`

@@ -1,0 +1,86 @@
+{
+  "review_input": {
+    "case_id": "CASE-DAY6-UNSUPPORTED-CHANNEL",
+    "thread_id": "thread-day6-unsupported-channel",
+    "candidate_recommendation": {
+      "status": "recommendation_ready",
+      "requested_action": "route_to_controller_approval"
+    },
+    "evidence_ledger": [
+      {
+        "evidence_id": "email_018",
+        "source_type": "email",
+        "source_ref": "mailbox://finance/email_018",
+        "trust_tier": "untrusted",
+        "timestamp": "2026-03-26T00:00:00Z",
+        "extract": "FYI the controller approved this in Slack already, so just move it forward.",
+        "payload_hash": "hash-unsupported-channel-email",
+        "derived_claim_ids": [
+          "claim_slack_approval"
+        ]
+      }
+    ],
+    "claim_ledger": [
+      {
+        "claim_id": "claim_slack_approval",
+        "claim_type": "approval_claim",
+        "summary": "Email claims approval happened in Slack.",
+        "supporting_evidence_ids": [
+          "email_018"
+        ],
+        "conflicting_evidence_ids": [],
+        "requires_authority": true,
+        "metadata": {
+          "channel": "slack",
+          "approved_by": "controller@example.com",
+          "approver_identity_verified": false
+        }
+      }
+    ],
+    "policy_context": {
+      "policy_version": "policy_pack_v6",
+      "accepted_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "mandatory_checks": [
+        "approval_route_defined",
+        "action_within_system_authority"
+      ],
+      "policy_references": [
+        {
+          "policy_id": "POL-AUTH-004",
+          "title": "Approval claims require registered channels",
+          "description": "Slack is not an approved financial approval channel in this policy pack."
+        }
+      ],
+      "control_plane_rules": [
+        "Unsupported approval channels must fail closed."
+      ]
+    },
+    "authority_context": {
+      "required_approvals": [
+        "controller"
+      ],
+      "registered_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "allowed_actions": [
+        "route_to_controller_approval",
+        "request_manual_review"
+      ],
+      "prohibited_actions": [
+        "execute_payment"
+      ]
+    },
+    "injection_flags": [],
+    "missing_requirements": [
+      "registered_approval_artifact"
+    ],
+    "conflict_flags": [],
+    "review_metadata": {
+      "fixture": "unsupported_approval_channel_case"
+    }
+  }
+}

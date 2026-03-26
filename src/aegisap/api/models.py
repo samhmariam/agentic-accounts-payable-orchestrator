@@ -16,6 +16,7 @@ class Day1IntakeRequest(BaseModel):
 class Day4RunRequest(BaseModel):
     case_facts: CaseFacts
     planner_mode: Literal["fixture", "azure_openai"] = "fixture"
+    enable_day6_review: bool = True
     persist_day5_handoff: bool = False
     thread_id: str | None = None
     assigned_to: str | None = None

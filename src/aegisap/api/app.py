@@ -90,6 +90,8 @@ async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[s
         case_facts=request.case_facts,
         planner_mode=request.planner_mode,
         artifact_name=f"{request.case_facts.case_id}_api",
+        include_day6_review=request.enable_day6_review,
+        thread_id=request.thread_id or f"thread-{request.case_facts.case_id}",
     )
     response: dict[str, object] = {
         "artifact_path": str(artifact_path),
@@ -97,6 +99,7 @@ async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[s
         "validated_plan": artifact_payload["validated_plan"],
         "recommendation": state.recommendation,
         "escalation_package": state.escalation_package,
+        "day6_review": artifact_payload["day6_review"],
     }
 
     if request.persist_day5_handoff:
@@ -126,6 +129,7 @@ async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[s
         request_id=raw_request.state.request_id,
         case_id=request.case_facts.case_id,
         recommendation_ready=state.recommendation is not None,
+        day6_outcome=(artifact_payload["day6_review"] or {}).get("outcome"),
     )
     return response
 
@@ -178,6 +182,9 @@ async def day5_resume(
         "thread_status": resumed.thread_status,
         "current_node": resumed.current_node,
         "approval_state": resumed.approval_state.model_dump(mode="json"),
+        "review_task_state": resumed.review_task_state.model_dump(mode="json"),
+        "review_outcome": resumed.review_outcome,
+        "review_summary": resumed.review_summary,
         "payment_recommendation": resumed.payment_recommendation,
         "escalation_package": resumed.escalation_package,
         "side_effect_records": [record.model_dump(mode="json") for record in resumed.side_effect_records],

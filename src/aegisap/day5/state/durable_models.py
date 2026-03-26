@@ -6,7 +6,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
-STATE_SCHEMA_VERSION = 5
+STATE_SCHEMA_VERSION = 6
 
 
 ThreadStatus = Literal[
@@ -24,6 +24,12 @@ ApprovalStatus = Literal[
     "approved",
     "rejected",
     "expired",
+]
+
+ReviewTaskStatus = Literal[
+    "not_requested",
+    "pending",
+    "completed",
 ]
 
 
@@ -91,6 +97,16 @@ class ResumeMetadata(BaseModel):
     last_resumed_by: str | None = None
 
 
+class ReviewTaskState(BaseModel):
+    status: ReviewTaskStatus = "not_requested"
+    review_task_id: str | None = None
+    assigned_to: str | None = None
+    requested_at: datetime | None = None
+    resolved_at: datetime | None = None
+    decision_payload: dict[str, Any] | None = None
+    missing_requirements: list[str] = Field(default_factory=list)
+
+
 class DurableWorkflowState(BaseModel):
     thread_id: str
     case_id: str
@@ -109,8 +125,11 @@ class DurableWorkflowState(BaseModel):
     canonical_invoice: dict[str, Any] = Field(default_factory=dict)
     payment_recommendation: dict[str, Any] | None = None
     escalation_package: dict[str, Any] | None = None
+    review_outcome: dict[str, Any] | None = None
+    review_summary: str | None = None
 
     approval_state: ApprovalState = Field(default_factory=ApprovalState)
+    review_task_state: ReviewTaskState = Field(default_factory=ReviewTaskState)
     evidence_snapshots: list[EvidenceSnapshot] = Field(default_factory=list)
     tool_execution_records: list[ToolExecutionRecord] = Field(default_factory=list)
     side_effect_records: list[SideEffectRecord] = Field(default_factory=list)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from typing import Any
 
 from aegisap.day4.planning.plan_types import PlanTask
 from aegisap.day4.state.workflow_state import WorkflowState as Day4WorkflowState
@@ -19,10 +20,16 @@ def bootstrap_durable_state_from_day4(
     *,
     thread_id: str,
     workflow_name: str = "payment_recommendation_workflow",
+    review_outcome: dict[str, Any] | None = None,
+    review_summary: str | None = None,
     now: datetime | None = None,
 ) -> DurableWorkflowState:
     handoff_time = now or datetime.now(timezone.utc)
-    current_node, thread_status, approval_state = _derive_handoff_status(day4_state, handoff_time)
+    current_node, thread_status, approval_state = _derive_handoff_status(
+        day4_state,
+        handoff_time,
+        review_outcome=review_outcome,
+    )
     evidence_snapshots, tool_execution_records = _build_execution_snapshots(day4_state, handoff_time)
     required_approvals = _required_approvals(day4_state)
 
@@ -37,6 +44,8 @@ def bootstrap_durable_state_from_day4(
         canonical_invoice=day4_state.case_facts.model_dump(mode="json"),
         payment_recommendation=day4_state.recommendation,
         escalation_package=day4_state.escalation_package,
+        review_outcome=review_outcome,
+        review_summary=review_summary,
         approval_state=approval_state,
         evidence_snapshots=evidence_snapshots,
         tool_execution_records=tool_execution_records,
@@ -64,8 +73,25 @@ def bootstrap_durable_state_from_day4(
 def _derive_handoff_status(
     day4_state: Day4WorkflowState,
     handoff_time: datetime,
+    *,
+    review_outcome: dict[str, Any] | None = None,
 ) -> tuple[str, str, ApprovalState]:
     required_approvals = _required_approvals(day4_state)
+    outcome = (review_outcome or {}).get("outcome")
+
+    if outcome == "not_authorised_to_continue":
+        return (
+            "policy_refusal_terminal",
+            "quarantined",
+            ApprovalState(status="not_requested"),
+        )
+
+    if outcome == "needs_human_review":
+        return (
+            "manual_review_required",
+            "resumable",
+            ApprovalState(status="not_requested"),
+        )
 
     if day4_state.recommendation is not None and required_approvals:
         return (

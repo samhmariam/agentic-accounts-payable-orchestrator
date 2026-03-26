@@ -1,0 +1,86 @@
+{
+  "review_input": {
+    "case_id": "CASE-DAY6-MISSING-APPROVAL",
+    "thread_id": "thread-day6-missing-approval",
+    "candidate_recommendation": {
+      "status": "recommendation_ready",
+      "requested_action": "route_to_controller_approval",
+      "required_approvals": [
+        "controller"
+      ]
+    },
+    "evidence_ledger": [
+      {
+        "evidence_id": "case_summary:missing-approval",
+        "source_type": "case_summary",
+        "source_ref": "fixture.missing-approval",
+        "trust_tier": "derived",
+        "timestamp": "2026-03-26T00:00:00Z",
+        "extract": "High-value invoice with controller approval required.",
+        "payload_hash": "hash-missing-approval-summary",
+        "derived_claim_ids": [
+          "claim_invoice_identity"
+        ]
+      }
+    ],
+    "claim_ledger": [
+      {
+        "claim_id": "claim_invoice_identity",
+        "claim_type": "invoice_identity_verified",
+        "summary": "Invoice identity has been verified.",
+        "supporting_evidence_ids": [
+          "case_summary:missing-approval"
+        ],
+        "conflicting_evidence_ids": [],
+        "requires_authority": false,
+        "metadata": {}
+      }
+    ],
+    "policy_context": {
+      "policy_version": "policy_pack_v6",
+      "accepted_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "mandatory_checks": [
+        "invoice_identity_verified",
+        "approval_route_defined",
+        "action_within_system_authority"
+      ],
+      "policy_references": [
+        {
+          "policy_id": "POL-AUTH-004",
+          "title": "Approval claims require registered channels",
+          "description": "Approval path must be defined in a registered channel."
+        }
+      ],
+      "control_plane_rules": [
+        "Do not guess approval evidence."
+      ]
+    },
+    "authority_context": {
+      "required_approvals": [
+        "controller"
+      ],
+      "registered_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "allowed_actions": [
+        "route_to_controller_approval",
+        "request_manual_review"
+      ],
+      "prohibited_actions": [
+        "execute_payment"
+      ]
+    },
+    "injection_flags": [],
+    "missing_requirements": [
+      "registered_approval_route"
+    ],
+    "conflict_flags": [],
+    "review_metadata": {
+      "fixture": "missing_approval_case"
+    }
+  }
+}

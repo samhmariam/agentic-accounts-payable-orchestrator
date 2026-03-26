@@ -60,3 +60,16 @@ def apply_migration_file(path: str | Path) -> None:
         with conn.cursor() as cur:
             cur.execute(sql)
         conn.commit()
+
+
+def apply_migration_path(path: str | Path) -> list[Path]:
+    migration_path = Path(path)
+    applied: list[Path] = []
+    if migration_path.is_dir():
+        for sql_file in sorted(migration_path.glob("*.sql")):
+            apply_migration_file(sql_file)
+            applied.append(sql_file)
+        return applied
+
+    apply_migration_file(migration_path)
+    return [migration_path]

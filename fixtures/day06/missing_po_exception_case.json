@@ -1,0 +1,96 @@
+{
+  "review_input": {
+    "case_id": "CASE-DAY6-MISSING-PO",
+    "thread_id": "thread-day6-missing-po",
+    "candidate_recommendation": null,
+    "escalation_package": {
+      "status": "manual_review_required",
+      "requested_action": "request_manual_review"
+    },
+    "evidence_ledger": [
+      {
+        "evidence_id": "case_summary:missing-po",
+        "source_type": "case_summary",
+        "source_ref": "fixture.missing-po",
+        "trust_tier": "derived",
+        "timestamp": "2026-03-26T00:00:00Z",
+        "extract": "Invoice has no PO and no approved exception record attached.",
+        "payload_hash": "hash-missing-po-summary",
+        "derived_claim_ids": [
+          "claim_po_requirement"
+        ]
+      },
+      {
+        "evidence_id": "task:po_waiver_check",
+        "source_type": "tool_artifact",
+        "source_ref": "po_waiver_check",
+        "trust_tier": "derived",
+        "timestamp": "2026-03-26T00:00:00Z",
+        "extract": "PO waiver presence=False authority=missing.",
+        "payload_hash": "hash-missing-po-task",
+        "derived_claim_ids": [
+          "claim_po_requirement"
+        ]
+      }
+    ],
+    "claim_ledger": [
+      {
+        "claim_id": "claim_po_requirement",
+        "claim_type": "po_waiver_check",
+        "summary": "PO requirement is unresolved because no waiver is present.",
+        "supporting_evidence_ids": [
+          "task:po_waiver_check"
+        ],
+        "conflicting_evidence_ids": [],
+        "requires_authority": false,
+        "metadata": {
+          "waiver_present": false,
+          "waiver_authority": "missing"
+        }
+      }
+    ],
+    "policy_context": {
+      "policy_version": "policy_pack_v6",
+      "accepted_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "mandatory_checks": [
+        "po_requirement_satisfied",
+        "action_within_system_authority"
+      ],
+      "policy_references": [
+        {
+          "policy_id": "POL-EVID-002",
+          "title": "Mandatory evidence must be present",
+          "description": "Missing PO evidence requires manual review."
+        }
+      ],
+      "control_plane_rules": [
+        "Pause when mandatory PO evidence is missing."
+      ]
+    },
+    "authority_context": {
+      "required_approvals": [],
+      "registered_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "allowed_actions": [
+        "route_to_controller_approval",
+        "request_manual_review"
+      ],
+      "prohibited_actions": [
+        "execute_payment"
+      ]
+    },
+    "injection_flags": [],
+    "missing_requirements": [
+      "approved_po_evidence_or_waiver"
+    ],
+    "conflict_flags": [],
+    "review_metadata": {
+      "fixture": "missing_po_exception_case"
+    }
+  }
+}

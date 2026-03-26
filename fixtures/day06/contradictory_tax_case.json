@@ -1,0 +1,109 @@
+{
+  "review_input": {
+    "case_id": "CASE-DAY6-TAX-CONFLICT",
+    "thread_id": "thread-day6-tax-conflict",
+    "candidate_recommendation": {
+      "status": "recommendation_ready",
+      "requested_action": "route_to_controller_approval"
+    },
+    "evidence_ledger": [
+      {
+        "evidence_id": "case_summary:tax-conflict",
+        "source_type": "case_summary",
+        "source_ref": "fixture.tax-conflict",
+        "trust_tier": "derived",
+        "timestamp": "2026-03-26T00:00:00Z",
+        "extract": "Invoice includes tax handling that must be validated before progression.",
+        "payload_hash": "hash-tax-summary",
+        "derived_claim_ids": [
+          "claim_tax_treatment"
+        ]
+      },
+      {
+        "evidence_id": "tax_doc:vat-note",
+        "source_type": "retrieval_note",
+        "source_ref": "tax_doc:vat-note",
+        "trust_tier": "derived",
+        "timestamp": "2026-03-26T00:00:00Z",
+        "extract": "Retrieved tax note suggests VAT should be charged.",
+        "payload_hash": "hash-tax-note-1",
+        "derived_claim_ids": [
+          "claim_tax_treatment"
+        ]
+      },
+      {
+        "evidence_id": "tax_doc:reverse-charge",
+        "source_type": "retrieval_note",
+        "source_ref": "tax_doc:reverse-charge",
+        "trust_tier": "derived",
+        "timestamp": "2026-03-26T00:00:00Z",
+        "extract": "Retrieved tax note suggests reverse-charge treatment applies instead.",
+        "payload_hash": "hash-tax-note-2",
+        "derived_claim_ids": [
+          "claim_tax_treatment"
+        ]
+      }
+    ],
+    "claim_ledger": [
+      {
+        "claim_id": "claim_tax_treatment",
+        "claim_type": "tax_treatment",
+        "summary": "Tax treatment is disputed by the available evidence.",
+        "supporting_evidence_ids": [
+          "tax_doc:vat-note",
+          "tax_doc:reverse-charge"
+        ],
+        "conflicting_evidence_ids": [
+          "tax_doc:vat-note",
+          "tax_doc:reverse-charge"
+        ],
+        "requires_authority": false,
+        "metadata": {}
+      }
+    ],
+    "policy_context": {
+      "policy_version": "policy_pack_v6",
+      "accepted_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "mandatory_checks": [
+        "invoice_identity_verified",
+        "tax_treatment_supported",
+        "action_within_system_authority"
+      ],
+      "policy_references": [
+        {
+          "policy_id": "POL-EVID-002",
+          "title": "Mandatory evidence must be present",
+          "description": "Tax evidence must be sufficient before progression."
+        }
+      ],
+      "control_plane_rules": [
+        "Return human review when tax evidence conflicts."
+      ]
+    },
+    "authority_context": {
+      "required_approvals": [],
+      "registered_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "allowed_actions": [
+        "route_to_controller_approval",
+        "request_manual_review"
+      ],
+      "prohibited_actions": [
+        "execute_payment"
+      ]
+    },
+    "injection_flags": [],
+    "missing_requirements": [],
+    "conflict_flags": [
+      "tax_conflict_detected"
+    ],
+    "review_metadata": {
+      "fixture": "contradictory_tax_case"
+    }
+  }
+}

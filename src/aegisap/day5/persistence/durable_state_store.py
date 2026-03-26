@@ -32,6 +32,16 @@ class StoredApprovalTask:
 
 
 @dataclass
+class StoredReviewTask:
+    review_task_id: str
+    thread_id: str
+    checkpoint_id: str
+    status: str
+    assigned_to: str | None
+    decision_payload: dict[str, Any] | None
+
+
+@dataclass
 class StoredSideEffect:
     effect_key: str
     effect_type: str
@@ -208,6 +218,56 @@ class DurableStateStore:
                 return None
             return StoredApprovalTask(
                 approval_task_id=row[0],
+                thread_id=row[1],
+                checkpoint_id=row[2],
+                status=row[3],
+                assigned_to=row[4],
+                decision_payload=row[5],
+            )
+
+    def create_review_task(
+        self,
+        *,
+        thread_id: str,
+        checkpoint_id: str,
+        assigned_to: str | None,
+        review_task_id: str | None = None,
+        conn: psycopg.Connection | None = None,
+    ) -> str:
+        review_task_id = review_task_id or str(uuid.uuid4())
+        with self._cursor(conn) as (active_conn, cur):
+            cur.execute(
+                """
+                INSERT INTO review_tasks (
+                    review_task_id, thread_id, checkpoint_id, status, assigned_to
+                )
+                VALUES (%s, %s, %s, 'pending', %s)
+                """,
+                (review_task_id, thread_id, checkpoint_id, assigned_to),
+            )
+            self._commit_if_owned(conn, active_conn)
+        return review_task_id
+
+    def get_review_task(
+        self,
+        review_task_id: str,
+        *,
+        conn: psycopg.Connection | None = None,
+    ) -> StoredReviewTask | None:
+        with self._cursor(conn) as (_active_conn, cur):
+            cur.execute(
+                """
+                SELECT review_task_id, thread_id, checkpoint_id, status, assigned_to, decision_payload
+                FROM review_tasks
+                WHERE review_task_id = %s
+                """,
+                (review_task_id,),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            return StoredReviewTask(
+                review_task_id=row[0],
                 thread_id=row[1],
                 checkpoint_id=row[2],
                 status=row[3],

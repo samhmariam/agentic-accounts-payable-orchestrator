@@ -8,13 +8,13 @@ from typing import Any, Literal
 
 from aegisap.day_01.models import CanonicalInvoice, ExtractedInvoiceCandidate, InvoicePackageInput
 from aegisap.day_01.service import canonicalize_with_candidate, run_day_01_intake
+from aegisap.day4.execution.task_registry import create_default_task_registry
 from aegisap.day2.config import HIGH_VALUE_THRESHOLD, KNOWN_VENDORS, ROUTE_PRECEDENCE
 from aegisap.day2.graph import build_graph
 from aegisap.day2.state import WorkflowState as Day2WorkflowState
 from aegisap.day2.state import make_initial_state
 from aegisap.day3.graph import run_day3_workflow
 from aegisap.day3.retrieval.interfaces import RetrievalConfig, build_retrieval_config
-from aegisap.day4.execution.task_registry import create_default_task_registry
 from aegisap.day4.graph.day4_explicit_planning_graph import run_day4_explicit_planning_case
 from aegisap.day4.planning.azure_openai_planner import AzureOpenAIPlannerClient
 from aegisap.day4.planning.plan_schema import parse_execution_plan
@@ -28,6 +28,8 @@ from aegisap.day4.recommendation.recommendation_composer import compose_recommen
 from aegisap.day4.recommendation.recommendation_gate import evaluate_recommendation_gate
 from aegisap.day4.state.workflow_state import WorkflowState as Day4WorkflowState
 from aegisap.day4.state.workflow_state import create_initial_workflow_state
+from aegisap.day6.graph.review_gate import run_day6_review, run_day6_review_from_day4
+from aegisap.day6.state.models import Day6ReviewInput, ReviewOutcome
 from aegisap.training.artifacts import build_root, load_json, write_json_artifact
 from aegisap.training.day4_plans import build_training_plan
 
@@ -59,6 +61,13 @@ def load_case_facts(path: str | Path) -> CaseFacts:
     if "case_facts" in payload:
         payload = payload["case_facts"]
     return CaseFacts.model_validate(payload)
+
+
+def load_day6_review_input(path: str | Path) -> Day6ReviewInput:
+    payload = load_json(path)
+    if "review_input" in payload:
+        payload = payload["review_input"]
+    return Day6ReviewInput.model_validate(payload)
 
 
 def _write_day_artifact(day: str, name: str, payload: dict[str, Any]) -> Path:
@@ -201,6 +210,8 @@ async def run_day4_case_artifact(
     case_facts: CaseFacts,
     planner_mode: Literal["fixture", "azure_openai"] = "azure_openai",
     artifact_name: str = "golden_thread_day4",
+    include_day6_review: bool = False,
+    thread_id: str | None = None,
 ) -> tuple[Path, dict[str, Any], Day4WorkflowState]:
     if planner_mode == "fixture":
         plan = build_training_plan(case_facts, plan_id=f"plan_{case_facts.case_id}")
@@ -214,6 +225,14 @@ async def run_day4_case_artifact(
     else:
         state, raw_plan_text, parsed_plan = await _run_day4_live(case_facts)
 
+    day6_review_payload: dict[str, Any] | None = None
+    if include_day6_review:
+        _review_input, review_outcome = run_day6_review_from_day4(
+            state,
+            thread_id=thread_id or f"thread-{case_facts.case_id}",
+        )
+        day6_review_payload = review_outcome.model_dump(mode="json")
+
     payload = {
         "day": 4,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -223,6 +242,7 @@ async def run_day4_case_artifact(
         "workflow_state": state.model_dump(mode="json"),
         "recommendation": state.recommendation,
         "escalation_package": state.escalation_package,
+        "day6_review": day6_review_payload,
     }
     return _write_day_artifact("day4", artifact_name, payload), payload, state
 
@@ -262,3 +282,37 @@ async def _run_day4_live(case_facts: CaseFacts) -> tuple[Day4WorkflowState, str,
         registry=create_default_task_registry(),
     )
     return state, raw_plan_text, parsed
+
+
+def run_day6_review_artifact_from_input(
+    *,
+    review_input: Day6ReviewInput,
+    artifact_name: str = "golden_thread_day6",
+) -> tuple[Path, dict[str, Any], ReviewOutcome]:
+    review_outcome = run_day6_review(review_input)
+    payload = {
+        "day": 6,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "review_input": review_input.model_dump(mode="json"),
+        "review_outcome": review_outcome.model_dump(mode="json"),
+    }
+    return _write_day_artifact("day6", artifact_name, payload), payload, review_outcome
+
+
+def run_day6_review_artifact_from_day4(
+    *,
+    day4_artifact_path: str | Path,
+    thread_id: str,
+    artifact_name: str = "golden_thread_day6",
+) -> tuple[Path, dict[str, Any], ReviewOutcome]:
+    payload = load_json(day4_artifact_path)
+    state = Day4WorkflowState.model_validate(payload["workflow_state"])
+    review_input, review_outcome = run_day6_review_from_day4(state, thread_id=thread_id)
+    artifact_payload = {
+        "day": 6,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "source_day4_artifact": str(day4_artifact_path),
+        "review_input": review_input.model_dump(mode="json"),
+        "review_outcome": review_outcome.model_dump(mode="json"),
+    }
+    return _write_day_artifact("day6", artifact_name, artifact_payload), artifact_payload, review_outcome

@@ -81,6 +81,14 @@ workflow cost is ledgered per run, and optimisation is allowed only on modules
 with slice-level regression evidence strong enough to catch silent compliance
 regressions.
 
+### Day 10
+
+The same case now becomes release-governed. A new container revision is not
+“good” because it starts; it is good only if health, trace correlation, cost,
+synthetic accuracy, refusal behavior, and replay safety all hold after deploy.
+The release unit is an immutable ACA revision, and rollback is part of the
+design rather than an afterthought.
+
 ## Learning Contract
 
 Every day should end with:

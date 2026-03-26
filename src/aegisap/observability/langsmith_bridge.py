@@ -38,6 +38,7 @@ def build_langsmith_metadata(context: WorkflowObservabilityContext) -> dict[str,
         "policy_version": context.policy_version,
         "environment": context.environment,
         "deployment_revision": context.deployment_revision,
+        "aegisap_revision": context.deployment_revision,
         **dict(context.metadata),
     }
 

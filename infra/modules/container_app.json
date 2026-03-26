@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.41.2.15936",
-      "templateHash": "1248299801539546142"
+      "templateHash": "78203553758490285"
     }
   },
   "parameters": {
@@ -28,6 +28,18 @@
     "imageName": {
       "type": "string"
     },
+    "serviceName": {
+      "type": "string",
+      "defaultValue": "aegisap-api"
+    },
+    "gitSha": {
+      "type": "string",
+      "defaultValue": "dev"
+    },
+    "imageTag": {
+      "type": "string",
+      "defaultValue": "dev"
+    },
     "resumeTokenSecretName": {
       "type": "string",
       "defaultValue": "aegisap-resume-token-secret"
@@ -35,6 +47,10 @@
     "runtimeEnvironment": {
       "type": "string",
       "defaultValue": "cloud"
+    },
+    "revisionSuffix": {
+      "type": "string",
+      "defaultValue": "dev"
     },
     "applicationInsightsConnectionString": {
       "type": "string",
@@ -49,6 +65,10 @@
       "defaultValue": "1.0"
     },
     "tracingEnabled": {
+      "type": "string",
+      "defaultValue": "true"
+    },
+    "langsmithTracing": {
       "type": "string",
       "defaultValue": "true"
     },
@@ -122,6 +142,7 @@
       "properties": {
         "managedEnvironmentId": "[parameters('containerAppsEnvironmentId')]",
         "configuration": {
+          "activeRevisionsMode": "multiple",
           "ingress": {
             "external": true,
             "targetPort": "[parameters('targetPort')]",
@@ -135,6 +156,7 @@
           ]
         },
         "template": {
+          "revisionSuffix": "[parameters('revisionSuffix')]",
           "containers": [
             {
               "name": "api",
@@ -143,10 +165,49 @@
                 "cpu": "[json('0.5')]",
                 "memory": "1.0Gi"
               },
+              "probes": [
+                {
+                  "type": "Startup",
+                  "httpGet": {
+                    "path": "/health/live",
+                    "port": "[parameters('targetPort')]"
+                  },
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 10,
+                  "timeoutSeconds": 5,
+                  "failureThreshold": 12
+                },
+                {
+                  "type": "Readiness",
+                  "httpGet": {
+                    "path": "/health/ready",
+                    "port": "[parameters('targetPort')]"
+                  },
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 10,
+                  "timeoutSeconds": 5,
+                  "failureThreshold": 6
+                },
+                {
+                  "type": "Liveness",
+                  "httpGet": {
+                    "path": "/health/live",
+                    "port": "[parameters('targetPort')]"
+                  },
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 15,
+                  "timeoutSeconds": 5,
+                  "failureThreshold": 4
+                }
+              ],
               "env": [
                 {
                   "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
                   "value": "[parameters('applicationInsightsConnectionString')]"
+                },
+                {
+                  "name": "AEGISAP_SERVICE_NAME",
+                  "value": "[parameters('serviceName')]"
                 },
                 {
                   "name": "AEGISAP_ENVIRONMENT",
@@ -157,12 +218,24 @@
                   "value": "[parameters('deploymentRevision')]"
                 },
                 {
+                  "name": "AEGISAP_GIT_SHA",
+                  "value": "[parameters('gitSha')]"
+                },
+                {
+                  "name": "AEGISAP_IMAGE_TAG",
+                  "value": "[parameters('imageTag')]"
+                },
+                {
                   "name": "AEGISAP_TRACE_SAMPLE_RATIO",
                   "value": "[parameters('traceSampleRatio')]"
                 },
                 {
                   "name": "AEGISAP_TRACING_ENABLED",
                   "value": "[parameters('tracingEnabled')]"
+                },
+                {
+                  "name": "LANGSMITH_TRACING",
+                  "value": "[parameters('langsmithTracing')]"
                 },
                 {
                   "name": "LANGSMITH_PROJECT",
@@ -247,6 +320,10 @@
     "runtimePrincipalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('appName')), '2024-03-01', 'full').identity.principalId]"
+    },
+    "latestRevisionName": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('appName')), '2024-03-01').latestRevisionName]"
     }
   }
 }

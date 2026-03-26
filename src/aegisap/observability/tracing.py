@@ -134,6 +134,9 @@ def root_span_attributes(context: WorkflowObservabilityContext) -> dict[str, Any
         "aegis.actor_type": context.actor_type,
         "aegis.outcome_type": context.outcome_type,
         "aegis.approval_status": context.approval_status,
+        "aegisap.workflow_run_id": context.workflow_run_id,
+        "aegisap.case_id": context.hashed_case_id,
+        "aegisap.revision": context.deployment_revision,
     }
     metadata = context.metadata
     if metadata.get("task_class") is not None:

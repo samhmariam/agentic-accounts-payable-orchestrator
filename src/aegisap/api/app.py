@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Request
 
 from aegisap.api.models import Day1IntakeRequest, Day4RunRequest, Day5ResumeRequest
+from aegisap.api.release import decision_envelope, health_live_payload, health_ready_payload, ReleaseMetadata
 from aegisap.day_01.service import canonicalize_with_candidate, run_day_01_intake
 from aegisap.day5.workflow.resume_service import ResumeTokenCodec
 from aegisap.day5.workflow.training_runtime import create_day5_pause, load_thread_snapshot, resume_day5_case
@@ -62,9 +63,12 @@ async def add_request_context(request: Request, call_next):
     try:
         response = await call_next(request)
         current = getattr(request.state, "observability", None) or get_observability_context()
+        release = ReleaseMetadata.from_config()
         response.headers["x-request-id"] = request_id
         response.headers["x-trace-id"] = current.trace_id or ""
         response.headers["x-workflow-run-id"] = current.workflow_run_id
+        response.headers["x-deployment-revision"] = release.deployment_revision
+        response.headers["x-git-sha"] = release.git_sha
         return response
     finally:
         reset_observability_context(token)
@@ -77,6 +81,24 @@ def _log(event: str, **fields: object) -> None:
 @app.get("/healthz")
 async def healthz() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/health/live")
+async def health_live() -> dict[str, object]:
+    return health_live_payload().model_dump(mode="json")
+
+
+@app.get("/health/ready")
+async def health_ready() -> dict[str, object]:
+    payload = health_ready_payload()
+    if payload.status != "ok":
+        raise HTTPException(status_code=503, detail=payload.model_dump(mode="json"))
+    return payload.model_dump(mode="json")
+
+
+@app.get("/version")
+async def version() -> dict[str, object]:
+    return ReleaseMetadata.from_config().version_payload().model_dump(mode="json")
 
 
 @app.post("/api/day1/intake")
@@ -103,11 +125,10 @@ async def day1_intake(request: Day1IntakeRequest, raw_request: Request) -> dict[
         "message_id": request.package.message_id,
         "canonical_invoice": canonical.model_dump(mode="json"),
         "correlation": (get_observability_context().to_public_dict() if get_observability_context() else None),
+        "release": ReleaseMetadata.from_config().version_payload().model_dump(mode="json"),
     }
 
-
-@app.post("/api/day4/cases/run")
-async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[str, object]:
+async def _execute_day4_run(request: Day4RunRequest, raw_request: Request) -> dict[str, object]:
     workflow_run_id = str(uuid.uuid4())
     with start_workflow_span(
         request_id=raw_request.state.request_id,
@@ -140,7 +161,9 @@ async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[s
         "recommendation": state.recommendation,
         "escalation_package": state.escalation_package,
         "day6_review": artifact_payload["day6_review"],
+        "decision": decision_envelope(artifact_payload["day6_review"]).model_dump(mode="json"),
         "correlation": workflow_context.to_public_dict(),
+        "release": ReleaseMetadata.from_config().version_payload().model_dump(mode="json"),
     }
 
     if request.persist_day5_handoff:
@@ -176,6 +199,16 @@ async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[s
         day6_outcome=(artifact_payload["day6_review"] or {}).get("outcome"),
     )
     return response
+
+
+@app.post("/api/day4/cases/run")
+async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[str, object]:
+    return await _execute_day4_run(request, raw_request)
+
+
+@app.post("/workflow/run")
+async def workflow_run(request: Day4RunRequest, raw_request: Request) -> dict[str, object]:
+    return await _execute_day4_run(request, raw_request)
 
 
 @app.get("/api/day5/threads/{thread_id}")
@@ -253,6 +286,7 @@ async def day5_resume(
     )
     return {
         "thread_id": resumed.thread_id,
+        "case_id": resumed.case_id,
         "thread_status": resumed.thread_status,
         "current_node": resumed.current_node,
         "approval_state": resumed.approval_state.model_dump(mode="json"),
@@ -262,5 +296,38 @@ async def day5_resume(
         "payment_recommendation": resumed.payment_recommendation,
         "escalation_package": resumed.escalation_package,
         "side_effect_records": [record.model_dump(mode="json") for record in resumed.side_effect_records],
+        "decision": decision_envelope(resumed.review_outcome).model_dump(mode="json"),
         "correlation": workflow_context.to_public_dict(),
+        "release": ReleaseMetadata.from_config().version_payload().model_dump(mode="json"),
     }
+
+
+@app.post("/workflow/resume/{case_id}")
+async def workflow_resume(
+    case_id: str,
+    request: Day5ResumeRequest,
+    raw_request: Request,
+) -> dict[str, object]:
+    token_secret = get_resume_token_secret()
+    token = ResumeTokenCodec(token_secret).decode(request.resume_token)
+    workflow_context = make_trace_context(
+        request_id=raw_request.state.request_id,
+        thread_id=token.thread_id,
+        checkpoint_id=token.checkpoint_id,
+    )
+    token_handle = bind_observability_context(workflow_context)
+    try:
+        raw_request.state.observability = workflow_context
+        snapshot = load_thread_snapshot(
+            store=build_store_from_env(),
+            thread_id=token.thread_id,
+            observability_context=workflow_context,
+        )
+    finally:
+        reset_observability_context(token_handle)
+    if snapshot["state"]["case_id"] != case_id:
+        raise HTTPException(status_code=400, detail="resume token does not match case_id")
+    approval_task_id = snapshot["approval_state"].get("approval_task_id")
+    if not approval_task_id:
+        raise HTTPException(status_code=400, detail="no pending approval task for case")
+    return await day5_resume(approval_task_id, request, raw_request)

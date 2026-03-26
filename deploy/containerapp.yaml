@@ -1,0 +1,37 @@
+type: Microsoft.App/containerApps
+name: ca-aegisap-placeholder
+properties:
+  managedEnvironmentId: /subscriptions/<subscription>/resourceGroups/<rg>/providers/Microsoft.App/managedEnvironments/<env>
+  configuration:
+    activeRevisionsMode: multiple
+    ingress:
+      external: true
+      targetPort: 8000
+    registries:
+      - server: <acr-login-server>
+        identity: <user-assigned-mi-resource-id>
+  template:
+    revisionSuffix: <git-sha>
+    containers:
+      - name: api
+        image: <acr-login-server>/aegisap-api:<git-sha>
+        probes:
+          - type: Startup
+            httpGet:
+              path: /health/live
+              port: 8000
+          - type: Readiness
+            httpGet:
+              path: /health/ready
+              port: 8000
+          - type: Liveness
+            httpGet:
+              path: /health/live
+              port: 8000
+        env:
+          - name: AEGISAP_SERVICE_NAME
+            value: aegisap-api
+          - name: AEGISAP_GIT_SHA
+            value: <git-sha>
+          - name: AEGISAP_IMAGE_TAG
+            value: <git-sha>

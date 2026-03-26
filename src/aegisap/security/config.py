@@ -34,6 +34,9 @@ ALLOWED_CONNECTION_STRING_VARS = {
 class SecurityConfig(BaseModel):
     environment: EnvironmentName = "local"
     credential_mode: CredentialMode = "entra_developer_identity"
+    service_name: str = "aegisap-api"
+    git_sha: str = "dev"
+    image_tag: str = "dev"
     key_vault_uri: str = ""
     application_insights_connection_string: str = ""
     deployment_revision: str = "dev"
@@ -71,6 +74,11 @@ def load_security_config(env: dict[str, str] | None = None) -> SecurityConfig:
     return SecurityConfig(
         environment=environment,
         credential_mode=credential_mode,
+        service_name=source.get("AEGISAP_SERVICE_NAME", "aegisap-api").strip() or "aegisap-api",
+        git_sha=source.get("AEGISAP_GIT_SHA", "dev").strip() or "dev",
+        image_tag=source.get("AEGISAP_IMAGE_TAG", source.get("AEGISAP_GIT_SHA", "dev")).strip()
+        or source.get("AEGISAP_GIT_SHA", "dev").strip()
+        or "dev",
         key_vault_uri=source.get("AZURE_KEY_VAULT_URI", "").strip(),
         application_insights_connection_string=source.get(
             "APPLICATIONINSIGHTS_CONNECTION_STRING", ""

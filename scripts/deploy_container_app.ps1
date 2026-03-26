@@ -4,17 +4,24 @@ param(
     [string]$ResourceGroup = $env:AZURE_RESOURCE_GROUP,
     [string]$Location = $env:AZURE_LOCATION,
     [string]$StateFile = (Join-Path $PSScriptRoot ".." ".day0" "full.json"),
-    [string]$TemplateFile = (Join-Path $PSScriptRoot ".." "infra" "modules" "container_app.bicep"),
+    [ValidateSet("staging", "production")]
+    [string]$EnvironmentName = "staging",
+    [string]$TemplateFile = "",
     [string]$RoleAssignmentsTemplateFile = (Join-Path $PSScriptRoot ".." "infra" "modules" "role_assignments.bicep"),
-    [string]$AppName = "ca-aegisap-training",
-    [string]$ImageName = "aegisap-training",
-    [string]$ImageTag = "latest",
-    [string]$DeploymentRevision = "dev",
+    [string]$AppName = "",
+    [string]$ImageName = "aegisap-api",
+    [string]$ImageTag = "",
+    [string]$DeploymentRevision = "",
     [string]$ResumeTokenSecretName = "aegisap-resume-token-secret",
     [string]$ResumeTokenSecretValue = $env:AEGISAP_RESUME_TOKEN_SECRET,
     [string]$LangSmithProject = $env:LANGSMITH_PROJECT,
     [string]$LangSmithEndpoint = $env:LANGSMITH_ENDPOINT,
-    [string]$LangSmithApiKeySecretName = "aegisap-langsmith-api-key"
+    [string]$LangSmithApiKeySecretName = "aegisap-langsmith-api-key",
+    [string]$ServiceName = "aegisap-api",
+    [string]$GitSha = "",
+    [string]$TraceSampleRatio = "",
+    [string]$TracingEnabled = "true",
+    [string]$LangSmithTracing = "true"
 )
 
 Set-StrictMode -Version Latest
@@ -29,6 +36,36 @@ if (-not (Test-Path -LiteralPath $StateFile)) {
 $state = Get-Content -LiteralPath $StateFile -Raw | ConvertFrom-Json
 $envVars = $state.environment
 $resources = $state.resources
+
+if ([string]::IsNullOrWhiteSpace($TemplateFile)) {
+    $templateName = if ($EnvironmentName -eq "production") { "prod.bicep" } else { "staging.bicep" }
+    $TemplateFile = (Join-Path $PSScriptRoot ".." "infra" "aca" $templateName)
+}
+
+if ([string]::IsNullOrWhiteSpace($AppName)) {
+    $AppName = if ($EnvironmentName -eq "production") { "ca-aegisap-prod" } else { "ca-aegisap-staging" }
+}
+
+if ([string]::IsNullOrWhiteSpace($GitSha)) {
+    if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_SHA)) {
+        $GitSha = $env:GITHUB_SHA
+    }
+    else {
+        $GitSha = (git -C (Join-Path $PSScriptRoot "..") rev-parse --short=12 HEAD).Trim()
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($ImageTag)) {
+    $ImageTag = $GitSha
+}
+
+if ([string]::IsNullOrWhiteSpace($DeploymentRevision)) {
+    $DeploymentRevision = "${EnvironmentName}-${GitSha}"
+}
+
+if ([string]::IsNullOrWhiteSpace($TraceSampleRatio)) {
+    $TraceSampleRatio = if ($EnvironmentName -eq "production") { "0.25" } else { "1.0" }
+}
 
 if ([string]::IsNullOrWhiteSpace($resources.acrName) -or [string]::IsNullOrWhiteSpace($resources.containerAppsEnvironmentId)) {
     throw "Missing full-track deployment metadata in $StateFile."
@@ -62,14 +99,17 @@ $deployment = az deployment group create `
   --parameters workloadIdentityResourceId=$resources.workloadIdentityResourceId `
   --parameters acrLoginServer=$acrLoginServer `
   --parameters imageName=$imageRef `
+  --parameters serviceName=$ServiceName `
+  --parameters gitSha=$GitSha `
+  --parameters imageTag=$ImageTag `
   --parameters resumeTokenSecretName=$ResumeTokenSecretName `
   --parameters deploymentRevision=$DeploymentRevision `
-  --parameters traceSampleRatio=1.0 `
-  --parameters tracingEnabled=true `
+  --parameters traceSampleRatio=$TraceSampleRatio `
+  --parameters tracingEnabled=$TracingEnabled `
+  --parameters langsmithTracing=$LangSmithTracing `
   --parameters langsmithProject=$LangSmithProject `
   --parameters langsmithEndpoint=$LangSmithEndpoint `
   --parameters langsmithApiKeySecretName=$LangSmithApiKeySecretName `
-  --parameters runtimeEnvironment=cloud `
   --parameters applicationInsightsConnectionString=$envVars.APPLICATIONINSIGHTS_CONNECTION_STRING `
   --parameters azureOpenAiEndpoint=$envVars.AZURE_OPENAI_ENDPOINT `
   --parameters azureOpenAiApiVersion=$envVars.AZURE_OPENAI_API_VERSION `
@@ -108,3 +148,9 @@ az deployment group create `
   --parameters acrPullRoleDefinitionId=$(Get-RoleDefinitionId "AcrPull") `
   --only-show-errors `
   -o none
+
+$appUrl = $deployment.properties.outputs.appUrl.value
+$latestRevisionName = $deployment.properties.outputs.latestRevisionName.value
+Write-Host "Deployment complete." -ForegroundColor Green
+Write-Host "App URL: $appUrl"
+Write-Host "Latest revision: $latestRevisionName"

@@ -1,0 +1,583 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "2835765532668473639"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure location"
+      }
+    },
+    "appName": {
+      "type": "string",
+      "defaultValue": "ca-aegisap-staging"
+    },
+    "containerAppsEnvironmentId": {
+      "type": "string"
+    },
+    "workloadIdentityResourceId": {
+      "type": "string"
+    },
+    "acrLoginServer": {
+      "type": "string"
+    },
+    "imageName": {
+      "type": "string"
+    },
+    "serviceName": {
+      "type": "string",
+      "defaultValue": "aegisap-api"
+    },
+    "gitSha": {
+      "type": "string",
+      "defaultValue": "dev"
+    },
+    "imageTag": {
+      "type": "string",
+      "defaultValue": "dev"
+    },
+    "deploymentRevision": {
+      "type": "string",
+      "defaultValue": "staging"
+    },
+    "applicationInsightsConnectionString": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "traceSampleRatio": {
+      "type": "string",
+      "defaultValue": "1.0"
+    },
+    "tracingEnabled": {
+      "type": "string",
+      "defaultValue": "true"
+    },
+    "langsmithTracing": {
+      "type": "string",
+      "defaultValue": "true"
+    },
+    "langsmithProject": {
+      "type": "string",
+      "defaultValue": "aegisap-staging"
+    },
+    "langsmithEndpoint": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "langsmithApiKeySecretName": {
+      "type": "string",
+      "defaultValue": "aegisap-langsmith-api-key"
+    },
+    "resumeTokenSecretName": {
+      "type": "string",
+      "defaultValue": "aegisap-resume-token-secret"
+    },
+    "azureOpenAiEndpoint": {
+      "type": "string"
+    },
+    "azureOpenAiApiVersion": {
+      "type": "string"
+    },
+    "azureOpenAiChatDeployment": {
+      "type": "string"
+    },
+    "azureSearchEndpoint": {
+      "type": "string"
+    },
+    "azureSearchDay3Index": {
+      "type": "string"
+    },
+    "azureStorageAccountUrl": {
+      "type": "string"
+    },
+    "azureStorageContainer": {
+      "type": "string"
+    },
+    "azurePostgresHost": {
+      "type": "string"
+    },
+    "azurePostgresPort": {
+      "type": "string",
+      "defaultValue": "5432"
+    },
+    "azurePostgresDb": {
+      "type": "string"
+    },
+    "azurePostgresUser": {
+      "type": "string"
+    },
+    "azureKeyVaultUri": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "targetPort": {
+      "type": "int",
+      "defaultValue": 8000
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "stagingApp",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "appName": {
+            "value": "[parameters('appName')]"
+          },
+          "containerAppsEnvironmentId": {
+            "value": "[parameters('containerAppsEnvironmentId')]"
+          },
+          "workloadIdentityResourceId": {
+            "value": "[parameters('workloadIdentityResourceId')]"
+          },
+          "acrLoginServer": {
+            "value": "[parameters('acrLoginServer')]"
+          },
+          "imageName": {
+            "value": "[parameters('imageName')]"
+          },
+          "serviceName": {
+            "value": "[parameters('serviceName')]"
+          },
+          "gitSha": {
+            "value": "[parameters('gitSha')]"
+          },
+          "imageTag": {
+            "value": "[parameters('imageTag')]"
+          },
+          "resumeTokenSecretName": {
+            "value": "[parameters('resumeTokenSecretName')]"
+          },
+          "runtimeEnvironment": {
+            "value": "staging"
+          },
+          "revisionSuffix": {
+            "value": "[parameters('gitSha')]"
+          },
+          "applicationInsightsConnectionString": {
+            "value": "[parameters('applicationInsightsConnectionString')]"
+          },
+          "deploymentRevision": {
+            "value": "[parameters('deploymentRevision')]"
+          },
+          "traceSampleRatio": {
+            "value": "[parameters('traceSampleRatio')]"
+          },
+          "tracingEnabled": {
+            "value": "[parameters('tracingEnabled')]"
+          },
+          "langsmithTracing": {
+            "value": "[parameters('langsmithTracing')]"
+          },
+          "langsmithProject": {
+            "value": "[parameters('langsmithProject')]"
+          },
+          "langsmithEndpoint": {
+            "value": "[parameters('langsmithEndpoint')]"
+          },
+          "langsmithApiKeySecretName": {
+            "value": "[parameters('langsmithApiKeySecretName')]"
+          },
+          "azureOpenAiEndpoint": {
+            "value": "[parameters('azureOpenAiEndpoint')]"
+          },
+          "azureOpenAiApiVersion": {
+            "value": "[parameters('azureOpenAiApiVersion')]"
+          },
+          "azureOpenAiChatDeployment": {
+            "value": "[parameters('azureOpenAiChatDeployment')]"
+          },
+          "azureSearchEndpoint": {
+            "value": "[parameters('azureSearchEndpoint')]"
+          },
+          "azureSearchDay3Index": {
+            "value": "[parameters('azureSearchDay3Index')]"
+          },
+          "azureStorageAccountUrl": {
+            "value": "[parameters('azureStorageAccountUrl')]"
+          },
+          "azureStorageContainer": {
+            "value": "[parameters('azureStorageContainer')]"
+          },
+          "azurePostgresHost": {
+            "value": "[parameters('azurePostgresHost')]"
+          },
+          "azurePostgresPort": {
+            "value": "[parameters('azurePostgresPort')]"
+          },
+          "azurePostgresDb": {
+            "value": "[parameters('azurePostgresDb')]"
+          },
+          "azurePostgresUser": {
+            "value": "[parameters('azurePostgresUser')]"
+          },
+          "azureKeyVaultUri": {
+            "value": "[parameters('azureKeyVaultUri')]"
+          },
+          "targetPort": {
+            "value": "[parameters('targetPort')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.41.2.15936",
+              "templateHash": "78203553758490285"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]"
+            },
+            "appName": {
+              "type": "string"
+            },
+            "containerAppsEnvironmentId": {
+              "type": "string"
+            },
+            "workloadIdentityResourceId": {
+              "type": "string"
+            },
+            "acrLoginServer": {
+              "type": "string"
+            },
+            "imageName": {
+              "type": "string"
+            },
+            "serviceName": {
+              "type": "string",
+              "defaultValue": "aegisap-api"
+            },
+            "gitSha": {
+              "type": "string",
+              "defaultValue": "dev"
+            },
+            "imageTag": {
+              "type": "string",
+              "defaultValue": "dev"
+            },
+            "resumeTokenSecretName": {
+              "type": "string",
+              "defaultValue": "aegisap-resume-token-secret"
+            },
+            "runtimeEnvironment": {
+              "type": "string",
+              "defaultValue": "cloud"
+            },
+            "revisionSuffix": {
+              "type": "string",
+              "defaultValue": "dev"
+            },
+            "applicationInsightsConnectionString": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "deploymentRevision": {
+              "type": "string",
+              "defaultValue": "dev"
+            },
+            "traceSampleRatio": {
+              "type": "string",
+              "defaultValue": "1.0"
+            },
+            "tracingEnabled": {
+              "type": "string",
+              "defaultValue": "true"
+            },
+            "langsmithTracing": {
+              "type": "string",
+              "defaultValue": "true"
+            },
+            "langsmithProject": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "langsmithEndpoint": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "langsmithApiKeySecretName": {
+              "type": "string",
+              "defaultValue": "aegisap-langsmith-api-key"
+            },
+            "azureOpenAiEndpoint": {
+              "type": "string"
+            },
+            "azureOpenAiApiVersion": {
+              "type": "string"
+            },
+            "azureOpenAiChatDeployment": {
+              "type": "string"
+            },
+            "azureSearchEndpoint": {
+              "type": "string"
+            },
+            "azureSearchDay3Index": {
+              "type": "string"
+            },
+            "azureStorageAccountUrl": {
+              "type": "string"
+            },
+            "azureStorageContainer": {
+              "type": "string"
+            },
+            "azurePostgresHost": {
+              "type": "string"
+            },
+            "azurePostgresPort": {
+              "type": "string",
+              "defaultValue": "5432"
+            },
+            "azurePostgresDb": {
+              "type": "string"
+            },
+            "azurePostgresUser": {
+              "type": "string"
+            },
+            "azureKeyVaultUri": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "targetPort": {
+              "type": "int",
+              "defaultValue": 8000
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2024-03-01",
+              "name": "[parameters('appName')]",
+              "location": "[parameters('location')]",
+              "identity": {
+                "type": "SystemAssigned,UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', parameters('workloadIdentityResourceId'))]": {}
+                }
+              },
+              "properties": {
+                "managedEnvironmentId": "[parameters('containerAppsEnvironmentId')]",
+                "configuration": {
+                  "activeRevisionsMode": "multiple",
+                  "ingress": {
+                    "external": true,
+                    "targetPort": "[parameters('targetPort')]",
+                    "transport": "auto"
+                  },
+                  "registries": [
+                    {
+                      "server": "[parameters('acrLoginServer')]",
+                      "identity": "[parameters('workloadIdentityResourceId')]"
+                    }
+                  ]
+                },
+                "template": {
+                  "revisionSuffix": "[parameters('revisionSuffix')]",
+                  "containers": [
+                    {
+                      "name": "api",
+                      "image": "[parameters('imageName')]",
+                      "resources": {
+                        "cpu": "[json('0.5')]",
+                        "memory": "1.0Gi"
+                      },
+                      "probes": [
+                        {
+                          "type": "Startup",
+                          "httpGet": {
+                            "path": "/health/live",
+                            "port": "[parameters('targetPort')]"
+                          },
+                          "initialDelaySeconds": 10,
+                          "periodSeconds": 10,
+                          "timeoutSeconds": 5,
+                          "failureThreshold": 12
+                        },
+                        {
+                          "type": "Readiness",
+                          "httpGet": {
+                            "path": "/health/ready",
+                            "port": "[parameters('targetPort')]"
+                          },
+                          "initialDelaySeconds": 10,
+                          "periodSeconds": 10,
+                          "timeoutSeconds": 5,
+                          "failureThreshold": 6
+                        },
+                        {
+                          "type": "Liveness",
+                          "httpGet": {
+                            "path": "/health/live",
+                            "port": "[parameters('targetPort')]"
+                          },
+                          "initialDelaySeconds": 30,
+                          "periodSeconds": 15,
+                          "timeoutSeconds": 5,
+                          "failureThreshold": 4
+                        }
+                      ],
+                      "env": [
+                        {
+                          "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                          "value": "[parameters('applicationInsightsConnectionString')]"
+                        },
+                        {
+                          "name": "AEGISAP_SERVICE_NAME",
+                          "value": "[parameters('serviceName')]"
+                        },
+                        {
+                          "name": "AEGISAP_ENVIRONMENT",
+                          "value": "[parameters('runtimeEnvironment')]"
+                        },
+                        {
+                          "name": "AEGISAP_DEPLOYMENT_REVISION",
+                          "value": "[parameters('deploymentRevision')]"
+                        },
+                        {
+                          "name": "AEGISAP_GIT_SHA",
+                          "value": "[parameters('gitSha')]"
+                        },
+                        {
+                          "name": "AEGISAP_IMAGE_TAG",
+                          "value": "[parameters('imageTag')]"
+                        },
+                        {
+                          "name": "AEGISAP_TRACE_SAMPLE_RATIO",
+                          "value": "[parameters('traceSampleRatio')]"
+                        },
+                        {
+                          "name": "AEGISAP_TRACING_ENABLED",
+                          "value": "[parameters('tracingEnabled')]"
+                        },
+                        {
+                          "name": "LANGSMITH_TRACING",
+                          "value": "[parameters('langsmithTracing')]"
+                        },
+                        {
+                          "name": "LANGSMITH_PROJECT",
+                          "value": "[parameters('langsmithProject')]"
+                        },
+                        {
+                          "name": "LANGSMITH_ENDPOINT",
+                          "value": "[parameters('langsmithEndpoint')]"
+                        },
+                        {
+                          "name": "AEGISAP_LANGSMITH_API_KEY_SECRET_NAME",
+                          "value": "[parameters('langsmithApiKeySecretName')]"
+                        },
+                        {
+                          "name": "AZURE_OPENAI_ENDPOINT",
+                          "value": "[parameters('azureOpenAiEndpoint')]"
+                        },
+                        {
+                          "name": "AZURE_OPENAI_API_VERSION",
+                          "value": "[parameters('azureOpenAiApiVersion')]"
+                        },
+                        {
+                          "name": "AZURE_OPENAI_CHAT_DEPLOYMENT",
+                          "value": "[parameters('azureOpenAiChatDeployment')]"
+                        },
+                        {
+                          "name": "AZURE_SEARCH_ENDPOINT",
+                          "value": "[parameters('azureSearchEndpoint')]"
+                        },
+                        {
+                          "name": "AZURE_SEARCH_DAY3_INDEX",
+                          "value": "[parameters('azureSearchDay3Index')]"
+                        },
+                        {
+                          "name": "AZURE_STORAGE_ACCOUNT_URL",
+                          "value": "[parameters('azureStorageAccountUrl')]"
+                        },
+                        {
+                          "name": "AZURE_STORAGE_CONTAINER",
+                          "value": "[parameters('azureStorageContainer')]"
+                        },
+                        {
+                          "name": "AZURE_POSTGRES_HOST",
+                          "value": "[parameters('azurePostgresHost')]"
+                        },
+                        {
+                          "name": "AZURE_POSTGRES_PORT",
+                          "value": "[parameters('azurePostgresPort')]"
+                        },
+                        {
+                          "name": "AZURE_POSTGRES_DB",
+                          "value": "[parameters('azurePostgresDb')]"
+                        },
+                        {
+                          "name": "AZURE_POSTGRES_USER",
+                          "value": "[parameters('azurePostgresUser')]"
+                        },
+                        {
+                          "name": "AZURE_KEY_VAULT_URI",
+                          "value": "[parameters('azureKeyVaultUri')]"
+                        },
+                        {
+                          "name": "AEGISAP_RESUME_TOKEN_SECRET_NAME",
+                          "value": "[parameters('resumeTokenSecretName')]"
+                        }
+                      ]
+                    }
+                  ],
+                  "scale": {
+                    "minReplicas": 1,
+                    "maxReplicas": 1
+                  }
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "appUrl": {
+              "type": "string",
+              "value": "[if(equals(reference(resourceId('Microsoft.App/containerApps', parameters('appName')), '2024-03-01').configuration.ingress.fqdn, ''), '', format('https://{0}', reference(resourceId('Microsoft.App/containerApps', parameters('appName')), '2024-03-01').configuration.ingress.fqdn))]"
+            },
+            "runtimePrincipalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('appName')), '2024-03-01', 'full').identity.principalId]"
+            },
+            "latestRevisionName": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('appName')), '2024-03-01').latestRevisionName]"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "appUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'stagingApp'), '2025-04-01').outputs.appUrl.value]"
+    },
+    "runtimePrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'stagingApp'), '2025-04-01').outputs.runtimePrincipalId.value]"
+    },
+    "latestRevisionName": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'stagingApp'), '2025-04-01').outputs.latestRevisionName.value]"
+    }
+  }
+}

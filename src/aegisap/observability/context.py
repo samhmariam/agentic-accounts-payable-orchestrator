@@ -58,6 +58,7 @@ class WorkflowObservabilityContext:
             "trace_id": self.trace_id,
             "checkpoint_id": self.checkpoint_id,
             "langsmith_trace_id": self.langsmith_trace_id,
+            "revision": self.deployment_revision,
             "task_class": _string_or_none(self.metadata.get("task_class")),
             "routing_decision": _string_or_none(self.metadata.get("routing_decision")),
             "model_deployment": _string_or_none(self.metadata.get("model_deployment")),

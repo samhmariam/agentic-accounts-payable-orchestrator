@@ -20,15 +20,15 @@ jobs:
       - uses: astral-sh/setup-uv@v5
 
       - name: Install dependencies
-        run: uv sync --dev
+        run: uv sync --extra dev --extra day9
 
       - name: Run fixture-backed Day 8 regression suite
-        run: uv run pytest tests/day8 -q
+        run: uv run python -m pytest tests/day8 -q
 
       - name: Smoke deployed runtime
         env:
           BASE_URL: ${{ secrets.AEGISAP_DEPLOYED_BASE_URL }}
         run: |
           if [ -n "$BASE_URL" ]; then
-            uv run python scripts/smoke_deployed_app.py --base-url "$BASE_URL"
+            uv run python scripts/smoke_test.py --base-url "$BASE_URL"
           fi

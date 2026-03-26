@@ -6,13 +6,18 @@ param containerAppsEnvironmentId string
 param workloadIdentityResourceId string
 param acrLoginServer string
 param imageName string
+param serviceName string = 'aegisap-api'
+param gitSha string = 'dev'
+param imageTag string = 'dev'
 param resumeTokenSecretName string = 'aegisap-resume-token-secret'
 param runtimeEnvironment string = 'cloud'
+param revisionSuffix string = 'dev'
 
 param applicationInsightsConnectionString string = ''
 param deploymentRevision string = 'dev'
 param traceSampleRatio string = '1.0'
 param tracingEnabled string = 'true'
+param langsmithTracing string = 'true'
 param langsmithProject string = ''
 param langsmithEndpoint string = ''
 param langsmithApiKeySecretName string = 'aegisap-langsmith-api-key'
@@ -42,6 +47,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: containerAppsEnvironmentId
     configuration: {
+      activeRevisionsMode: 'multiple'
       ingress: {
         external: true
         targetPort: targetPort
@@ -55,6 +61,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
       ]
     }
     template: {
+      revisionSuffix: revisionSuffix
       containers: [
         {
           name: 'api'
@@ -63,10 +70,49 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.5')
             memory: '1.0Gi'
           }
+          probes: [
+            {
+              type: 'Startup'
+              httpGet: {
+                path: '/health/live'
+                port: targetPort
+              }
+              initialDelaySeconds: 10
+              periodSeconds: 10
+              timeoutSeconds: 5
+              failureThreshold: 12
+            }
+            {
+              type: 'Readiness'
+              httpGet: {
+                path: '/health/ready'
+                port: targetPort
+              }
+              initialDelaySeconds: 10
+              periodSeconds: 10
+              timeoutSeconds: 5
+              failureThreshold: 6
+            }
+            {
+              type: 'Liveness'
+              httpGet: {
+                path: '/health/live'
+                port: targetPort
+              }
+              initialDelaySeconds: 30
+              periodSeconds: 15
+              timeoutSeconds: 5
+              failureThreshold: 4
+            }
+          ]
           env: [
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
               value: applicationInsightsConnectionString
+            }
+            {
+              name: 'AEGISAP_SERVICE_NAME'
+              value: serviceName
             }
             {
               name: 'AEGISAP_ENVIRONMENT'
@@ -77,12 +123,24 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
               value: deploymentRevision
             }
             {
+              name: 'AEGISAP_GIT_SHA'
+              value: gitSha
+            }
+            {
+              name: 'AEGISAP_IMAGE_TAG'
+              value: imageTag
+            }
+            {
               name: 'AEGISAP_TRACE_SAMPLE_RATIO'
               value: traceSampleRatio
             }
             {
               name: 'AEGISAP_TRACING_ENABLED'
               value: tracingEnabled
+            }
+            {
+              name: 'LANGSMITH_TRACING'
+              value: langsmithTracing
             }
             {
               name: 'LANGSMITH_PROJECT'
@@ -161,3 +219,4 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
 
 output appUrl string = app.properties.configuration.ingress.fqdn == '' ? '' : 'https://${app.properties.configuration.ingress.fqdn}'
 output runtimePrincipalId string = app.identity.principalId
+output latestRevisionName string = app.properties.latestRevisionName

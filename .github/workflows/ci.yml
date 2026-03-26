@@ -18,13 +18,13 @@ jobs:
       - uses: astral-sh/setup-uv@v5
 
       - name: Install dependencies
-        run: uv sync --dev
+        run: uv sync --extra dev --extra day9
 
       - name: Run tests
-        run: uv run pytest -q
+        run: uv run python -m pytest -q
 
       - name: Compile Python entrypoints
-        run: uv run python -m compileall src scripts
+        run: uv run python -m compileall src scripts evals
 
       - name: Install Azure CLI
         run: |
@@ -37,9 +37,15 @@ jobs:
         run: |
           az bicep build --file infra/core.bicep
           az bicep build --file infra/full.bicep
+          az bicep build --file infra/aca/staging.bicep
+          az bicep build --file infra/aca/prod.bicep
           az bicep build --file infra/modules/container_app.bicep
           az bicep build --file infra/modules/role_assignments.bicep
           az bicep build --file infra/modules/diagnostic_settings.bicep
+          az bicep build --file infra/monitoring/alerts/alerts.bicep
 
-      - name: Build container image
-        run: docker build .
+      - name: Build API container image
+        run: docker build -f docker/Dockerfile.api -t aegisap-api:${{ github.sha }} .
+
+      - name: Build worker container image
+        run: docker build -f docker/Dockerfile.worker -t aegisap-worker:${{ github.sha }} .

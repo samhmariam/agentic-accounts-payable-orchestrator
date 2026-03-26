@@ -1,0 +1,196 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_sha:
+        description: Previously staging-approved commit SHA to promote.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  verify-staging-approval:
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.release.outputs.short_sha }}
+    steps:
+      - name: Resolve release SHA
+        id: release
+        run: |
+          RELEASE_SHA="${{ github.event.inputs.git_sha }}"
+          echo "short_sha=${RELEASE_SHA:0:12}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify successful staging deploy for SHA
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_SHA: ${{ github.event.inputs.git_sha }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          repo = os.environ["GITHUB_REPOSITORY"]
+          sha = os.environ["TARGET_SHA"]
+          token = os.environ["GITHUB_TOKEN"]
+          url = f"https://api.github.com/repos/{repo}/actions/workflows/deploy-staging.yml/runs?head_sha={sha}&status=success"
+          req = urllib.request.Request(url, headers={
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}",
+              "X-GitHub-Api-Version": "2022-11-28",
+          })
+          with urllib.request.urlopen(req, timeout=30) as response:
+              payload = json.load(response)
+          if payload.get("total_count", 0) < 1:
+              raise SystemExit(f"No successful deploy-staging.yml run found for {sha}")
+          PY
+
+  deploy-prod:
+    needs: verify-staging-approval
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      ACR_NAME: ${{ secrets.AEGISAP_ACR_NAME }}
+      PROD_APP_NAME: ${{ vars.AEGISAP_PROD_APP_NAME }}
+      CONTAINER_APPS_ENVIRONMENT_ID: ${{ secrets.AEGISAP_CONTAINERAPPS_ENVIRONMENT_ID }}
+      WORKLOAD_IDENTITY_RESOURCE_ID: ${{ secrets.AEGISAP_WORKLOAD_IDENTITY_RESOURCE_ID }}
+      APPINSIGHTS_CONNECTION_STRING: ${{ secrets.AEGISAP_APPLICATIONINSIGHTS_CONNECTION_STRING }}
+      APPINSIGHTS_NAME: ${{ vars.AEGISAP_APPINSIGHTS_NAME }}
+      OPENAI_ENDPOINT: ${{ secrets.AEGISAP_OPENAI_ENDPOINT }}
+      OPENAI_API_VERSION: ${{ vars.AEGISAP_OPENAI_API_VERSION }}
+      OPENAI_CHAT_DEPLOYMENT: ${{ vars.AEGISAP_OPENAI_CHAT_DEPLOYMENT }}
+      SEARCH_ENDPOINT: ${{ secrets.AEGISAP_SEARCH_ENDPOINT }}
+      SEARCH_DAY3_INDEX: ${{ vars.AEGISAP_SEARCH_DAY3_INDEX }}
+      STORAGE_ACCOUNT_URL: ${{ secrets.AEGISAP_STORAGE_ACCOUNT_URL }}
+      STORAGE_CONTAINER: ${{ vars.AEGISAP_STORAGE_CONTAINER }}
+      POSTGRES_HOST: ${{ secrets.AEGISAP_POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ vars.AEGISAP_POSTGRES_PORT }}
+      POSTGRES_DB: ${{ vars.AEGISAP_POSTGRES_DB }}
+      POSTGRES_USER: ${{ vars.AEGISAP_POSTGRES_USER }}
+      KEY_VAULT_URI: ${{ secrets.AEGISAP_KEY_VAULT_URI }}
+      LANGSMITH_PROJECT: ${{ vars.AEGISAP_LANGSMITH_PROD_PROJECT }}
+      LANGSMITH_ENDPOINT: ${{ vars.AEGISAP_LANGSMITH_ENDPOINT }}
+      IMAGE_NAME_API: aegisap-api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --extra dev --extra day9
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve ACR login server and Application Insights app id
+        id: azure
+        run: |
+          ACR_LOGIN_SERVER="$(az acr show --name "$ACR_NAME" --query loginServer -o tsv)"
+          APP_ID="$(az monitor app-insights component show --app "$APPINSIGHTS_NAME" --resource-group "$RESOURCE_GROUP" --query appId -o tsv)"
+          echo "acr_login_server=$ACR_LOGIN_SERVER" >> "$GITHUB_OUTPUT"
+          echo "app_id=$APP_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Capture previous production revision
+        id: previous
+        run: |
+          PREVIOUS="$(az containerapp revision list --name "$PROD_APP_NAME" --resource-group "$RESOURCE_GROUP" --query "[?properties.active].name | [0]" -o tsv 2>/dev/null || true)"
+          echo "previous_revision=$PREVIOUS" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy production ACA revision
+        run: |
+          az deployment group create \
+            --resource-group "$RESOURCE_GROUP" \
+            --template-file infra/aca/prod.bicep \
+            --parameters appName="$PROD_APP_NAME" \
+            --parameters containerAppsEnvironmentId="$CONTAINER_APPS_ENVIRONMENT_ID" \
+            --parameters workloadIdentityResourceId="$WORKLOAD_IDENTITY_RESOURCE_ID" \
+            --parameters acrLoginServer="${{ steps.azure.outputs.acr_login_server }}" \
+            --parameters imageName="${{ steps.azure.outputs.acr_login_server }}/${IMAGE_NAME_API}:${{ github.event.inputs.git_sha }}" \
+            --parameters serviceName="aegisap-api" \
+            --parameters gitSha="${{ needs.verify-staging-approval.outputs.short_sha }}" \
+            --parameters imageTag="${{ github.event.inputs.git_sha }}" \
+            --parameters deploymentRevision="production-${{ needs.verify-staging-approval.outputs.short_sha }}" \
+            --parameters applicationInsightsConnectionString="$APPINSIGHTS_CONNECTION_STRING" \
+            --parameters traceSampleRatio="0.25" \
+            --parameters tracingEnabled="true" \
+            --parameters langsmithTracing="true" \
+            --parameters langsmithProject="$LANGSMITH_PROJECT" \
+            --parameters langsmithEndpoint="$LANGSMITH_ENDPOINT" \
+            --parameters azureOpenAiEndpoint="$OPENAI_ENDPOINT" \
+            --parameters azureOpenAiApiVersion="$OPENAI_API_VERSION" \
+            --parameters azureOpenAiChatDeployment="$OPENAI_CHAT_DEPLOYMENT" \
+            --parameters azureSearchEndpoint="$SEARCH_ENDPOINT" \
+            --parameters azureSearchDay3Index="$SEARCH_DAY3_INDEX" \
+            --parameters azureStorageAccountUrl="$STORAGE_ACCOUNT_URL" \
+            --parameters azureStorageContainer="$STORAGE_CONTAINER" \
+            --parameters azurePostgresHost="$POSTGRES_HOST" \
+            --parameters azurePostgresPort="$POSTGRES_PORT" \
+            --parameters azurePostgresDb="$POSTGRES_DB" \
+            --parameters azurePostgresUser="$POSTGRES_USER" \
+            --parameters azureKeyVaultUri="$KEY_VAULT_URI"
+
+      - name: Resolve production base URL
+        id: endpoint
+        run: |
+          FQDN="$(az containerapp show --name "$PROD_APP_NAME" --resource-group "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv)"
+          echo "base_url=https://$FQDN" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for readiness
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS "${{ steps.endpoint.outputs.base_url }}/health/ready" >/dev/null; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Production app failed readiness within timeout." >&2
+          exit 1
+
+      - name: Post-deploy smoke test
+        run: |
+          uv run python scripts/smoke_test.py \
+            --base-url "${{ steps.endpoint.outputs.base_url }}" \
+            --expected-sha "${{ needs.verify-staging-approval.outputs.short_sha }}" \
+            > smoke-summary.json
+
+      - name: Verify production trace arrival
+        env:
+          LANGSMITH_API_KEY: ${{ secrets.AEGISAP_LANGSMITH_SERVICE_KEY }}
+        run: |
+          WORKFLOW_RUN_ID="$(python - <<'PY'
+          import json
+          payload = json.load(open("smoke-summary.json", "r", encoding="utf-8"))
+          print(payload["workflow_run"]["correlation"]["workflow_run_id"])
+          PY
+          )"
+          uv run python scripts/check_traces.py \
+            --workflow-run-id "$WORKFLOW_RUN_ID" \
+            --revision "${{ needs.verify-staging-approval.outputs.short_sha }}" \
+            --azure-app-id "${{ steps.azure.outputs.app_id }}" \
+            --langsmith-project "$LANGSMITH_PROJECT"
+
+      - name: Publish rollback target
+        run: |
+          {
+            echo "## Production Promotion"
+            echo ""
+            echo "- Promoted SHA: \`${{ github.event.inputs.git_sha }}\`"
+            echo "- Base URL: \`${{ steps.endpoint.outputs.base_url }}\`"
+            echo "- Rollback target revision: \`${{ steps.previous.outputs.previous_revision || 'none' }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

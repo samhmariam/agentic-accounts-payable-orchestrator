@@ -78,6 +78,11 @@ for key, value in env.items():
     text = str(value)
     if text.strip():
         print(f"export {key}={shlex.quote(text)}")
+
+if not str(env.get("AEGISAP_ENVIRONMENT", "")).strip():
+    print("export AEGISAP_ENVIRONMENT=local")
+if not str(env.get("AEGISAP_RESUME_TOKEN_SECRET_NAME", "")).strip():
+    print("export AEGISAP_RESUME_TOKEN_SECRET_NAME=aegisap-resume-token-secret")
 PY
 )"
 

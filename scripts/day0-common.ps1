@@ -145,6 +145,23 @@ function Ensure-RoleAssignment {
     ) | Out-Null
 }
 
+function Get-RoleDefinitionId {
+    param(
+        [string]$RoleName
+    )
+
+    $role = Invoke-AzJson -Arguments @(
+        "role", "definition", "list",
+        "--name", $RoleName
+    )
+
+    if (-not $role -or $role.Count -eq 0) {
+        throw "Role definition not found: $RoleName"
+    }
+
+    return $role[0].id
+}
+
 function Get-OutputValue {
     param(
         [object]$Outputs,

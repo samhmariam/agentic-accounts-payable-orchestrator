@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import argparse
-import os
 
 from aegisap.training.artifacts import build_root, load_json, write_json_artifact
 from aegisap.training.postgres import build_store_from_env
+from aegisap.security.key_vault import get_resume_token_secret
 from aegisap.day5.workflow.training_runtime import resume_day5_case
 
 
@@ -45,7 +45,7 @@ def main() -> None:
     pause_payload = load_json(args.pause_artifact)
     resumed = resume_day5_case(
         store=build_store_from_env(),
-        token_secret=os.getenv("AEGISAP_RESUME_TOKEN_SECRET", "dev-only-resume-secret"),
+        token_secret=get_resume_token_secret(),
         resume_token=pause_payload["resume_token"],
         decision_payload={"status": args.status, "comment": args.comment},
         resumed_by=args.resumed_by,

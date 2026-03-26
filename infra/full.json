@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.41.2.15936",
-      "templateHash": "9242747210529022759"
+      "templateHash": "10870755486780360539"
     }
   },
   "parameters": {
@@ -161,7 +161,21 @@
       "type": "string",
       "defaultValue": "id-aegisap-workload",
       "metadata": {
-        "description": "User-assigned managed identity name for future workload use"
+        "description": "User-assigned managed identity name used for registry pull and Key Vault secret references"
+      }
+    },
+    "jobsIdentityName": {
+      "type": "string",
+      "defaultValue": "id-aegisap-jobs",
+      "metadata": {
+        "description": "User-assigned managed identity name scaffolded for background jobs and replay workers"
+      }
+    },
+    "searchAdminIdentityName": {
+      "type": "string",
+      "defaultValue": "id-aegisap-search-admin",
+      "metadata": {
+        "description": "User-assigned managed identity name scaffolded for Search indexing and schema administration"
       }
     }
   },
@@ -244,6 +258,18 @@
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "apiVersion": "2023-01-31",
       "name": "[parameters('workloadIdentityName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[parameters('jobsIdentityName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[parameters('searchAdminIdentityName')]",
       "location": "[parameters('location')]"
     },
     {
@@ -358,6 +384,72 @@
         "disableLocalAuth": true,
         "publicNetworkAccess": "Enabled"
       }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "keyVaultDiagnostics",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "keyVaultName": {
+            "value": "[parameters('keyVaultName')]"
+          },
+          "logAnalyticsWorkspaceName": {
+            "value": "[parameters('logAnalyticsName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.41.2.15936",
+              "templateHash": "13206508835563049900"
+            }
+          },
+          "parameters": {
+            "keyVaultName": {
+              "type": "string"
+            },
+            "logAnalyticsWorkspaceName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+              "name": "[format('{0}-audit', parameters('keyVaultName'))]",
+              "properties": {
+                "workspaceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]",
+                "logs": [
+                  {
+                    "category": "AuditEvent",
+                    "enabled": true
+                  }
+                ],
+                "metrics": []
+              }
+            }
+          ],
+          "outputs": {
+            "diagnosticSettingId": {
+              "type": "string",
+              "value": "[extensionResourceId(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), 'Microsoft.Insights/diagnosticSettings', format('{0}-audit', parameters('keyVaultName')))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsName'))]"
+      ]
     }
   ],
   "outputs": {
@@ -485,6 +577,30 @@
       "type": "string",
       "value": "[parameters('storageContainerName')]"
     },
+    "jobsIdentityClientId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('jobsIdentityName')), '2023-01-31').clientId]"
+    },
+    "jobsIdentityPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('jobsIdentityName')), '2023-01-31').principalId]"
+    },
+    "jobsIdentityResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('jobsIdentityName'))]"
+    },
+    "searchAdminIdentityClientId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('searchAdminIdentityName')), '2023-01-31').clientId]"
+    },
+    "searchAdminIdentityPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('searchAdminIdentityName')), '2023-01-31').principalId]"
+    },
+    "searchAdminIdentityResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('searchAdminIdentityName'))]"
+    },
     "workloadIdentityClientId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('workloadIdentityName')), '2023-01-31').clientId]"
@@ -496,6 +612,10 @@
     "workloadIdentityResourceId": {
       "type": "string",
       "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('workloadIdentityName'))]"
+    },
+    "keyVaultDiagnosticsId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'keyVaultDiagnostics'), '2025-04-01').outputs.diagnosticSettingId.value]"
     }
   }
 }

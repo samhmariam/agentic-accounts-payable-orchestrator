@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 import logging
-import os
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -13,6 +11,12 @@ from aegisap.api.models import Day1IntakeRequest, Day4RunRequest, Day5ResumeRequ
 from aegisap.day_01.service import canonicalize_with_candidate, run_day_01_intake
 from aegisap.day5.workflow.resume_service import ResumeTokenCodec
 from aegisap.day5.workflow.training_runtime import create_day5_pause, load_thread_snapshot, resume_day5_case
+from aegisap.observability.logging import configure_application_logging, log_structured
+from aegisap.observability.tracing import make_trace_context
+from aegisap.security.config import load_security_config
+from aegisap.security.credentials import redact_credential_summary
+from aegisap.security.key_vault import get_resume_token_secret
+from aegisap.security.policy import validate_security_posture
 from aegisap.training.postgres import build_store_from_env
 from aegisap.training.labs import run_day4_case_artifact
 
@@ -20,8 +24,12 @@ logger = logging.getLogger("aegisap.api")
 
 
 def _configure_observability() -> None:
-    connection_string = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING", "").strip()
+    configure_application_logging()
+    config = load_security_config()
+    validate_security_posture(config)
+    connection_string = config.application_insights_connection_string
     if not connection_string:
+        log_structured(logger, "security_runtime_started", **redact_credential_summary())
         return
     try:
         from azure.monitor.opentelemetry import configure_azure_monitor
@@ -29,6 +37,7 @@ def _configure_observability() -> None:
         configure_azure_monitor(connection_string=connection_string)
     except Exception as exc:  # pragma: no cover - defensive startup guard
         logger.warning("azure_monitor_configuration_failed: %s", exc)
+    log_structured(logger, "security_runtime_started", **redact_credential_summary())
 
 
 @asynccontextmanager
@@ -44,13 +53,16 @@ app = FastAPI(title="AegisAP Training Runtime", version="0.1.0", lifespan=lifesp
 async def add_request_context(request: Request, call_next):
     request_id = request.headers.get("x-request-id") or str(uuid.uuid4())
     request.state.request_id = request_id
+    trace_context = make_trace_context(request_id=request_id)
+    request.state.trace_id = trace_context.trace_id
     response = await call_next(request)
     response.headers["x-request-id"] = request_id
+    response.headers["x-trace-id"] = trace_context.trace_id
     return response
 
 
 def _log(event: str, **fields: object) -> None:
-    logger.info("%s %s", event, json.dumps(fields, sort_keys=True, default=str))
+    log_structured(logger, event, **fields)
 
 
 @app.get("/healthz")
@@ -103,7 +115,7 @@ async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[s
     }
 
     if request.persist_day5_handoff:
-        token_secret = os.getenv("AEGISAP_RESUME_TOKEN_SECRET", "dev-only-resume-secret")
+        token_secret = get_resume_token_secret()
         thread_id = request.thread_id or f"thread-{request.case_facts.case_id}"
         assigned_to = request.assigned_to or "controller@example.com"
         try:
@@ -113,6 +125,7 @@ async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[s
                 assigned_to=assigned_to,
                 store=build_store_from_env(),
                 token_secret=token_secret,
+                trace_id=raw_request.state.trace_id,
             )
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -120,6 +133,7 @@ async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[s
         _log(
             "day5_pause_created",
             request_id=raw_request.state.request_id,
+            trace_id=raw_request.state.trace_id,
             thread_id=thread_id,
             approval_task_id=pause_payload["approval_task_id"],
         )
@@ -127,6 +141,7 @@ async def day4_run_case(request: Day4RunRequest, raw_request: Request) -> dict[s
     _log(
         "day4_case_completed",
         request_id=raw_request.state.request_id,
+        trace_id=raw_request.state.trace_id,
         case_id=request.case_facts.case_id,
         recommendation_ready=state.recommendation is not None,
         day6_outcome=(artifact_payload["day6_review"] or {}).get("outcome"),
@@ -140,7 +155,12 @@ async def day5_thread(thread_id: str, raw_request: Request) -> dict[str, object]
         snapshot = load_thread_snapshot(store=build_store_from_env(), thread_id=thread_id)
     except Exception as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-    _log("day5_thread_loaded", request_id=raw_request.state.request_id, thread_id=thread_id)
+    _log(
+        "day5_thread_loaded",
+        request_id=raw_request.state.request_id,
+        trace_id=raw_request.state.trace_id,
+        thread_id=thread_id,
+    )
     return snapshot
 
 
@@ -150,7 +170,7 @@ async def day5_resume(
     request: Day5ResumeRequest,
     raw_request: Request,
 ) -> dict[str, object]:
-    token_secret = os.getenv("AEGISAP_RESUME_TOKEN_SECRET", "dev-only-resume-secret")
+    token_secret = get_resume_token_secret()
     token = ResumeTokenCodec(token_secret).decode(request.resume_token)
     if token.approval_task_id != approval_task_id:
         raise HTTPException(status_code=400, detail="approval_task_id does not match resume token")
@@ -167,6 +187,7 @@ async def day5_resume(
             resume_token=request.resume_token,
             decision_payload=decision,
             resumed_by=request.resumed_by,
+            trace_id=raw_request.state.trace_id,
         )
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -174,6 +195,7 @@ async def day5_resume(
     _log(
         "day5_resume_completed",
         request_id=raw_request.state.request_id,
+        trace_id=raw_request.state.trace_id,
         thread_id=resumed.thread_id,
         approval_task_id=approval_task_id,
     )

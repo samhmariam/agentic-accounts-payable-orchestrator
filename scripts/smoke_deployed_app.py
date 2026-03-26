@@ -65,7 +65,21 @@ def main() -> None:
             "resumed_by": "controller@example.com",
         },
     )
-    print(json.dumps({"healthz": "ok", "day4": run_payload, "resume": resumed}, indent=2))
+    thread_snapshot = _request(
+        "GET",
+        f"{base_url}/api/day5/threads/{handoff['thread_id']}",
+    )
+    print(
+        json.dumps(
+            {
+                "healthz": "ok",
+                "day4": run_payload,
+                "resume": resumed,
+                "thread_snapshot": thread_snapshot,
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

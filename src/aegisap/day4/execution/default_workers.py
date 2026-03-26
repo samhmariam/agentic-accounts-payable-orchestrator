@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from aegisap.audit.events import build_audit_event, buffer_audit_event
 from aegisap.common.paths import repo_root
 from aegisap.day3.agents.po_match_agent import verify_po_match
 from aegisap.day3.agents.vendor_risk_verifier import verify_vendor_risk
@@ -24,6 +25,31 @@ def _to_evidence_refs(evidence_ids: list[str]) -> list[EvidenceRef]:
             source_type = "document"
         refs.append(EvidenceRef(source_id=evidence_id, source_type=source_type))
     return refs
+
+
+def _buffer_sensitive_event(
+    *,
+    state,
+    action_type: str,
+    decision_outcome: str,
+    summary: str,
+    evidence_refs: list[str],
+    metadata: dict[str, object] | None = None,
+) -> None:
+    event = build_audit_event(
+        workflow_run_id=state.case_facts.case_id,
+        thread_id=f"case:{state.case_facts.case_id}",
+        state_version=0,
+        actor_type="system_job",
+        actor_id=f"day4:{action_type}",
+        action_type=action_type,
+        decision_outcome=decision_outcome,
+        evidence_summary=summary,
+        evidence_refs=evidence_refs,
+        planner_version=state.planning.plan_version or "day4",
+        metadata=metadata or {},
+    )
+    buffer_audit_event(state.artifacts, event)
 
 
 class PolicyRetrievalWorker:
@@ -89,6 +115,14 @@ class POMatchVerificationWorker:
                 mismatch_flags.append(finding.recommended_action)
                 blocking_reason = "po_condition_unsatisfied"
 
+        _buffer_sensitive_event(
+            state=state,
+            action_type="po_match_check",
+            decision_outcome="completed" if status == "completed" else "needs_human_review",
+            summary=f"PO match verification returned {finding.status} for invoice {state.case_facts.invoice_id}.",
+            evidence_refs=finding.evidence_ids,
+            metadata={"status": finding.status, "confidence": finding.confidence},
+        )
         return TaskResult(
             task_id=input_data.task_id,
             status=status,
@@ -206,6 +240,17 @@ class VendorHistoryCheckWorker:
             evidence_refs = []
             confidence = 0.35
 
+        _buffer_sensitive_event(
+            state=state,
+            action_type="vendor_check",
+            decision_outcome="completed" if result_status == "completed" else "needs_human_review",
+            summary=(
+                f"Vendor history check completed with risk level {outputs['risk_level']} "
+                f"for supplier {state.case_facts.supplier_id}."
+            ),
+            evidence_refs=[item.evidence_id for item in evidence] if evidence else [],
+            metadata={"risk_level": outputs["risk_level"], "confidence": confidence},
+        )
         return TaskResult(
             task_id=input_data.task_id,
             status=result_status,
@@ -247,6 +292,16 @@ class VendorBankVerificationWorker:
             )
 
         if bank_change_verified:
+            _buffer_sensitive_event(
+                state=state,
+                action_type="bank_detail_evaluation",
+                decision_outcome="completed",
+                summary=(
+                    f"Bank detail verification passed for supplier {state.case_facts.supplier_id}."
+                ),
+                evidence_refs=evidence_ids,
+                metadata={"bank_change_verified": True},
+            )
             return TaskResult(
                 task_id=input_data.task_id,
                 status="completed",
@@ -260,6 +315,17 @@ class VendorBankVerificationWorker:
                 evidence_refs=_to_evidence_refs(evidence_ids),
             )
 
+        _buffer_sensitive_event(
+            state=state,
+            action_type="bank_detail_evaluation",
+            decision_outcome="needs_human_review",
+            summary=(
+                f"Bank detail verification failed for supplier {state.case_facts.supplier_id}; "
+                "manual review required."
+            ),
+            evidence_refs=evidence_ids,
+            metadata={"bank_change_verified": False},
+        )
         return TaskResult(
             task_id=input_data.task_id,
             status="escalated",
@@ -289,6 +355,17 @@ class ThresholdApprovalCheckWorker:
         if state.case_facts.invoice_amount_gbp >= controller_threshold:
             required_approvals.append("controller")
 
+        _buffer_sensitive_event(
+            state=state,
+            action_type="high_value_escalation",
+            decision_outcome="completed" if required_approvals else "completed",
+            summary=(
+                f"Threshold approval check identified approvals {required_approvals or ['none']} "
+                f"for invoice amount {state.case_facts.invoice_amount_gbp}."
+            ),
+            evidence_refs=["policy:approval-thresholds"],
+            metadata={"required_approvals": required_approvals},
+        )
         return TaskResult(
             task_id=input_data.task_id,
             status="completed",

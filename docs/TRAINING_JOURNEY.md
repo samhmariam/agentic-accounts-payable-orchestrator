@@ -59,6 +59,13 @@ completion. It emits one typed outcome:
 The refusal path is now a first-class, auditable product outcome rather than an
 implicit failure.
 
+### Day 7
+
+The same case now becomes enterprise-reviewable. The runtime identity is
+separated from admin identities, residual secrets move behind Key Vault access
+contracts, Search key fallback is eliminated, and every sensitive outcome emits
+redacted audit evidence tied to thread state and trace context.
+
 ## Learning Contract
 
 Every day should end with:

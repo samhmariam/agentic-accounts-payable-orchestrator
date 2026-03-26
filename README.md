@@ -2,7 +2,8 @@
 
 AegisAP is the Golden Thread training repo for Forward Deployed Engineers building
 production-ready agentic systems on Azure. The repo follows one invoice case
-from Day 0 bootstrap through Day 6 graceful refusal and policy-grounded abstention.
+from Day 0 bootstrap through Day 7 identity hardening, secret removal, and
+auditability.
 
 ## Training Journey
 
@@ -15,6 +16,7 @@ from Day 0 bootstrap through Day 6 graceful refusal and policy-grounded abstenti
 | Day 4 | Produce and validate execution plans | Explicit planning and controlled execution | Azure OpenAI, Azure AI Search | `uv run python scripts/run_day4_case.py --planner-mode fixture` or `--planner-mode azure_openai` | `build/day4/golden_thread_day4.json` | Typed plan validates and yields recommendation or escalation |
 | Day 5 | Pause, persist, and resume | Durable checkpoints and approval resume | Azure Database for PostgreSQL, Azure OpenAI, Azure AI Search | `uv run python scripts/run_day5_pause_resume.py` then `uv run python scripts/resume_day5_case.py` | `build/day5/golden_thread_day5_pause.json`, `build/day5/golden_thread_day5_resumed.json` | Approval thread resumes without duplicate side effects |
 | Day 6 | Refuse unsafe or unauthorised progression | Policy review, bounded reflection, and graceful refusal | Azure OpenAI optional, Azure Database for PostgreSQL | `uv run python scripts/run_day6_case.py` | `build/day6/golden_thread_day6.json` | Case ends in `approved_to_proceed`, `needs_human_review`, or `not_authorised_to_continue` with an audit-ready payload |
+| Day 7 | Harden identity, secrets, traces, and audit evidence | Managed identity, secret elimination, redacted observability | Managed Identity, Key Vault RBAC, Azure AI Search RBAC, Log Analytics, PostgreSQL audit store | `uv run python scripts/verify_env.py --track full --env` then `uv run pytest tests/day7 tests/day6/test_training_runtime_integration.py -q` | PostgreSQL audit rows, redacted logs, hardened infra contracts | No forbidden runtime secret fallback, Search local auth disabled, audit rows emitted for sensitive outcomes |
 
 ## Start Here
 
@@ -32,6 +34,7 @@ from Day 0 bootstrap through Day 6 graceful refusal and policy-grounded abstenti
 - [Day 4 Explicit Planning](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_04_EXPLICIT_PLANNING.md)
 - [Day 5 Durable State and Resumption](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_05_DURABLE_STATE_AND_RESUMPTION.md)
 - [Day 6 Reflection and Graceful Refusal](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_06_REFLECTION_AND_GRACEFUL_REFUSAL.md)
+- [Day 7 Security, Identity, and Auditability](/workspaces/agentic-accounts-payable-orchestrator/docs/day7/DAY_07_SECURITY_IDENTITY_AUDITABILITY.md)
 
 ## Notebooks
 
@@ -110,14 +113,17 @@ uv run python scripts/smoke_deployed_app.py --base-url https://<container-app-ur
 ```
 
 Hosted success means a learner can hit `/healthz`, run the Day 4 case, inspect
-the Day 6 review outcome, persist Day 5 state to Azure PostgreSQL, and resume
-the approval flow without duplicate side effects.
+the Day 6 review outcome, persist Day 5 state to Azure PostgreSQL, resume the
+approval flow without duplicate side effects, and confirm that Day 7 has removed
+Search key fallback while emitting redacted audit rows.
 
 ## Repo Conventions
 
 - `pyproject.toml` and `uv.lock` are the dependency source of truth.
 - `fixtures/golden_thread/` is the primary teaching baseline.
 - `fixtures/day06/` is the primary adversarial safety baseline.
+- `docs/day7/` groups the Day 7 training guides and security reference docs.
+- `tests/day7/` groups the Day 7 security and audit regression suite.
 - `build/day*/` contains generated lab artifacts.
 - `src/aegisap/api/app.py` is the deployable training runtime.
 - Existing unit and integration tests remain the regression baseline.
@@ -140,8 +146,8 @@ uv run python scripts/run_day4_case.py --planner-mode fixture
 uv run python scripts/run_day6_case.py
 ```
 
-## Days 6-10
+## Days 8-10
 
-Days 7-10 are intentionally reserved for future curriculum expansion:
-security hardening, observability and regression, cost/speed optimization, and
-production deployment hardening.
+Days 8-10 are intentionally reserved for future curriculum expansion:
+observability and regression, cost/speed optimization, and production
+deployment hardening.

@@ -38,6 +38,8 @@ jobs:
           az bicep build --file infra/core.bicep
           az bicep build --file infra/full.bicep
           az bicep build --file infra/modules/container_app.bicep
+          az bicep build --file infra/modules/role_assignments.bicep
+          az bicep build --file infra/modules/diagnostic_settings.bicep
 
       - name: Build container image
         run: docker build .

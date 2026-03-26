@@ -7,7 +7,9 @@ resumes approved threads without duplicating side effects.
 
 ## Prerequisite
 
-Use the `full` Day 0 track or provide `AEGISAP_POSTGRES_DSN`. Day 5 requires a
+Use the `full` Day 0 track for the intended Azure path. `AEGISAP_POSTGRES_DSN`
+is still available as a local-only escape hatch for development and tests, but
+Day 7 forbids it in staging or production-like environments. Day 5 requires a
 reachable PostgreSQL database before any checkpoints can be written.
 
 ## Lab Sequence

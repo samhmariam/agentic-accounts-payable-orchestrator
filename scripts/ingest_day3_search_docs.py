@@ -37,13 +37,11 @@ def main() -> int:
         print("Missing required index name. Set AZURE_SEARCH_DAY3_INDEX or pass --index-name.", file=sys.stderr)
         return 2
 
-    from azure.search.documents import SearchClient
-
     from aegisap.day3.retrieval.azure_ai_search_adapter import (
-        _build_credential,
         blob_markdown_documents,
         day3_fixture_documents,
     )
+    from aegisap.security.credentials import get_search_query_client
 
     if args.source == "blob":
         if not args.account_url.strip() or not args.container_name.strip():
@@ -65,10 +63,9 @@ def main() -> int:
         print("No Day 3 documents found to ingest.", file=sys.stderr)
         return 1
 
-    client = SearchClient(
+    client = get_search_query_client(
         endpoint=args.endpoint.rstrip("/"),
         index_name=args.index_name,
-        credential=_build_credential(),
     )
     results = client.upload_documents(documents=documents)
     failures = [result.key for result in results if not result.succeeded]

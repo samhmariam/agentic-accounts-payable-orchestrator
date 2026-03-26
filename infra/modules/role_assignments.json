@@ -1,0 +1,246 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "4279509151500191399"
+    }
+  },
+  "parameters": {
+    "openAiName": {
+      "type": "string"
+    },
+    "searchName": {
+      "type": "string"
+    },
+    "storageAccountName": {
+      "type": "string"
+    },
+    "keyVaultName": {
+      "type": "string"
+    },
+    "acrName": {
+      "type": "string"
+    },
+    "developerPrincipalId": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "developerPrincipalType": {
+      "type": "string",
+      "defaultValue": "User"
+    },
+    "pullIdentityPrincipalId": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "jobsIdentityPrincipalId": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "searchAdminIdentityPrincipalId": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "runtimeApiPrincipalId": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "cognitiveServicesOpenAiUserRoleDefinitionId": {
+      "type": "string"
+    },
+    "searchIndexDataReaderRoleDefinitionId": {
+      "type": "string"
+    },
+    "searchIndexDataContributorRoleDefinitionId": {
+      "type": "string"
+    },
+    "searchServiceContributorRoleDefinitionId": {
+      "type": "string"
+    },
+    "storageBlobDataReaderRoleDefinitionId": {
+      "type": "string"
+    },
+    "storageBlobDataContributorRoleDefinitionId": {
+      "type": "string"
+    },
+    "keyVaultUserRoleId": {
+      "type": "string"
+    },
+    "acrPullRoleDefinitionId": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[not(empty(parameters('developerPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName'))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName')), parameters('developerPrincipalId'), parameters('cognitiveServicesOpenAiUserRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('developerPrincipalId')]",
+        "principalType": "[parameters('developerPrincipalType')]",
+        "roleDefinitionId": "[parameters('cognitiveServicesOpenAiUserRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('developerPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Search/searchServices', parameters('searchName'))]",
+      "name": "[guid(resourceId('Microsoft.Search/searchServices', parameters('searchName')), parameters('developerPrincipalId'), parameters('searchServiceContributorRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('developerPrincipalId')]",
+        "principalType": "[parameters('developerPrincipalType')]",
+        "roleDefinitionId": "[parameters('searchServiceContributorRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('developerPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Search/searchServices', parameters('searchName'))]",
+      "name": "[guid(resourceId('Microsoft.Search/searchServices', parameters('searchName')), parameters('developerPrincipalId'), parameters('searchIndexDataContributorRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('developerPrincipalId')]",
+        "principalType": "[parameters('developerPrincipalType')]",
+        "roleDefinitionId": "[parameters('searchIndexDataContributorRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('developerPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), parameters('developerPrincipalId'), parameters('storageBlobDataContributorRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('developerPrincipalId')]",
+        "principalType": "[parameters('developerPrincipalType')]",
+        "roleDefinitionId": "[parameters('storageBlobDataContributorRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('developerPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), parameters('developerPrincipalId'), parameters('keyVaultUserRoleId'))]",
+      "properties": {
+        "principalId": "[parameters('developerPrincipalId')]",
+        "principalType": "[parameters('developerPrincipalType')]",
+        "roleDefinitionId": "[parameters('keyVaultUserRoleId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('pullIdentityPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), parameters('pullIdentityPrincipalId'), parameters('keyVaultUserRoleId'))]",
+      "properties": {
+        "principalId": "[parameters('pullIdentityPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[parameters('keyVaultUserRoleId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('pullIdentityPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName'))]",
+      "name": "[guid(resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName')), parameters('pullIdentityPrincipalId'), parameters('acrPullRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('pullIdentityPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[parameters('acrPullRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('jobsIdentityPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), parameters('jobsIdentityPrincipalId'), parameters('storageBlobDataReaderRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('jobsIdentityPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[parameters('storageBlobDataReaderRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('searchAdminIdentityPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Search/searchServices', parameters('searchName'))]",
+      "name": "[guid(resourceId('Microsoft.Search/searchServices', parameters('searchName')), parameters('searchAdminIdentityPrincipalId'), parameters('searchServiceContributorRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('searchAdminIdentityPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[parameters('searchServiceContributorRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('searchAdminIdentityPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Search/searchServices', parameters('searchName'))]",
+      "name": "[guid(resourceId('Microsoft.Search/searchServices', parameters('searchName')), parameters('searchAdminIdentityPrincipalId'), parameters('searchIndexDataContributorRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('searchAdminIdentityPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[parameters('searchIndexDataContributorRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('runtimeApiPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName'))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName')), parameters('runtimeApiPrincipalId'), parameters('cognitiveServicesOpenAiUserRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('runtimeApiPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[parameters('cognitiveServicesOpenAiUserRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('runtimeApiPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Search/searchServices', parameters('searchName'))]",
+      "name": "[guid(resourceId('Microsoft.Search/searchServices', parameters('searchName')), parameters('runtimeApiPrincipalId'), parameters('searchIndexDataReaderRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('runtimeApiPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[parameters('searchIndexDataReaderRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('runtimeApiPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), parameters('runtimeApiPrincipalId'), parameters('storageBlobDataReaderRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('runtimeApiPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[parameters('storageBlobDataReaderRoleDefinitionId')]"
+      }
+    },
+    {
+      "condition": "[not(empty(parameters('runtimeApiPrincipalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), parameters('runtimeApiPrincipalId'), parameters('keyVaultUserRoleId'))]",
+      "properties": {
+        "principalId": "[parameters('runtimeApiPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[parameters('keyVaultUserRoleId')]"
+      }
+    }
+  ]
+}

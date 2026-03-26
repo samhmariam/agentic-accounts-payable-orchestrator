@@ -73,6 +73,14 @@ foreach ($property in $state.environment.PSObject.Properties) {
     }
 }
 
+if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable("AEGISAP_ENVIRONMENT", "Process"))) {
+    [Environment]::SetEnvironmentVariable("AEGISAP_ENVIRONMENT", "local", "Process")
+}
+
+if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable("AEGISAP_RESUME_TOKEN_SECRET_NAME", "Process"))) {
+    [Environment]::SetEnvironmentVariable("AEGISAP_RESUME_TOKEN_SECRET_NAME", "aegisap-resume-token-secret", "Process")
+}
+
 foreach ($key in $requiredVars) {
     $property = $state.environment.PSObject.Properties[$key]
     $value = if ($property) { [string]$property.Value } else { "" }

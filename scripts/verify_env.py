@@ -13,20 +13,23 @@ Usage:
     python scripts/verify_env.py --track full --include-langsmith
 
 Prerequisites: production dependencies must be installed
-    uv venv .venv
-    source .venv/bin/activate
-    uv pip install -r requirements.txt
+    uv sync --dev
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
+import subprocess
 import sys
 import urllib.error
 import urllib.request
 from typing import Any
 from urllib.parse import urlparse
+
+from aegisap.security.config import load_security_config
+from aegisap.security.policy import validate_security_posture
 
 
 CORE_REQUIRED_ENV_VARS = [
@@ -103,6 +106,19 @@ def require_env(required_keys: list[str]) -> list[dict[str, str]]:
         else:
             results.append(result(f"env:{key}", FAIL, "missing"))
     return results
+
+
+def check_security_posture() -> dict[str, str]:
+    try:
+        config = load_security_config()
+        validate_security_posture(config)
+        return result(
+            "security_posture",
+            PASS,
+            f"environment={config.environment}, credential_mode={config.credential_mode}",
+        )
+    except Exception as exc:
+        return result("security_posture", FAIL, str(exc))
 
 
 def langsmith_requested(args: argparse.Namespace) -> bool:
@@ -238,6 +254,103 @@ def check_key_vault(credential: Any) -> dict[str, str]:
         return result("key_vault", FAIL, str(exc))
 
 
+def _run_az_json(*args: str) -> Any:
+    completed = subprocess.run(
+        ["az", *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        message = completed.stderr.strip() or completed.stdout.strip() or "Azure CLI command failed"
+        raise RuntimeError(message)
+    output = completed.stdout.strip()
+    return json.loads(output) if output else None
+
+
+def _run_az_text(*args: str) -> str:
+    completed = subprocess.run(
+        ["az", *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        message = completed.stderr.strip() or completed.stdout.strip() or "Azure CLI command failed"
+        raise RuntimeError(message)
+    return completed.stdout.strip()
+
+
+def check_search_local_auth_disabled() -> dict[str, str]:
+    try:
+        endpoint = os.environ["AZURE_SEARCH_ENDPOINT"].rstrip("/")
+        search_name = urlparse(endpoint).netloc.split(".")[0]
+        value = _run_az_text(
+            "search",
+            "service",
+            "show",
+            "--name",
+            search_name,
+            "--resource-group",
+            os.environ["AZURE_RESOURCE_GROUP"],
+            "--query",
+            "disableLocalAuth",
+            "-o",
+            "tsv",
+        ).lower()
+        if value == "true":
+            return result("search_local_auth", PASS, "Azure AI Search local auth disabled")
+        return result("search_local_auth", FAIL, "Azure AI Search local auth is still enabled")
+    except Exception as exc:
+        return result("search_local_auth", FAIL, str(exc))
+
+
+def check_key_vault_diagnostics() -> dict[str, str]:
+    try:
+        vault_name = urlparse(os.environ["AZURE_KEY_VAULT_URI"]).netloc.split(".")[0]
+        vault_id = _run_az_text(
+            "keyvault",
+            "show",
+            "--name",
+            vault_name,
+            "--resource-group",
+            os.environ["AZURE_RESOURCE_GROUP"],
+            "--query",
+            "id",
+            "-o",
+            "tsv",
+        )
+        payload = _run_az_json(
+            "monitor",
+            "diagnostic-settings",
+            "list",
+            "--resource",
+            vault_id,
+            "-o",
+            "json",
+        )
+        settings = payload.get("value", []) if isinstance(payload, dict) else payload or []
+        for setting in settings:
+            logs = setting.get("logs", [])
+            has_audit = any(
+                log.get("category") == "AuditEvent" and bool(log.get("enabled"))
+                for log in logs
+            )
+            if has_audit and setting.get("workspaceId"):
+                return result(
+                    "key_vault_diagnostics",
+                    PASS,
+                    f"AuditEvent logs enabled and routed to workspace '{setting['workspaceId']}'",
+                )
+        return result(
+            "key_vault_diagnostics",
+            FAIL,
+            "No Key Vault diagnostic setting was found with AuditEvent logs enabled to Log Analytics.",
+        )
+    except Exception as exc:
+        return result("key_vault_diagnostics", FAIL, str(exc))
+
+
 def check_langsmith() -> dict[str, str]:
     try:
         from langsmith import Client as LangSmithClient
@@ -287,6 +400,7 @@ def main() -> int:
     args = parse_args()
     results = []
     results.extend(require_env(required_env_for_track(args.track)))
+    results.append(check_security_posture())
 
     if langsmith_requested(args):
         results.extend(require_env(OPTIONAL_LANGSMITH_ENV_VARS))
@@ -304,6 +418,9 @@ def main() -> int:
         results.append(check_postgres(credential))
         results.append(check_key_vault(credential))
         results.append(check_app_insights())
+        results.append(check_key_vault_diagnostics())
+
+    results.append(check_search_local_auth_disabled())
 
     if langsmith_requested(args):
         results.append(check_langsmith())

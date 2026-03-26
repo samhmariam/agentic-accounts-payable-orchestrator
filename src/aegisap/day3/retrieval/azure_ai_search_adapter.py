@@ -4,6 +4,8 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from aegisap.security.credentials import get_blob_service_client, get_search_query_client, get_token_credential
+
 from ..state.evidence_models import EvidenceItem
 from .interfaces import (
     ParsedMarkdownDocument,
@@ -31,19 +33,6 @@ SEARCH_INDEX_FIELDS = [
     "bank_account_last4",
     "chunk_id",
 ]
-
-
-def _build_credential():
-    from azure.identity import DefaultAzureCredential
-
-    try:
-        return DefaultAzureCredential(exclude_interactive_browser_credential=True)
-    except ValueError:
-        return DefaultAzureCredential(
-            exclude_environment_credential=True,
-            exclude_interactive_browser_credential=True,
-        )
-
 
 def _naive_keyword_score(query: str, text: str) -> float:
     query_tokens = {token.lower() for token in query.split() if token.strip()}
@@ -204,15 +193,12 @@ class AzureAISearchLiveAdapter:
         self.index_name = index_name or day3_search_index_name()
         if not self.endpoint:
             raise RuntimeError("missing required environment variable: AZURE_SEARCH_ENDPOINT")
-        self.credential = credential or _build_credential()
+        self.credential = credential or get_token_credential()
 
     def search(self, *, query: str, max_results: int = 5) -> list[EvidenceItem]:
-        from azure.search.documents import SearchClient
-
-        client = SearchClient(
+        client = get_search_query_client(
             endpoint=self.endpoint,
             index_name=self.index_name,
-            credential=self.credential,
         )
         results = client.search(
             search_text=query,
@@ -247,9 +233,7 @@ def blob_markdown_documents(
     credential: Any | None = None,
     prefix: str = "day3/unstructured/",
 ) -> list[dict[str, Any]]:
-    from azure.storage.blob import BlobServiceClient
-
-    service_client = BlobServiceClient(account_url=account_url, credential=credential or _build_credential())
+    service_client = get_blob_service_client(account_url=account_url)
     container = service_client.get_container_client(container_name)
     documents: list[dict[str, Any]] = []
     for blob in container.list_blobs(name_starts_with=prefix):

@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 
-OPENAI_SCOPE = "https://cognitiveservices.azure.com/.default"
+from aegisap.security.credentials import get_openai_client
 
 
 def _required_env(name: str) -> str:
@@ -12,31 +12,9 @@ def _required_env(name: str) -> str:
         raise RuntimeError(f"missing required environment variable: {name}")
     return value
 
-
-def _build_credential():
-    from azure.identity import DefaultAzureCredential
-
-    try:
-        return DefaultAzureCredential(exclude_interactive_browser_credential=True)
-    except ValueError:
-        return DefaultAzureCredential(
-            exclude_environment_credential=True,
-            exclude_interactive_browser_credential=True,
-        )
-
-
 @lru_cache(maxsize=1)
 def _get_client():
-    from azure.identity import get_bearer_token_provider
-    from openai import AzureOpenAI
-
-    credential = _build_credential()
-    token_provider = get_bearer_token_provider(credential, OPENAI_SCOPE)
-    return AzureOpenAI(
-        azure_endpoint=_required_env("AZURE_OPENAI_ENDPOINT"),
-        azure_ad_token_provider=token_provider,
-        api_version=_required_env("AZURE_OPENAI_API_VERSION"),
-    )
+    return get_openai_client()
 
 
 def _extract_message_text(response) -> str:

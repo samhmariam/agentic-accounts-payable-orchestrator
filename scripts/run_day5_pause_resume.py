@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import argparse
-import os
 
 from aegisap.day4.state.workflow_state import WorkflowState as Day4WorkflowState
 from aegisap.training.artifacts import write_json_artifact
 from aegisap.training.postgres import build_store_from_env
 from aegisap.day5.workflow.training_runtime import create_day5_pause
+from aegisap.security.key_vault import get_resume_token_secret
 from aegisap.training.artifacts import load_json, build_root
 
 
@@ -40,13 +40,12 @@ def main() -> None:
     args = parse_args()
     payload = load_json(args.day4_artifact)
     day4_state = Day4WorkflowState.model_validate(payload["workflow_state"])
-    token_secret = os.getenv("AEGISAP_RESUME_TOKEN_SECRET", "dev-only-resume-secret")
     pause_payload = create_day5_pause(
         day4_state=day4_state,
         thread_id=args.thread_id,
         assigned_to=args.assigned_to,
         store=build_store_from_env(),
-        token_secret=token_secret,
+        token_secret=get_resume_token_secret(),
     )
     artifact_path = write_json_artifact(build_root("day5") / f"{args.artifact_name}.json", pause_payload)
     print(f"Day 5 pause complete: {artifact_path}")

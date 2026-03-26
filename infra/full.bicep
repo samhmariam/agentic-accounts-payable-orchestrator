@@ -72,8 +72,14 @@ param postgresEntraAdminName string
 @description('Principal type for the PostgreSQL Microsoft Entra admin')
 param postgresEntraAdminType string = 'User'
 
-@description('User-assigned managed identity name for future workload use')
+@description('User-assigned managed identity name used for registry pull and Key Vault secret references')
 param workloadIdentityName string = 'id-aegisap-workload'
+
+@description('User-assigned managed identity name scaffolded for background jobs and replay workers')
+param jobsIdentityName string = 'id-aegisap-jobs'
+
+@description('User-assigned managed identity name scaffolded for Search indexing and schema administration')
+param searchAdminIdentityName string = 'id-aegisap-search-admin'
 
 resource st 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: storageAccountName
@@ -138,6 +144,16 @@ resource appi 'Microsoft.Insights/components@2020-02-02' = {
 
 resource workloadIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: workloadIdentityName
+  location: location
+}
+
+resource jobsIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: jobsIdentityName
+  location: location
+}
+
+resource searchAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: searchAdminIdentityName
   location: location
 }
 
@@ -226,6 +242,14 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
   }
 }
 
+module keyVaultDiagnostics './modules/diagnostic_settings.bicep' = {
+  name: 'keyVaultDiagnostics'
+  params: {
+    keyVaultName: kv.name
+    logAnalyticsWorkspaceName: law.name
+  }
+}
+
 resource aoai 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: openAiName
   location: location
@@ -271,6 +295,13 @@ output storageAccountId string = st.id
 output storageAccountName string = st.name
 output storageAccountUrl string = st.properties.primaryEndpoints.blob
 output storageContainerName string = stContainer.name
+output jobsIdentityClientId string = jobsIdentity.properties.clientId
+output jobsIdentityPrincipalId string = jobsIdentity.properties.principalId
+output jobsIdentityResourceId string = jobsIdentity.id
+output searchAdminIdentityClientId string = searchAdminIdentity.properties.clientId
+output searchAdminIdentityPrincipalId string = searchAdminIdentity.properties.principalId
+output searchAdminIdentityResourceId string = searchAdminIdentity.id
 output workloadIdentityClientId string = workloadIdentity.properties.clientId
 output workloadIdentityPrincipalId string = workloadIdentity.properties.principalId
 output workloadIdentityResourceId string = workloadIdentity.id
+output keyVaultDiagnosticsId string = keyVaultDiagnostics.outputs.diagnosticSettingId

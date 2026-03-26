@@ -70,11 +70,12 @@ uv run python scripts/verify_env.py --track full
 
 ## Roles to Expect
 
-- Azure OpenAI: `Cognitive Services OpenAI User`
-- Azure AI Search: `Search Service Contributor`, `Search Index Data Contributor`
-- Blob Storage: `Storage Blob Data Contributor`
-- Key Vault: `Key Vault Secrets User`
-- Container Registry pull access for the workload identity on the full track
+- Runtime app identity: `Cognitive Services OpenAI User`,
+  `Search Index Data Reader`, `Storage Blob Data Reader`, `Key Vault Secrets User`
+- Pull or secret-reference identity: `AcrPull`, `Key Vault Secrets User`
+- Search admin identity scaffold: `Search Service Contributor`,
+  `Search Index Data Contributor`
+- Developer principal: bootstrap contributor roles for Day 0 setup and index seeding
 
 ## Troubleshooting
 

@@ -7,11 +7,15 @@ from pathlib import Path
 import psycopg
 
 from aegisap.day5.persistence.durable_state_store import DurableStateStore
+from aegisap.security.credentials import get_token_credential
+from aegisap.security.config import load_security_config
+from aegisap.security.policy import validate_security_posture
 
 POSTGRES_SCOPE = "https://ossrdbms-aad.database.windows.net/.default"
 
 
 def build_connection_factory_from_env() -> Callable[[], psycopg.Connection]:
+    validate_security_posture(load_security_config())
     dsn = os.getenv("AEGISAP_POSTGRES_DSN", "").strip()
     if dsn:
         return lambda: psycopg.connect(dsn)
@@ -27,17 +31,8 @@ def build_connection_factory_from_env() -> Callable[[], psycopg.Connection]:
         joined = ", ".join(sorted(missing))
         raise RuntimeError(f"Missing PostgreSQL connection settings: {joined}")
 
-    from azure.identity import DefaultAzureCredential
-
     def connect() -> psycopg.Connection:
-        try:
-            credential = DefaultAzureCredential(exclude_interactive_browser_credential=True)
-        except ValueError:
-            credential = DefaultAzureCredential(
-                exclude_environment_credential=True,
-                exclude_interactive_browser_credential=True,
-            )
-        token = credential.get_token(POSTGRES_SCOPE).token
+        token = get_token_credential().get_token(POSTGRES_SCOPE).token
         conninfo = (
             f"host={required['AZURE_POSTGRES_HOST']} "
             f"port={required['AZURE_POSTGRES_PORT']} "

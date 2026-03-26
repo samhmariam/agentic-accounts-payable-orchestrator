@@ -4,6 +4,7 @@ param(
     [string]$ResourceGroup = $env:AZURE_RESOURCE_GROUP,
     [string]$Location = $env:AZURE_LOCATION,
     [string]$TemplateFile = (Join-Path $PSScriptRoot ".." "infra" "full.bicep"),
+    [string]$RoleAssignmentsTemplateFile = (Join-Path $PSScriptRoot ".." "infra" "modules" "role_assignments.bicep"),
     [string]$ParameterFile = (Join-Path $PSScriptRoot ".." "infra" "full.bicepparam"),
     [string]$OutputsFile = (Join-Path $PSScriptRoot ".." ".day0" "full.json"),
     [string]$SearchIndexScript = (Join-Path $PSScriptRoot "ensure_search_index.py"),
@@ -18,6 +19,8 @@ param(
     [ValidateSet("User", "ServicePrincipal", "Group", "Unknown")]
     [string]$PostgresEntraAdminType,
     [string]$WorkloadIdentityName = "id-aegisap-workload",
+    [string]$JobsIdentityName = "id-aegisap-jobs",
+    [string]$SearchAdminIdentityName = "id-aegisap-search-admin",
     [switch]$SkipRoleAssignments
 )
 
@@ -31,6 +34,7 @@ $SubscriptionId = Get-RequiredValue -Value $SubscriptionId -Name "SubscriptionId
 $ResourceGroup = Get-RequiredValue -Value $ResourceGroup -Name "ResourceGroup / AZURE_RESOURCE_GROUP"
 $Location = Get-RequiredValue -Value $Location -Name "Location / AZURE_LOCATION"
 $TemplateFile = Resolve-ExistingPath -PathValue $TemplateFile -Name "TemplateFile"
+$RoleAssignmentsTemplateFile = Resolve-ExistingPath -PathValue $RoleAssignmentsTemplateFile -Name "RoleAssignmentsTemplateFile"
 if (-not (Test-Path -LiteralPath $ParameterFile)) {
     throw "Parameter file not found: $ParameterFile. Copy infra/full.bicepparam.example to infra/full.bicepparam and fill in the placeholders."
 }
@@ -78,25 +82,38 @@ $deployment = Invoke-AzJson -Arguments @(
     "--parameters", "postgresEntraAdminObjectId=$PostgresEntraAdminObjectId",
     "--parameters", "postgresEntraAdminName=$PostgresEntraAdminName",
     "--parameters", "postgresEntraAdminType=$PostgresEntraAdminType",
-    "--parameters", "workloadIdentityName=$WorkloadIdentityName"
+    "--parameters", "workloadIdentityName=$WorkloadIdentityName",
+    "--parameters", "jobsIdentityName=$JobsIdentityName",
+    "--parameters", "searchAdminIdentityName=$SearchAdminIdentityName"
 )
 
 $outputs = $deployment.properties.outputs
 
 if (-not $SkipRoleAssignments) {
     Write-Host "Applying full-track RBAC role assignments..." -ForegroundColor Cyan
-    Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Cognitive Services OpenAI User" -Scope (Get-OutputValue -Outputs $outputs -Name "openAiId")
-    Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Search Service Contributor" -Scope (Get-OutputValue -Outputs $outputs -Name "searchServiceId")
-    Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Search Index Data Contributor" -Scope (Get-OutputValue -Outputs $outputs -Name "searchServiceId")
-    Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Storage Blob Data Contributor" -Scope (Get-OutputValue -Outputs $outputs -Name "storageAccountId")
-    Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Key Vault Secrets User" -Scope (Get-OutputValue -Outputs $outputs -Name "keyVaultId")
-
-    $workloadPrincipalId = Get-OutputValue -Outputs $outputs -Name "workloadIdentityPrincipalId"
-    Ensure-RoleAssignment -PrincipalId $workloadPrincipalId -PrincipalType "ServicePrincipal" -RoleName "Cognitive Services OpenAI User" -Scope (Get-OutputValue -Outputs $outputs -Name "openAiId")
-    Ensure-RoleAssignment -PrincipalId $workloadPrincipalId -PrincipalType "ServicePrincipal" -RoleName "Search Index Data Contributor" -Scope (Get-OutputValue -Outputs $outputs -Name "searchServiceId")
-    Ensure-RoleAssignment -PrincipalId $workloadPrincipalId -PrincipalType "ServicePrincipal" -RoleName "Storage Blob Data Contributor" -Scope (Get-OutputValue -Outputs $outputs -Name "storageAccountId")
-    Ensure-RoleAssignment -PrincipalId $workloadPrincipalId -PrincipalType "ServicePrincipal" -RoleName "Key Vault Secrets User" -Scope (Get-OutputValue -Outputs $outputs -Name "keyVaultId")
-    Ensure-RoleAssignment -PrincipalId $workloadPrincipalId -PrincipalType "ServicePrincipal" -RoleName "AcrPull" -Scope (Get-OutputValue -Outputs $outputs -Name "acrId")
+    az deployment group create `
+      --resource-group $ResourceGroup `
+      --template-file $RoleAssignmentsTemplateFile `
+      --parameters openAiName=(Get-OutputValue -Outputs $outputs -Name "openAiName") `
+      --parameters searchName=(Get-OutputValue -Outputs $outputs -Name "searchName") `
+      --parameters storageAccountName=(Get-OutputValue -Outputs $outputs -Name "storageAccountName") `
+      --parameters keyVaultName=$((Get-OutputValue -Outputs $outputs -Name "keyVaultUri").Split("//")[1].Split(".")[0]) `
+      --parameters acrName=(Get-OutputValue -Outputs $outputs -Name "acrName") `
+      --parameters developerPrincipalId=$DeveloperPrincipalId `
+      --parameters developerPrincipalType=$DeveloperPrincipalType `
+      --parameters pullIdentityPrincipalId=(Get-OutputValue -Outputs $outputs -Name "workloadIdentityPrincipalId") `
+      --parameters jobsIdentityPrincipalId=(Get-OutputValue -Outputs $outputs -Name "jobsIdentityPrincipalId") `
+      --parameters searchAdminIdentityPrincipalId=(Get-OutputValue -Outputs $outputs -Name "searchAdminIdentityPrincipalId") `
+      --parameters cognitiveServicesOpenAiUserRoleDefinitionId=$(Get-RoleDefinitionId "Cognitive Services OpenAI User") `
+      --parameters searchIndexDataReaderRoleDefinitionId=$(Get-RoleDefinitionId "Search Index Data Reader") `
+      --parameters searchIndexDataContributorRoleDefinitionId=$(Get-RoleDefinitionId "Search Index Data Contributor") `
+      --parameters searchServiceContributorRoleDefinitionId=$(Get-RoleDefinitionId "Search Service Contributor") `
+      --parameters storageBlobDataReaderRoleDefinitionId=$(Get-RoleDefinitionId "Storage Blob Data Reader") `
+      --parameters storageBlobDataContributorRoleDefinitionId=$(Get-RoleDefinitionId "Storage Blob Data Contributor") `
+      --parameters keyVaultUserRoleId=$(Get-RoleDefinitionId "Key Vault Secrets User") `
+      --parameters acrPullRoleDefinitionId=$(Get-RoleDefinitionId "AcrPull") `
+      --only-show-errors `
+      -o none
 }
 
 Ensure-OpenAiDeployment `
@@ -153,6 +170,10 @@ $resources = [ordered]@{
     keyVaultUri = Get-OutputValue -Outputs $outputs -Name "keyVaultUri"
     workloadIdentityClientId = Get-OutputValue -Outputs $outputs -Name "workloadIdentityClientId"
     workloadIdentityResourceId = Get-OutputValue -Outputs $outputs -Name "workloadIdentityResourceId"
+    jobsIdentityClientId = Get-OutputValue -Outputs $outputs -Name "jobsIdentityClientId"
+    jobsIdentityResourceId = Get-OutputValue -Outputs $outputs -Name "jobsIdentityResourceId"
+    searchAdminIdentityClientId = Get-OutputValue -Outputs $outputs -Name "searchAdminIdentityClientId"
+    searchAdminIdentityResourceId = Get-OutputValue -Outputs $outputs -Name "searchAdminIdentityResourceId"
     developerPrincipalName = $DeveloperPrincipalName
     postgresEntraAdminName = $PostgresEntraAdminName
 }

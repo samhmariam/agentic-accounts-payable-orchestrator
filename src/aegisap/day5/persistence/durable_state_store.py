@@ -8,6 +8,7 @@ from typing import Any, Callable, Iterator
 
 import psycopg
 
+from aegisap.audit.models import AuditEvent
 from aegisap.day5.state.durable_models import DurableWorkflowState
 
 
@@ -47,6 +48,16 @@ class StoredSideEffect:
     effect_type: str
     effect_result_json: dict[str, Any]
     status: str
+
+
+@dataclass
+class StoredAuditEvent:
+    audit_id: str
+    thread_id: str
+    action_type: str
+    decision_outcome: str
+    trace_id: str | None
+    payload_json: dict[str, Any]
 
 
 class DurableStateStore:
@@ -387,6 +398,95 @@ class DurableStateStore:
                 (effect_key,),
             )
             self._commit_if_owned(conn, active_conn)
+
+    def insert_audit_event(
+        self,
+        *,
+        event: AuditEvent,
+        conn: psycopg.Connection | None = None,
+    ) -> None:
+        payload = event.model_dump(mode="json")
+        with self._cursor(conn) as (active_conn, cur):
+            cur.execute(
+                """
+                INSERT INTO workflow_audit_events (
+                    audit_id,
+                    timestamp_utc,
+                    workflow_run_id,
+                    thread_id,
+                    state_version,
+                    actor_type,
+                    actor_id,
+                    action_type,
+                    decision_outcome,
+                    approval_status,
+                    evidence_summary_redacted,
+                    evidence_refs,
+                    pii_redaction_applied,
+                    policy_version,
+                    planner_version,
+                    error_code,
+                    trace_id,
+                    payload_json
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s, %s, %s, %s, %s::jsonb
+                )
+                ON CONFLICT (audit_id) DO NOTHING
+                """,
+                (
+                    event.audit_id,
+                    event.timestamp_utc,
+                    event.workflow_run_id,
+                    event.thread_id,
+                    event.state_version,
+                    event.actor_type,
+                    event.actor_id,
+                    event.action_type,
+                    event.decision_outcome,
+                    event.approval_status,
+                    event.evidence_summary_redacted,
+                    json.dumps(event.evidence_refs),
+                    event.pii_redaction_applied,
+                    event.policy_version,
+                    event.planner_version,
+                    event.error_code,
+                    event.trace_id,
+                    json.dumps(payload),
+                ),
+            )
+            self._commit_if_owned(conn, active_conn)
+
+    def list_audit_events(
+        self,
+        *,
+        thread_id: str,
+        limit: int = 25,
+        conn: psycopg.Connection | None = None,
+    ) -> list[StoredAuditEvent]:
+        with self._cursor(conn) as (_active_conn, cur):
+            cur.execute(
+                """
+                SELECT audit_id, thread_id, action_type, decision_outcome, trace_id, payload_json
+                FROM workflow_audit_events
+                WHERE thread_id = %s
+                ORDER BY timestamp_utc DESC
+                LIMIT %s
+                """,
+                (thread_id, limit),
+            )
+            rows = cur.fetchall() or []
+            return [
+                StoredAuditEvent(
+                    audit_id=row[0],
+                    thread_id=row[1],
+                    action_type=row[2],
+                    decision_outcome=row[3],
+                    trace_id=row[4],
+                    payload_json=row[5],
+                )
+                for row in rows
+            ]
 
     def mark_thread_quarantined(
         self,

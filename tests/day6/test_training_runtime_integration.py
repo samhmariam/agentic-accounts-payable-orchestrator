@@ -6,6 +6,8 @@ from contextlib import contextmanager
 from aegisap.day4.execution.task_registry import create_default_task_registry
 from aegisap.day4.graph.day4_explicit_planning_graph import run_day4_explicit_planning_case
 from aegisap.day4.planning.plan_types import CaseFacts
+from aegisap.day5.state.durable_models import DurableWorkflowState
+from aegisap.day5.workflow.training_runtime import Day5TrainingGraphRunner
 from aegisap.training.day4_plans import build_training_plan
 from aegisap.training.fixtures import golden_thread_path
 from aegisap.training.labs import StaticPlanModel, load_case_facts
@@ -44,6 +46,8 @@ class FakeStore:
         self.checkpoints: dict[str, dict] = {}
         self.approval_tasks: dict[str, dict] = {}
         self.review_tasks: dict[str, dict] = {}
+        self.audit_events: list[dict] = []
+        self.side_effects: dict[str, dict] = {}
 
     @contextmanager
     def connection(self):
@@ -116,6 +120,79 @@ class FakeStore:
             apply()
         return review_task_id
 
+    def insert_audit_event(self, *, event, conn=None) -> None:
+        def apply() -> None:
+            self.audit_events.append(event.model_dump(mode="json"))
+
+        if conn is not None:
+            conn.on_commit.append(apply)
+        else:
+            apply()
+
+    def list_audit_events(self, *, thread_id: str, limit: int = 25, conn=None) -> list:
+        events = [item for item in self.audit_events if item["thread_id"] == thread_id]
+        events = list(reversed(events))[:limit]
+        return [
+            type(
+                "StoredAuditEvent",
+                (),
+                {
+                    "audit_id": item["audit_id"],
+                    "thread_id": item["thread_id"],
+                    "action_type": item["action_type"],
+                    "decision_outcome": item["decision_outcome"],
+                    "trace_id": item.get("trace_id"),
+                    "payload_json": item,
+                },
+            )()
+            for item in events
+        ]
+
+    def get_side_effect(self, effect_key: str, *, conn=None):
+        effect = self.side_effects.get(effect_key)
+        if effect is None:
+            return None
+        return type(
+            "StoredSideEffect",
+            (),
+            {
+                "effect_key": effect_key,
+                "effect_type": effect["effect_type"],
+                "effect_result_json": effect["effect_result_json"],
+                "status": effect["status"],
+            },
+        )()
+
+    def try_start_side_effect(
+        self,
+        *,
+        effect_key: str,
+        thread_id: str,
+        checkpoint_id: str,
+        effect_type: str,
+        effect_payload_hash: str,
+        conn=None,
+    ) -> bool:
+        if effect_key in self.side_effects:
+            return False
+        self.side_effects[effect_key] = {
+            "thread_id": thread_id,
+            "checkpoint_id": checkpoint_id,
+            "effect_type": effect_type,
+            "effect_payload_hash": effect_payload_hash,
+            "effect_result_json": {},
+            "status": "pending",
+        }
+        return True
+
+    def complete_side_effect(self, *, effect_key: str, effect_result_json: dict, conn=None) -> None:
+        self.side_effects[effect_key]["effect_result_json"] = effect_result_json
+        self.side_effects[effect_key]["status"] = "applied"
+
+    def fail_side_effect(self, *, effect_key: str, conn=None) -> None:
+        if effect_key in self.side_effects:
+            self.side_effects[effect_key]["status"] = "failed"
+
 
 def _run_day4(case_facts: CaseFacts):
     plan = build_training_plan(case_facts, plan_id=f"plan_{case_facts.case_id}")
@@ -144,6 +221,9 @@ def test_create_day5_pause_routes_clean_case_into_controller_approval() -> None:
     assert pause["approval_task_id"] is not None
     assert pause["review_task_id"] is None
     assert pause["resume_token"] is not None
+    assert store.audit_events
+    assert any(event["action_type"] == "payment_recommendation" for event in store.audit_events)
+    assert all("@" not in event["evidence_summary_redacted"] for event in store.audit_events)
 
 
 def test_create_day5_pause_routes_manual_review_case_to_review_task() -> None:
@@ -169,6 +249,7 @@ def test_create_day5_pause_routes_manual_review_case_to_review_task() -> None:
     assert pause["approval_task_id"] is None
     assert pause["review_task_id"] is not None
     assert pause["resume_token"] is None
+    assert any(event["decision_outcome"] == "needs_human_review" for event in store.audit_events)
 
 
 def test_apply_migration_path_runs_all_sql_files(monkeypatch, tmp_path) -> None:
@@ -185,3 +266,32 @@ def test_apply_migration_path_runs_all_sql_files(monkeypatch, tmp_path) -> None:
 
     assert [path.name for path in result] == ["001.sql", "002.sql"]
     assert applied == [str(tmp_path / "001.sql"), str(tmp_path / "002.sql")]
+
+
+def test_day5_resume_records_redacted_audit_events() -> None:
+    state = _run_day4(load_case_facts(golden_thread_path("day4_case.json")))
+    store = FakeStore()
+    pause = create_day5_pause(
+        day4_state=state,
+        thread_id="thread-day7-resume",
+        assigned_to="controller@example.com",
+        store=store,  # type: ignore[arg-type]
+        token_secret="test-secret",
+        trace_id="trace-day7",
+    )
+
+    durable = DurableWorkflowState.model_validate(pause["state"])
+    resumed = Day5TrainingGraphRunner(store=store).resume(
+        state=durable,
+        approval_decision={
+            "status": "approved",
+            "comment": "Approved by controller@example.com via +44 20 7946 0958",
+            "trace_id": "trace-day7",
+        },
+    )
+
+    assert resumed.thread_status == "completed"
+    assert any(event["action_type"] == "human_approval" for event in store.audit_events)
+    assert any(event["action_type"] == "resume" for event in store.audit_events)
+    assert all("controller@example.com" not in event["evidence_summary_redacted"] for event in store.audit_events)
+    assert all("0958" not in event["evidence_summary_redacted"] for event in store.audit_events)

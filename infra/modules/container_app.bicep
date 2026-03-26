@@ -4,11 +4,10 @@ param location string = resourceGroup().location
 param appName string
 param containerAppsEnvironmentId string
 param workloadIdentityResourceId string
-param workloadIdentityClientId string
 param acrLoginServer string
 param imageName string
-@secure()
-param resumeTokenSecret string
+param resumeTokenSecretName string = 'aegisap-resume-token-secret'
+param runtimeEnvironment string = 'cloud'
 
 param applicationInsightsConnectionString string = ''
 param azureOpenAiEndpoint string
@@ -29,7 +28,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
   identity: {
-    type: 'UserAssigned'
+    type: 'SystemAssigned,UserAssigned'
     userAssignedIdentities: {
       '${workloadIdentityResourceId}': {}
     }
@@ -48,12 +47,6 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
           identity: workloadIdentityResourceId
         }
       ]
-      secrets: [
-        {
-          name: 'resume-token-secret'
-          value: resumeTokenSecret
-        }
-      ]
     }
     template: {
       containers: [
@@ -70,8 +63,8 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
               value: applicationInsightsConnectionString
             }
             {
-              name: 'AZURE_CLIENT_ID'
-              value: workloadIdentityClientId
+              name: 'AEGISAP_ENVIRONMENT'
+              value: runtimeEnvironment
             }
             {
               name: 'AZURE_OPENAI_ENDPOINT'
@@ -122,8 +115,8 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
               value: azureKeyVaultUri
             }
             {
-              name: 'AEGISAP_RESUME_TOKEN_SECRET'
-              secretRef: 'resume-token-secret'
+              name: 'AEGISAP_RESUME_TOKEN_SECRET_NAME'
+              value: resumeTokenSecretName
             }
           ]
         }
@@ -137,3 +130,4 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 output appUrl string = app.properties.configuration.ingress.fqdn == '' ? '' : 'https://${app.properties.configuration.ingress.fqdn}'
+output runtimePrincipalId string = app.identity.principalId

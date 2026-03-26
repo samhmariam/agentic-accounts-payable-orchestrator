@@ -1,0 +1,29 @@
+{
+  "case_facts": {
+    "case_id": "case_bank_change_001",
+    "invoice_id": "inv_bank_change_001",
+    "supplier_id": "SUP-003",
+    "supplier_name": "Harbor IT Services",
+    "supplier_exists": true,
+    "invoice_amount_gbp": 12100,
+    "invoice_currency": "GBP",
+    "po_present": true,
+    "po_number": "PO-3991",
+    "bank_details_changed": true,
+    "retrieved_evidence_ids": [
+      "erp:po:3991",
+      "supplier_master:SUP-003",
+      "email:bank-change-req"
+    ]
+  },
+  "expected": {
+    "must_include_risk_flags": [
+      "existing_supplier",
+      "bank_details_changed"
+    ],
+    "must_include_task_types": [
+      "vendor_bank_verification"
+    ],
+    "recommendation_blocked_until_resolved": true
+  }
+}

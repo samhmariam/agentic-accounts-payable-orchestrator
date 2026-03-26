@@ -1,0 +1,40 @@
+{
+  "case_facts": {
+    "case_id": "case_hv_missing_po_bank_001",
+    "invoice_id": "inv_hv_missing_po_bank_001",
+    "supplier_id": "SUP-005",
+    "supplier_name": "Vector Industrial Components",
+    "supplier_exists": true,
+    "invoice_amount_gbp": 48000,
+    "invoice_currency": "GBP",
+    "po_present": false,
+    "po_number": null,
+    "bank_details_changed": true,
+    "retrieved_evidence_ids": [
+      "supplier_master:SUP-005",
+      "email:bank-change-req",
+      "policy:approval-thresholds"
+    ]
+  },
+  "expected": {
+    "must_include_risk_flags": [
+      "existing_supplier",
+      "missing_po",
+      "bank_details_changed",
+      "high_value",
+      "combined_risk"
+    ],
+    "must_include_task_types": [
+      "po_match_verification",
+      "po_waiver_check",
+      "vendor_bank_verification",
+      "threshold_approval_check",
+      "manual_escalation_package"
+    ],
+    "must_require_approvals": [
+      "ap_manager",
+      "controller"
+    ],
+    "must_escalate": true
+  }
+}

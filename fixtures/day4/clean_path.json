@@ -1,0 +1,25 @@
+{
+  "case_facts": {
+    "case_id": "case_clean_001",
+    "invoice_id": "inv_clean_001",
+    "supplier_id": "SUP-001",
+    "supplier_name": "Northwind Office Supplies",
+    "supplier_exists": true,
+    "invoice_amount_gbp": 4800,
+    "invoice_currency": "GBP",
+    "po_present": true,
+    "po_number": "PO-1001",
+    "bank_details_changed": false,
+    "retrieved_evidence_ids": [
+      "erp:po:1001",
+      "supplier_master:SUP-001"
+    ]
+  },
+  "expected": {
+    "must_include_risk_flags": [
+      "existing_supplier",
+      "clean_path"
+    ],
+    "must_not_escalate": true
+  }
+}

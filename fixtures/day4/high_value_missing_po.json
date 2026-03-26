@@ -1,0 +1,33 @@
+{
+  "case_facts": {
+    "case_id": "case_high_value_missing_po_001",
+    "invoice_id": "inv_high_value_missing_po_001",
+    "supplier_id": "SUP-004",
+    "supplier_name": "Apex Engineering",
+    "supplier_exists": true,
+    "invoice_amount_gbp": 36200,
+    "invoice_currency": "GBP",
+    "po_present": false,
+    "po_number": null,
+    "bank_details_changed": false,
+    "retrieved_evidence_ids": [
+      "supplier_master:SUP-004",
+      "policy:approval-thresholds"
+    ]
+  },
+  "expected": {
+    "must_include_risk_flags": [
+      "existing_supplier",
+      "missing_po",
+      "high_value"
+    ],
+    "must_include_task_types": [
+      "po_match_verification",
+      "po_waiver_check",
+      "threshold_approval_check"
+    ],
+    "must_require_approvals": [
+      "ap_manager"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# AegisAP Engineering Workbook\nTracks node p50/p95 latency, retries, failure taxonomy, and resume behavior."
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "traces | summarize p95=percentile(todouble(customDimensions['duration_ms']), 95) by tostring(customDimensions['aegis.node_name'])",
+        "size": 1,
+        "title": "Node P95"
+      }
+    }
+  ]
+}

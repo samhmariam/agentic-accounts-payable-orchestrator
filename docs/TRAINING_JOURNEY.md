@@ -66,6 +66,13 @@ separated from admin identities, residual secrets move behind Key Vault access
 contracts, Search key fallback is eliminated, and every sensitive outcome emits
 redacted audit evidence tied to thread state and trace context.
 
+### Day 8
+
+The same case now becomes observable and regression-testable. Every workflow run
+emits one canonical trace with correlated task and dependency spans, silent
+latency or retry regressions become queryable, and the evaluation sheet becomes
+an executable regression suite that can run in CI and on a deployed sentinel.
+
 ## Learning Contract
 
 Every day should end with:

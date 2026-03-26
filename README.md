@@ -2,8 +2,8 @@
 
 AegisAP is the Golden Thread training repo for Forward Deployed Engineers building
 production-ready agentic systems on Azure. The repo follows one invoice case
-from Day 0 bootstrap through Day 7 identity hardening, secret removal, and
-auditability.
+from Day 0 bootstrap through Day 8 observability, regression coverage, and
+reliability engineering.
 
 ## Training Journey
 
@@ -17,6 +17,7 @@ auditability.
 | Day 5 | Pause, persist, and resume | Durable checkpoints and approval resume | Azure Database for PostgreSQL, Azure OpenAI, Azure AI Search | `uv run python scripts/run_day5_pause_resume.py` then `uv run python scripts/resume_day5_case.py` | `build/day5/golden_thread_day5_pause.json`, `build/day5/golden_thread_day5_resumed.json` | Approval thread resumes without duplicate side effects |
 | Day 6 | Refuse unsafe or unauthorised progression | Policy review, bounded reflection, and graceful refusal | Azure OpenAI optional, Azure Database for PostgreSQL | `uv run python scripts/run_day6_case.py` | `build/day6/golden_thread_day6.json` | Case ends in `approved_to_proceed`, `needs_human_review`, or `not_authorised_to_continue` with an audit-ready payload |
 | Day 7 | Harden identity, secrets, traces, and audit evidence | Managed identity, secret elimination, redacted observability | Managed Identity, Key Vault RBAC, Azure AI Search RBAC, Log Analytics, PostgreSQL audit store | `uv run python scripts/verify_env.py --track full --env` then `uv run pytest tests/day7 tests/day6/test_training_runtime_integration.py -q` | PostgreSQL audit rows, redacted logs, hardened infra contracts | No forbidden runtime secret fallback, Search local auth disabled, audit rows emitted for sensitive outcomes |
+| Day 8 | Make workflow behavior explorable and reliable | OpenTelemetry traces, regression harness, dashboards, alerts | Application Insights, Azure Monitor, Log Analytics, LangSmith optional, PostgreSQL audit store | `uv run pytest tests/day8 -q` and `az bicep build --file infra/monitoring/alerts/alerts.bicep` | Day 8 docs, regression dataset, monitoring assets, correlation-aware runtime | Operators can pivot from workflow run to trace to audit state, and silent reliability regressions surface in telemetry |
 
 ## Start Here
 
@@ -35,6 +36,7 @@ auditability.
 - [Day 5 Durable State and Resumption](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_05_DURABLE_STATE_AND_RESUMPTION.md)
 - [Day 6 Reflection and Graceful Refusal](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_06_REFLECTION_AND_GRACEFUL_REFUSAL.md)
 - [Day 7 Security, Identity, and Auditability](/workspaces/agentic-accounts-payable-orchestrator/docs/day7/DAY_07_SECURITY_IDENTITY_AUDITABILITY.md)
+- [Day 8 Observability and Reliability Engineering](/workspaces/agentic-accounts-payable-orchestrator/docs/day8/DAY_08_OBSERVABILITY_AND_RELIABILITY.md)
 
 ## Notebooks
 

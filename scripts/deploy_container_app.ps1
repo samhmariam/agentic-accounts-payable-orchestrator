@@ -9,8 +9,12 @@ param(
     [string]$AppName = "ca-aegisap-training",
     [string]$ImageName = "aegisap-training",
     [string]$ImageTag = "latest",
+    [string]$DeploymentRevision = "dev",
     [string]$ResumeTokenSecretName = "aegisap-resume-token-secret",
-    [string]$ResumeTokenSecretValue = $env:AEGISAP_RESUME_TOKEN_SECRET
+    [string]$ResumeTokenSecretValue = $env:AEGISAP_RESUME_TOKEN_SECRET,
+    [string]$LangSmithProject = $env:LANGSMITH_PROJECT,
+    [string]$LangSmithEndpoint = $env:LANGSMITH_ENDPOINT,
+    [string]$LangSmithApiKeySecretName = "aegisap-langsmith-api-key"
 )
 
 Set-StrictMode -Version Latest
@@ -59,6 +63,12 @@ $deployment = az deployment group create `
   --parameters acrLoginServer=$acrLoginServer `
   --parameters imageName=$imageRef `
   --parameters resumeTokenSecretName=$ResumeTokenSecretName `
+  --parameters deploymentRevision=$DeploymentRevision `
+  --parameters traceSampleRatio=1.0 `
+  --parameters tracingEnabled=true `
+  --parameters langsmithProject=$LangSmithProject `
+  --parameters langsmithEndpoint=$LangSmithEndpoint `
+  --parameters langsmithApiKeySecretName=$LangSmithApiKeySecretName `
   --parameters runtimeEnvironment=cloud `
   --parameters applicationInsightsConnectionString=$envVars.APPLICATIONINSIGHTS_CONNECTION_STRING `
   --parameters azureOpenAiEndpoint=$envVars.AZURE_OPENAI_ENDPOINT `

@@ -250,6 +250,14 @@ module keyVaultDiagnostics './modules/diagnostic_settings.bicep' = {
   }
 }
 
+module day8Alerts './monitoring/alerts/alerts.bicep' = {
+  name: 'day8Alerts'
+  params: {
+    location: location
+    logAnalyticsWorkspaceId: law.id
+  }
+}
+
 resource aoai 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: openAiName
   location: location
@@ -305,3 +313,4 @@ output workloadIdentityClientId string = workloadIdentity.properties.clientId
 output workloadIdentityPrincipalId string = workloadIdentity.properties.principalId
 output workloadIdentityResourceId string = workloadIdentity.id
 output keyVaultDiagnosticsId string = keyVaultDiagnostics.outputs.diagnosticSettingId
+output day8AlertsDeployment string = day8Alerts.name

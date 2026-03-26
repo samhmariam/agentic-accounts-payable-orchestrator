@@ -52,6 +52,8 @@ def test_day4_case_run_returns_plan_and_recommendation() -> None:
     assert payload["validated_plan"]["plan_id"] == "plan_case_golden_001"
     assert payload["recommendation"]["status"] == "recommendation_ready"
     assert payload["day6_review"]["outcome"] == "approved_to_proceed"
+    assert payload["correlation"]["workflow_run_id"]
+    assert response.headers["x-workflow-run-id"] == payload["correlation"]["workflow_run_id"]
 
 
 def test_day5_resume_rejects_path_token_mismatch(monkeypatch) -> None:

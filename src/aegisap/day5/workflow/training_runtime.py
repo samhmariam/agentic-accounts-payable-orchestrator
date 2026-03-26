@@ -18,6 +18,16 @@ from aegisap.day5.workflow.side_effects import (
     build_audit_entry_effect_key,
     build_payment_recommendation_effect_key,
 )
+from aegisap.observability.context import WorkflowObservabilityContext
+from aegisap.observability.langsmith_bridge import publish_langsmith_run
+from aegisap.observability.metrics import record_business_event, record_resume_delay, record_workflow_run
+from aegisap.observability.tracing import (
+    add_span_event,
+    business_outcome_attributes,
+    node_span_attributes,
+    set_span_attributes,
+    start_observability_span,
+)
 from aegisap.security.config import load_security_config
 
 
@@ -124,7 +134,7 @@ class Day5TrainingGraphRunner:
             }
             self._audit.write(
                 build_audit_event(
-                    workflow_run_id=state.case_id,
+                    workflow_run_id=state.workflow_run_id,
                     thread_id=state.thread_id,
                     state_version=state.checkpoint_seq,
                     actor_type=actor_type,
@@ -140,11 +150,15 @@ class Day5TrainingGraphRunner:
                     policy_version=(state.review_outcome or {}).get("model_trace", {}).get("policy_version"),
                     planner_version=state.plan_version,
                     trace_id=approval_decision.get("trace_id"),
+                    metadata={
+                        "workflow_run_id": state.workflow_run_id,
+                        "checkpoint_id": state.resume_metadata.resumable_from_checkpoint_id,
+                    },
                 )
             )
             self._audit.write(
                 build_audit_event(
-                    workflow_run_id=state.case_id,
+                    workflow_run_id=state.workflow_run_id,
                     thread_id=state.thread_id,
                     state_version=state.checkpoint_seq,
                     actor_type=actor_type,
@@ -157,6 +171,10 @@ class Day5TrainingGraphRunner:
                     policy_version=(state.review_outcome or {}).get("model_trace", {}).get("policy_version"),
                     planner_version=state.plan_version,
                     trace_id=approval_decision.get("trace_id"),
+                    metadata={
+                        "workflow_run_id": state.workflow_run_id,
+                        "checkpoint_id": state.resume_metadata.resumable_from_checkpoint_id,
+                    },
                 )
             )
             state.thread_status = "completed"
@@ -171,7 +189,7 @@ class Day5TrainingGraphRunner:
         }
         self._audit.write(
             build_audit_event(
-                workflow_run_id=state.case_id,
+                workflow_run_id=state.workflow_run_id,
                 thread_id=state.thread_id,
                 state_version=state.checkpoint_seq,
                 actor_type=actor_type,
@@ -187,11 +205,15 @@ class Day5TrainingGraphRunner:
                 policy_version=(state.review_outcome or {}).get("model_trace", {}).get("policy_version"),
                 planner_version=state.plan_version,
                 trace_id=approval_decision.get("trace_id"),
+                metadata={
+                    "workflow_run_id": state.workflow_run_id,
+                    "checkpoint_id": state.resume_metadata.resumable_from_checkpoint_id,
+                },
             )
         )
         self._audit.write(
             build_audit_event(
-                workflow_run_id=state.case_id,
+                workflow_run_id=state.workflow_run_id,
                 thread_id=state.thread_id,
                 state_version=state.checkpoint_seq,
                 actor_type=actor_type,
@@ -204,6 +226,10 @@ class Day5TrainingGraphRunner:
                 policy_version=(state.review_outcome or {}).get("model_trace", {}).get("policy_version"),
                 planner_version=state.plan_version,
                 trace_id=approval_decision.get("trace_id"),
+                metadata={
+                    "workflow_run_id": state.workflow_run_id,
+                    "checkpoint_id": state.resume_metadata.resumable_from_checkpoint_id,
+                },
             )
         )
         state.thread_status = "resumable"
@@ -218,23 +244,66 @@ def create_day5_pause(
     assigned_to: str,
     store: DurableStateStore,
     token_secret: str,
+    observability_context: WorkflowObservabilityContext | None = None,
     trace_id: str | None = None,
 ) -> dict:
     checkpoint_manager = CheckpointManager(store)
-    _review_input, review_outcome = run_day6_review_from_day4(day4_state, thread_id=thread_id)
-    review_payload = review_outcome.model_dump(mode="json")
-    durable = bootstrap_durable_state_from_day4(
-        day4_state,
-        thread_id=thread_id,
-        review_outcome=review_payload,
-        review_summary=build_operator_summary(review_outcome),
-    )
+    if observability_context is None and trace_id is not None:
+        restored = WorkflowObservabilityContext.from_state_payload(
+            day4_state.observability,
+            workflow_run_id=day4_state.workflow_run_id,
+            case_id=day4_state.case_facts.case_id,
+            thread_id=thread_id,
+        )
+        observability_context = restored or WorkflowObservabilityContext(
+            request_id="day5-pause",
+            workflow_run_id=day4_state.workflow_run_id,
+            trace_id=trace_id,
+            case_id=day4_state.case_facts.case_id,
+            thread_id=thread_id,
+            environment=load_security_config().environment,
+            deployment_revision=load_security_config().deployment_revision,
+        )
+        observability_context.trace_id = trace_id
+        observability_context.azure_trace_id = trace_id
+    with start_observability_span(
+        "aegis.workflow.day5.persist_state",
+        attributes=node_span_attributes(
+            node_name="day5_persist_state",
+            idempotent=False,
+            checkpoint_saved=True,
+        ),
+    ):
+        _review_input, review_outcome = run_day6_review_from_day4(
+            day4_state,
+            thread_id=thread_id,
+            observability_context=observability_context,
+        )
+        review_payload = review_outcome.model_dump(mode="json")
+        durable = bootstrap_durable_state_from_day4(
+            day4_state,
+            thread_id=thread_id,
+            review_outcome=review_payload,
+            review_summary=build_operator_summary(review_outcome),
+        )
+        if observability_context is not None:
+            observability_context.thread_id = thread_id
+            observability_context.checkpoint_id = durable.resume_metadata.resumable_from_checkpoint_id
+            observability_context.plan_version = durable.plan_version
+            observability_context.policy_version = review_payload.get("model_trace", {}).get("policy_version")
+            observability_context.outcome_type = review_payload["outcome"]
+            observability_context.approval_status = durable.approval_state.status
+            durable.observability = observability_context.to_state_payload()
 
     if durable.thread_status not in {"awaiting_approval", "resumable", "quarantined"}:
         raise ValueError("Day 5 pause requires a Day 4 result that can be durably controlled.")
 
     checkpoint_id = str(uuid.uuid4())
     durable.resume_metadata.resumable_from_checkpoint_id = checkpoint_id
+    if observability_context is not None:
+        observability_context.checkpoint_id = checkpoint_id
+        observability_context.state_version = durable.checkpoint_seq + 1
+        durable.observability = observability_context.to_state_payload()
 
     approval_task_id: str | None = None
     review_task_id: str | None = None
@@ -284,7 +353,13 @@ def create_day5_pause(
             update={
                 "thread_id": thread_id,
                 "state_version": durable.checkpoint_seq,
-                "trace_id": trace_id,
+                "trace_id": observability_context.trace_id if observability_context else durable.observability.get("trace_id"),
+                "workflow_run_id": durable.workflow_run_id,
+                "metadata": {
+                    **event.metadata,
+                    "workflow_run_id": durable.workflow_run_id,
+                    "checkpoint_id": checkpoint_id,
+                },
             }
         )
         for event in buffered_audit_events(day4_state.artifacts)
@@ -293,7 +368,7 @@ def create_day5_pause(
         buffered_events
         + [
             build_audit_event(
-                workflow_run_id=day4_state.case_facts.case_id,
+                workflow_run_id=durable.workflow_run_id,
                 thread_id=thread_id,
                 state_version=durable.checkpoint_seq,
                 actor_type=actor_type,
@@ -310,10 +385,31 @@ def create_day5_pause(
                 policy_version=review_payload.get("model_trace", {}).get("policy_version"),
                 planner_version=durable.plan_version,
                 error_code=(review_payload["reasons"][0]["code"] if review_payload["reasons"] else None),
-                trace_id=trace_id,
-                metadata={"review_stage": review_payload["review_stage"]},
+                trace_id=observability_context.trace_id if observability_context else durable.observability.get("trace_id"),
+                metadata={
+                    "review_stage": review_payload["review_stage"],
+                    "workflow_run_id": durable.workflow_run_id,
+                    "checkpoint_id": checkpoint_id,
+                },
             )
         ]
+    )
+    record_workflow_run(
+        environment=load_security_config().environment,
+        outcome=review_payload["outcome"],
+        workflow_name=durable.workflow_name,
+    )
+    record_business_event(
+        "workflow_pause_created",
+        workflow_run_id=durable.workflow_run_id,
+        approval_status=durable.approval_state.status,
+    )
+    set_span_attributes(
+        business_outcome_attributes(
+            recommendation_value_band="high" if day4_state.case_facts.invoice_amount_gbp >= 25_000 else "standard",
+            final_decision_type=review_payload["outcome"],
+            human_review_required=review_payload["outcome"] != "approved_to_proceed",
+        )
     )
 
     resume_token: str | None = None
@@ -343,6 +439,16 @@ def create_day5_pause(
         "review_outcome": review_payload,
         "review_summary": durable.review_summary,
         "state": durable.model_dump(mode="json"),
+        "correlation": (
+            observability_context.to_public_dict()
+            if observability_context is not None
+            else {
+                "workflow_run_id": durable.workflow_run_id,
+                "trace_id": durable.observability.get("trace_id"),
+                "checkpoint_id": checkpoint_id,
+                "langsmith_trace_id": durable.observability.get("langsmith_trace_id"),
+            }
+        ),
     }
 
 
@@ -353,10 +459,13 @@ def resume_day5_case(
     resume_token: str,
     decision_payload: dict,
     resumed_by: str,
+    observability_context: WorkflowObservabilityContext | None = None,
     trace_id: str | None = None,
 ):
     decision = {**decision_payload}
-    if trace_id is not None:
+    if observability_context is not None and observability_context.trace_id is not None:
+        decision["trace_id"] = observability_context.trace_id
+    elif trace_id is not None:
         decision["trace_id"] = trace_id
     checkpoint_manager = CheckpointManager(store)
     service = ResumeService(
@@ -365,17 +474,51 @@ def resume_day5_case(
         graph_runner=Day5TrainingGraphRunner(store),
         token_codec=ResumeTokenCodec(token_secret),
     )
-    return service.resume_after_approval(
+    resumed = service.resume_after_approval(
         resume_token=resume_token,
         decision_payload=decision,
         resumed_by=resumed_by,
     )
+    if observability_context is not None:
+        observability_context.workflow_run_id = resumed.workflow_run_id
+        observability_context.thread_id = resumed.thread_id
+        observability_context.checkpoint_id = resumed.resume_metadata.resumable_from_checkpoint_id
+        observability_context.plan_version = resumed.plan_version
+        observability_context.policy_version = (resumed.review_outcome or {}).get("model_trace", {}).get("policy_version")
+        observability_context.approval_status = resumed.approval_state.status
+        observability_context.outcome_type = (
+            "completed" if resumed.thread_status == "completed" else resumed.thread_status
+        )
+        publish_langsmith_run(
+            context=observability_context,
+            name="aegis.workflow.day5.resume",
+            run_type="chain",
+            inputs={"approval_status": decision.get("status")},
+            outputs={"thread_status": resumed.thread_status, "current_node": resumed.current_node},
+            tags=["day5", "resume"],
+        )
+        if resumed.approval_state.requested_at is not None and resumed.approval_state.resolved_at is not None:
+            duration_ms = int(
+                (resumed.approval_state.resolved_at - resumed.approval_state.requested_at).total_seconds()
+                * 1000
+            )
+            record_resume_delay(duration_ms, workflow_run_id=resumed.workflow_run_id)
+    return resumed
 
 
-def load_thread_snapshot(*, store: DurableStateStore, thread_id: str) -> dict:
+def load_thread_snapshot(
+    *,
+    store: DurableStateStore,
+    thread_id: str,
+    observability_context: WorkflowObservabilityContext | None = None,
+) -> dict:
     checkpoint_manager = CheckpointManager(store)
     loaded = checkpoint_manager.load_latest_checkpoint(thread_id)
     audit_events = store.list_audit_events(thread_id=thread_id, limit=20)
+    if observability_context is not None:
+        observability_context.workflow_run_id = loaded.state.workflow_run_id
+        observability_context.thread_id = loaded.state.thread_id
+        observability_context.checkpoint_id = loaded.checkpoint_id
     return {
         "thread_id": thread_id,
         "checkpoint_id": loaded.checkpoint_id,
@@ -390,4 +533,14 @@ def load_thread_snapshot(*, store: DurableStateStore, thread_id: str) -> dict:
         "audit_events": [item.payload_json for item in audit_events],
         "side_effect_records": [record.model_dump(mode="json") for record in loaded.state.side_effect_records],
         "state": loaded.state.model_dump(mode="json"),
+        "correlation": (
+            observability_context.to_public_dict()
+            if observability_context is not None
+            else {
+                "workflow_run_id": loaded.state.workflow_run_id,
+                "trace_id": loaded.state.observability.get("trace_id"),
+                "checkpoint_id": loaded.checkpoint_id,
+                "langsmith_trace_id": loaded.state.observability.get("langsmith_trace_id"),
+            }
+        ),
     }

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -39,7 +40,9 @@ class EligibilityState(BaseModel):
 
 class WorkflowState(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    workflow_run_id: str
     case_facts: CaseFacts
+    observability: dict[str, Any] = Field(default_factory=dict)
     retrieved_evidence: list[str]
     planning: PlanningState
     eligibility: EligibilityState
@@ -51,9 +54,16 @@ class WorkflowState(BaseModel):
     artifacts: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
 
-def create_initial_workflow_state(case_facts: CaseFacts) -> WorkflowState:
+def create_initial_workflow_state(
+    case_facts: CaseFacts,
+    *,
+    workflow_run_id: str | None = None,
+    observability: dict[str, Any] | None = None,
+) -> WorkflowState:
     return WorkflowState(
+        workflow_run_id=workflow_run_id or f"wf_{uuid4().hex[:16]}",
         case_facts=case_facts,
+        observability=dict(observability or {}),
         retrieved_evidence=case_facts.retrieved_evidence_ids or [],
         planning=PlanningState(
             requires_explicit_plan=True,

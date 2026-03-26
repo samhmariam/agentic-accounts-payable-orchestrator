@@ -144,8 +144,10 @@ class FakeGraphRunner:
 def build_state() -> DurableWorkflowState:
     now = datetime.now(timezone.utc)
     return DurableWorkflowState(
+        workflow_run_id="wf-1",
         thread_id="thread-1",
         case_id="case-1",
+        observability={"workflow_run_id": "wf-1", "trace_id": "trace-1"},
         checkpoint_seq=1,
         current_node="await_controller_approval",
         thread_status="awaiting_approval",

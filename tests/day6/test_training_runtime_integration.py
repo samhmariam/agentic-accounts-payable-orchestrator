@@ -221,6 +221,7 @@ def test_create_day5_pause_routes_clean_case_into_controller_approval() -> None:
     assert pause["approval_task_id"] is not None
     assert pause["review_task_id"] is None
     assert pause["resume_token"] is not None
+    assert pause["correlation"]["workflow_run_id"] == state.workflow_run_id
     assert store.audit_events
     assert any(event["action_type"] == "payment_recommendation" for event in store.audit_events)
     assert all("@" not in event["evidence_summary_redacted"] for event in store.audit_events)
@@ -249,6 +250,7 @@ def test_create_day5_pause_routes_manual_review_case_to_review_task() -> None:
     assert pause["approval_task_id"] is None
     assert pause["review_task_id"] is not None
     assert pause["resume_token"] is None
+    assert pause["correlation"]["workflow_run_id"] == state.workflow_run_id
     assert any(event["decision_outcome"] == "needs_human_review" for event in store.audit_events)
 
 

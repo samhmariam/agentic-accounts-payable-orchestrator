@@ -11,6 +11,7 @@ from typing import Protocol
 from aegisap.day5.persistence.durable_state_store import DurableStateStore
 from aegisap.day5.state.durable_models import DurableWorkflowState
 from aegisap.day5.workflow.checkpoint_manager import CheckpointManager, CheckpointValidationError
+from aegisap.observability.tracing import add_span_event, node_span_attributes, start_observability_span
 
 
 class GraphRunner(Protocol):
@@ -90,55 +91,75 @@ class ResumeService:
     ) -> DurableWorkflowState:
         token = self.token_codec.decode(resume_token)
 
-        with self.store.connection() as conn:
-            try:
-                approval_task = self.store.get_approval_task(token.approval_task_id, conn=conn)
-                if approval_task is None:
-                    raise ValueError("Approval task not found.")
-                if approval_task.status != "pending":
-                    raise ValueError("Approval task is no longer pending.")
-                if approval_task.thread_id != token.thread_id:
-                    raise ValueError("Approval task does not belong to thread.")
-                if approval_task.checkpoint_id != token.checkpoint_id:
-                    raise CheckpointValidationError("Approval task is not bound to the resume checkpoint.")
+        with start_observability_span(
+            "aegis.workflow.day5.resume",
+            attributes=node_span_attributes(
+                node_name="day5_resume",
+                idempotent=False,
+                checkpoint_loaded=True,
+                checkpoint_saved=True,
+            ),
+        ):
+            with self.store.connection() as conn:
+                try:
+                    approval_task = self.store.get_approval_task(token.approval_task_id, conn=conn)
+                    if approval_task is None:
+                        raise ValueError("Approval task not found.")
+                    if approval_task.status != "pending":
+                        raise ValueError("Approval task is no longer pending.")
+                    if approval_task.thread_id != token.thread_id:
+                        raise ValueError("Approval task does not belong to thread.")
+                    if approval_task.checkpoint_id != token.checkpoint_id:
+                        raise CheckpointValidationError("Approval task is not bound to the resume checkpoint.")
 
-                loaded = self.checkpoint_manager.load_latest_checkpoint(token.thread_id, conn=conn)
-                if loaded.checkpoint_id != token.checkpoint_id:
-                    raise CheckpointValidationError("Resume token is stale: checkpoint has moved.")
-                if loaded.state.checkpoint_seq != token.checkpoint_seq:
-                    raise CheckpointValidationError("Resume token sequence does not match the latest checkpoint.")
+                    loaded = self.checkpoint_manager.load_latest_checkpoint(token.thread_id, conn=conn)
+                    if loaded.checkpoint_id != token.checkpoint_id:
+                        raise CheckpointValidationError("Resume token is stale: checkpoint has moved.")
+                    if loaded.state.checkpoint_seq != token.checkpoint_seq:
+                        raise CheckpointValidationError("Resume token sequence does not match the latest checkpoint.")
 
-                state = loaded.state
-                if state.thread_status != "awaiting_approval":
-                    raise ValueError("Thread is not awaiting approval.")
+                    state = loaded.state
+                    if state.thread_status != "awaiting_approval":
+                        raise ValueError("Thread is not awaiting approval.")
 
-                now = datetime.now(timezone.utc)
-                state.approval_state.status = decision_payload["status"]
-                state.approval_state.decision_payload = decision_payload
-                state.approval_state.resolved_at = now
-                state.resume_metadata.last_resume_attempt_at = now
-                state.resume_metadata.last_resumed_by = resumed_by
-                state.thread_status = "running"
+                    now = datetime.now(timezone.utc)
+                    state.approval_state.status = decision_payload["status"]
+                    state.approval_state.decision_payload = decision_payload
+                    state.approval_state.resolved_at = now
+                    state.resume_metadata.last_resume_attempt_at = now
+                    state.resume_metadata.last_resumed_by = resumed_by
+                    state.thread_status = "running"
+                    add_span_event(
+                        "checkpoint_restored",
+                        {
+                            "error_class": "none",
+                            "attempt_number": 1,
+                            "backoff_ms": 0,
+                            "remaining_budget_ms": 0,
+                            "dependency_name": "postgres",
+                            "decision_reason_code": "APPROVAL_RESUME",
+                        },
+                    )
 
-                resumed_state = self.graph_runner.resume(
-                    state=state,
-                    approval_decision=decision_payload,
-                )
+                    resumed_state = self.graph_runner.resume(
+                        state=state,
+                        approval_decision=decision_payload,
+                    )
 
-                self.checkpoint_manager.save_checkpoint(
-                    state=resumed_state,
-                    node_name=resumed_state.current_node,
-                    is_interrupt_checkpoint=False,
-                    conn=conn,
-                )
-                self.store.resolve_approval_task(
-                    approval_task_id=token.approval_task_id,
-                    status=decision_payload["status"],
-                    decision_payload=decision_payload,
-                    conn=conn,
-                )
-                conn.commit()
-                return resumed_state
-            except Exception:
-                conn.rollback()
-                raise
+                    self.checkpoint_manager.save_checkpoint(
+                        state=resumed_state,
+                        node_name=resumed_state.current_node,
+                        is_interrupt_checkpoint=False,
+                        conn=conn,
+                    )
+                    self.store.resolve_approval_task(
+                        approval_task_id=token.approval_task_id,
+                        status=decision_payload["status"],
+                        decision_payload=decision_payload,
+                        conn=conn,
+                    )
+                    conn.commit()
+                    return resumed_state
+                except Exception:
+                    conn.rollback()
+                    raise

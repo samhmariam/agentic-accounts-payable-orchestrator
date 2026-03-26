@@ -10,6 +10,12 @@ param resumeTokenSecretName string = 'aegisap-resume-token-secret'
 param runtimeEnvironment string = 'cloud'
 
 param applicationInsightsConnectionString string = ''
+param deploymentRevision string = 'dev'
+param traceSampleRatio string = '1.0'
+param tracingEnabled string = 'true'
+param langsmithProject string = ''
+param langsmithEndpoint string = ''
+param langsmithApiKeySecretName string = 'aegisap-langsmith-api-key'
 param azureOpenAiEndpoint string
 param azureOpenAiApiVersion string
 param azureOpenAiChatDeployment string
@@ -65,6 +71,30 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'AEGISAP_ENVIRONMENT'
               value: runtimeEnvironment
+            }
+            {
+              name: 'AEGISAP_DEPLOYMENT_REVISION'
+              value: deploymentRevision
+            }
+            {
+              name: 'AEGISAP_TRACE_SAMPLE_RATIO'
+              value: traceSampleRatio
+            }
+            {
+              name: 'AEGISAP_TRACING_ENABLED'
+              value: tracingEnabled
+            }
+            {
+              name: 'LANGSMITH_PROJECT'
+              value: langsmithProject
+            }
+            {
+              name: 'LANGSMITH_ENDPOINT'
+              value: langsmithEndpoint
+            }
+            {
+              name: 'AEGISAP_LANGSMITH_API_KEY_SECRET_NAME'
+              value: langsmithApiKeySecretName
             }
             {
               name: 'AZURE_OPENAI_ENDPOINT'

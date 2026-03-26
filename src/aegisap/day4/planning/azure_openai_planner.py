@@ -3,6 +3,9 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 
+from aegisap.observability.metrics import record_estimated_cost, record_tokens
+from aegisap.observability.retry_policy import RetryPolicy, execute_with_retry
+from aegisap.observability.tracing import node_span_attributes, start_observability_span
 from aegisap.security.credentials import get_openai_client
 
 
@@ -40,21 +43,53 @@ class AzureOpenAIPlannerClient:
 
     async def invoke(self, prompt: str) -> str:
         client = _get_client()
-        response = client.chat.completions.create(
-            model=self.deployment,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are the AegisAP planning controller.\n"
-                        "Return JSON only.\n"
-                        "Do not wrap the payload in markdown.\n"
-                        "Do not omit mandatory controls from the policy overlay.\n"
-                        "Do not produce explanatory prose outside the JSON payload."
-                    ),
+        with start_observability_span(
+            "dep.llm.call",
+            attributes=node_span_attributes(
+                node_name="llm_call",
+                idempotent=True,
+                prompt_revision="day4",
+                model_name=self.deployment,
+            ),
+        ):
+            response = execute_with_retry(
+                client.chat.completions.create,
+                policy=RetryPolicy(max_attempts=3, initial_backoff_ms=250, max_backoff_ms=1_000, deadline_ms=6_000),
+                node_name="azure_openai_planner",
+                dependency_name="azure_openai",
+                idempotent=True,
+                decision_reason_code="PLANNER_MODEL_CALL",
+                kwargs={
+                    "model": self.deployment,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are the AegisAP planning controller.\n"
+                                "Return JSON only.\n"
+                                "Do not wrap the payload in markdown.\n"
+                                "Do not omit mandatory controls from the policy overlay.\n"
+                                "Do not produce explanatory prose outside the JSON payload."
+                            ),
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0,
                 },
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0,
-        )
+            )
+            usage = getattr(response, "usage", None)
+            if usage is not None:
+                prompt_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
+                completion_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
+                record_tokens(
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                    node_name="azure_openai_planner",
+                    model_name=self.deployment,
+                )
+                record_estimated_cost(
+                    cost_usd=round((prompt_tokens * 0.0000025) + (completion_tokens * 0.00001), 6),
+                    node_name="azure_openai_planner",
+                    model_name=self.deployment,
+                )
         return _extract_message_text(response)

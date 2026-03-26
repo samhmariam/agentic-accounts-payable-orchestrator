@@ -30,6 +30,7 @@ from aegisap.day4.state.workflow_state import WorkflowState as Day4WorkflowState
 from aegisap.day4.state.workflow_state import create_initial_workflow_state
 from aegisap.day6.graph.review_gate import run_day6_review, run_day6_review_from_day4
 from aegisap.day6.state.models import Day6ReviewInput, ReviewOutcome
+from aegisap.observability.context import WorkflowObservabilityContext
 from aegisap.training.artifacts import build_root, load_json, write_json_artifact
 from aegisap.training.day4_plans import build_training_plan
 
@@ -212,6 +213,7 @@ async def run_day4_case_artifact(
     artifact_name: str = "golden_thread_day4",
     include_day6_review: bool = False,
     thread_id: str | None = None,
+    observability_context: WorkflowObservabilityContext | None = None,
 ) -> tuple[Path, dict[str, Any], Day4WorkflowState]:
     if planner_mode == "fixture":
         plan = build_training_plan(case_facts, plan_id=f"plan_{case_facts.case_id}")
@@ -219,17 +221,22 @@ async def run_day4_case_artifact(
             case_facts=case_facts,
             model=StaticPlanModel(plan),
             registry=create_default_task_registry(),
+            observability_context=observability_context,
         )
         raw_plan_text = json.dumps(plan.model_dump(mode="json"), indent=2)
         parsed_plan = plan
     else:
-        state, raw_plan_text, parsed_plan = await _run_day4_live(case_facts)
+        state, raw_plan_text, parsed_plan = await _run_day4_live(
+            case_facts,
+            observability_context=observability_context,
+        )
 
     day6_review_payload: dict[str, Any] | None = None
     if include_day6_review:
         _review_input, review_outcome = run_day6_review_from_day4(
             state,
             thread_id=thread_id or f"thread-{case_facts.case_id}",
+            observability_context=observability_context,
         )
         day6_review_payload = review_outcome.model_dump(mode="json")
 
@@ -247,14 +254,22 @@ async def run_day4_case_artifact(
     return _write_day_artifact("day4", artifact_name, payload), payload, state
 
 
-async def _run_day4_live(case_facts: CaseFacts) -> tuple[Day4WorkflowState, str, ExecutionPlan]:
+async def _run_day4_live(
+    case_facts: CaseFacts,
+    *,
+    observability_context: WorkflowObservabilityContext | None = None,
+) -> tuple[Day4WorkflowState, str, ExecutionPlan]:
     overlay = derive_policy_overlay(case_facts)
     prompt = build_planner_prompt(case_facts=case_facts, policy_overlay=overlay)
     model = AzureOpenAIPlannerClient()
     raw_plan_text = await model.invoke(prompt)
     parsed = parse_execution_plan(coerce_json(raw_plan_text))
 
-    state = create_initial_workflow_state(case_facts)
+    state = create_initial_workflow_state(
+        case_facts,
+        workflow_run_id=observability_context.workflow_run_id if observability_context else None,
+        observability=observability_context.to_state_payload() if observability_context else None,
+    )
     state.planning.planner_input_snapshot = {
         "case_facts": case_facts.model_dump(),
         "policy_overlay": overlay.model_dump(),
@@ -280,6 +295,7 @@ async def _run_day4_live(case_facts: CaseFacts) -> tuple[Day4WorkflowState, str,
         case_facts=case_facts,
         model=StaticPlanModel(parsed),
         registry=create_default_task_registry(),
+        observability_context=observability_context,
     )
     return state, raw_plan_text, parsed
 

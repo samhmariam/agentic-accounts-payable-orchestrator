@@ -10,6 +10,10 @@ from aegisap.day3.retrieval.structured_po_lookup import StructuredPOLookup
 from aegisap.day3.retrieval.structured_vendor_lookup import StructuredVendorLookup
 from aegisap.day4.execution.task_contracts import WorkerExecutor, WorkerTaskInput
 from aegisap.day4.planning.plan_types import EvidenceRef, TaskResult
+from aegisap.observability.retry_policy import RetryPolicy, execute_with_retry
+from aegisap.observability.tracing import add_span_event, node_span_attributes, start_observability_span
+
+READ_RETRY_POLICY = RetryPolicy(max_attempts=3, initial_backoff_ms=100, max_backoff_ms=400, deadline_ms=2_000)
 
 
 def _to_evidence_refs(evidence_ids: list[str]) -> list[EvidenceRef]:
@@ -37,7 +41,7 @@ def _buffer_sensitive_event(
     metadata: dict[str, object] | None = None,
 ) -> None:
     event = build_audit_event(
-        workflow_run_id=state.case_facts.case_id,
+        workflow_run_id=state.workflow_run_id,
         thread_id=f"case:{state.case_facts.case_id}",
         state_version=0,
         actor_type="system_job",
@@ -57,20 +61,24 @@ class PolicyRetrievalWorker:
 
     async def execute(self, input_data: WorkerTaskInput) -> TaskResult:
         state = input_data.workflow_state
-        policy_path = repo_root(__file__) / "data" / "day3" / "unstructured" / "ap_policy_bank_change.md"
-        citation_ref = f"file:{policy_path.relative_to(repo_root(__file__))}"
-        policy_requirements = [
-            "Recommendations must remain blocked until mandatory controls are satisfied.",
-        ]
-
-        if not state.case_facts.po_present:
-            policy_requirements.append("Missing PO cases require PO verification or an approved waiver.")
-        if state.case_facts.bank_details_changed:
-            policy_requirements.append("Changed bank details require authoritative verification.")
-        if state.case_facts.invoice_amount_gbp >= (
-            state.case_facts.amount_approval_threshold_gbp or 25_000
+        with start_observability_span(
+            "dep.external_policy_doc_fetch",
+            attributes=node_span_attributes(node_name="external_policy_doc_fetch", idempotent=True),
         ):
-            policy_requirements.append("High-value invoices require an approval route before recommendation.")
+            policy_path = repo_root(__file__) / "data" / "day3" / "unstructured" / "ap_policy_bank_change.md"
+            citation_ref = f"file:{policy_path.relative_to(repo_root(__file__))}"
+            policy_requirements = [
+                "Recommendations must remain blocked until mandatory controls are satisfied.",
+            ]
+
+            if not state.case_facts.po_present:
+                policy_requirements.append("Missing PO cases require PO verification or an approved waiver.")
+            if state.case_facts.bank_details_changed:
+                policy_requirements.append("Changed bank details require authoritative verification.")
+            if state.case_facts.invoice_amount_gbp >= (
+                state.case_facts.amount_approval_threshold_gbp or 25_000
+            ):
+                policy_requirements.append("High-value invoices require an approval route before recommendation.")
 
         return TaskResult(
             task_id=input_data.task_id,
@@ -95,7 +103,19 @@ class POMatchVerificationWorker:
             "po_number": state.case_facts.po_number,
             "amount": state.case_facts.invoice_amount_gbp,
         }
-        evidence = StructuredPOLookup().search(po_number=state.case_facts.po_number)
+        with start_observability_span(
+            "dep.structured_po_lookup.read",
+            attributes=node_span_attributes(node_name="structured_po_lookup", idempotent=True),
+        ):
+            evidence = execute_with_retry(
+                StructuredPOLookup().search,
+                policy=READ_RETRY_POLICY,
+                node_name=self.task_type,
+                dependency_name="structured_po_lookup",
+                idempotent=True,
+                decision_reason_code="PO_LOOKUP",
+                kwargs={"po_number": state.case_facts.po_number},
+            )
         finding = verify_po_match(invoice, evidence)
 
         matched_fields: list[str] = []
@@ -192,10 +212,22 @@ class VendorHistoryCheckWorker:
 
     async def execute(self, input_data: WorkerTaskInput) -> TaskResult:
         state = input_data.workflow_state
-        evidence = StructuredVendorLookup().search(
-            vendor_id=state.case_facts.supplier_id,
-            vendor_name=state.case_facts.supplier_name,
-        )
+        with start_observability_span(
+            "dep.structured_vendor_lookup.read",
+            attributes=node_span_attributes(node_name="structured_vendor_lookup", idempotent=True),
+        ):
+            evidence = execute_with_retry(
+                StructuredVendorLookup().search,
+                policy=READ_RETRY_POLICY,
+                node_name=self.task_type,
+                dependency_name="structured_vendor_lookup",
+                idempotent=True,
+                decision_reason_code="VENDOR_HISTORY_LOOKUP",
+                kwargs={
+                    "vendor_id": state.case_facts.supplier_id,
+                    "vendor_name": state.case_facts.supplier_name,
+                },
+            )
         finding = verify_vendor_risk(
             {
                 "vendor_id": state.case_facts.supplier_id,
@@ -266,10 +298,22 @@ class VendorBankVerificationWorker:
 
     async def execute(self, input_data: WorkerTaskInput) -> TaskResult:
         state = input_data.workflow_state
-        evidence = StructuredVendorLookup().search(
-            vendor_id=state.case_facts.supplier_id,
-            vendor_name=state.case_facts.supplier_name,
-        )
+        with start_observability_span(
+            "dep.structured_vendor_lookup.read",
+            attributes=node_span_attributes(node_name="structured_vendor_lookup", idempotent=True),
+        ):
+            evidence = execute_with_retry(
+                StructuredVendorLookup().search,
+                policy=READ_RETRY_POLICY,
+                node_name=self.task_type,
+                dependency_name="structured_vendor_lookup",
+                idempotent=True,
+                decision_reason_code="BANK_VERIFICATION_LOOKUP",
+                kwargs={
+                    "vendor_id": state.case_facts.supplier_id,
+                    "vendor_name": state.case_facts.supplier_name,
+                },
+            )
         evidence_ids = [item.evidence_id for item in evidence]
 
         bank_change_verified = bool(
@@ -292,6 +336,17 @@ class VendorBankVerificationWorker:
             )
 
         if bank_change_verified:
+            add_span_event(
+                "cache_hit",
+                {
+                    "error_class": "none",
+                    "attempt_number": 1,
+                    "backoff_ms": 0,
+                    "remaining_budget_ms": READ_RETRY_POLICY.deadline_ms,
+                    "dependency_name": "structured_vendor_lookup",
+                    "decision_reason_code": "BANK_CHANGE_VERIFIED",
+                },
+            )
             _buffer_sensitive_event(
                 state=state,
                 action_type="bank_detail_evaluation",
@@ -383,6 +438,17 @@ class ManualEscalationPackageWorker:
 
     async def execute(self, input_data: WorkerTaskInput) -> TaskResult:
         state = input_data.workflow_state
+        add_span_event(
+            "human_review_escalated",
+            {
+                "error_class": "manual_escalation_package",
+                "attempt_number": 1,
+                "backoff_ms": 0,
+                "remaining_budget_ms": 0,
+                "dependency_name": self.task_type,
+                "decision_reason_code": "MANUAL_ESCALATION_PACKAGE",
+            },
+        )
         reasons = list(
             dict.fromkeys(
                 state.eligibility.blocking_conditions

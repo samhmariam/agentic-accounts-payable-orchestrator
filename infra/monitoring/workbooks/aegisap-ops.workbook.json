@@ -1,0 +1,20 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# AegisAP Ops Workbook\nTracks case completions, escalations, approval backlog, and business outcome mix."
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "traces | summarize runs=count() by tostring(customDimensions['aegis.outcome_type'])",
+        "size": 1,
+        "title": "Outcome Mix"
+      }
+    }
+  ]
+}

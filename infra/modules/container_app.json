@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.41.2.15936",
-      "templateHash": "3209457517684700630"
+      "templateHash": "1248299801539546142"
     }
   },
   "parameters": {
@@ -39,6 +39,30 @@
     "applicationInsightsConnectionString": {
       "type": "string",
       "defaultValue": ""
+    },
+    "deploymentRevision": {
+      "type": "string",
+      "defaultValue": "dev"
+    },
+    "traceSampleRatio": {
+      "type": "string",
+      "defaultValue": "1.0"
+    },
+    "tracingEnabled": {
+      "type": "string",
+      "defaultValue": "true"
+    },
+    "langsmithProject": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "langsmithEndpoint": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "langsmithApiKeySecretName": {
+      "type": "string",
+      "defaultValue": "aegisap-langsmith-api-key"
     },
     "azureOpenAiEndpoint": {
       "type": "string"
@@ -127,6 +151,30 @@
                 {
                   "name": "AEGISAP_ENVIRONMENT",
                   "value": "[parameters('runtimeEnvironment')]"
+                },
+                {
+                  "name": "AEGISAP_DEPLOYMENT_REVISION",
+                  "value": "[parameters('deploymentRevision')]"
+                },
+                {
+                  "name": "AEGISAP_TRACE_SAMPLE_RATIO",
+                  "value": "[parameters('traceSampleRatio')]"
+                },
+                {
+                  "name": "AEGISAP_TRACING_ENABLED",
+                  "value": "[parameters('tracingEnabled')]"
+                },
+                {
+                  "name": "LANGSMITH_PROJECT",
+                  "value": "[parameters('langsmithProject')]"
+                },
+                {
+                  "name": "LANGSMITH_ENDPOINT",
+                  "value": "[parameters('langsmithEndpoint')]"
+                },
+                {
+                  "name": "AEGISAP_LANGSMITH_API_KEY_SECRET_NAME",
+                  "value": "[parameters('langsmithApiKeySecretName')]"
                 },
                 {
                   "name": "AZURE_OPENAI_ENDPOINT",

@@ -6,6 +6,7 @@ from aegisap.day4.execution.task_contracts import WorkerTaskInput, validate_task
 from aegisap.day4.execution.task_registry import TaskRegistry
 from aegisap.day4.planning.plan_types import ExecutionPlan, PlanTask, TaskLedgerEntry, TaskResult
 from aegisap.day4.state.workflow_state import WorkflowState
+from aegisap.observability.tracing import add_span_event, node_span_attributes, start_observability_span
 
 
 async def execute_plan(*, state: WorkflowState, plan: ExecutionPlan, registry: TaskRegistry) -> WorkflowState:
@@ -104,18 +105,51 @@ async def _execute_single_task(
     state.planning.plan_status = "executing"
 
     executor = registry.get(task.task_type)
-    result = await executor.execute(
-        WorkerTaskInput(
-            task_id=task.task_id,
-            case_id=state.case_facts.case_id,
-            workflow_state=state,
-            task_inputs=task.inputs,
-            required_evidence=task.required_evidence,
-            expected_outputs=task.expected_outputs,
+    with start_observability_span(
+        f"task.{task.task_type}",
+        attributes=node_span_attributes(
+            node_name=task.task_type,
+            idempotent=task.task_type not in {"manual_escalation_package", "payment_recommendation_draft"},
+            evidence_count=len(task.required_evidence),
+            prompt_revision=state.planning.plan_version,
+        ),
+    ):
+        result = await executor.execute(
+            WorkerTaskInput(
+                task_id=task.task_id,
+                case_id=state.case_facts.case_id,
+                workflow_state=state,
+                task_inputs=task.inputs,
+                required_evidence=task.required_evidence,
+                expected_outputs=task.expected_outputs,
+            )
         )
-    )
     result = _normalise_result_for_contract(task, result)
     _apply_task_result(state, task, result)
+    if result.status == "escalated":
+        add_span_event(
+            "human_review_escalated",
+            {
+                "error_class": result.blocking_reason or "manual_review_required",
+                "attempt_number": 1,
+                "backoff_ms": 0,
+                "remaining_budget_ms": 0,
+                "dependency_name": task.task_type,
+                "decision_reason_code": result.blocking_reason,
+            },
+        )
+    elif result.status == "blocked":
+        add_span_event(
+            "evidence_insufficient",
+            {
+                "error_class": result.blocking_reason or "blocked",
+                "attempt_number": 1,
+                "backoff_ms": 0,
+                "remaining_budget_ms": 0,
+                "dependency_name": task.task_type,
+                "decision_reason_code": result.blocking_reason,
+            },
+        )
     state.planning.active_task_ids = []
     _refresh_eligibility_state(state, plan)
 

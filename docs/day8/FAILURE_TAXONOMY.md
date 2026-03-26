@@ -1,0 +1,36 @@
+# Failure Taxonomy
+
+- `model_failure`
+  - hallucination
+  - malformed structured output
+  - weak extraction or reasoning
+- `retrieval_failure`
+  - no evidence
+  - stale evidence
+  - low-confidence match
+  - index or config issue
+- `policy_failure`
+  - insufficient evidence
+  - contradictory authority
+  - policy refusal
+  - authorization boundary
+- `orchestration_failure`
+  - bad branch
+  - bad resume
+  - checkpoint corruption
+  - non-idempotent side-effect risk
+- `dependency_failure`
+  - Azure AI Search
+  - PostgreSQL
+  - Key Vault
+  - network
+  - auth or quota
+- `data_quality_failure`
+  - OCR issue
+  - malformed source records
+  - missing PO
+  - locale mismatch
+- `human_process_failure`
+  - approval SLA breach
+  - incorrect override
+  - unresolved exception queue

@@ -34,9 +34,11 @@ def bootstrap_durable_state_from_day4(
     required_approvals = _required_approvals(day4_state)
 
     return DurableWorkflowState(
+        workflow_run_id=day4_state.workflow_run_id,
         thread_id=thread_id,
         case_id=day4_state.case_facts.case_id,
         workflow_name=workflow_name,
+        observability=dict(day4_state.observability),
         current_node=current_node,
         thread_status=thread_status,
         plan_version=day4_state.planning.plan_version or "day4",

@@ -1,0 +1,7 @@
+traces
+| extend workflow_run_id = tostring(customDimensions["aegis.workflow_run_id"])
+| extend node_name = tostring(customDimensions["aegis.node_name"])
+| extend duration_ms = todouble(customDimensions["duration_ms"])
+| where isnotempty(node_name)
+| summarize p50=percentile(duration_ms, 50), p95=percentile(duration_ms, 95), count() by node_name
+| order by p95 desc

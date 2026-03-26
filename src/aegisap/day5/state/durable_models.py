@@ -108,9 +108,11 @@ class ReviewTaskState(BaseModel):
 
 
 class DurableWorkflowState(BaseModel):
+    workflow_run_id: str
     thread_id: str
     case_id: str
     workflow_name: str = "payment_recommendation_workflow"
+    observability: dict[str, Any] = Field(default_factory=dict)
 
     checkpoint_seq: int = 0
     current_node: str = "start"

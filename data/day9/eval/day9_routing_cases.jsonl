@@ -1,0 +1,7 @@
+{"case_id":"case_day9_clean","slices":["clean_routine_invoices"],"expected_task_class":"extract","expected_route":"light","passed":true,"latency_ms":420,"workflow_cost":0.004}
+{"case_id":"case_day9_missing_po","slices":["missing_po","human_review_required"],"expected_task_class":"plan","expected_route":"strong","passed":true,"latency_ms":980,"workflow_cost":0.019}
+{"case_id":"case_day9_new_vendor","slices":["new_vendor"],"expected_task_class":"plan","expected_route":"strong","passed":true,"latency_ms":1040,"workflow_cost":0.021}
+{"case_id":"case_day9_bank_change","slices":["bank_details_changed"],"expected_task_class":"plan","expected_route":"strong","passed":true,"latency_ms":1125,"workflow_cost":0.022}
+{"case_id":"case_day9_vat_conflict","slices":["contradictory_vat_evidence"],"expected_task_class":"compliance_review","expected_route":"strong","passed":false,"latency_ms":890,"workflow_cost":0.016}
+{"case_id":"case_day9_cross_border","slices":["cross_border_multi_currency"],"expected_task_class":"compliance_review","expected_route":"strong","passed":true,"latency_ms":1210,"workflow_cost":0.024}
+{"case_id":"case_day9_retrieval_ambiguity","slices":["retrieval_ambiguity"],"expected_task_class":"retrieve_summarise","expected_route":"strong","passed":true,"latency_ms":760,"workflow_cost":0.011}

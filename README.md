@@ -2,8 +2,8 @@
 
 AegisAP is the Golden Thread training repo for Forward Deployed Engineers building
 production-ready agentic systems on Azure. The repo follows one invoice case
-from Day 0 bootstrap through Day 8 observability, regression coverage, and
-reliability engineering.
+from Day 0 bootstrap through Day 9 observability, regression coverage,
+reliability engineering, and explicit cost-speed routing controls.
 
 ## Training Journey
 
@@ -18,6 +18,7 @@ reliability engineering.
 | Day 6 | Refuse unsafe or unauthorised progression | Policy review, bounded reflection, and graceful refusal | Azure OpenAI optional, Azure Database for PostgreSQL | `uv run python scripts/run_day6_case.py` | `build/day6/golden_thread_day6.json` | Case ends in `approved_to_proceed`, `needs_human_review`, or `not_authorised_to_continue` with an audit-ready payload |
 | Day 7 | Harden identity, secrets, traces, and audit evidence | Managed identity, secret elimination, redacted observability | Managed Identity, Key Vault RBAC, Azure AI Search RBAC, Log Analytics, PostgreSQL audit store | `uv run python scripts/verify_env.py --track full --env` then `uv run pytest tests/day7 tests/day6/test_training_runtime_integration.py -q` | PostgreSQL audit rows, redacted logs, hardened infra contracts | No forbidden runtime secret fallback, Search local auth disabled, audit rows emitted for sensitive outcomes |
 | Day 8 | Make workflow behavior explorable and reliable | OpenTelemetry traces, regression harness, dashboards, alerts | Application Insights, Azure Monitor, Log Analytics, LangSmith optional, PostgreSQL audit store | `uv run pytest tests/day8 -q` and `az bicep build --file infra/monitoring/alerts/alerts.bicep` | Day 8 docs, regression dataset, monitoring assets, correlation-aware runtime | Operators can pivot from workflow run to trace to audit state, and silent reliability regressions surface in telemetry |
+| Day 9 | Make capability allocation explicit, measurable, and reversible | Model router, workflow cost ledger, conservative cache, slice-governed optimisation | Azure OpenAI deployments, Azure Monitor, Application Insights, APIM policy assets optional, LangSmith optional | `uv run pytest tests/day9 -q` and `uv run pytest tests/day4/test_azure_openai_planner.py tests/api/test_app.py -q` | Day 9 docs, routing dataset, APIM policies, routed runtime | Model routing and cost are visible per workflow, low-risk paths can use cheaper capability safely, and risky slices block bad routing changes |
 
 ## Start Here
 
@@ -37,6 +38,7 @@ reliability engineering.
 - [Day 6 Reflection and Graceful Refusal](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_06_REFLECTION_AND_GRACEFUL_REFUSAL.md)
 - [Day 7 Security, Identity, and Auditability](/workspaces/agentic-accounts-payable-orchestrator/docs/day7/DAY_07_SECURITY_IDENTITY_AUDITABILITY.md)
 - [Day 8 Observability and Reliability Engineering](/workspaces/agentic-accounts-payable-orchestrator/docs/day8/DAY_08_OBSERVABILITY_AND_RELIABILITY.md)
+- [Day 9 Cost, Speed, Routing, Caching, and Optimisation](/workspaces/agentic-accounts-payable-orchestrator/docs/day9/DAY_09_COST_SPEED_ROUTING_CACHING_AND_OPTIMISATION.md)
 
 ## Notebooks
 
@@ -150,6 +152,6 @@ uv run python scripts/run_day6_case.py
 
 ## Days 8-10
 
-Days 8-10 are intentionally reserved for future curriculum expansion:
-observability and regression, cost/speed optimization, and production
-deployment hardening.
+Day 8 is now the observability and reliability milestone, Day 9 adds explicit
+capability allocation and cost governance, and Day 10 remains reserved for
+production deployment hardening.

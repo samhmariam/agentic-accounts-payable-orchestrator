@@ -37,10 +37,14 @@ async def run_day4_explicit_planning_case(
         observability=observability_context.to_state_payload() if observability_context else None,
     )
     overlay = derive_policy_overlay(case_facts)
+    state.risk_flags = list(overlay.risk_flags)
+    state.task_class = "plan"
     state.planning.planner_input_snapshot = {
         "case_facts": case_facts.model_dump(),
         "policy_overlay": overlay.model_dump(),
     }
+    if observability_context is not None:
+        observability_context.metadata["risk_flags"] = list(overlay.risk_flags)
 
     try:
         with start_observability_span(
@@ -136,6 +140,21 @@ async def run_day4_explicit_planning_case(
             ),
         )
     )
+    post_execution_state.evidence_conflict_count = 0
+    post_execution_state.retrieval_confidence = _retrieval_confidence(post_execution_state)
+    if observability_context is not None:
+        metadata = observability_context.metadata
+        post_execution_state.routing_decision = {
+            "task_class": metadata.get("task_class", "plan"),
+            "reason": metadata.get("routing_decision", "fixture_plan"),
+            "deployment_name": metadata.get("model_deployment"),
+            "deployment_tier": metadata.get("deployment_tier"),
+        }
+        post_execution_state.model_deployment = metadata.get("model_deployment")
+        post_execution_state.cache_hit = bool(metadata.get("cache_hit", False))
+        post_execution_state.workflow_cost_estimate = float(metadata.get("workflow_cost_estimate", 0.0) or 0.0)
+        post_execution_state.cost_ledger = list(metadata.get("cost_ledger") or [])
+        post_execution_state.risk_flags = list(metadata.get("risk_flags") or overlay.risk_flags)
     if observability_context is not None:
         publish_langsmith_run(
             context=observability_context,
@@ -206,3 +225,14 @@ def _value_band(amount: float) -> str:
     if amount >= 10_000:
         return "medium"
     return "standard"
+
+
+def _retrieval_confidence(state: WorkflowState) -> float | None:
+    confidences = [
+        float(entry.confidence)
+        for entry in state.task_ledger
+        if entry.confidence is not None and entry.task_type in {"policy_retrieval", "vendor_history_check"}
+    ]
+    if not confidences:
+        return None
+    return round(sum(confidences) / len(confidences), 4)

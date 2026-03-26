@@ -122,7 +122,7 @@ def make_trace_context(
 
 
 def root_span_attributes(context: WorkflowObservabilityContext) -> dict[str, Any]:
-    return {
+    attributes = {
         "aegis.workflow_run_id": context.workflow_run_id,
         "aegis.thread_id": context.hashed_thread_id,
         "aegis.case_id": context.hashed_case_id,
@@ -135,6 +135,18 @@ def root_span_attributes(context: WorkflowObservabilityContext) -> dict[str, Any
         "aegis.outcome_type": context.outcome_type,
         "aegis.approval_status": context.approval_status,
     }
+    metadata = context.metadata
+    if metadata.get("task_class") is not None:
+        attributes["aegis.task_class"] = metadata["task_class"]
+    if metadata.get("routing_decision") is not None:
+        attributes["aegis.routing_decision"] = metadata["routing_decision"]
+    if metadata.get("model_deployment") is not None:
+        attributes["aegis.model_deployment"] = metadata["model_deployment"]
+    if metadata.get("cache_hit") is not None:
+        attributes["aegis.cache_hit"] = metadata["cache_hit"]
+    if metadata.get("workflow_cost_estimate") is not None:
+        attributes["aegis.workflow_cost_estimate"] = metadata["workflow_cost_estimate"]
+    return attributes
 
 
 def node_span_attributes(

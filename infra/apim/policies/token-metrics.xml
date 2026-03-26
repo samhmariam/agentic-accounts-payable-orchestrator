@@ -1,0 +1,17 @@
+<policies>
+  <inbound>
+    <base />
+    <set-header name="x-aegisap-token-metrics" exists-action="override">
+      <value>enabled</value>
+    </set-header>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

@@ -16,6 +16,7 @@ class FakeResponse:
                 self.message = Message(content)
 
         self.choices = [Choice(content)]
+        self.usage = None
 
 
 class FakeClient:
@@ -29,9 +30,8 @@ class FakeClient:
 
 
 def test_azure_openai_planner_returns_string_content(monkeypatch) -> None:
-    monkeypatch.setenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "planner")
     monkeypatch.setattr(
-        "aegisap.day4.planning.azure_openai_planner._get_client",
+        "aegisap.routing.model_router._client",
         lambda: FakeClient('{"plan_id": "plan-1"}'),
     )
 
@@ -41,10 +41,9 @@ def test_azure_openai_planner_returns_string_content(monkeypatch) -> None:
 
 
 def test_azure_openai_planner_flattens_content_parts(monkeypatch) -> None:
-    monkeypatch.setenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "planner")
     parts = [type("Part", (), {"text": '{"plan_id": "'})(), type("Part", (), {"text": 'plan-2"}'})()]
     monkeypatch.setattr(
-        "aegisap.day4.planning.azure_openai_planner._get_client",
+        "aegisap.routing.model_router._client",
         lambda: FakeClient(parts),
     )
 

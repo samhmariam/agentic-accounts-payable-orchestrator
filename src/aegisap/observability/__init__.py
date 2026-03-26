@@ -8,6 +8,12 @@ from aegisap.observability.context import (
     reset_observability_context,
     update_observability_context,
 )
+from aegisap.observability.metrics import (
+    record_cache_event,
+    record_queue_delay,
+    record_routing_decision,
+    record_workflow_cost,
+)
 from aegisap.observability.tracing import (
     add_span_event,
     business_outcome_attributes,
@@ -34,6 +40,10 @@ __all__ = [
     "node_span_attributes",
     "reset_observability_context",
     "root_span_attributes",
+    "record_cache_event",
+    "record_queue_delay",
+    "record_routing_decision",
+    "record_workflow_cost",
     "set_span_attributes",
     "start_observability_span",
     "start_workflow_span",

@@ -58,6 +58,10 @@ class WorkflowObservabilityContext:
             "trace_id": self.trace_id,
             "checkpoint_id": self.checkpoint_id,
             "langsmith_trace_id": self.langsmith_trace_id,
+            "task_class": _string_or_none(self.metadata.get("task_class")),
+            "routing_decision": _string_or_none(self.metadata.get("routing_decision")),
+            "model_deployment": _string_or_none(self.metadata.get("model_deployment")),
+            "workflow_cost_estimate": _string_or_none(self.metadata.get("workflow_cost_estimate")),
         }
 
     def to_state_payload(self) -> dict[str, Any]:
@@ -119,6 +123,12 @@ class WorkflowObservabilityContext:
             langsmith_run_id=payload.get("langsmith_run_id"),
             metadata=dict(payload.get("metadata") or {}),
         )
+
+
+def _string_or_none(value: Any) -> str | None:
+    if value is None:
+        return None
+    return str(value)
 
 
 def make_workflow_observability_context(

@@ -1,0 +1,16 @@
+{
+  "version": "baseline",
+  "day": 9,
+  "artifacts": [
+    {
+      "task_class": "extract",
+      "prompt_name": "invoice_field_extraction",
+      "status": "human_authored_baseline"
+    },
+    {
+      "task_class": "retrieve_summarise",
+      "prompt_name": "retrieval_summary",
+      "status": "human_authored_baseline"
+    }
+  ]
+}

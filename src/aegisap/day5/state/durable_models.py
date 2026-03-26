@@ -6,7 +6,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
-STATE_SCHEMA_VERSION = 6
+STATE_SCHEMA_VERSION = 7
 
 
 ThreadStatus = Literal[
@@ -113,6 +113,15 @@ class DurableWorkflowState(BaseModel):
     case_id: str
     workflow_name: str = "payment_recommendation_workflow"
     observability: dict[str, Any] = Field(default_factory=dict)
+    task_class: str = "plan"
+    risk_flags: list[str] = Field(default_factory=list)
+    routing_decision: dict[str, Any] = Field(default_factory=dict)
+    model_deployment: str | None = None
+    cache_hit: bool = False
+    workflow_cost_estimate: float = 0.0
+    cost_ledger: list[dict[str, Any]] = Field(default_factory=list)
+    evidence_conflict_count: int = 0
+    retrieval_confidence: float | None = None
 
     checkpoint_seq: int = 0
     current_node: str = "start"

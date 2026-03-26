@@ -1,0 +1,18 @@
+<policies>
+  <inbound>
+    <base />
+    <set-variable name="aegisap-cache-scope" value="@(context.Request.Headers.GetValueOrDefault(&quot;x-aegisap-task-class&quot;, &quot;unknown&quot;))" />
+    <set-header name="x-aegisap-cache-policy" exists-action="override">
+      <value>semantic-cache-optional-day9</value>
+    </set-header>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

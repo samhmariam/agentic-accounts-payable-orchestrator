@@ -102,6 +102,7 @@ async def day1_intake(request: Day1IntakeRequest, raw_request: Request) -> dict[
         "mode": mode,
         "message_id": request.package.message_id,
         "canonical_invoice": canonical.model_dump(mode="json"),
+        "correlation": (get_observability_context().to_public_dict() if get_observability_context() else None),
     }
 
 

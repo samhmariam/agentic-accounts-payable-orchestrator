@@ -53,6 +53,40 @@ def estimated_cost_counter():
 
 
 @lru_cache(maxsize=1)
+def workflow_cost_counter():
+    return _meter().create_counter(
+        "aegis.workflow_cost_usd",
+        unit="USD",
+        description="Workflow-level estimated cost rollups for routed model usage.",
+    )
+
+
+@lru_cache(maxsize=1)
+def cache_event_counter():
+    return _meter().create_counter(
+        "aegis.cache_events",
+        description="Semantic cache hits, misses, and bypass decisions.",
+    )
+
+
+@lru_cache(maxsize=1)
+def routing_decision_counter():
+    return _meter().create_counter(
+        "aegis.routing_decisions",
+        description="Model routing decisions by task class and deployment tier.",
+    )
+
+
+@lru_cache(maxsize=1)
+def queue_delay_histogram():
+    return _meter().create_histogram(
+        "aegis.queue_delay_ms",
+        unit="ms",
+        description="Queue or backpressure delay grouped by task class and tier.",
+    )
+
+
+@lru_cache(maxsize=1)
 def workflow_duration_histogram():
     return _meter().create_histogram(
         "aegis.workflow_duration_ms",
@@ -103,6 +137,18 @@ def record_estimated_cost(*, cost_usd: float, **attributes: Any) -> None:
     estimated_cost_counter().add(cost_usd, attributes=_compact(attributes))
 
 
+def record_workflow_cost(*, cost_usd: float, **attributes: Any) -> None:
+    workflow_cost_counter().add(cost_usd, attributes=_compact(attributes))
+
+
+def record_cache_event(name: str, *, value: int = 1, **attributes: Any) -> None:
+    cache_event_counter().add(value, attributes=_compact({"cache_event": name, **attributes}))
+
+
+def record_routing_decision(*, value: int = 1, **attributes: Any) -> None:
+    routing_decision_counter().add(value, attributes=_compact(attributes))
+
+
 def record_workflow_duration(duration_ms: float, **attributes: Any) -> None:
     workflow_duration_histogram().record(duration_ms, attributes=_compact(attributes))
 
@@ -113,6 +159,10 @@ def record_node_duration(duration_ms: float, **attributes: Any) -> None:
 
 def record_resume_delay(duration_ms: float, **attributes: Any) -> None:
     resume_delay_histogram().record(duration_ms, attributes=_compact(attributes))
+
+
+def record_queue_delay(duration_ms: float, **attributes: Any) -> None:
+    queue_delay_histogram().record(duration_ms, attributes=_compact(attributes))
 
 
 def _compact(attributes: dict[str, Any]) -> dict[str, Any]:

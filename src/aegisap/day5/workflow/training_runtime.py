@@ -293,6 +293,17 @@ def create_day5_pause(
             observability_context.policy_version = review_payload.get("model_trace", {}).get("policy_version")
             observability_context.outcome_type = review_payload["outcome"]
             observability_context.approval_status = durable.approval_state.status
+            observability_context.metadata.update(
+                {
+                    "task_class": durable.task_class,
+                    "routing_decision": durable.routing_decision.get("reason"),
+                    "model_deployment": durable.model_deployment,
+                    "cache_hit": durable.cache_hit,
+                    "workflow_cost_estimate": durable.workflow_cost_estimate,
+                    "cost_ledger": list(durable.cost_ledger),
+                    "risk_flags": list(durable.risk_flags),
+                }
+            )
             durable.observability = observability_context.to_state_payload()
 
     if durable.thread_status not in {"awaiting_approval", "resumable", "quarantined"}:
@@ -447,6 +458,10 @@ def create_day5_pause(
                 "trace_id": durable.observability.get("trace_id"),
                 "checkpoint_id": checkpoint_id,
                 "langsmith_trace_id": durable.observability.get("langsmith_trace_id"),
+                "task_class": durable.task_class,
+                "routing_decision": durable.routing_decision.get("reason"),
+                "model_deployment": durable.model_deployment,
+                "workflow_cost_estimate": str(durable.workflow_cost_estimate),
             }
         ),
     }
@@ -489,6 +504,17 @@ def resume_day5_case(
         observability_context.outcome_type = (
             "completed" if resumed.thread_status == "completed" else resumed.thread_status
         )
+        observability_context.metadata.update(
+            {
+                "task_class": resumed.task_class,
+                "routing_decision": resumed.routing_decision.get("reason"),
+                "model_deployment": resumed.model_deployment,
+                "cache_hit": resumed.cache_hit,
+                "workflow_cost_estimate": resumed.workflow_cost_estimate,
+                "cost_ledger": list(resumed.cost_ledger),
+                "risk_flags": list(resumed.risk_flags),
+            }
+        )
         publish_langsmith_run(
             context=observability_context,
             name="aegis.workflow.day5.resume",
@@ -519,6 +545,17 @@ def load_thread_snapshot(
         observability_context.workflow_run_id = loaded.state.workflow_run_id
         observability_context.thread_id = loaded.state.thread_id
         observability_context.checkpoint_id = loaded.checkpoint_id
+        observability_context.metadata.update(
+            {
+                "task_class": loaded.state.task_class,
+                "routing_decision": loaded.state.routing_decision.get("reason"),
+                "model_deployment": loaded.state.model_deployment,
+                "cache_hit": loaded.state.cache_hit,
+                "workflow_cost_estimate": loaded.state.workflow_cost_estimate,
+                "cost_ledger": list(loaded.state.cost_ledger),
+                "risk_flags": list(loaded.state.risk_flags),
+            }
+        )
     return {
         "thread_id": thread_id,
         "checkpoint_id": loaded.checkpoint_id,
@@ -541,6 +578,10 @@ def load_thread_snapshot(
                 "trace_id": loaded.state.observability.get("trace_id"),
                 "checkpoint_id": loaded.checkpoint_id,
                 "langsmith_trace_id": loaded.state.observability.get("langsmith_trace_id"),
+                "task_class": loaded.state.task_class,
+                "routing_decision": loaded.state.routing_decision.get("reason"),
+                "model_deployment": loaded.state.model_deployment,
+                "workflow_cost_estimate": str(loaded.state.workflow_cost_estimate),
             }
         ),
     }

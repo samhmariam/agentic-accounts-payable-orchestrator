@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import json
-import os
-from functools import lru_cache
 
-from aegisap.security.credentials import get_openai_client
+from aegisap.routing.model_router import ModelGateway, ModelInvocationRequest
 
 from .models import ExtractedInvoiceCandidate, InvoicePackageInput
 
@@ -17,32 +15,6 @@ SYSTEM_INSTRUCTIONS = (
     "When the same amount appears in both PDF and email, populate both.\n"
     "Do not invent values. Leave missing fields as null."
 )
-
-
-def _required_env(name: str) -> str:
-    value = os.getenv(name)
-    if value:
-        return value
-    raise RuntimeError(f"missing required environment variable: {name}")
-
-@lru_cache(maxsize=1)
-def _get_client():
-    return get_openai_client()
-
-
-def _extract_message_text(response) -> str:
-    content = response.choices[0].message.content
-    if isinstance(content, str):
-        return content
-
-    parts: list[str] = []
-    for item in content or []:
-        text = getattr(item, "text", None)
-        if text:
-            parts.append(text)
-    return "".join(parts)
-
-
 def _parse_candidate_payload(payload: str) -> ExtractedInvoiceCandidate:
     text = payload.strip()
     if text.startswith("```"):
@@ -62,22 +34,22 @@ def _parse_candidate_payload(payload: str) -> ExtractedInvoiceCandidate:
 
 
 def extract_candidate(package: InvoicePackageInput) -> ExtractedInvoiceCandidate:
-    client = _get_client()
-    deployment = _required_env("AZURE_OPENAI_CHAT_DEPLOYMENT")
     package_json = json.dumps(package.model_dump(mode="json"), ensure_ascii=True)
-
-    response = client.chat.completions.create(
-        model=deployment,
-        messages=[
-            {"role": "system", "content": SYSTEM_INSTRUCTIONS},
-            {
-                "role": "user",
-                "content": (
-                    "Extract the invoice candidate from this package.\n"
-                    "Return a JSON object matching the ExtractedInvoiceCandidate schema.\n"
-                    f"Invoice package:\n{package_json}"
-                ),
-            },
-        ],
+    prompt = (
+        "Extract the invoice candidate from this package.\n"
+        "Return a JSON object matching the ExtractedInvoiceCandidate schema.\n"
+        f"Invoice package:\n{package_json}"
     )
-    return _parse_candidate_payload(_extract_message_text(response))
+    response_text, _decision, _ledger_entry = ModelGateway().invoke_text(
+        ModelInvocationRequest(
+            task_class="extract",
+            node_name="invoice_extraction",
+            system_instruction=SYSTEM_INSTRUCTIONS,
+            user_prompt=prompt,
+            prompt_revision="day1",
+            metadata={"tenant": "aegisap-training"},
+            source_snapshot_hash=package.message_id,
+            citation_hash=package.message_id,
+        )
+    )
+    return _parse_candidate_payload(response_text)

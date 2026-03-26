@@ -73,6 +73,14 @@ emits one canonical trace with correlated task and dependency spans, silent
 latency or retry regressions become queryable, and the evaluation sheet becomes
 an executable regression suite that can run in CI and on a deployed sentinel.
 
+### Day 9
+
+The same case now becomes economically governable. Model choice is no longer an
+incidental env var: routing is explicit, cache reuse is bounded by policy,
+workflow cost is ledgered per run, and optimisation is allowed only on modules
+with slice-level regression evidence strong enough to catch silent compliance
+regressions.
+
 ## Learning Contract
 
 Every day should end with:

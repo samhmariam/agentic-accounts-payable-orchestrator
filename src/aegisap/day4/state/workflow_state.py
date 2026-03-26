@@ -43,6 +43,15 @@ class WorkflowState(BaseModel):
     workflow_run_id: str
     case_facts: CaseFacts
     observability: dict[str, Any] = Field(default_factory=dict)
+    task_class: str = "plan"
+    risk_flags: list[str] = Field(default_factory=list)
+    routing_decision: dict[str, Any] = Field(default_factory=dict)
+    model_deployment: str | None = None
+    cache_hit: bool = False
+    workflow_cost_estimate: float = 0.0
+    cost_ledger: list[dict[str, Any]] = Field(default_factory=list)
+    evidence_conflict_count: int = 0
+    retrieval_confidence: float | None = None
     retrieved_evidence: list[str]
     planning: PlanningState
     eligibility: EligibilityState
@@ -64,6 +73,15 @@ def create_initial_workflow_state(
         workflow_run_id=workflow_run_id or f"wf_{uuid4().hex[:16]}",
         case_facts=case_facts,
         observability=dict(observability or {}),
+        task_class="plan",
+        risk_flags=[],
+        routing_decision={},
+        model_deployment=None,
+        cache_hit=False,
+        workflow_cost_estimate=0.0,
+        cost_ledger=[],
+        evidence_conflict_count=0,
+        retrieval_confidence=None,
         retrieved_evidence=case_facts.retrieved_evidence_ids or [],
         planning=PlanningState(
             requires_explicit_plan=True,

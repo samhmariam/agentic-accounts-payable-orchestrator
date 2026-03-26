@@ -260,6 +260,8 @@ async def _run_day4_live(
     observability_context: WorkflowObservabilityContext | None = None,
 ) -> tuple[Day4WorkflowState, str, ExecutionPlan]:
     overlay = derive_policy_overlay(case_facts)
+    if observability_context is not None:
+        observability_context.metadata["risk_flags"] = list(overlay.risk_flags)
     prompt = build_planner_prompt(case_facts=case_facts, policy_overlay=overlay)
     model = AzureOpenAIPlannerClient()
     raw_plan_text = await model.invoke(prompt)
@@ -270,6 +272,8 @@ async def _run_day4_live(
         workflow_run_id=observability_context.workflow_run_id if observability_context else None,
         observability=observability_context.to_state_payload() if observability_context else None,
     )
+    state.task_class = "plan"
+    state.risk_flags = list(overlay.risk_flags)
     state.planning.planner_input_snapshot = {
         "case_facts": case_facts.model_dump(),
         "policy_overlay": overlay.model_dump(),

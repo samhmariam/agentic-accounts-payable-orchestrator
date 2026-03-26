@@ -1,0 +1,34 @@
+name: Day9 Routing Nightly
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  nightly-routing:
+    if: ${{ secrets.AEGISAP_DEPLOYED_BASE_URL != '' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run Day 9 routing regression suite
+        run: uv run pytest tests/day9 -q
+
+      - name: Smoke deployed runtime
+        env:
+          BASE_URL: ${{ secrets.AEGISAP_DEPLOYED_BASE_URL }}
+        run: |
+          if [ -n "$BASE_URL" ]; then
+            uv run python scripts/smoke_deployed_app.py --base-url "$BASE_URL"
+          fi

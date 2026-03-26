@@ -39,6 +39,14 @@ class SecurityConfig(BaseModel):
     deployment_revision: str = "dev"
     tracing_enabled: bool = True
     trace_sample_ratio: float = 1.0
+    light_model_deployment: str = ""
+    strong_model_deployment: str = ""
+    cache_enabled: bool = False
+    cache_ttl_seconds: int = 300
+    backpressure_enabled: bool = True
+    cheap_model_max_concurrency: int = 8
+    strong_model_max_concurrency: int = 2
+    compiled_prompt_version: str = "baseline"
     langsmith_project: str = ""
     langsmith_endpoint: str = ""
     langsmith_api_key_secret_name: str = DEFAULT_LANGSMITH_API_KEY_SECRET_NAME
@@ -70,6 +78,23 @@ def load_security_config(env: dict[str, str] | None = None) -> SecurityConfig:
         deployment_revision=source.get("AEGISAP_DEPLOYMENT_REVISION", "dev").strip() or "dev",
         tracing_enabled=_bool_env(source.get("AEGISAP_TRACING_ENABLED"), default=True),
         trace_sample_ratio=_sample_ratio(source.get("AEGISAP_TRACE_SAMPLE_RATIO")),
+        light_model_deployment=source.get("AEGISAP_LIGHT_MODEL_DEPLOYMENT", "").strip(),
+        strong_model_deployment=source.get("AEGISAP_STRONG_MODEL_DEPLOYMENT", "").strip(),
+        cache_enabled=_bool_env(source.get("AEGISAP_CACHE_ENABLED"), default=False),
+        cache_ttl_seconds=_int_env(source.get("AEGISAP_CACHE_TTL_SECONDS"), default=300, minimum=30),
+        backpressure_enabled=_bool_env(source.get("AEGISAP_BACKPRESSURE_ENABLED"), default=True),
+        cheap_model_max_concurrency=_int_env(
+            source.get("AEGISAP_CHEAP_MODEL_MAX_CONCURRENCY"),
+            default=8,
+            minimum=1,
+        ),
+        strong_model_max_concurrency=_int_env(
+            source.get("AEGISAP_STRONG_MODEL_MAX_CONCURRENCY"),
+            default=2,
+            minimum=1,
+        ),
+        compiled_prompt_version=source.get("AEGISAP_COMPILED_PROMPT_VERSION", "baseline").strip()
+        or "baseline",
         langsmith_project=source.get("LANGSMITH_PROJECT", "").strip(),
         langsmith_endpoint=source.get("LANGSMITH_ENDPOINT", "").strip(),
         langsmith_api_key_secret_name=source.get(
@@ -138,3 +163,13 @@ def _sample_ratio(value: str | None) -> float:
     except ValueError:
         return 1.0
     return max(0.0, min(1.0, ratio))
+
+
+def _int_env(value: str | None, *, default: int, minimum: int = 0) -> int:
+    if value is None or not value.strip():
+        return default
+    try:
+        parsed = int(value)
+    except ValueError:
+        return default
+    return max(minimum, parsed)

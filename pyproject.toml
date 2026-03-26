@@ -28,6 +28,9 @@ dependencies = [
 dev = [
   "pytest>=8.0",
 ]
+day9 = [
+  "dspy>=2.6",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

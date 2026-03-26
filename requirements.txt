@@ -1,6 +1,10 @@
+# Compatibility export for environments that still install from requirements.txt.
+# The source of truth for dependencies is pyproject.toml + uv.lock.
+
 # Web / API
 fastapi==0.135.1
 uvicorn==0.42.0
+pydantic>=2.7
 
 # Agent framework
 langgraph==1.1.3

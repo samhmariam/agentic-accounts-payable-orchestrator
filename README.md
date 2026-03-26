@@ -1,224 +1,137 @@
 # Agentic Accounts Payable Orchestrator
 
-Day 0 should get engineers to Day 1 with the fewest moving parts possible. In this repo that means a default `core` track for Azure OpenAI, Azure AI Search, and Blob Storage, plus an optional `full` track for the broader platform.
+AegisAP is the Golden Thread training repo for Forward Deployed Engineers building
+production-ready agentic systems on Azure. The repo follows one invoice case
+from Day 0 bootstrap through Day 5 durable approval resume.
 
-## Recommended Day 0
+## Training Journey
 
-The recommended path is devcontainer-first and keyless end to end. It assumes:
+| Day | Objective | New Architectural Layer | Azure Services | Command | Artifact | Exit Check |
+| --- | --- | --- | --- | --- | --- | --- |
+| Day 0 | Bootstrap a keyless Azure substrate | Provisioning + RBAC | Azure OpenAI, Azure AI Search, Blob Storage, optional PostgreSQL, Key Vault, App Insights, Container Apps | `uv run python scripts/verify_env.py --track core` or `--track full` | `.day0/core.json` or `.day0/full.json` | Azure services reachable with `DefaultAzureCredential` |
+| Day 1 | Canonicalize invoice intake | Tool-grounded extraction | Azure OpenAI | `uv run python scripts/run_day1_intake.py --mode fixture` or `--mode live` | `build/day1/golden_thread_day1.json` | Canonical invoice emitted or rejected deterministically |
+| Day 2 | Route a trusted invoice through explicit state | Stateful control flow | Azure OpenAI substrate from Day 0 | `uv run python scripts/run_day2_workflow.py --day1-artifact build/day1/golden_thread_day1.json --known-vendor` | `build/day2/golden_thread_day2.json` | Workflow state records route, evidence, and recommendations |
+| Day 3 | Retrieve evidence and rank authority | Multi-agent retrieval with live enterprise search | Azure AI Search, Blob Storage | `uv run python scripts/run_day3_case.py --retrieval-mode azure_search_live` | `build/day3/golden_thread_day3.json` | Live Search evidence is surfaced and authority-ranked correctly |
+| Day 4 | Produce and validate execution plans | Explicit planning and controlled execution | Azure OpenAI, Azure AI Search | `uv run python scripts/run_day4_case.py --planner-mode fixture` or `--planner-mode azure_openai` | `build/day4/golden_thread_day4.json` | Typed plan validates and yields recommendation or escalation |
+| Day 5 | Pause, persist, and resume | Durable checkpoints and approval resume | Azure Database for PostgreSQL, Azure OpenAI, Azure AI Search | `uv run python scripts/run_day5_pause_resume.py` then `uv run python scripts/resume_day5_case.py` | `build/day5/golden_thread_day5_pause.json`, `build/day5/golden_thread_day5_resumed.json` | Approval thread resumes without duplicate side effects |
 
-- you run `az login` inside the devcontainer or local shell
-- `DefaultAzureCredential` provides all Azure auth
-- no service keys, connection strings, or database passwords are committed or required for the default flow
+## Start Here
 
-### 10-minute quickstart
+1. Read [Training Journey](/workspaces/agentic-accounts-payable-orchestrator/docs/TRAINING_JOURNEY.md).
+2. Provision Azure with [Day 0 Azure Bootstrap](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md).
+3. Run the golden-thread lab for each day in order.
+4. Use the notebooks for walkthroughs and the scripts for repeatable execution.
+
+## Day Guides
+
+- [Day 0 Azure Bootstrap](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md)
+- [Day 1 Intake and Canonicalization](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_01.md)
+- [Day 2 Stateful Workflow](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_02.md)
+- [Day 3 Retrieval and Authority](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_03_MULTI_AGENT_RETRIEVAL.md)
+- [Day 4 Explicit Planning](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_04_EXPLICIT_PLANNING.md)
+- [Day 5 Durable State and Resumption](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_05_DURABLE_STATE_AND_RESUMPTION.md)
+
+## Notebooks
+
+- `notebooks/day1_intake_and_canonicalization.ipynb`
+- `notebooks/day2_stateful_workflow_orchestration.ipynb`
+- `notebooks/day3_multi_agent_retrieval_and_authority.ipynb`
+- `notebooks/day4_explicit_planning_and_controlled_execution.ipynb`
+- `notebooks/day5_durable_state_and_resumption.ipynb`
+
+## Day 0 in 10 Minutes
+
+The recommended bootstrap is devcontainer-first, keyless, and RBAC-based.
 
 1. Open the repo in the devcontainer.
+2. Run `az login` and `az account set --subscription <subscription-id>`.
+3. Copy `infra/core.bicepparam.example` to `infra/core.bicepparam`.
+4. Provision core resources:
 
-   The container creates `.venv`, installs the repo dependencies with `uv`, and installs Bicep.
+```powershell
+pwsh ./scripts/provision-core.ps1 `
+  -SubscriptionId <subscription-id> `
+  -ResourceGroup <resource-group> `
+  -Location <azure-region>
+```
 
-2. Authenticate to Azure and select the subscription.
+5. Load the generated state:
 
-   ```bash
-   az login
-   az account set --subscription <subscription-id>
-   az account show
-   ```
+```bash
+source ./scripts/setup-env.sh core
+```
 
-3. Copy the core parameter template and fill in the placeholders.
+6. Verify the environment:
 
-   ```bash
-   cp infra/core.bicepparam.example infra/core.bicepparam
-   ```
+```bash
+uv run python scripts/verify_env.py --track core --env
+uv run python scripts/verify_env.py --track core
+```
 
-   `infra/core.bicepparam` must include:
+Use the `full` track before Day 5 or before deploying the hosted runtime.
 
-   - resource names for Storage, Search, and Azure OpenAI
-   - `openAiChatDeploymentName`
-   - `openAiChatModelName` and `openAiChatModelVersion` if the deployment does not already exist
-   - a unique Azure OpenAI resource name, because the deployment uses that same value as the required custom subdomain for Microsoft Entra token auth
+## Azure Deployment Path
 
-4. Provision the core Day 0 resources.
+The hosted training milestone uses the `full` track and a minimal FastAPI
+runtime exposed through Azure Container Apps.
 
-   ```powershell
-   pwsh ./scripts/provision-core.ps1 `
-     -SubscriptionId <subscription-id> `
-     -ResourceGroup <resource-group> `
-     -Location <azure-region>
-   ```
+1. Provision `full` track resources.
+2. Load the environment with `source ./scripts/setup-env.sh full`.
+3. Apply the Day 5 migration:
 
-   This script:
+```bash
+uv run python scripts/apply_migrations.py
+```
 
-   - deploys Azure OpenAI, Azure AI Search, and Blob Storage
-   - applies the local developer RBAC roles
-   - configures Azure OpenAI with a custom subdomain so keyless Microsoft Entra auth works against the account endpoint
-   - creates the named OpenAI chat deployment if model settings are supplied
-   - creates the starter Search index if it does not already exist
-   - writes local state to `.day0/core.json`
+4. Build and push the image:
 
-5. Load the local environment from the generated Day 0 state file.
+```powershell
+pwsh ./scripts/build_and_push_image.ps1
+```
 
-   In `bash`:
+5. Deploy the Container App:
 
-   ```bash
-   source ./scripts/setup-env.sh core
-   ```
+```powershell
+pwsh ./scripts/deploy_container_app.ps1
+```
 
-   In PowerShell:
+6. Smoke-test the deployed app:
 
-   ```powershell
-   . ./scripts/setup-env.ps1 -Track core
-   ```
+```bash
+uv run python scripts/smoke_deployed_app.py --base-url https://<container-app-url>
+```
 
-6. Verify the environment.
+Hosted success means a learner can hit `/healthz`, run the Day 4 case, persist
+Day 5 state to Azure PostgreSQL, and resume the approval flow without duplicate
+side effects.
 
-   ```bash
-   uv run python scripts/verify_env.py --track core --env
-   uv run python scripts/verify_env.py --track core
-   ```
+## Repo Conventions
 
-## What Day 1 Assumes
-
-Day 1 assumes only this substrate exists:
-
-- one reachable Azure OpenAI chat deployment
-- one reachable Azure AI Search service with the target starter index
-- one reachable Blob Storage account with the source container
-
-That is enough to start agent behavior, retrieval wiring, and document handling. PostgreSQL, Key Vault, telemetry, registry, and runtime hosting are intentionally deferred out of the recommended path.
-
-## Tracks
-
-### Core track
-
-Use the `core` track when the goal is a fast, low-friction bootstrap.
-
-- Infra: `infra/core.bicep`
-- Param template: `infra/core.bicepparam.example`
-- Provisioning: `scripts/provision-core.ps1`
-- Setup in bash: `source ./scripts/setup-env.sh core`
-- Setup in PowerShell: `. ./scripts/setup-env.ps1 -Track core`
-- Verification: `uv run python scripts/verify_env.py --track core`
-
-Core resource providers:
-
-- `Microsoft.CognitiveServices`
-- `Microsoft.Search`
-- `Microsoft.Storage`
-
-### Full track
-
-Use the `full` track only when you need the broader Azure platform on Day 0.
-
-- Infra: `infra/full.bicep`
-- Param template: `infra/full.bicepparam.example`
-- Provisioning: `scripts/provision-full.ps1`
-- Setup in bash: `source ./scripts/setup-env.sh full`
-- Setup in PowerShell: `. ./scripts/setup-env.ps1 -Track full`
-- Verification: `uv run python scripts/verify_env.py --track full`
-
-The full track adds:
-
-- PostgreSQL Flexible Server with Microsoft Entra auth
-- Key Vault in RBAC mode
-- Application Insights and Log Analytics
-- Container Registry
-- Container Apps environment
-- user-assigned managed identity
-
-Full-track-only resource providers:
-
-- `Microsoft.DBforPostgreSQL`
-- `Microsoft.KeyVault`
-- `Microsoft.ContainerRegistry`
-- `Microsoft.App`
-- `Microsoft.Insights`
-- `Microsoft.OperationalInsights`
-- `Microsoft.ManagedIdentity`
-
-## Local Workflow
-
-### Devcontainer
-
-The repo is optimized for the provided devcontainer:
-
-- Python 3.12
-- Azure CLI
-- Bicep
-- PowerShell 7
-- `uv`
-- Docker tooling
-
-The container uses the workspace `.venv` as the default interpreter, matching the README commands and `scripts/verify_env.py`.
-
-### State files and setup
-
-Provisioning writes local, ignored state files:
-
-- `.day0/core.json`
-- `.day0/full.json`
-
-`scripts/setup-env.ps1` reads those files and exports the non-secret environment variables into the current PowerShell process. It does not fetch keys, admin keys, storage connection strings, or PostgreSQL passwords, and it does not overwrite `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, or `AZURE_CLIENT_SECRET`.
-
-`scripts/setup-env.sh` does the same for the current `bash` process, which is the recommended path when running `uv run ...` commands from the devcontainer terminal.
-
-The generated environment also includes `AZURE_SEARCH_DAY3_INDEX` for the dedicated Day 3 live-retrieval index.
-
-### `.env.example`
-
-`.env.example` documents the resulting environment contract for both tracks, but it is not the primary bootstrap path. The preferred flow is provision -> setup-env -> verify.
-
-## Security Baseline
-
-Day 0 defaults in this repo:
-
-- use `az login` locally and managed identity in Azure-hosted workloads
-- use RBAC-enabled data-plane access instead of service keys
-- keep Azure OpenAI and Search local auth disabled
-- keep Storage shared-key auth disabled
-- keep PostgreSQL password auth disabled in the full track
-- do not commit populated `.bicepparam`, `.env`, or `.day0` files
-
-Useful local development roles:
-
-- Azure OpenAI: `Cognitive Services OpenAI User`
-- Azure AI Search: `Search Service Contributor` and `Search Index Data Contributor`
-- Blob Storage: `Storage Blob Data Contributor`
-- Key Vault in the full track: `Key Vault Secrets User`
+- `pyproject.toml` and `uv.lock` are the dependency source of truth.
+- `fixtures/golden_thread/` is the primary teaching baseline.
+- `build/day*/` contains generated lab artifacts.
+- `src/aegisap/api/app.py` is the deployable training runtime.
+- Existing unit and integration tests remain the regression baseline.
 
 ## Verification
 
-`scripts/verify_env.py` is track-aware:
+Run the local regression suite:
 
-- `--track core` checks Azure OpenAI, Azure AI Search, and Blob Storage
-- `--track full` checks the core services plus PostgreSQL, Key Vault, and Application Insights
-- `--env` validates only the environment variables for the selected track
-- `--include-langsmith` enables the optional LangSmith check
+```bash
+pytest -q
+```
 
-The default Day 0 success condition is:
+Run the deployment-free lab path:
 
-- `uv run python scripts/verify_env.py --track core` completes without failures
+```bash
+uv run python scripts/run_day1_intake.py
+uv run python scripts/run_day2_workflow.py --day1-artifact build/day1/golden_thread_day1.json --known-vendor
+uv run python scripts/run_day3_case.py --retrieval-mode fixture
+uv run python scripts/run_day4_case.py --planner-mode fixture
+```
 
-Optional Day 3 live retrieval follow-up:
+## Days 6-10
 
-- `python scripts/ingest_day3_search_docs.py` indexes the Day 3 unstructured evidence into the dedicated Search index
-- `python scripts/verify_day3_live_retrieval.py` runs one live Day 3 smoke case against Azure AI Search
-
-Full-track success adds:
-
-- `uv run python scripts/verify_env.py --track full` completes without failures
-
-## Compatibility Notes
-
-- `scripts/provision.ps1` now aliases the recommended `core` bootstrap.
-- `infra/main.bicep` remains as a compatibility wrapper to the core template.
-- If you need the broader platform, use the explicit `full` files and scripts instead of the compatibility aliases.
-
-## References
-
-- Azure resource providers and Azure services: <https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/azure-services-resource-providers>
-- Azure OpenAI keyless connections: <https://learn.microsoft.com/en-us/azure/developer/ai/keyless-connections>
-- Azure AI Search RBAC client connections: <https://learn.microsoft.com/en-us/azure/search/search-security-rbac-client-code>
-- Azure Storage auth with Microsoft Entra ID: <https://learn.microsoft.com/en-us/azure/storage/blobs/authorize-access-azure-active-directory>
-- Azure Database for PostgreSQL Flexible Server Microsoft Entra auth: <https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/security-entra-configure>
-- Azure Key Vault authentication: <https://learn.microsoft.com/en-us/azure/key-vault/general/authentication>
-- Azure Monitor OpenTelemetry overview: <https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-overview>
+Days 6-10 are intentionally reserved for future curriculum expansion:
+graceful refusal, security hardening, observability and regression, cost/speed
+optimization, and production deployment hardening.

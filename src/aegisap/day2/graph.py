@@ -19,7 +19,7 @@ def build_graph() -> Any:
         from langgraph.graph import END, START, StateGraph
     except ImportError as exc:
         raise ImportError(
-            "LangGraph is required for Day 2. Install dependencies from requirements-day2.txt."
+            "LangGraph is required for Day 2. Install the project dependencies with `uv sync`."
         ) from exc
 
     graph = StateGraph(WorkflowState)

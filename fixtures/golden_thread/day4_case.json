@@ -1,0 +1,27 @@
+{
+  "case_facts": {
+    "case_id": "case_golden_001",
+    "invoice_id": "INV-3001",
+    "supplier_id": "VEND-001",
+    "supplier_name": "Acme Office Supplies",
+    "supplier_exists": true,
+    "invoice_amount_gbp": 12500.0,
+    "invoice_currency": "GBP",
+    "po_present": true,
+    "po_number": "PO-9001",
+    "bank_details_changed": false,
+    "amount_approval_threshold_gbp": 10000.0,
+    "controller_approval_threshold_gbp": 12000.0,
+    "retrieved_evidence_ids": [
+      "erp:po:9001",
+      "supplier_master:VEND-001"
+    ]
+  },
+  "expected": {
+    "must_require_approvals": [
+      "ap_manager",
+      "controller"
+    ],
+    "must_not_escalate": true
+  }
+}

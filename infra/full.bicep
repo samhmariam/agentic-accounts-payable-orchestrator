@@ -241,7 +241,11 @@ resource aoai 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
 }
 
 output acrId string = acr.id
+output acrLoginServer string = acr.properties.loginServer
+output acrName string = acr.name
 output appInsightsConnectionString string = appi.properties.ConnectionString
+output containerAppsEnvironmentId string = cae.id
+output containerAppsEnvironmentName string = cae.name
 output keyVaultId string = kv.id
 output keyVaultUri string = kv.properties.vaultUri
 output location string = location

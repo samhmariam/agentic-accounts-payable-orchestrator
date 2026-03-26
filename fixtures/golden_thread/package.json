@@ -1,0 +1,13 @@
+{
+  "message_id": "msg-golden-001",
+  "email_subject": "Invoice INV-3001 from Acme Office Supplies",
+  "email_body": "Hello AP team,\nPlease find attached invoice INV-3001 from Acme Office Supplies for PO-9001.\nGross total is GBP 12500.00.\nThis case follows the Golden Thread training path.\nRegards,\nAcme Billing",
+  "attachments": [
+    {
+      "filename": "INV-3001.pdf",
+      "content_type": "application/pdf",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "extracted_text": "Supplier: Acme Office Supplies\nInvoice Number: INV-3001\nInvoice Date: 01/03/2026\nCurrency: GBP\nNet Amount: 10000.00 GBP\nVAT Amount: 2500.00 GBP\nGross Amount: 12500.00 GBP\nPO Reference: PO-9001\nBank Details: IBAN GB29NWBK60161331924421\n"
+    }
+  ]
+}

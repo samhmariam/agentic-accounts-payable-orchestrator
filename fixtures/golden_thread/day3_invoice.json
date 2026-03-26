@@ -1,0 +1,11 @@
+{
+  "case_id": "case_golden_001",
+  "invoice_id": "INV-3001",
+  "invoice_date": "2026-03-01",
+  "vendor_id": "VEND-001",
+  "vendor_name": "Acme Office Supplies",
+  "po_number": "PO-9001",
+  "amount": 12500.0,
+  "currency": "GBP",
+  "bank_account_last4": "4421"
+}

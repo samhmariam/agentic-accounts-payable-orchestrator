@@ -1,4 +1,6 @@
-# Evaluation / dev only — not installed in production containers
+# Compatibility export for development installs.
+# The source of truth for dependencies is pyproject.toml + uv.lock.
+# Evaluation / dev only - not installed in production containers
 -r requirements.txt
 
 dspy-ai==3.1.3

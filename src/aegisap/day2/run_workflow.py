@@ -48,7 +48,9 @@ def run_from_fixture(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run AegisAP Day 2 workflow")
+    parser = argparse.ArgumentParser(
+        description="Run the legacy Day 2 fixture demo. The preferred training entrypoint is scripts/run_day2_workflow.py."
+    )
     parser.add_argument("fixture", help="fixture directory name under fixtures/day2")
     parser.add_argument(
         "--known-vendor",

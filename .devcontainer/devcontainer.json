@@ -11,7 +11,7 @@
     "ghcr.io/devcontainers/features/node:1": { "version": "lts" }
   },
 
-  "postCreateCommand": "bash -lc 'pip install uv && uv venv .venv && . .venv/bin/activate && uv pip install -r requirements.txt && az bicep install'",
+  "postCreateCommand": "bash -lc 'pip install uv && uv sync --dev && az bicep install'",
 
   "customizations": {
     "vscode": {
@@ -60,6 +60,8 @@
     "AZURE_STORAGE_CONTAINER": "${localEnv:AZURE_STORAGE_CONTAINER}",
     "AZURE_KEY_VAULT_URI": "${localEnv:AZURE_KEY_VAULT_URI}",
     "APPLICATIONINSIGHTS_CONNECTION_STRING": "${localEnv:APPLICATIONINSIGHTS_CONNECTION_STRING}",
+    "AEGISAP_POSTGRES_DSN": "${localEnv:AEGISAP_POSTGRES_DSN}",
+    "AEGISAP_RESUME_TOKEN_SECRET": "${localEnv:AEGISAP_RESUME_TOKEN_SECRET}",
     "LANGSMITH_API_KEY": "${localEnv:LANGSMITH_API_KEY}",
     "LANGSMITH_PROJECT": "${localEnv:LANGSMITH_PROJECT}",
     "AZURE_TENANT_ID": "${localEnv:AZURE_TENANT_ID}",

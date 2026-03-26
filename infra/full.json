@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.41.2.15936",
-      "templateHash": "11602449143995829008"
+      "templateHash": "9242747210529022759"
     }
   },
   "parameters": {
@@ -354,6 +354,7 @@
         "name": "S0"
       },
       "properties": {
+        "customSubDomainName": "[parameters('openAiName')]",
         "disableLocalAuth": true,
         "publicNetworkAccess": "Enabled"
       }
@@ -364,9 +365,25 @@
       "type": "string",
       "value": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName'))]"
     },
+    "acrLoginServer": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName')), '2023-07-01').loginServer]"
+    },
+    "acrName": {
+      "type": "string",
+      "value": "[parameters('acrName')]"
+    },
     "appInsightsConnectionString": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').ConnectionString]"
+    },
+    "containerAppsEnvironmentId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.App/managedEnvironments', parameters('containerAppsEnvName'))]"
+    },
+    "containerAppsEnvironmentName": {
+      "type": "string",
+      "value": "[parameters('containerAppsEnvName')]"
     },
     "keyVaultId": {
       "type": "string",
@@ -406,7 +423,7 @@
     },
     "openAiEndpoint": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName')), '2024-10-01').endpoint]"
+      "value": "[format('https://{0}.openai.azure.com/', parameters('openAiName'))]"
     },
     "openAiId": {
       "type": "string",

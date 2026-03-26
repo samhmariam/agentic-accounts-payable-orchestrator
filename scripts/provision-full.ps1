@@ -141,13 +141,18 @@ $environment = [ordered]@{
 }
 
 $resources = [ordered]@{
+    acrName = Get-OutputValue -Outputs $outputs -Name "acrName"
+    acrLoginServer = Get-OutputValue -Outputs $outputs -Name "acrLoginServer"
     openAiName = Get-OutputValue -Outputs $outputs -Name "openAiName"
     searchName = Get-OutputValue -Outputs $outputs -Name "searchName"
     searchDay3IndexName = $Day3SearchIndexName
     storageAccountName = Get-OutputValue -Outputs $outputs -Name "storageAccountName"
+    containerAppsEnvironmentId = Get-OutputValue -Outputs $outputs -Name "containerAppsEnvironmentId"
+    containerAppsEnvironmentName = Get-OutputValue -Outputs $outputs -Name "containerAppsEnvironmentName"
     postgresServerName = Get-OutputValue -Outputs $outputs -Name "postgresServerName"
     keyVaultUri = Get-OutputValue -Outputs $outputs -Name "keyVaultUri"
     workloadIdentityClientId = Get-OutputValue -Outputs $outputs -Name "workloadIdentityClientId"
+    workloadIdentityResourceId = Get-OutputValue -Outputs $outputs -Name "workloadIdentityResourceId"
     developerPrincipalName = $DeveloperPrincipalName
     postgresEntraAdminName = $PostgresEntraAdminName
 }

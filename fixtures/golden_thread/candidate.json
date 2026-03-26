@@ -1,0 +1,18 @@
+{
+  "supplier_name_text": "Acme Office Supplies",
+  "invoice_number_text": "INV-3001",
+  "invoice_date_text": "01/03/2026",
+  "currency_text": "GBP",
+  "net_amount": {
+    "pdf_text": "10000.00 GBP"
+  },
+  "vat_amount": {
+    "pdf_text": "2500.00 GBP"
+  },
+  "gross_amount": {
+    "pdf_text": "12500.00 GBP",
+    "email_text": "GBP 12500.00"
+  },
+  "po_reference_text": "PO-9001",
+  "bank_details_text": "IBAN GB29NWBK60161331924421"
+}

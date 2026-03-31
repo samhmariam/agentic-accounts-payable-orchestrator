@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 
 from aegisap.training.fixtures import golden_thread_path
 from aegisap.training.labs import (
@@ -42,6 +43,37 @@ def test_day2_lab_consumes_day1_artifact() -> None:
     assert artifact_path.exists()
     assert payload["workflow_state"]["invoice_id"] == "INV-3001"
     assert payload["workflow_state"]["route"] == "high_value"
+
+
+def test_day2_lab_consumes_legacy_flat_day1_artifact(tmp_path) -> None:
+    legacy_day1_path = tmp_path / "legacy_day1.json"
+    legacy_day1_path.write_text(
+        json.dumps(
+            {
+                "supplier_name": "Acme Office Supplies",
+                "invoice_number": "INV-3001",
+                "invoice_date": "2026-03-01",
+                "currency": "GBP",
+                "net_amount": "10000.00",
+                "vat_amount": "2500.00",
+                "gross_amount": "12500.00",
+                "po_reference": "PO-9001",
+                "bank_details_hash": "ec9b5ac9d24b093affc8aeb5d8464258c60621a6545a81fc212adc3561e7a800",
+                "_meta": {"extraction_latency_ms": 65714},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    artifact_path, payload = run_day2_from_day1_artifact(
+        artifact_path=legacy_day1_path,
+        known_vendor=True,
+        artifact_name="test_day2_legacy_flat",
+    )
+
+    assert artifact_path.exists()
+    assert payload["workflow_state"]["invoice_id"] == "INV-3001"
+    assert payload["workflow_state"]["package_id"] == "legacy-legacy_day1-INV-3001"
 
 
 def test_day3_lab_writes_evidence_bundle() -> None:

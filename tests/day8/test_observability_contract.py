@@ -23,6 +23,22 @@ def test_root_span_attributes_hash_case_and_thread_identifiers() -> None:
     assert attrs["aegis.policy_version"] == "policy-v1"
 
 
+def test_root_span_attributes_include_training_checkpoint_metadata_when_present() -> None:
+    context = make_workflow_observability_context(
+        request_id="req-2",
+        workflow_run_id="wf-2",
+        case_id="case-2",
+        thread_id="thread-2",
+    )
+    context.metadata["checkpoint_phase"] = "day8_trace_extension"
+    context.metadata["checkpoint_span"] = "day8.eval_guardrail"
+
+    attrs = root_span_attributes(context)
+
+    assert attrs["aegis.checkpoint_phase"] == "day8_trace_extension"
+    assert attrs["aegis.checkpoint_span"] == "day8.eval_guardrail"
+
+
 def test_node_and_business_outcome_attribute_sets_match_day8_contract() -> None:
     node_attrs = node_span_attributes(
         node_name="vendor_history_check",

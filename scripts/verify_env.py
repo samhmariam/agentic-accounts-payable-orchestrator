@@ -28,6 +28,7 @@ import urllib.request
 from typing import Any
 from urllib.parse import urlparse
 
+from aegisap.security import credentials
 from aegisap.security.config import load_security_config
 from aegisap.security.policy import validate_security_posture
 
@@ -398,6 +399,7 @@ def check_app_insights() -> dict[str, str]:
 
 def main() -> int:
     args = parse_args()
+    credentials._load_local_day0_environment()
     results = []
     results.extend(require_env(required_env_for_track(args.track)))
     results.append(check_security_posture())

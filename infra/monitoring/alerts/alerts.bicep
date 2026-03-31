@@ -3,7 +3,7 @@ targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 param logAnalyticsWorkspaceId string
 
-resource retrySpikeAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01-preview' = {
+resource retrySpikeAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01' = {
   name: 'aegisap-retry-spike'
   location: location
   properties: {
@@ -18,7 +18,7 @@ resource retrySpikeAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01-prev
     criteria: {
       allOf: [
         {
-          query: 'traces | where message contains "retry_" | summarize Count=count()'
+          query: 'AppTraces | where Message contains "retry_" | summarize Count=count()'
           timeAggregation: 'Count'
           operator: 'GreaterThan'
           threshold: 10
@@ -35,7 +35,7 @@ resource retrySpikeAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01-prev
   }
 }
 
-resource latencyAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01-preview' = {
+resource latencyAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01' = {
   name: 'aegisap-node-latency'
   location: location
   properties: {
@@ -50,7 +50,7 @@ resource latencyAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01-preview
     criteria: {
       allOf: [
         {
-          query: 'traces | summarize Count=count()'
+          query: 'AppTraces | summarize Count=count()'
           timeAggregation: 'Count'
           operator: 'GreaterThan'
           threshold: 0

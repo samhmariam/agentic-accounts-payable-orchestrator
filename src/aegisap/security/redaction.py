@@ -44,6 +44,11 @@ def redact_text(text: str) -> tuple[str, bool]:
     return redacted, changed
 
 
+def redact_pii(text: str) -> str:
+    redacted, _changed = redact_text(text)
+    return redacted
+
+
 def redact_value(value: Any) -> tuple[Any, bool]:
     if isinstance(value, str):
         return redact_text(value)

@@ -1,0 +1,178 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "071b6711609cf4e6b1b1b5b24bef847d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "f71439002d1c7b5c9920bf8c70b16800",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-6-policy-review-graceful-refusal\">Day 6 \u2014 Policy Review &amp; Graceful Refusal</h1>\n<span class=\"paragraph\"><strong>What you will learn</strong>:</span>\n<ul>\n<li>How policy rules are declared as typed <code>PolicyReference</code> objects \u2014 not inline strings</li>\n<li>How <code>detect_prompt_injection()</code> catches override and hearsay-approval patterns</li>\n<li>How <code>evaluate_authority_boundary()</code> scores whether the proposed action is in scope</li>\n<li>Why <strong>three typed outcomes</strong> are safer than a boolean: <code>approved_to_proceed</code> /\n  <code>needs_human_review</code> / <code>not_authorised_to_continue</code></li>\n<li>The adversarial lab: 20 malicious cases across 5 attack buckets</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "8d07dc51a16c128b07f06b79a70cba76",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"lab-contract\">Lab Contract</h2></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Prerequisites</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>Policy fixtures are present under <code>fixtures/day06</code>.</li>\n<li>If you are following the full cumulative path, Day 5 produced <code>build/day5/golden_thread_day5_resumed.json</code>.</li>\n<li>The adversarial cases file exists if you want to run the malicious-case batch.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Required inputs</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>A Day 6 fixture or custom <code>Day6ReviewInput</code> payload.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Required env vars</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>None beyond the prior-day artifact and notebook defaults.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Expected artifact</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li><code>build/day6/golden_thread_day6.json</code></li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Pass criteria</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>The notebook produces one of the three typed policy outcomes.</li>\n<li>The adversarial summary shows whether malicious cases are blocked correctly.</li>\n<li>The Day 6 artifact is written for Day 10 refusal-safety gating.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Implementation exercise</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>Run or extend a refusal scenario and prove the decision object still explains the reason codes, blocking conditions, and citations.</li>\n</ul></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "3874411da99e626fc4184c6b8e55269f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-select-scenario\">1 \u2014 Select Scenario</h2></span><marimo-ui-element object-id='bkHC-0' random-id='1df59906-f83a-3c20-efe7-b5f2aba31e2a'><marimo-dropdown data-initial-value='[&quot;clean_authorised_case&quot;]' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Fixture Scenario&lt;/span&gt;&lt;/span&gt;&quot;' data-options='[&quot;-- custom JSON below --&quot;,&quot;clean_authorised_case&quot;,&quot;contradictory_tax_case&quot;,&quot;missing_approval_case&quot;,&quot;missing_po_exception_case&quot;,&quot;prompt_injection_email_case&quot;,&quot;unsupported_approval_channel_case&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false'></marimo-dropdown></marimo-ui-element><marimo-ui-element object-id='bkHC-1' random-id='27f01835-594d-3070-9cbc-40157187536c'><marimo-code-editor data-initial-value='&quot;&quot;' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Or paste a Day6ReviewInput JSON&lt;/span&gt;&lt;/span&gt;&quot;' data-language='&quot;json&quot;' data-placeholder='&quot;&quot;' data-disabled='false' data-show-copy-button='true' data-debounce='false'></marimo-code-editor></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "63abba3fe4a0409269af6a235a721187",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-review-input\">2 \u2014 Review Input</h2></span><marimo-json-output data-json-data='{&quot;case_id&quot;:&quot;CASE-DAY6-TAX-CONFLICT&quot;,&quot;thread_id&quot;:&quot;thread-day6-tax-conflict&quot;,&quot;candidate_recommendation&quot;:{&quot;status&quot;:&quot;recommendation_ready&quot;,&quot;requested_action&quot;:&quot;route_to_controller_approval&quot;},&quot;escalation_package&quot;:null,&quot;evidence_ledger&quot;:[{&quot;evidence_id&quot;:&quot;case_summary:tax-conflict&quot;,&quot;source_type&quot;:&quot;case_summary&quot;,&quot;source_ref&quot;:&quot;fixture.tax-conflict&quot;,&quot;trust_tier&quot;:&quot;derived&quot;,&quot;timestamp&quot;:&quot;2026-03-26T00:00:00Z&quot;,&quot;extract&quot;:&quot;Invoice includes tax handling that must be validated before progression.&quot;,&quot;payload_hash&quot;:&quot;hash-tax-summary&quot;,&quot;derived_claim_ids&quot;:[&quot;claim_tax_treatment&quot;]},{&quot;evidence_id&quot;:&quot;tax_doc:vat-note&quot;,&quot;source_type&quot;:&quot;retrieval_note&quot;,&quot;source_ref&quot;:&quot;tax_doc:vat-note&quot;,&quot;trust_tier&quot;:&quot;derived&quot;,&quot;timestamp&quot;:&quot;2026-03-26T00:00:00Z&quot;,&quot;extract&quot;:&quot;Retrieved tax note suggests VAT should be charged.&quot;,&quot;payload_hash&quot;:&quot;hash-tax-note-1&quot;,&quot;derived_claim_ids&quot;:[&quot;claim_tax_treatment&quot;]},{&quot;evidence_id&quot;:&quot;tax_doc:reverse-charge&quot;,&quot;source_type&quot;:&quot;retrieval_note&quot;,&quot;source_ref&quot;:&quot;tax_doc:reverse-charge&quot;,&quot;trust_tier&quot;:&quot;derived&quot;,&quot;timestamp&quot;:&quot;2026-03-26T00:00:00Z&quot;,&quot;extract&quot;:&quot;Retrieved tax note suggests reverse-charge treatment applies instead.&quot;,&quot;payload_hash&quot;:&quot;hash-tax-note-2&quot;,&quot;derived_claim_ids&quot;:[&quot;claim_tax_treatment&quot;]}],&quot;claim_ledger&quot;:[{&quot;claim_id&quot;:&quot;claim_tax_treatment&quot;,&quot;claim_type&quot;:&quot;tax_treatment&quot;,&quot;summary&quot;:&quot;Tax treatment is disputed by the available evidence.&quot;,&quot;supporting_evidence_ids&quot;:[&quot;tax_doc:vat-note&quot;,&quot;tax_doc:reverse-charge&quot;],&quot;conflicting_evidence_ids&quot;:[&quot;tax_doc:vat-note&quot;,&quot;tax_doc:reverse-charge&quot;],&quot;requires_authority&quot;:false,&quot;metadata&quot;:{}}],&quot;policy_context&quot;:{&quot;policy_version&quot;:&quot;policy_pack_v6&quot;,&quot;accepted_approval_channels&quot;:[&quot;erp_approval_record&quot;,&quot;controller_queue&quot;],&quot;mandatory_checks&quot;:[&quot;invoice_identity_verified&quot;,&quot;tax_treatment_supported&quot;,&quot;action_within_system_authority&quot;],&quot;policy_references&quot;:[{&quot;policy_id&quot;:&quot;POL-EVID-002&quot;,&quot;title&quot;:&quot;Mandatory evidence must be present&quot;,&quot;description&quot;:&quot;Tax evidence must be sufficient before progression.&quot;}],&quot;control_plane_rules&quot;:[&quot;Return human review when tax evidence conflicts.&quot;]},&quot;authority_context&quot;:{&quot;required_approvals&quot;:[],&quot;registered_approval_channels&quot;:[&quot;erp_approval_record&quot;,&quot;controller_queue&quot;],&quot;allowed_actions&quot;:[&quot;route_to_controller_approval&quot;,&quot;request_manual_review&quot;],&quot;prohibited_actions&quot;:[&quot;execute_payment&quot;]},&quot;injection_flags&quot;:[],&quot;missing_requirements&quot;:[],&quot;conflict_flags&quot;:[&quot;tax_conflict_detected&quot;],&quot;review_metadata&quot;:{&quot;fixture&quot;:&quot;contradictory_tax_case&quot;}}' data-value-types='&quot;python&quot;'></marimo-json-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "713069dc598608de28887ea0765aeb66",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-policy-registry\">3 \u2014 Policy Registry</h2></span><marimo-ui-element object-id='PKri-0' random-id='2e0b65a6-891b-c343-19ad-895a09784d58'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;Policy ID&#92;&quot;:&#92;&quot;POL-CTRL-001&#92;&quot;,&#92;&quot;Title&#92;&quot;:&#92;&quot;Control plane immutability&#92;&quot;,&#92;&quot;Blocking&#92;&quot;:&#92;&quot;Yes&#92;&quot;},{&#92;&quot;Policy ID&#92;&quot;:&#92;&quot;POL-AUTH-004&#92;&quot;,&#92;&quot;Title&#92;&quot;:&#92;&quot;Approval channel registration&#92;&quot;,&#92;&quot;Blocking&#92;&quot;:&#92;&quot;Yes&#92;&quot;},{&#92;&quot;Policy ID&#92;&quot;:&#92;&quot;POL-EVID-002&#92;&quot;,&#92;&quot;Title&#92;&quot;:&#92;&quot;Mandatory evidence present&#92;&quot;,&#92;&quot;Blocking&#92;&quot;:&#92;&quot;Yes&#92;&quot;},{&#92;&quot;Policy ID&#92;&quot;:&#92;&quot;POL-SCOPE-003&#92;&quot;,&#92;&quot;Title&#92;&quot;:&#92;&quot;System authority boundary&#92;&quot;,&#92;&quot;Blocking&#92;&quot;:&#92;&quot;Yes&#92;&quot;}]&quot;' data-total-rows='4' data-total-columns='3' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-show-filters='false' data-show-download='false' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false' data-download-file-name='&quot;policies&quot;'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "c716c707a0eb3ae3b4cf92bd9b09b2f7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-prompt-injection-scan\">4 \u2014 Prompt-Injection Scan</h2></span><marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;No injection signals detected.&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;success&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "a742cfe19d775470bec11873901ff335",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-authority-boundary-check\">5 \u2014 Authority Boundary Check</h2></span><marimo-json-output data-json-data='{&quot;required&quot;:false,&quot;present&quot;:true,&quot;approval_channel_valid&quot;:true,&quot;approver_identity_verified&quot;:true,&quot;approved_by&quot;:null,&quot;notes&quot;:&quot;Workflow is authorised to continue to the next control step because no unverified approval claim is being relied on.&quot;}' data-value-types='&quot;python&quot;'></marimo-json-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "b3e251dd49b8cc831109cf8da38783c3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-evidence-sufficiency\">6 \u2014 Evidence Sufficiency</h2></span><marimo-json-output data-json-data='{&quot;sufficiency&quot;:&quot;conflicting&quot;,&quot;mandatory_checks&quot;:[{&quot;check_id&quot;:&quot;invoice_identity_verified&quot;,&quot;status&quot;:&quot;pass&quot;,&quot;reason_code&quot;:&quot;none&quot;,&quot;evidence_ids&quot;:[&quot;case_summary:tax-conflict&quot;],&quot;missing_evidence&quot;:[],&quot;policy_ids&quot;:[&quot;POL-EVID-002&quot;]},{&quot;check_id&quot;:&quot;supplier_identity_verified&quot;,&quot;status&quot;:&quot;pass&quot;,&quot;reason_code&quot;:&quot;none&quot;,&quot;evidence_ids&quot;:[&quot;case_summary:tax-conflict&quot;],&quot;missing_evidence&quot;:[],&quot;policy_ids&quot;:[&quot;POL-EVID-002&quot;]},{&quot;check_id&quot;:&quot;po_requirement_satisfied&quot;,&quot;status&quot;:&quot;not_applicable&quot;,&quot;reason_code&quot;:&quot;none&quot;,&quot;evidence_ids&quot;:[],&quot;missing_evidence&quot;:[],&quot;policy_ids&quot;:[&quot;POL-EVID-002&quot;]},{&quot;check_id&quot;:&quot;bank_change_verified_if_changed&quot;,&quot;status&quot;:&quot;not_applicable&quot;,&quot;reason_code&quot;:&quot;none&quot;,&quot;evidence_ids&quot;:[],&quot;missing_evidence&quot;:[],&quot;policy_ids&quot;:[&quot;POL-EVID-002&quot;]},{&quot;check_id&quot;:&quot;approval_route_defined&quot;,&quot;status&quot;:&quot;pass&quot;,&quot;reason_code&quot;:&quot;none&quot;,&quot;evidence_ids&quot;:[],&quot;missing_evidence&quot;:[],&quot;policy_ids&quot;:[&quot;POL-AUTH-004&quot;]},{&quot;check_id&quot;:&quot;tax_treatment_supported&quot;,&quot;status&quot;:&quot;fail&quot;,&quot;reason_code&quot;:&quot;CONTRADICTORY_EVIDENCE&quot;,&quot;evidence_ids&quot;:[&quot;tax_doc:vat-note&quot;,&quot;tax_doc:reverse-charge&quot;],&quot;missing_evidence&quot;:[],&quot;policy_ids&quot;:[&quot;POL-EVID-002&quot;]},{&quot;check_id&quot;:&quot;action_within_system_authority&quot;,&quot;status&quot;:&quot;pass&quot;,&quot;reason_code&quot;:&quot;none&quot;,&quot;evidence_ids&quot;:[],&quot;missing_evidence&quot;:[],&quot;policy_ids&quot;:[&quot;POL-SCOPE-003&quot;]},{&quot;check_id&quot;:&quot;case_material_override_attempt&quot;,&quot;status&quot;:&quot;pass&quot;,&quot;reason_code&quot;:&quot;none&quot;,&quot;evidence_ids&quot;:[],&quot;missing_evidence&quot;:[],&quot;policy_ids&quot;:[&quot;POL-CTRL-001&quot;]},{&quot;check_id&quot;:&quot;contradiction_detection&quot;,&quot;status&quot;:&quot;fail&quot;,&quot;reason_code&quot;:&quot;CONTRADICTORY_EVIDENCE&quot;,&quot;evidence_ids&quot;:[&quot;tax_doc:vat-note&quot;,&quot;tax_doc:reverse-charge&quot;],&quot;missing_evidence&quot;:[],&quot;policy_ids&quot;:[&quot;POL-EVID-002&quot;]}]}' data-value-types='&quot;python&quot;'></marimo-json-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "2fb902359d6d4ea92d7cc74342971534",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"7-decision-outcome\">7 \u2014 Decision Outcome</h2></span><marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;&lt;strong&gt;&lt;code&gt;needs_human_review&lt;/code&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;warn&quot;'></marimo-callout-output><marimo-accordion data-labels='[&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Full reflection review&lt;/span&gt;&lt;/span&gt;&quot;,&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Audit row&lt;/span&gt;&lt;/span&gt;&quot;]' data-multiple='false'><div><marimo-json-output data-json-data='{&quot;required_claims&quot;:[&quot;invoice_identity_verified&quot;,&quot;supplier_identity_verified&quot;,&quot;approval_route_defined&quot;,&quot;action_within_system_authority&quot;],&quot;unresolved_conflicts&quot;:[&quot;tax_conflict_detected&quot;],&quot;override_signals&quot;:[],&quot;recommended_outcome&quot;:&quot;needs_human_review&quot;,&quot;rationale&quot;:&quot;Contradictory evidence must be resolved by a human reviewer.&quot;}' data-value-types='&quot;python&quot;'></marimo-json-output></div><div><marimo-json-output data-json-data='{&quot;outcome&quot;:&quot;needs_human_review&quot;,&quot;policy_version&quot;:&quot;&quot;,&quot;reviewer_model&quot;:&quot;&quot;,&quot;reasons&quot;:[&quot;Mandatory check &#x27;tax_treatment_supported&#x27; found contradictory evidence that blocks automated progression.&quot;,&quot;Mandatory check &#x27;contradiction_detection&#x27; found contradictory evidence that blocks automated progression.&quot;],&quot;escalation_required&quot;:false,&quot;next_action&quot;:&quot;&quot;,&quot;citations&quot;:2,&quot;case_id&quot;:&quot;CASE-DAY6-TAX-CONFLICT&quot;,&quot;injection_flags_count&quot;:0}' data-value-types='&quot;python&quot;'></marimo-json-output></div></marimo-accordion></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "dfcf7b49129a6b46c4ef5014d57eb690",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"8-adversarial-lab-results\">8 \u2014 Adversarial Lab Results</h2></span><marimo-ui-element object-id='Kclp-0' random-id='c45ef3d6-e56b-e1de-dba6-e4c740e97dbc'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;Bucket&#92;&quot;:&#92;&quot;direct_prompt_override&#92;&quot;,&#92;&quot;Pass&#92;&quot;:0,&#92;&quot;Fail&#92;&quot;:4,&#92;&quot;Pass Rate&#92;&quot;:&#92;&quot;0%&#92;&quot;},{&#92;&quot;Bucket&#92;&quot;:&#92;&quot;false_evidence_claims&#92;&quot;,&#92;&quot;Pass&#92;&quot;:0,&#92;&quot;Fail&#92;&quot;:4,&#92;&quot;Pass Rate&#92;&quot;:&#92;&quot;0%&#92;&quot;},{&#92;&quot;Bucket&#92;&quot;:&#92;&quot;forged_approval_authority&#92;&quot;,&#92;&quot;Pass&#92;&quot;:0,&#92;&quot;Fail&#92;&quot;:4,&#92;&quot;Pass Rate&#92;&quot;:&#92;&quot;0%&#92;&quot;},{&#92;&quot;Bucket&#92;&quot;:&#92;&quot;resume_state_manipulation&#92;&quot;,&#92;&quot;Pass&#92;&quot;:0,&#92;&quot;Fail&#92;&quot;:4,&#92;&quot;Pass Rate&#92;&quot;:&#92;&quot;0%&#92;&quot;},{&#92;&quot;Bucket&#92;&quot;:&#92;&quot;tool_call_coercion&#92;&quot;,&#92;&quot;Pass&#92;&quot;:0,&#92;&quot;Fail&#92;&quot;:4,&#92;&quot;Pass Rate&#92;&quot;:&#92;&quot;0%&#92;&quot;}]&quot;' data-total-rows='5' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-show-filters='false' data-show-download='false' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false' data-download-file-name='&quot;summary_rows&quot;'></marimo-table></marimo-ui-element><marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Some adversarial cases failed \u2014 review the Fail column.&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;danger&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "1524fa28195a608549ac7e0e1eebb364",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Artifact written to &lt;code&gt;build/day6/golden_thread_day6.json&lt;/code&gt;&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;success&quot;'></marimo-callout-output><marimo-ui-element object-id='emfo-0' random-id='5b100309-e1c5-87d6-70d2-36f4d660eaac'><marimo-download data-initial-value='null' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Download golden_thread_day6.json&lt;/span&gt;&lt;/span&gt;&quot;' data-data='&quot;./@file/5607-58080-e8vD2AyN.json&quot;' data-filename='&quot;golden_thread_day6.json&quot;' data-disabled='false' data-lazy='false'></marimo-download></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "fc8352fee2434e5180f956a0c34fcc70",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Ready for &lt;strong&gt;Day 7 or Day 10 gate validation&lt;/strong&gt;. Verified artifact: &lt;code&gt;build/day6/golden_thread_day6.json&lt;/code&gt;&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;success&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

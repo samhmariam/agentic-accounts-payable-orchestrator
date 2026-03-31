@@ -34,6 +34,14 @@ SEARCH_INDEX_FIELDS = [
     "chunk_id",
 ]
 
+DAY3_SEMANTIC_CONFIGURATION_NAME = "day3-semantic-config"
+
+
+def _build_credential():
+    # Backward-compatible wrapper for scripts that still import this helper.
+    return get_token_credential()
+
+
 def _naive_keyword_score(query: str, text: str) -> float:
     query_tokens = {token.lower() for token in query.split() if token.strip()}
     if not query_tokens:
@@ -120,6 +128,28 @@ def evidence_item_from_search_result(document: Mapping[str, Any], *, backend: st
     )
 
 
+def _build_day3_semantic_search():
+    from azure.search.documents.indexes.models import (
+        SemanticConfiguration,
+        SemanticField,
+        SemanticPrioritizedFields,
+        SemanticSearch,
+    )
+
+    return SemanticSearch(
+        default_configuration_name=DAY3_SEMANTIC_CONFIGURATION_NAME,
+        configurations=[
+            SemanticConfiguration(
+                name=DAY3_SEMANTIC_CONFIGURATION_NAME,
+                prioritized_fields=SemanticPrioritizedFields(
+                    title_field=SemanticField(field_name="title"),
+                    content_fields=[SemanticField(field_name="content")],
+                ),
+            )
+        ],
+    )
+
+
 def build_day3_search_index(index_name: str):
     from azure.search.documents.indexes.models import SearchFieldDataType, SearchIndex, SearchableField, SimpleField
 
@@ -139,7 +169,11 @@ def build_day3_search_index(index_name: str):
         SimpleField(name="bank_account_last4", type=SearchFieldDataType.String, filterable=True),
         SimpleField(name="chunk_id", type=SearchFieldDataType.Int32, filterable=True, sortable=True),
     ]
-    return SearchIndex(name=index_name, fields=fields)
+    return SearchIndex(
+        name=index_name,
+        fields=fields,
+        semantic_search=_build_day3_semantic_search(),
+    )
 
 
 def day3_fixture_documents(docs_path: str | Path | None = None) -> list[dict[str, Any]]:
@@ -188,12 +222,14 @@ class AzureAISearchLiveAdapter:
         endpoint: str | None = None,
         index_name: str | None = None,
         credential: Any | None = None,
+        semantic_configuration_name: str = DAY3_SEMANTIC_CONFIGURATION_NAME,
     ) -> None:
         self.endpoint = (endpoint or "").rstrip("/")
         self.index_name = index_name or day3_search_index_name()
         if not self.endpoint:
             raise RuntimeError("missing required environment variable: AZURE_SEARCH_ENDPOINT")
         self.credential = credential or get_token_credential()
+        self.semantic_configuration_name = semantic_configuration_name
 
     def search(self, *, query: str, max_results: int = 5) -> list[EvidenceItem]:
         client = get_search_query_client(
@@ -202,6 +238,9 @@ class AzureAISearchLiveAdapter:
         )
         results = client.search(
             search_text=query,
+            query_type="semantic",
+            semantic_query=query,
+            semantic_configuration_name=self.semantic_configuration_name,
             top=max_results,
             select=SEARCH_INDEX_FIELDS,
         )

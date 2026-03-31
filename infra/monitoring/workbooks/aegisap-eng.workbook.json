@@ -11,7 +11,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "traces | summarize p95=percentile(todouble(customDimensions['duration_ms']), 95) by tostring(customDimensions['aegis.node_name'])",
+        "query": "AppTraces | summarize p95=percentile(todouble(Properties['duration_ms']), 95) by tostring(Properties['aegis.node_name'])",
         "size": 1,
         "title": "Node P95"
       }

@@ -1,0 +1,8 @@
+# marimo configuration for the AegisAP project.
+# Selects the project venv Python so all notebooks have access to
+# aegisap, pydantic, langchain, azure-* packages, etc.
+#
+# Reference: https://docs.marimo.io/guides/configuration.html
+
+[server]
+python_path = ".venv/bin/python"

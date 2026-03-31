@@ -1,0 +1,152 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "MJUe",
+      "code_hash": "0695a49f47d7fc3dbb8eb7889e6791a2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-1-invoice-intake-canonicalization\">Day 1 \u2014 Invoice Intake &amp; Canonicalization</h1>\n<span class=\"paragraph\"><strong>Golden Thread</strong>: INV-3001 \u00b7 PO-9001 \u00b7 Acme Office Supplies \u00b7 GBP 12,500</span>\n<span class=\"paragraph\"><strong>What you will learn</strong>:</span>\n<ul>\n<li>How a single GPT-4o tool-call extracts a typed <code>CanonicalInvoice</code></li>\n<li>How Pydantic validation rejects malformed or ambiguous fields</li>\n<li>How the <code>ModelGateway</code> routes this low-risk task to the <em>light</em> model tier</li>\n<li>What a <code>TokenUsage</code> cost footprint looks like per extraction call</li>\n</ul>\n<blockquote>\n<span class=\"paragraph\">Prerequisite: Day 0 gate must have passed (<code>build/day0/env_report.json</code>).</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "0945c359208ab6cdaadfe4d535ceb619",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"lab-contract\">Lab Contract</h2></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Prerequisites</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>Day 0 gate passed or the Azure environment is already known-good.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Required inputs</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>A fixture case or a valid <code>InvoicePackageInput</code> JSON payload.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Required env vars</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li><code>AZURE_OPENAI_ENDPOINT</code></li>\n<li><code>AZURE_OPENAI_API_VERSION</code></li>\n<li><code>AZURE_OPENAI_CHAT_DEPLOYMENT</code></li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Expected artifact</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li><code>build/day1/golden_thread_day1.json</code></li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Pass criteria</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>The notebook produces a valid canonical invoice or an explicit rejection.</li>\n<li>The artifact <code>build/day1/golden_thread_day1.json</code> is written.</li>\n<li>You can explain the difference between extraction and validation using the displayed output.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Implementation exercise</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>Run a malformed invoice or missing-PO case and prove the notebook produces a deterministic rejection with the correct reason code.</li>\n</ul></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "4b126d33d9ce5764f92fcbb2e6dcecfa",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Day 0 gate not passed. Run Day 0 first.&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;danger&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "39d7136579b27135d7def467cb101bb5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "a20af8a3cf8d282c98efc663a7a4742f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-select-input\">1 \u2014 Select Input</h2></span><marimo-ui-element object-id='PKri-0' random-id='82040989-da17-331a-f122-c7ae05ad7b63'><marimo-dropdown data-initial-value='[&quot;golden_thread&quot;]' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Fixture Case&lt;/span&gt;&lt;/span&gt;&quot;' data-options='[&quot;-- paste below --&quot;,&quot;golden_thread&quot;,&quot;happy_path&quot;,&quot;locale_mismatch&quot;,&quot;missing_po&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false'></marimo-dropdown></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>\u2014 or \u2014</em></span></span><marimo-ui-element object-id='PKri-1' random-id='264998a2-ae8e-4955-e6b6-619423b3d154'><marimo-text-area data-initial-value='&quot;&quot;' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Or paste raw InvoicePackageInput JSON&lt;/span&gt;&lt;/span&gt;&quot;' data-placeholder='&quot;{&#92;&quot;message_id&#92;&quot;: &#92;&quot;...&#92;&quot;, &#92;&quot;email_subject&#92;&quot;: &#92;&quot;...&#92;&quot;, ...}&quot;' data-disabled='false' data-debounce='true' data-full-width='false' data-rows='8'></marimo-text-area></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "cf6497474cd050d17bf7397c40225795",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-raw-package\">2 \u2014 Raw Package</h2></span><marimo-json-output data-json-data='{&quot;message_id&quot;:&quot;msg-golden-001&quot;,&quot;email_subject&quot;:&quot;Invoice INV-3001 from Acme Office Supplies&quot;,&quot;email_body&quot;:&quot;Hello AP team,&#92;nPlease find attached invoice INV-3001 from Acme Office Supplies for PO-9001.&#92;nGross total is GBP 12500.00.&#92;nThis case follows the Golden Thread training path.&#92;nRegards,&#92;nAcme Billing&quot;,&quot;attachments&quot;:[{&quot;filename&quot;:&quot;INV-3001.pdf&quot;,&quot;content_type&quot;:&quot;application/pdf&quot;,&quot;sha256&quot;:&quot;bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&quot;,&quot;extracted_text&quot;:&quot;Supplier: Acme Office Supplies&#92;nInvoice Number: INV-3001&#92;nInvoice Date: 01/03/2026&#92;nCurrency: GBP&#92;nNet Amount: 10000.00 GBP&#92;nVAT Amount: 2500.00 GBP&#92;nGross Amount: 12500.00 GBP&#92;nPO Reference: PO-9001&#92;nBank Details: IBAN GB29NWBK60161331924421&#92;n&quot;}]}' data-value-types='&quot;python&quot;'></marimo-json-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "947985c6fb4bad11c56ee4d447eee90e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-raw-llm-output-extractedinvoicecandidate\">3 \u2014 Raw LLM Output (ExtractedInvoiceCandidate)</h2></span><marimo-json-output data-json-data='{&quot;supplier_name_text&quot;:&quot;Acme Office Supplies&quot;,&quot;invoice_number_text&quot;:&quot;INV-3001&quot;,&quot;invoice_date_text&quot;:&quot;01/03/2026&quot;,&quot;currency_text&quot;:&quot;GBP&quot;,&quot;net_amount&quot;:{&quot;pdf_text&quot;:&quot;10000.00 GBP&quot;,&quot;email_text&quot;:null},&quot;vat_amount&quot;:{&quot;pdf_text&quot;:&quot;2500.00 GBP&quot;,&quot;email_text&quot;:null},&quot;gross_amount&quot;:{&quot;pdf_text&quot;:&quot;12500.00 GBP&quot;,&quot;email_text&quot;:&quot;GBP 12500.00&quot;},&quot;po_reference_text&quot;:&quot;PO-9001&quot;,&quot;bank_details_text&quot;:&quot;IBAN GB29NWBK60161331924421&quot;}' data-value-types='&quot;python&quot;'></marimo-json-output><marimo-stat data-value='&quot;65714 ms&quot;' data-label='&quot;Extraction latency&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "a6feb6b67fe658b1f7af30ad3315a8e6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-canonicalinvoice\">4 \u2014 CanonicalInvoice</h2></span><marimo-json-output data-json-data='{&quot;supplier_name&quot;:&quot;Acme Office Supplies&quot;,&quot;invoice_number&quot;:&quot;INV-3001&quot;,&quot;invoice_date&quot;:&quot;2026-03-01&quot;,&quot;currency&quot;:&quot;GBP&quot;,&quot;net_amount&quot;:&quot;10000.00&quot;,&quot;vat_amount&quot;:&quot;2500.00&quot;,&quot;gross_amount&quot;:&quot;12500.00&quot;,&quot;po_reference&quot;:&quot;PO-9001&quot;,&quot;bank_details_hash&quot;:&quot;ec9b5ac9d24b093affc8aeb5d8464258c60621a6545a81fc212adc3561e7a800&quot;}' data-value-types='&quot;python&quot;'></marimo-json-output><marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Canonicalization &lt;strong&gt;succeeded&lt;/strong&gt;.&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;success&quot;'></marimo-callout-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "b76b0f4301e5baeff2c1821370abd627",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-persist\">5 \u2014 Persist</h2></span><marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Artifact written to &lt;code&gt;build/day1/golden_thread_day1.json&lt;/code&gt;&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;success&quot;'></marimo-callout-output><marimo-ui-element object-id='RGSE-0' random-id='11bf6c44-57f5-2e96-a90c-724839afc29f'><marimo-download data-initial-value='null' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Download golden_thread_day1.json&lt;/span&gt;&lt;/span&gt;&quot;' data-data='&quot;./@file/388-43045-wPsO1PKy.json&quot;' data-filename='&quot;golden_thread_day1.json&quot;' data-disabled='false' data-lazy='false'></marimo-download></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "473c81f6417361966bbdd60dbed83c3b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Ready for &lt;strong&gt;Day 2&lt;/strong&gt;. Verified artifact: &lt;code&gt;build/day1/golden_thread_day1.json&lt;/code&gt;&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;success&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

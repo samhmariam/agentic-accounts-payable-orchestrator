@@ -131,15 +131,33 @@ def _day1_payload(
     }
 
 
+def _load_day1_artifact_payload(
+    artifact_path: str | Path,
+) -> tuple[CanonicalInvoice, str, dict[str, Any]]:
+    payload = load_json(artifact_path)
+    if not isinstance(payload, dict):
+        raise TypeError("day1 artifact payload must be a JSON object")
+
+    if "canonical_invoice" in payload:
+        invoice_payload = payload["canonical_invoice"]
+    else:
+        # Support legacy flat Day 1 artifacts that serialized the canonical invoice
+        # directly and may include non-model metadata such as `_meta`.
+        invoice_fields = set(CanonicalInvoice.model_fields)
+        invoice_payload = {key: value for key, value in payload.items() if key in invoice_fields}
+
+    invoice = CanonicalInvoice.model_validate_json(json.dumps(invoice_payload))
+    message_id = payload.get("message_id") or f"legacy-{Path(artifact_path).stem}-{invoice.invoice_number}"
+    return invoice, message_id, payload
+
+
 def run_day2_from_day1_artifact(
     *,
     artifact_path: str | Path,
     known_vendor: bool | None = None,
     artifact_name: str = "golden_thread_day2",
 ) -> tuple[Path, dict[str, Any]]:
-    payload = load_json(artifact_path)
-    invoice = CanonicalInvoice.model_validate_json(json.dumps(payload["canonical_invoice"]))
-    message_id = payload["message_id"]
+    invoice, message_id, _payload = _load_day1_artifact_payload(artifact_path)
     state = make_initial_state(
         invoice,
         package_id=message_id,

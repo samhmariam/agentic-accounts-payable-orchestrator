@@ -11,7 +11,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "traces | summarize runs=count() by tostring(customDimensions['aegis.outcome_type'])",
+        "query": "AppTraces | summarize runs=count() by tostring(Properties['aegis.outcome_type'])",
         "size": 1,
         "title": "Outcome Mix"
       }

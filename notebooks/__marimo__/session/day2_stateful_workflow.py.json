@@ -1,0 +1,152 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "071b6711609cf4e6b1b1b5b24bef847d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "a0178a8872697f3fce59c4ab21ba7561",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-2-stateful-routing-with-langgraph\">Day 2 \u2014 Stateful Routing with LangGraph</h1>\n<span class=\"paragraph\"><strong>What you will learn</strong>:</span>\n<ul>\n<li>Why a single LLM call is insufficient \u2014 workflows need explicit <em>state</em></li>\n<li>How LangGraph models state as a typed <code>WorkflowState</code> Pydantic object</li>\n<li>How the route decision (<code>high_value / new_vendor / clean_path</code>) gates\n  which review node runs</li>\n<li>How <code>NodeMetric</code> + OTel spans expose per-node latency</li>\n</ul>\n<blockquote>\n<span class=\"paragraph\">Prerequisite: <code>build/day1/golden_thread_day1.json</code> must exist.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "628036ed58b9180956f213056022832c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"lab-contract\">Lab Contract</h2></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Prerequisites</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>Day 1 produced <code>build/day1/golden_thread_day1.json</code>.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Required inputs</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>A valid Day 1 canonical invoice artifact.</li>\n<li>One routing scenario: <code>known_vendor</code>, <code>new_vendor</code>, or <code>high_value</code>.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Required env vars</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>None beyond the prior-day artifact and notebook defaults.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Expected artifact</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li><code>build/day2/golden_thread_day2.json</code></li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Pass criteria</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>The workflow executes end-to-end and shows a route and final status.</li>\n<li>The state diff explains how the workflow mutated the invoice context.</li>\n<li>The Day 2 artifact is written for downstream retrieval work.</li>\n</ul></span><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Implementation exercise</strong></span></span><span class=\"markdown prose dark:prose-invert contents\"><ul>\n<li>Modify or re-run the routing scenario so a seeded escalation case lands on the correct state path without breaking the golden-thread artifact.</li>\n</ul></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "db6048268393a96bbd72b48ba4b64eb0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"day-1-artifact-loaded\">Day 1 Artifact Loaded</h2></span><marimo-json-output data-json-data='{&quot;supplier_name&quot;:&quot;Acme Office Supplies&quot;,&quot;invoice_number&quot;:&quot;INV-3001&quot;,&quot;invoice_date&quot;:&quot;2026-03-01&quot;,&quot;currency&quot;:&quot;GBP&quot;,&quot;net_amount&quot;:&quot;10000.00&quot;,&quot;vat_amount&quot;:&quot;2500.00&quot;,&quot;gross_amount&quot;:&quot;12500.00&quot;,&quot;po_reference&quot;:&quot;PO-9001&quot;,&quot;bank_details_hash&quot;:&quot;ec9b5ac9d24b093affc8aeb5d8464258c60621a6545a81fc212adc3561e7a800&quot;}' data-value-types='&quot;python&quot;'></marimo-json-output></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "176a71ac9afe36bc9b6bdbdc2251d26e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"day-2-workflow-graph\">Day 2 Workflow Graph</h2></span><marimo-mermaid data-diagram='&quot;flowchart TD&#92;n    START([START]) --&gt; init_workflow&#92;n    init_workflow --&gt; route_invoice&#92;n&#92;n    route_invoice --&gt;|high_value| high_value_review&#92;n    route_invoice --&gt;|new_vendor| new_vendor_review&#92;n    route_invoice --&gt;|clean_path| clean_path_finalize&#92;n&#92;n    high_value_review --&gt; finalize_workflow&#92;n    new_vendor_review --&gt; finalize_workflow&#92;n    clean_path_finalize --&gt; finalize_workflow&#92;n&#92;n    finalize_workflow --&gt; END([END])&#92;n&#92;n    style high_value_review fill:#f9c74f,stroke:#f3722c&#92;n    style new_vendor_review fill:#90be6d,stroke:#43aa8b&#92;n    style clean_path_finalize fill:#4cc9f0,stroke:#4361ee&#92;n&quot;'></marimo-mermaid></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "8f2c53a0075d276658ab8d587b0dbec5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"choose-routing-scenario\">Choose Routing Scenario</h2></span><marimo-ui-element object-id='PKri-0' random-id='0e2dae30-7e4e-e0e8-718e-8bcd03f89af1'><marimo-radio data-initial-value='&quot;known_vendor (clean path)&quot;' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Routing Scenario&lt;/span&gt;&lt;/span&gt;&quot;' data-options='[&quot;known_vendor (clean path)&quot;,&quot;new_vendor (extra review)&quot;,&quot;high_value (controller review)&quot;]' data-inline='false' data-disabled='false'></marimo-radio></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "787d7c92f829583745a5db814eee5b48",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"workflow-executed\">Workflow Executed</h2></span><marimo-stat data-value='&quot;new_vendor&quot;' data-label='&quot;Route taken&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;in_review&quot;' data-label='&quot;Final status&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat><marimo-stat data-value='&quot;114 ms&quot;' data-label='&quot;Wall-clock&quot;' data-bordered='false' data-target_direction='&quot;increase&quot;'></marimo-stat></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "3c6301de34dc056a82124b8f45ddd8c1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"workflowstate-before-vs-after\">WorkflowState \u2014 Before vs After</h2></span><div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 3rem'><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Initial state</strong></span></span><marimo-json-output data-json-data='{&quot;workflow_id&quot;:&quot;wf_eae29ba43539&quot;,&quot;thread_id&quot;:&quot;ffa032df-462e-457f-86fa-b73032f71731&quot;,&quot;package_id&quot;:&quot;notebook-INV-3001-new_vendor-0dfcff2a&quot;,&quot;invoice_id&quot;:&quot;INV-3001&quot;,&quot;started_at&quot;:&quot;2026-03-27T16:18:06+00:00&quot;,&quot;last_updated_at&quot;:&quot;2026-03-27T16:18:06+00:00&quot;,&quot;invoice&quot;:{&quot;supplier_name&quot;:&quot;Acme Office Supplies&quot;,&quot;invoice_number&quot;:&quot;INV-3001&quot;,&quot;invoice_date&quot;:&quot;2026-03-01&quot;,&quot;currency&quot;:&quot;GBP&quot;,&quot;net_amount&quot;:&quot;7600.00&quot;,&quot;vat_amount&quot;:&quot;1900.00&quot;,&quot;gross_amount&quot;:&quot;9500.00&quot;,&quot;po_reference&quot;:&quot;PO-9001&quot;,&quot;bank_details_hash&quot;:&quot;ec9b5ac9d24b093affc8aeb5d8464258c60621a6545a81fc212adc3561e7a800&quot;},&quot;vendor&quot;:{&quot;vendor_name&quot;:&quot;Acme Office Supplies&quot;,&quot;is_known_vendor&quot;:false,&quot;verification&quot;:{&quot;verified&quot;:false,&quot;source&quot;:&quot;approved_vendor_registry&quot;,&quot;checked_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;evidence&quot;:[{&quot;kind&quot;:&quot;vendor_lookup&quot;,&quot;source&quot;:&quot;approved_vendor_registry&quot;,&quot;detail&quot;:&quot;vendor not found in registry for this workflow thread&quot;,&quot;value&quot;:false,&quot;node_name&quot;:&quot;new_vendor_review&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;}]}},&quot;policy&quot;:{&quot;high_value_threshold&quot;:&quot;10000.00&quot;,&quot;route_precedence&quot;:[&quot;high_value&quot;,&quot;new_vendor&quot;,&quot;clean_path&quot;]},&quot;current_node&quot;:&quot;init&quot;,&quot;route&quot;:null,&quot;route_reason&quot;:null,&quot;status&quot;:&quot;initialized&quot;,&quot;completed_nodes&quot;:[],&quot;retry_counts&quot;:{},&quot;evidence&quot;:[],&quot;recommendations&quot;:[],&quot;warnings&quot;:[],&quot;validation_errors&quot;:[],&quot;node_metrics&quot;:[],&quot;total_tokens_prompt&quot;:0,&quot;total_tokens_completion&quot;:0,&quot;total_cost_usd&quot;:&quot;text/plain+float:0.0&quot;,&quot;total_latency_ms&quot;:0,&quot;idempotency_keys&quot;:{},&quot;side_effects&quot;:[],&quot;run_notes&quot;:[]}' data-value-types='&quot;python&quot;'></marimo-json-output></div><div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Final state</strong></span></span><marimo-json-output data-json-data='{&quot;workflow_id&quot;:&quot;wf_eae29ba43539&quot;,&quot;thread_id&quot;:&quot;ffa032df-462e-457f-86fa-b73032f71731&quot;,&quot;package_id&quot;:&quot;notebook-INV-3001-new_vendor-0dfcff2a&quot;,&quot;invoice_id&quot;:&quot;INV-3001&quot;,&quot;started_at&quot;:&quot;2026-03-27T16:18:06+00:00&quot;,&quot;last_updated_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;invoice&quot;:{&quot;supplier_name&quot;:&quot;Acme Office Supplies&quot;,&quot;invoice_number&quot;:&quot;INV-3001&quot;,&quot;invoice_date&quot;:&quot;2026-03-01&quot;,&quot;currency&quot;:&quot;GBP&quot;,&quot;net_amount&quot;:&quot;7600.00&quot;,&quot;vat_amount&quot;:&quot;1900.00&quot;,&quot;gross_amount&quot;:&quot;9500.00&quot;,&quot;po_reference&quot;:&quot;PO-9001&quot;,&quot;bank_details_hash&quot;:&quot;ec9b5ac9d24b093affc8aeb5d8464258c60621a6545a81fc212adc3561e7a800&quot;},&quot;vendor&quot;:{&quot;vendor_name&quot;:&quot;Acme Office Supplies&quot;,&quot;is_known_vendor&quot;:false,&quot;verification&quot;:{&quot;verified&quot;:false,&quot;source&quot;:&quot;approved_vendor_registry&quot;,&quot;checked_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;evidence&quot;:[{&quot;kind&quot;:&quot;vendor_lookup&quot;,&quot;source&quot;:&quot;approved_vendor_registry&quot;,&quot;detail&quot;:&quot;vendor not found in registry for this workflow thread&quot;,&quot;value&quot;:false,&quot;node_name&quot;:&quot;new_vendor_review&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;}]}},&quot;policy&quot;:{&quot;high_value_threshold&quot;:&quot;10000.00&quot;,&quot;route_precedence&quot;:[&quot;high_value&quot;,&quot;new_vendor&quot;,&quot;clean_path&quot;]},&quot;current_node&quot;:&quot;finalize_workflow&quot;,&quot;route&quot;:&quot;new_vendor&quot;,&quot;route_reason&quot;:&quot;vendor not found in approved vendor registry&quot;,&quot;status&quot;:&quot;in_review&quot;,&quot;completed_nodes&quot;:[&quot;init_workflow&quot;,&quot;route_invoice&quot;,&quot;new_vendor_review&quot;,&quot;finalize_workflow&quot;],&quot;retry_counts&quot;:{},&quot;evidence&quot;:[{&quot;kind&quot;:&quot;workflow_initialized&quot;,&quot;source&quot;:&quot;init_workflow&quot;,&quot;detail&quot;:&quot;workflow state initialized from canonical Day 1 invoice&quot;,&quot;value&quot;:&quot;INV-3001&quot;,&quot;node_name&quot;:&quot;init_workflow&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;},{&quot;kind&quot;:&quot;routing_decision&quot;,&quot;source&quot;:&quot;route_invoice&quot;,&quot;detail&quot;:&quot;vendor not found in approved vendor registry&quot;,&quot;value&quot;:&quot;new_vendor&quot;,&quot;node_name&quot;:&quot;route_invoice&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;},{&quot;kind&quot;:&quot;routing_rule&quot;,&quot;source&quot;:&quot;route_invoice&quot;,&quot;detail&quot;:&quot;new_vendor predicate returned true&quot;,&quot;value&quot;:true,&quot;node_name&quot;:&quot;route_invoice&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;},{&quot;kind&quot;:&quot;vendor_lookup&quot;,&quot;source&quot;:&quot;approved_vendor_registry&quot;,&quot;detail&quot;:&quot;vendor not found in registry for this workflow thread&quot;,&quot;value&quot;:false,&quot;node_name&quot;:&quot;new_vendor_review&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;},{&quot;kind&quot;:&quot;workflow_finalized&quot;,&quot;source&quot;:&quot;finalize_workflow&quot;,&quot;detail&quot;:&quot;workflow finalized with aggregate metrics and recommendations&quot;,&quot;value&quot;:{&quot;total_latency_ms&quot;:0,&quot;total_cost_usd&quot;:&quot;text/plain+float:0.0&quot;},&quot;node_name&quot;:&quot;finalize_workflow&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;}],&quot;recommendations&quot;:[{&quot;action&quot;:&quot;run_vendor_verification&quot;,&quot;reason&quot;:&quot;vendor is not yet approved in master registry&quot;,&quot;owner&quot;:&quot;vendor_management&quot;,&quot;status&quot;:&quot;pending&quot;}],&quot;warnings&quot;:[],&quot;validation_errors&quot;:[],&quot;node_metrics&quot;:[{&quot;node_name&quot;:&quot;init_workflow&quot;,&quot;started_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;finished_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;latency_ms&quot;:0,&quot;prompt_tokens&quot;:0,&quot;completion_tokens&quot;:0,&quot;estimated_cost_usd&quot;:&quot;text/plain+float:0.0&quot;,&quot;outcome&quot;:&quot;ok&quot;},{&quot;node_name&quot;:&quot;route_invoice&quot;,&quot;started_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;finished_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;latency_ms&quot;:0,&quot;prompt_tokens&quot;:0,&quot;completion_tokens&quot;:0,&quot;estimated_cost_usd&quot;:&quot;text/plain+float:0.0&quot;,&quot;outcome&quot;:&quot;ok&quot;},{&quot;node_name&quot;:&quot;new_vendor_review&quot;,&quot;started_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;finished_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;latency_ms&quot;:0,&quot;prompt_tokens&quot;:0,&quot;completion_tokens&quot;:0,&quot;estimated_cost_usd&quot;:&quot;text/plain+float:0.0&quot;,&quot;outcome&quot;:&quot;ok&quot;},{&quot;node_name&quot;:&quot;finalize_workflow&quot;,&quot;started_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;finished_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;,&quot;latency_ms&quot;:0,&quot;prompt_tokens&quot;:0,&quot;completion_tokens&quot;:0,&quot;estimated_cost_usd&quot;:&quot;text/plain+float:0.0&quot;,&quot;outcome&quot;:&quot;ok&quot;}],&quot;total_tokens_prompt&quot;:0,&quot;total_tokens_completion&quot;:0,&quot;total_cost_usd&quot;:&quot;text/plain+float:0.0&quot;,&quot;total_latency_ms&quot;:0,&quot;idempotency_keys&quot;:{&quot;run_vendor_verification&quot;:&quot;deabf7ad088a720ec407de3153e0a843ff2d89cca2e1b999924ad7d3bb95cb04&quot;},&quot;side_effects&quot;:[],&quot;run_notes&quot;:[&quot;route=new_vendor; status=in_review; recommendations=1&quot;]}' data-value-types='&quot;python&quot;'></marimo-json-output></div></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "12ba6ba3741cff37be028cecd4943d34",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"evidence-recommendations\">Evidence &amp; Recommendations</h2></span><marimo-accordion data-labels='[&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Evidence items&lt;/span&gt;&lt;/span&gt;&quot;,&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Recommendations&lt;/span&gt;&lt;/span&gt;&quot;,&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Warnings&lt;/span&gt;&lt;/span&gt;&quot;]' data-multiple='false'><div><marimo-json-output data-json-data='[{&quot;kind&quot;:&quot;workflow_initialized&quot;,&quot;source&quot;:&quot;init_workflow&quot;,&quot;detail&quot;:&quot;workflow state initialized from canonical Day 1 invoice&quot;,&quot;value&quot;:&quot;INV-3001&quot;,&quot;node_name&quot;:&quot;init_workflow&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;},{&quot;kind&quot;:&quot;routing_decision&quot;,&quot;source&quot;:&quot;route_invoice&quot;,&quot;detail&quot;:&quot;vendor not found in approved vendor registry&quot;,&quot;value&quot;:&quot;new_vendor&quot;,&quot;node_name&quot;:&quot;route_invoice&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;},{&quot;kind&quot;:&quot;routing_rule&quot;,&quot;source&quot;:&quot;route_invoice&quot;,&quot;detail&quot;:&quot;new_vendor predicate returned true&quot;,&quot;value&quot;:true,&quot;node_name&quot;:&quot;route_invoice&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;},{&quot;kind&quot;:&quot;vendor_lookup&quot;,&quot;source&quot;:&quot;approved_vendor_registry&quot;,&quot;detail&quot;:&quot;vendor not found in registry for this workflow thread&quot;,&quot;value&quot;:false,&quot;node_name&quot;:&quot;new_vendor_review&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;},{&quot;kind&quot;:&quot;workflow_finalized&quot;,&quot;source&quot;:&quot;finalize_workflow&quot;,&quot;detail&quot;:&quot;workflow finalized with aggregate metrics and recommendations&quot;,&quot;value&quot;:{&quot;total_latency_ms&quot;:0,&quot;total_cost_usd&quot;:&quot;text/plain+float:0.0&quot;},&quot;node_name&quot;:&quot;finalize_workflow&quot;,&quot;recorded_at&quot;:&quot;2026-03-27T16:18:25+00:00&quot;}]' data-value-types='&quot;python&quot;'></marimo-json-output></div><div><marimo-json-output data-json-data='[{&quot;action&quot;:&quot;run_vendor_verification&quot;,&quot;reason&quot;:&quot;vendor is not yet approved in master registry&quot;,&quot;owner&quot;:&quot;vendor_management&quot;,&quot;status&quot;:&quot;pending&quot;}]' data-value-types='&quot;python&quot;'></marimo-json-output></div><div><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>(none)</em></span></span></div></marimo-accordion></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "5305b30fe607d90f17229ad1f56b7c07",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Artifact written to &lt;code&gt;build/day2/golden_thread_day2.json&lt;/code&gt;&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;success&quot;'></marimo-callout-output><marimo-ui-element object-id='RGSE-0' random-id='a7e58a0f-9110-584e-8b23-b2b855e7588e'><marimo-download data-initial-value='null' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Download golden_thread_day2.json&lt;/span&gt;&lt;/span&gt;&quot;' data-data='&quot;./@file/4852-65976-o4aLhfVa.json&quot;' data-filename='&quot;golden_thread_day2.json&quot;' data-disabled='false' data-lazy='false'></marimo-download></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "0a84441c78f4a3edeb4e79bd7be9185a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Ready for &lt;strong&gt;Day 3&lt;/strong&gt;. Verified artifact: &lt;code&gt;build/day2/golden_thread_day2.json&lt;/code&gt;&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;success&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

@@ -26,6 +26,12 @@ jobs:
       - name: Compile Python entrypoints
         run: uv run python -m compileall src scripts evals
 
+      - name: Compile notebooks
+        run: uv run python -m py_compile notebooks/day*.py
+
+      - name: Validate curriculum references
+        run: uv run python scripts/validate_curriculum.py
+
       - name: Install Azure CLI
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash

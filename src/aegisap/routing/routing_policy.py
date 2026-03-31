@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import json
+import os
+from pathlib import Path
 from typing import Literal
 
 from aegisap.security.config import load_security_config
@@ -54,10 +57,28 @@ class ModelRouteDecision:
         }
 
 
+def _day0_chat_deployment_name() -> str:
+    deployment = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "").strip()
+    if deployment:
+        return deployment
+
+    if load_security_config().is_local_like:
+        repo_root = Path(__file__).resolve().parents[3]
+        for state_path in (repo_root / ".day0" / "full.json", repo_root / ".day0" / "core.json"):
+            if not state_path.exists():
+                continue
+            payload = json.loads(state_path.read_text())
+            value = str(payload.get("environment", {}).get("AZURE_OPENAI_CHAT_DEPLOYMENT", "")).strip()
+            if value:
+                return value
+    return ""
+
+
 def build_default_routing_policy() -> RoutingPolicy:
     config = load_security_config()
-    light = config.light_model_deployment or "gpt-4.1-mini"
-    strong = config.strong_model_deployment or "gpt-4.1"
+    fallback_chat_deployment = _day0_chat_deployment_name()
+    light = config.light_model_deployment or fallback_chat_deployment or "gpt-4.1-mini"
+    strong = config.strong_model_deployment or fallback_chat_deployment or "gpt-4.1"
     return RoutingPolicy(
         light_model_deployment=light,
         strong_model_deployment=strong,

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.41.2.15936",
-      "templateHash": "8481402504442436708"
+      "templateHash": "10121203829856140127"
     }
   },
   "parameters": {
@@ -475,7 +475,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.41.2.15936",
-              "templateHash": "10752990628500250861"
+              "templateHash": "3759040367720247926"
             }
           },
           "parameters": {
@@ -490,7 +490,7 @@
           "resources": [
             {
               "type": "Microsoft.Insights/scheduledQueryRules",
-              "apiVersion": "2023-12-01-preview",
+              "apiVersion": "2023-12-01",
               "name": "aegisap-retry-spike",
               "location": "[parameters('location')]",
               "properties": {
@@ -505,7 +505,7 @@
                 "criteria": {
                   "allOf": [
                     {
-                      "query": "traces | where message contains \"retry_\" | summarize Count=count()",
+                      "query": "AppTraces | where Message contains \"retry_\" | summarize Count=count()",
                       "timeAggregation": "Count",
                       "operator": "GreaterThan",
                       "threshold": 10,
@@ -523,7 +523,7 @@
             },
             {
               "type": "Microsoft.Insights/scheduledQueryRules",
-              "apiVersion": "2023-12-01-preview",
+              "apiVersion": "2023-12-01",
               "name": "aegisap-node-latency",
               "location": "[parameters('location')]",
               "properties": {
@@ -538,7 +538,7 @@
                 "criteria": {
                   "allOf": [
                     {
-                      "query": "traces | summarize Count=count()",
+                      "query": "AppTraces | summarize Count=count()",
                       "timeAggregation": "Count",
                       "operator": "GreaterThan",
                       "threshold": 0,

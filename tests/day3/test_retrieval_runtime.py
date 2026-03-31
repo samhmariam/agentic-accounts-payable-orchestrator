@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from aegisap.day3.retrieval import azure_ai_search_adapter
 from aegisap.day3.retrieval import (
     AzureAISearchFixtureAdapter,
     PGVectorFixtureAdapter,
@@ -49,6 +50,13 @@ def test_evidence_item_from_search_result_maps_live_search_fields():
     assert item.backend == "azure_ai_search_live"
     assert item.retrieval_score == 2.75
     assert item.metadata["bank_account_last4"] == "1138"
+
+
+def test_build_credential_uses_shared_security_helper(monkeypatch: pytest.MonkeyPatch):
+    sentinel = object()
+    monkeypatch.setattr(azure_ai_search_adapter, "get_token_credential", lambda: sentinel)
+
+    assert azure_ai_search_adapter._build_credential() is sentinel
 
 
 def test_build_retrieval_config_defaults_to_fixture():

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from aegisap.security.redaction import redact_text, summarize_evidence_text
+from aegisap.security.redaction import redact_pii, redact_text, summarize_evidence_text
 
 
 def test_redact_text_masks_common_pii_patterns() -> None:
@@ -25,6 +25,15 @@ def test_redact_text_hashes_bank_like_values() -> None:
     assert changed is True
     assert "12345678" not in redacted
     assert "[REDACTED_BANK:" in redacted
+
+
+def test_redact_pii_returns_redacted_string() -> None:
+    redacted = redact_pii("Reach jane@example.com at +1 415 555 0100.")
+
+    assert "jane@example.com" not in redacted
+    assert "+1 415 555 0100" not in redacted
+    assert "[REDACTED_EMAIL]" in redacted
+    assert "[REDACTED_PHONE]" in redacted
 
 
 def test_summarize_evidence_text_truncates_long_freeform_content() -> None:

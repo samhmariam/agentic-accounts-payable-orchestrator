@@ -59,3 +59,48 @@ def test_day4_planner_uses_shared_model_gateway(monkeypatch) -> None:
 
     assert called == ["plan"]
     assert result == '{"plan_id": "plan-1"}'
+
+
+def test_day1_extraction_accepts_legacy_live_payload_shape(monkeypatch) -> None:
+    def fake_invoke(self, request):
+        return (
+            """{
+                "invoice_number": "INV-3001",
+                "invoice_date": "01/03/2026",
+                "supplier_name": "Acme Office Supplies",
+                "currency": "GBP",
+                "net_amount": "10000.00 GBP",
+                "vat_amount": "2500.00 GBP",
+                "gross_amount": "12500.00 GBP",
+                "po_reference": "PO-9001",
+                "bank_details": "IBAN GB29NWBK60161331924421",
+                "email_message_id": "msg-golden-001"
+            }""",
+            None,
+            None,
+        )
+
+    monkeypatch.setattr("aegisap.day_01.agent.ModelGateway.invoke_text", fake_invoke)
+
+    package = InvoicePackageInput(
+        message_id="msg-1",
+        email_subject="Invoice",
+        email_body="Please process",
+        attachments=[
+            AttachmentInput(
+                filename="invoice.pdf",
+                content_type="application/pdf",
+                sha256="a" * 64,
+                extracted_text="invoice attachment",
+            )
+        ],
+    )
+    candidate = extract_candidate(package)
+
+    assert candidate.invoice_number_text == "INV-3001"
+    assert candidate.invoice_date_text == "01/03/2026"
+    assert candidate.supplier_name_text == "Acme Office Supplies"
+    assert candidate.currency_text == "GBP"
+    assert candidate.net_amount is not None
+    assert candidate.net_amount.pdf_text == "10000.00 GBP"
+    assert candidate.po_reference_text == "PO-9001"

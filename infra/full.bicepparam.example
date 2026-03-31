@@ -22,3 +22,6 @@ param openAiChatCapacity = 1
 param logAnalyticsName = '<log-analytics-name>'
 param appInsightsName = '<application-insights-name>'
 param containerAppsEnvName = '<container-apps-environment-name>'
+param postgresEntraAdminObjectId = ''
+param postgresEntraAdminName = ''
+param postgresEntraAdminType = 'User'

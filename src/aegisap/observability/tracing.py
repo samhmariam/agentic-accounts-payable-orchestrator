@@ -149,6 +149,10 @@ def root_span_attributes(context: WorkflowObservabilityContext) -> dict[str, Any
         attributes["aegis.cache_hit"] = metadata["cache_hit"]
     if metadata.get("workflow_cost_estimate") is not None:
         attributes["aegis.workflow_cost_estimate"] = metadata["workflow_cost_estimate"]
+    if metadata.get("checkpoint_phase") is not None:
+        attributes["aegis.checkpoint_phase"] = metadata["checkpoint_phase"]
+    if metadata.get("checkpoint_span") is not None:
+        attributes["aegis.checkpoint_span"] = metadata["checkpoint_span"]
     return attributes
 
 

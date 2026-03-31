@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import os
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 from aegisap.security.config import load_security_config
@@ -10,8 +12,42 @@ from aegisap.security.policy import validate_security_posture
 OPENAI_SCOPE = "https://cognitiveservices.azure.com/.default"
 
 
+def _day0_state_candidates() -> list[Path]:
+    repo_root = Path(__file__).resolve().parents[3]
+    return [
+        repo_root / ".day0" / "full.json",
+        repo_root / ".day0" / "core.json",
+    ]
+
+
+@lru_cache(maxsize=1)
+def _load_local_day0_environment() -> dict[str, str]:
+    config = load_security_config()
+    if not config.is_local_like:
+        return {}
+
+    for state_path in _day0_state_candidates():
+        if not state_path.exists():
+            continue
+        payload = json.loads(state_path.read_text())
+        environment = payload.get("environment", {})
+        loaded: dict[str, str] = {}
+        for key, value in environment.items():
+            text = str(value).strip() if value is not None else ""
+            if not text:
+                continue
+            if not os.environ.get(key, "").strip():
+                os.environ[key] = text
+                loaded[key] = text
+        return loaded
+    return {}
+
+
 def _required_env(name: str) -> str:
     value = os.getenv(name, "").strip()
+    if not value:
+        _load_local_day0_environment()
+        value = os.getenv(name, "").strip()
     if not value:
         raise RuntimeError(f"missing required environment variable: {name}")
     return value
@@ -84,4 +120,3 @@ def redact_credential_summary() -> dict[str, Any]:
         "credential_mode": config.credential_mode,
         "key_vault_enabled": bool(config.key_vault_uri),
     }
-

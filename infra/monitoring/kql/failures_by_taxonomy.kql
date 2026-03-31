@@ -1,5 +1,5 @@
-traces
-| extend failure_class = tostring(customDimensions["aegis.failure_class"])
+AppTraces
+| extend failure_class = tostring(Properties["aegis.failure_class"])
 | where isnotempty(failure_class)
 | summarize failures=count() by failure_class
 | order by failures desc

@@ -7,6 +7,7 @@ from pathlib import Path
 import psycopg
 
 from aegisap.day5.persistence.durable_state_store import DurableStateStore
+from aegisap.security import credentials
 from aegisap.security.credentials import get_token_credential
 from aegisap.security.config import load_security_config
 from aegisap.security.policy import validate_security_posture
@@ -20,6 +21,7 @@ def build_connection_factory_from_env() -> Callable[[], psycopg.Connection]:
     if dsn:
         return lambda: psycopg.connect(dsn)
 
+    credentials._load_local_day0_environment()
     required = {
         "AZURE_POSTGRES_HOST": os.getenv("AZURE_POSTGRES_HOST", "").strip(),
         "AZURE_POSTGRES_PORT": os.getenv("AZURE_POSTGRES_PORT", "").strip(),

@@ -1,5 +1,5 @@
-traces
-| extend dependency_name = tostring(customDimensions["dependency_name"])
-| where message has "retry_" or tostring(customDimensions["event_name"]) has "retry_"
+AppTraces
+| extend dependency_name = tostring(Properties["dependency_name"])
+| where Message has "retry_" or tostring(Properties["event_name"]) has "retry_"
 | summarize retries=count() by dependency_name
 | order by retries desc

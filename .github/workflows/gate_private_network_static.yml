@@ -1,0 +1,47 @@
+name: gate-private-network-static
+
+on:
+  pull_request:
+    paths:
+      - 'infra/network/**'
+      - 'src/aegisap/network/**'
+      - 'scripts/verify_private_network_posture.py'
+      - 'src/aegisap/deploy/gates_v2.py'
+
+jobs:
+  gate-private-network-static:
+    name: Gate — Private Network Static
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet
+
+      - name: Write stub artifacts (no Azure access in PR runner)
+        run: python scripts/verify_private_network_posture.py
+        env:
+          # No Azure creds set → stub mode writes gate artifact
+          AEGISAP_CORRELATION_ID: ${{ github.sha }}
+
+      - name: Run gate_private_network_static
+        run: |
+          python -c "
+          import sys; sys.path.insert(0, 'src')
+          from aegisap.deploy.gates_v2 import gate_private_network_static
+          r = gate_private_network_static()
+          print(f'Gate: {r.name}  Passed: {r.passed}  Detail: {r.detail}')
+          sys.exit(0 if r.passed else 1)
+          "
+
+      - name: Upload gate artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-private-network-static-${{ github.sha }}
+          path: build/day12/external_sink_disabled.json
+          if-no-files-found: warn

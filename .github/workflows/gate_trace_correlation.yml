@@ -1,0 +1,53 @@
+name: gate-trace-correlation
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to check'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [staging, production]
+
+jobs:
+  gate-trace-correlation:
+    name: Gate — Trace Correlation
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet
+
+      - name: Generate trace correlation report
+        run: python scripts/generate_cto_trace_report.py
+        env:
+          APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
+          OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_EXPORTER_OTLP_ENDPOINT }}
+          AEGISAP_CORRELATION_ID: ${{ github.run_id }}
+
+      - name: Run gate_trace_correlation
+        run: |
+          python -c "
+          import sys; sys.path.insert(0, 'src')
+          from aegisap.deploy.gates_v2 import gate_trace_correlation
+          r = gate_trace_correlation()
+          print(f'Gate: {r.name}  Passed: {r.passed}  Detail: {r.detail}')
+          sys.exit(0 if r.passed else 1)
+          "
+
+      - name: Upload CTO trace report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cto-trace-report-${{ github.run_id }}
+          path: build/day14/
+          if-no-files-found: warn

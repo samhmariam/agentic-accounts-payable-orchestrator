@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: agentic-accounts-payable-orchestrator
+metadata:
+  template: agentic-accounts-payable-orchestrator@0.0.1
+
+# Notebooks run locally — there are no deployable services.
+# Lifecycle: azd provision (create Azure resources) / azd down (teardown)
+#
+# Quick start:
+#   azd env new day-3
+#   azd env set NOTEBOOK_PROFILE core
+#   azd env set AZURE_LOCATION eastus
+#   azd provision
+#   # ... run notebooks ...
+#   azd down
+#
+# Profile reference:
+#   core     → Days 3-4:  Storage, Azure OpenAI, Azure AI Search
+#   standard → Days 5-7:  + PostgreSQL, Content Safety, Cosmos DB, ADF
+#   full     → Days 8-10: + ACR, Key Vault, ACA environment, Log Analytics,
+#                           Application Insights, Azure Machine Learning
+#   advanced → Days 11-14: + VNet, Private Endpoints, Private DNS, Service Bus
+
+infra:
+  provider: bicep
+  path: infra
+  module: notebook

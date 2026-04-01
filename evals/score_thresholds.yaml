@@ -10,3 +10,16 @@ schema_valid_rate_min: 1.00
 # Cost gates
 clean_path_cost_max: 0.12
 exception_path_cost_max: 0.25
+
+# Days 11-14 gates (all must pass — threshold = 1.0)
+gate_delegated_identity: 1.0
+gate_obo_app_identity: 1.0
+gate_obo_exchange: 1.0
+gate_actor_binding: 1.0
+gate_private_network_static: 1.0
+gate_private_network_posture: 1.0
+gate_trace_correlation: 1.0
+gate_data_residency: 1.0
+gate_dlq_drain_health: 1.0
+gate_mcp_contract_integrity: 1.0
+gate_canary_regression: 1.0

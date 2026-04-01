@@ -1,10 +1,11 @@
-# Agentic Accounts Payable Orchestrator
+P# Agentic Accounts Payable Orchestrator
 
 AegisAP is the Golden Thread training repo for Forward Deployed Engineers building
 production-ready agentic systems on Azure. The repo follows one invoice case
-from Day 0 bootstrap through Day 10 observability, regression coverage,
-reliability engineering, explicit cost-speed routing controls, and gated Azure
-deployment.
+from Day 0 bootstrap through Day 14, covering observability, regression coverage,
+reliability engineering, cost-speed routing controls, gated Azure deployment,
+delegated identity, private networking, integration boundaries, MCP, and elite
+operational readiness.
 
 ## Training Journey
 
@@ -21,6 +22,10 @@ deployment.
 | Day 8 | Make workflow behavior explorable and reliable | OpenTelemetry traces, regression harness, dashboards, alerts | Application Insights, Azure Monitor, Log Analytics, LangSmith optional, PostgreSQL audit store | `uv run python -m pytest tests/day8 -q` and `az bicep build --file infra/monitoring/alerts/alerts.bicep` | Day 8 docs, regression dataset, monitoring assets, correlation-aware runtime | Operators can pivot from workflow run to trace to audit state, and silent reliability regressions surface in telemetry |
 | Day 9 | Make capability allocation explicit, measurable, and reversible | Model router, workflow cost ledger, conservative cache, slice-governed optimisation | Azure OpenAI deployments, Azure Monitor, Application Insights, APIM policy assets optional, LangSmith optional | `uv run python -m pytest tests/day9 -q` and `uv run python -m pytest tests/day4/test_azure_openai_planner.py tests/api/test_app.py -q` | Day 9 docs, routing dataset, APIM policies, routed runtime | Model routing and cost are visible per workflow, low-risk paths can use cheaper capability safely, and risky slices block bad routing changes |
 | Day 10 | Make deployment success separate from release acceptance | SHA-tagged containers, ACA revisions, OIDC deploys, acceptance gates | Azure Container Apps, ACR, Key Vault, Application Insights, LangSmith optional, GitHub Actions | `uv run python -m pytest tests/day10 tests/api/test_app.py -q` and `az bicep build --file infra/aca/staging.bicep` | Day 10 docs, rollback runbook, staging/prod workflows, gate scripts | A release is blocked unless deployment, telemetry, eval quality, refusal safety, cost, and resume safety all pass |
+| Day 11 | Enforce delegated identity for every actor crossing a trust boundary | OBO token exchange, actor binding, MSAL token verification | Azure AD, Managed Identity, Azure OpenAI | `uv run python scripts/verify_delegated_identity_contract.py` and `uv run python -m pytest tests/day11 -q` | `build/day11/obo_contract.json` | All three identity gate checks pass: `obo_app_identity_ok`, `obo_exchange_ok`, `actor_binding_ok` |
+| Day 12 | Eliminate all public network attack surface | VNET injection, Private Endpoints, Private DNS, external-sink guard | Azure Virtual Network, Private Endpoints, Private DNS, Azure Container Apps | `uv run python scripts/verify_private_network_posture.py` and `uv run python -m pytest tests/day12 -q` | `build/day12/private_network_posture.json`, `build/day12/external_sink_disabled.json` | All AI hostnames resolve to RFC-1918 addresses and no external sink is enabled |
+| Day 13 | Harden integration boundaries and expose a governed MCP server | Azure Functions, Service Bus, DLQ compensating actions, MCP contract | Azure Functions (Flex Consumption), Azure Service Bus Premium, Azure Container Apps | `uv run python scripts/verify_mcp_contract_integrity.py` and `uv run python -m pytest tests/day13 -q` | `build/day13/dlq_drain_report.json`, `build/day13/mcp_contract_report.json` | DLQ drain succeeds with compensating actions and MCP `/capabilities` exposes all required tools |
+| Day 14 | Prove elite operational readiness across all 17 gates and 10 failure drills | Canary regression, data residency ARM check, trace correlation, CTO report | Azure Container Apps, Azure Resource Manager, Application Insights, all prior services | `uv run python scripts/generate_cto_trace_report.py` and `uv run python -m pytest tests/day14 -q` | `build/day14/canary_regression_report.json`, `build/day14/data_residency_report.json`, `build/day14/trace_correlation_report.json`, `build/day14/cto_trace_report.json` | All 17 gates pass, 10 failure drills are documented, CTO trace report is generated |
 
 ## Start Here
 
@@ -42,6 +47,10 @@ deployment.
 - [Day 8 Observability and Reliability Engineering](/workspaces/agentic-accounts-payable-orchestrator/docs/day8/DAY_08_OBSERVABILITY_AND_RELIABILITY.md)
 - [Day 9 Cost, Speed, Routing, Caching, and Optimisation](/workspaces/agentic-accounts-payable-orchestrator/docs/day9/DAY_09_COST_SPEED_ROUTING_CACHING_AND_OPTIMISATION.md)
 - [Day 10 Deployment and Acceptance Gating](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_10_DEPLOYMENT_AND_ACCEPTANCE.md)
+- [Day 11 Delegated Identity](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_11_DELEGATED_IDENTITY.md)
+- [Day 12 Private Networking](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_12_PRIVATE_NETWORKING.md)
+- [Day 13 Integration and MCP](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_13_INTEGRATION_AND_MCP.md)
+- [Day 14 Breaking Changes and Elite Ops](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_14_BREAKING_CHANGES.md)
 
 ## Notebooks
 

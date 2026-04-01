@@ -20,21 +20,32 @@ source = { editable = "." }
 dependencies = [
     { name = "azure-identity" },
     { name = "azure-keyvault-secrets" },
+    { name = "azure-mgmt-network" },
+    { name = "azure-mgmt-resource" },
     { name = "azure-monitor-opentelemetry" },
     { name = "azure-search-documents" },
+    { name = "azure-servicebus" },
     { name = "azure-storage-blob" },
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "ipykernel" },
     { name = "langgraph" },
     { name = "langsmith" },
     { name = "marimo" },
+    { name = "msal" },
     { name = "openai" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
+    { name = "pyjwt" },
+    { name = "requests" },
+    { name = "tenacity" },
     { name = "uvicorn" },
 ]
 
 [package.optional-dependencies]
+day11 = [
+    { name = "msal" },
+]
 day9 = [
     { name = "dspy" },
 ]
@@ -52,24 +63,33 @@ requires-dist = [
     { name = "altair", marker = "extra == 'notebooks'", specifier = ">=5.0" },
     { name = "azure-identity", specifier = "==1.25.3" },
     { name = "azure-keyvault-secrets", specifier = "==4.10.0" },
+    { name = "azure-mgmt-network", specifier = ">=25.0" },
+    { name = "azure-mgmt-resource", specifier = ">=23.0" },
     { name = "azure-monitor-opentelemetry", specifier = "==1.8.7" },
     { name = "azure-search-documents", specifier = "==11.6.0" },
+    { name = "azure-servicebus", specifier = ">=7.12" },
     { name = "azure-storage-blob", specifier = "==12.28.0" },
     { name = "dspy", marker = "extra == 'day9'", specifier = ">=2.6" },
     { name = "fastapi", specifier = "==0.135.1" },
+    { name = "httpx", specifier = ">=0.27" },
     { name = "ipykernel", specifier = ">=7.2.0" },
     { name = "langgraph", specifier = "==1.1.3" },
     { name = "langsmith", specifier = "==0.7.22" },
     { name = "marimo", specifier = ">=0.9" },
     { name = "marimo", marker = "extra == 'notebooks'", specifier = ">=0.9" },
+    { name = "msal", specifier = ">=1.29" },
+    { name = "msal", marker = "extra == 'day11'", specifier = ">=1.29" },
     { name = "openai", specifier = "==2.29.0" },
     { name = "pandas", marker = "extra == 'notebooks'", specifier = ">=2.0" },
     { name = "psycopg", extras = ["binary"], specifier = "==3.3.3" },
     { name = "pydantic", specifier = ">=2.7" },
+    { name = "pyjwt", specifier = ">=2.8" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "requests", specifier = ">=2.32" },
+    { name = "tenacity", specifier = ">=8.3" },
     { name = "uvicorn", specifier = "==0.42.0" },
 ]
-provides-extras = ["dev", "day9", "notebooks"]
+provides-extras = ["dev", "day9", "day11", "notebooks"]
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -370,6 +390,46 @@ wheels = [
 ]
 
 [[package]]
+name = "azure-mgmt-core"
+version = "1.6.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "azure-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3e/99/fa9e7551313d8c7099c89ebf3b03cd31beb12e1b498d575aa19bb59a5d04/azure_mgmt_core-1.6.0.tar.gz", hash = "sha256:b26232af857b021e61d813d9f4ae530465255cb10b3dde945ad3743f7a58e79c", size = 30818, upload-time = "2025-07-03T02:02:24.093Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/26/c79f962fd3172b577b6f38685724de58b6b4337a51d3aad316a43a4558c6/azure_mgmt_core-1.6.0-py3-none-any.whl", hash = "sha256:0460d11e85c408b71c727ee1981f74432bc641bb25dfcf1bb4e90a49e776dbc4", size = 29310, upload-time = "2025-07-03T02:02:25.203Z" },
+]
+
+[[package]]
+name = "azure-mgmt-network"
+version = "30.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "azure-mgmt-core" },
+    { name = "isodate" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9a/e5/31cf174ef67087532f159083e2e007507fe163f58c58fbd0e08d05209cf4/azure_mgmt_network-30.2.0.tar.gz", hash = "sha256:9b17c259e6344808aaa80a34bbc4b13f16bc01185dd9db137eaa0ae26664861a", size = 708178, upload-time = "2026-02-13T03:45:39.617Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/5a/14c8cfb1655267dfed7529d35e5dd6581746238c9f50d4307b9e2faaacf8/azure_mgmt_network-30.2.0-py3-none-any.whl", hash = "sha256:a87edffd7c38aa9d3494daa8d42914213b0863a9072cf8c7c7e48018b12b6532", size = 631894, upload-time = "2026-02-13T03:45:41.738Z" },
+]
+
+[[package]]
+name = "azure-mgmt-resource"
+version = "25.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "azure-mgmt-core" },
+    { name = "isodate" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d7/7e/b3f9d544a94782be9c5ab8123d2fa7fb20cbdf3f5a16b883f308865e1406/azure_mgmt_resource-25.0.0.tar.gz", hash = "sha256:dc123a9f6509c37299d7716c9090cff0a9d73309b228cc094ea950ce3cca3603", size = 92837, upload-time = "2026-02-06T06:00:39.699Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/92/41/ce12546aa2a20c4f37d061bfa7df3bf8fa72ff01e7557ec330929c72ec7d/azure_mgmt_resource-25.0.0-py3-none-any.whl", hash = "sha256:f6f17b2305abe9bf6ec6c92a9410af21a2b0d805cc98e94d80c07220924a045b", size = 83670, upload-time = "2026-02-06T06:00:41.317Z" },
+]
+
+[[package]]
 name = "azure-monitor-opentelemetry"
 version = "1.8.7"
 source = { registry = "https://pypi.org/simple" }
@@ -423,6 +483,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/cf/68/9d59a0bed5fd9581b45444e8abc3ecda97e0466ae0f03affc7cddfb9fa74/azure_search_documents-11.6.0.tar.gz", hash = "sha256:fcc807076ff82024be576ffccb0d0f3261e5c2a112a6666b86ec70bbdb2e1d64", size = 311194, upload-time = "2025-10-09T22:04:03.655Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c5/4c/d74e5c3ccc0b9ead0e400a2d70ded67554b56a5d799aaa8bf5baaacf4aea/azure_search_documents-11.6.0-py3-none-any.whl", hash = "sha256:c3eb2deaf7926844e99a881830861225ef68e8b3bc067a76019e87fc7f5586dc", size = 307935, upload-time = "2025-10-09T22:04:05.008Z" },
+]
+
+[[package]]
+name = "azure-servicebus"
+version = "7.14.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "azure-core" },
+    { name = "isodate" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a8/d2/a5c11d4c955e2875de2383c1af8e43ce4899e8418b22e61d32d2bf103626/azure_servicebus-7.14.3.tar.gz", hash = "sha256:70a63384557aec0bee727740e7b25ded29e9e701b77611764577fd7402389402", size = 534786, upload-time = "2025-10-31T05:30:03.342Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/04/e9/d9fd0b2bef14d85b408c51802142b1c8b7bc3ab08514c89432547b1d87d3/azure_servicebus-7.14.3-py3-none-any.whl", hash = "sha256:386f8d32dae8881661ec8d791c38978eca2bbf7ea9f489d6cff8ad9cc6990234", size = 412522, upload-time = "2025-10-31T05:30:05.252Z" },
 ]
 
 [[package]]

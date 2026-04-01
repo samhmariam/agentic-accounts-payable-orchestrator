@@ -23,23 +23,24 @@ dependencies = [
   "psycopg[binary]==3.3.3",
   "ipykernel>=7.2.0",
   "marimo>=0.9",
+  "msal>=1.29",
+  "azure-servicebus>=7.12",
+  "azure-mgmt-resource>=23.0",
+  "azure-mgmt-network>=25.0",
+  "httpx>=0.27",
+  "tenacity>=8.3",
+  "PyJWT>=2.8",
+  "requests>=2.32",
 ]
 
 [project.optional-dependencies]
-dev = [
-  "pytest>=8.0",
-]
-day9 = [
-  "dspy>=2.6",
-]
-notebooks = [
-  "marimo>=0.9",
-  "altair>=5.0",
-  "pandas>=2.0",
-]
+dev = ["pytest>=8.0"]
+day9 = ["dspy>=2.6"]
+day11 = ["msal>=1.29"]
+notebooks = ["marimo>=0.9", "altair>=5.0", "pandas>=2.0"]
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]

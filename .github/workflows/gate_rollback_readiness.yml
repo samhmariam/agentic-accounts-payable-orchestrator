@@ -1,0 +1,56 @@
+name: gate-rollback-readiness
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'  # Weekly Monday 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [staging, production]
+
+jobs:
+  rollback-readiness:
+    name: Rollback Readiness Gate
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify stable revision is pinned and reachable
+        run: |
+          az containerapp revision list \
+            --name aegisap-worker \
+            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+            --query "[?properties.active==\`true\`].name" \
+            -o tsv
+
+      - name: Run all gates v2
+        run: python scripts/check_all_gates_v2.py
+        env:
+          AEGISAP_CORRELATION_ID: rollback-readiness-${{ github.run_id }}
+
+      - name: Upload gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-readiness-${{ github.run_id }}
+          path: build/
+          if-no-files-found: warn

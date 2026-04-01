@@ -6,6 +6,9 @@ param storageAccountName string
 param keyVaultName string
 param acrName string
 
+@description('Optional: Content Safety account name for Cognitive Services User role assignment')
+param contentSafetyName string = ''
+
 param developerPrincipalId string = ''
 param developerPrincipalType string = 'User'
 param pullIdentityPrincipalId string = ''
@@ -21,6 +24,12 @@ param storageBlobDataReaderRoleDefinitionId string
 param storageBlobDataContributorRoleDefinitionId string
 param keyVaultUserRoleId string
 param acrPullRoleDefinitionId string
+
+@description('Cognitive Services User role — grants read access to Content Safety and other Cognitive Services endpoints. Defaults to the well-known built-in role ID.')
+param cognitiveServicesUserRoleDefinitionId string = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  'a97b65f3-24c7-4388-baec-2e87135dc908'
+)
 
 resource openAi 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = {
   name: openAiName
@@ -179,5 +188,21 @@ resource runtimeKeyVaultAssignment 'Microsoft.Authorization/roleAssignments@2022
     principalId: runtimeApiPrincipalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: keyVaultUserRoleId
+  }
+}
+
+// ── Content Safety (Day 7) ────────────────────────────────────────────────────
+
+resource contentSafety 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = if (!empty(contentSafetyName)) {
+  name: !empty(contentSafetyName) ? contentSafetyName : 'placeholder'
+}
+
+resource developerContentSafetyAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(developerPrincipalId) && !empty(contentSafetyName)) {
+  name: guid(contentSafety.id, developerPrincipalId, cognitiveServicesUserRoleDefinitionId)
+  scope: contentSafety
+  properties: {
+    principalId: developerPrincipalId
+    principalType: developerPrincipalType
+    roleDefinitionId: cognitiveServicesUserRoleDefinitionId
   }
 }

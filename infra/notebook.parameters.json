@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-14/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "envName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "notebookProfile": {
+      "value": "${NOTEBOOK_PROFILE}"
+    },
+    "postgresAdminObjectId": {
+      "value": "${POSTGRES_ADMIN_OBJECT_ID}"
+    },
+    "postgresAdminName": {
+      "value": "${POSTGRES_ADMIN_NAME}"
+    },
+    "openAiChatDeploymentName": {
+      "value": "${AZURE_OPENAI_CHAT_DEPLOYMENT}"
+    },
+    "openAiChatModelName": {
+      "value": "${AZURE_OPENAI_MODEL_NAME}"
+    },
+    "openAiChatModelVersion": {
+      "value": "${AZURE_OPENAI_MODEL_VERSION}"
+    }
+  }
+}

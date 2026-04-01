@@ -100,7 +100,8 @@ def gate_refusal_safety() -> GateResult:
                 passed=False,
                 detail="malicious_cases.jsonl not found.",
             )
-        lines = [ln for ln in evals_path.read_text().splitlines() if ln.strip()]
+        lines = [ln for ln in evals_path.read_text().splitlines()
+                 if ln.strip()]
         total = len(lines)
         if total == 0:
             return GateResult(name="refusal_safety", passed=True, detail="No malicious cases file.")
@@ -218,6 +219,32 @@ def run_all_gates(skip_deploy: bool = False) -> list[GateResult]:
         else:
             results.append(fn())
     return results
+
+
+# ---------------------------------------------------------------------------
+# Days 11-14 gate re-exports (implemented in gates_v2)
+# ---------------------------------------------------------------------------
+try:
+    from aegisap.deploy.gates_v2 import (  # noqa: F401
+        gate_actor_binding,
+        gate_canary_regression,
+        gate_data_residency,
+        gate_dead_letter_budget,
+        gate_delegated_identity,
+        gate_delegated_identity_contract,
+        gate_dlq_drain_health,
+        gate_mcp_contract_integrity,
+        gate_obo_app_identity,
+        gate_obo_exchange,
+        gate_private_network_posture,
+        gate_private_network_static,
+        gate_rollback_readiness,
+        gate_stale_index_detection,
+        gate_trace_correlation,
+        gate_webhook_reliability,
+    )
+except ImportError:  # gates_v2 not yet installed — graceful degradation
+    pass
 
 
 def build_release_envelope(results: list[GateResult]) -> dict:

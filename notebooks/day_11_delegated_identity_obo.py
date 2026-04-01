@@ -673,5 +673,53 @@ Open `notebooks/day_12_private_networking_constraints.py` when ready.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 11: Delegated Identity, OBO, and Authority Confusion Defense
+    
+> **Zero-tolerance day** — a hard-fail on any zero-tolerance condition sets the day score to 0.
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Obo Correctness | 30 |
+| Threat Model Completeness | 20 |
+| Delegated Authority Boundary Understanding | 20 |
+| Audit Explanation Quality | 15 |
+| Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. Walk through the authority confusion attack path you modelled and explain exactly which control in the OBO flow breaks the chain.
+2. A team asks to skip OBO for integration speed. What is the blast radius of granting that exception, and what compensating controls would you require?
+3. Who in the enterprise must approve an identity architecture exception, and what audit evidence would a security reviewer demand at the six-month review?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day11/APPROVAL_AUTHORITY_MODEL.md`
+- `docs/curriculum/artifacts/day11/OBO_THREAT_MODEL.md`
+- `docs/curriculum/artifacts/day11/IDENTITY_EXCEPTION_REQUEST_RESPONSE.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

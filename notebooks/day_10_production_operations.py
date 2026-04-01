@@ -1323,5 +1323,53 @@ Ship with confidence.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 10: Production Acceptance, Release Evidence, and Change Board Readiness
+    
+> **Zero-tolerance day** — a hard-fail on any zero-tolerance condition sets the day score to 0.
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Technical Release Readiness | 25 |
+| Evidence Pack Quality | 25 |
+| Gate Exception Handling | 20 |
+| Executive Communication | 15 |
+| Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. Walk through one gate in your CAB packet that almost failed and explain what evidence tipped the decision.
+2. A late executive wants to override one gate for business urgency. What is your response and what is the blast radius if you comply?
+3. Who chairs the CAB for this system, what quorum is required, and what documented evidence must exist before the chair can approve?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day10/CAB_PACKET.md`
+- `docs/curriculum/artifacts/day10/EXECUTIVE_RELEASE_BRIEF.md`
+- `docs/curriculum/artifacts/day10/GATE_EXCEPTION_POLICY.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

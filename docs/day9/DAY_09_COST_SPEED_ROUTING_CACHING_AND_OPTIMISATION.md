@@ -36,3 +36,29 @@ Day 9 is complete when:
 - cached answers are bypassed automatically on high-risk or stale-evidence paths
 - nightly regression can catch the “aggregate got better, VAT slice got worse”
   failure mode
+
+---
+
+## FDE Rubric — Day 9 (100 points)
+
+| Dimension | Points |
+|---|---|
+| Routing correctness | 25 |
+| Cost reasoning | 25 |
+| Observability as control | 20 |
+| Finance communication quality | 15 |
+| Oral defense | 15 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+## Oral Defense Prompts
+
+1. Which capability did you route to the mini model and what is the quality degradation risk if that routing decision is wrong?
+2. Finance demands a 30% cost cut. Walk through which lever you would pull first and what zero-tolerance controls you would not touch.
+3. Who approves a PTU commitment in your enterprise, and what observability evidence would they require before signing a two-year reservation?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day09/CAPABILITY_ALLOCATION_MEMO.md`
+- `docs/curriculum/artifacts/day09/COST_GOVERNANCE_POLICY.md`
+- `docs/curriculum/artifacts/day09/PTU_PAYG_DECISION_NOTE.md`

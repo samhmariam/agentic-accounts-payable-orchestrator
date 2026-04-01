@@ -1362,5 +1362,52 @@ def _s_foundry_lab(mo, json, os):
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 03: Azure AI Services, Framework Selection, and Architectural Choice
+    
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Correct Technical Selection | 30 |
+| Rejected Alternatives Strength | 20 |
+| Azure Implementation Realism | 20 |
+| Cost Latency Quality Tradeoff | 15 |
+| Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. You chose one framework and rejected three. Explain the single strongest argument for each rejected alternative and why that argument was still insufficient.
+2. If your framework choice turns out to be wrong at Day 10 scale, what is the migration blast radius in terms of state contracts and tool interfaces?
+3. Who in the enterprise approves a framework change after Day 3, and what evidence of migration risk would they require before signing off?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day03/FRAMEWORK_DECISION_MATRIX.md`
+- `docs/curriculum/artifacts/day03/MODEL_ROUTING_POLICY_V1.yaml`
+- `docs/curriculum/artifacts/day03/RAG_BOUNDARY_DECISION.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

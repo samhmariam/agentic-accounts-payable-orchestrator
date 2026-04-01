@@ -38,3 +38,30 @@ Day 2 succeeds when the learner can inspect:
 - `src/aegisap/day2/router.py`
 - `src/aegisap/day2/graph.py`
 - `scripts/run_day2_workflow.py`
+
+---
+
+## FDE Rubric — Day 2 (100 points)
+
+| Dimension | Points |
+|---|---|
+| Discovery completeness | 20 |
+| NFR quality with numeric targets | 20 |
+| Zero-tolerance NFR identification | 20 |
+| Stakeholder / ownership realism | 20 |
+| ADR trade-off defense | 20 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+## Oral Defense Prompts
+
+1. Which NFR did you classify as zero-tolerance and why can it not be tuned post-launch without a full change-board review?
+2. If the security stakeholder and the process owner disagree on latency vs control, whose position wins and through what governance mechanism?
+3. Who must approve the scope ADR in production, what evidence section would they challenge first, and what would trigger a rollback?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day02/STAKEHOLDER_MAP.md`
+- `docs/curriculum/artifacts/day02/RACI_MATRIX.md`
+- `docs/curriculum/artifacts/day02/NFR_REGISTER.md`
+- `docs/curriculum/artifacts/day02/ADR_001_SCOPE_AND_BOUNDARIES.md`

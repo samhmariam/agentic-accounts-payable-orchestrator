@@ -1,0 +1,15 @@
+{
+  "_case": "claim_001_routine",
+  "_description": "Routine low-value DME claim. All required fields present and valid. Expected outcome: auto_approved.",
+  "claim_number": "CL-100001",
+  "claimant_id": "PT-0042",
+  "provider_id": "DME-PROV-0017",
+  "service_date": "2026-03-10",
+  "procedure_codes": ["E0601"],
+  "diagnosis_codes": ["G47.33"],
+  "billed_amount_usd": "320.00",
+  "authorisation_ref": "AUTH-20260301-0042",
+  "payer_id": "PAYER-BLUE-001",
+  "submission_date": "2026-03-12",
+  "place_of_service": "12"
+}

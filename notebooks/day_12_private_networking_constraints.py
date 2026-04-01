@@ -447,5 +447,54 @@ Open `notebooks/day_13_integration_boundary_and_mcp.py` when ready.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 12: Private Networking, Egress Control, and Security Dependency Management
+    
+> **Zero-tolerance day** — a hard-fail on any zero-tolerance condition sets the day score to 0.
+> **Capstone B day** — primary deliverables are in the claims intake transfer domain.
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Network Posture Design | 30 |
+| Static Vs Live Proof Understanding | 20 |
+| Dependency Management Realism | 20 |
+| Security Exception Handling | 15 |
+| Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. Which network dependency has the longest lead time and what is your plan if it is not resolved before production cutover?
+2. You temporarily enable a public endpoint in dev. Walk through every compensating control, the expiry date, and who holds the removal obligation.
+3. Who approves a security exception in your enterprise, what evidence is mandatory in the request, and what happens at expiry if no renewal is filed?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day12/NETWORK_DEPENDENCY_REGISTER.md`
+- `docs/curriculum/artifacts/day12/SECURITY_EXCEPTION_REQUEST.md`
+- `docs/curriculum/artifacts/day12/EGRESS_CONTROL_POLICY.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

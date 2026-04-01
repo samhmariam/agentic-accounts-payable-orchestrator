@@ -620,5 +620,53 @@ Open `notebooks/day_14_breaking_changes_elite_ops.py` when ready.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 13: Integration Boundaries, Async Reliability, and Contract Management
+    
+> **Capstone B day** — primary deliverables are in the claims intake transfer domain.
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Boundary Architecture Correctness | 25 |
+| Reliability Design | 20 |
+| Contract Versioning Quality | 20 |
+| External Stakeholder Communication | 20 |
+| Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. A partner demands direct access to the orchestrator. Walk through your boundary defense and what you offer instead.
+2. If a compensating action fails silently, what is the blast radius and what is your detection and recovery path?
+3. Who approves a breaking change to an external API contract, what is the minimum notice period, and what evidence must accompany the deprecation notice?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day13/EXTERNAL_CONTRACT_POLICY.md`
+- `docs/curriculum/artifacts/day13/COMPENSATING_ACTION_CATALOG.md`
+- `docs/curriculum/artifacts/day13/API_CHANGE_COMMUNICATION_PLAN.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

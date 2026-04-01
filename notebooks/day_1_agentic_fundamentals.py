@@ -1331,5 +1331,52 @@ def _s_threat_artifact(mo, json):
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 01: Agentic Systems Fundamentals, Business Value, and FDE Judgment
+    
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Agent Fit Signals | 25 |
+| Rejection Criteria | 20 |
+| Waf Trust Tradeoff | 20 |
+| Business Framing | 15 |
+| Oral Defense | 20 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. What alternative automation approach did you reject for this pain point, and why does the agent design win on this dimension?
+2. What is the blast radius if the agent acts on a misclassified invoice? Name the downstream systems and approvers affected.
+3. Who in a real enterprise must sign off on introducing an agentic system into a financial workflow, and what audit evidence would they demand before go-live?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day01/AGENT_FIT_MEMO.md`
+- `docs/curriculum/artifacts/day01/NO_AGENT_MEMO.md`
+- `docs/curriculum/artifacts/day01/FDE_MENTAL_MODELS.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

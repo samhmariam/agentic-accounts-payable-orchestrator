@@ -837,5 +837,52 @@ Open `notebooks/day_7_testing_eval_guardrails.py` when ready.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 06: Data Authority, System of Record, and Change Classification
+    
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Source Of Truth Hierarchy | 25 |
+| Change Classification Rigor | 25 |
+| Governance Realism | 20 |
+| Incident Recovery Logic | 15 |
+| Defense Quality | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. Which data source did you demote in the authority hierarchy, and what scenario would cause a conflict between it and the authoritative source?
+2. If you classify a threshold change as a policy change rather than a model change, what approval path changes and what is the blast radius of the wrong classification?
+3. Who in the enterprise owns the data authority chart, and what evidence would an auditor require to prove it was followed during an incident?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day06/DATA_AUTHORITY_CHART.md`
+- `docs/curriculum/artifacts/day06/CHANGE_CLASSIFICATION_MATRIX.md`
+- `docs/curriculum/artifacts/day06/SOURCE_OF_TRUTH_CONFLICT_RUNBOOK.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

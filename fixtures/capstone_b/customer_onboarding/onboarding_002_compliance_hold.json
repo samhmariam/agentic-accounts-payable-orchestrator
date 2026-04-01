@@ -1,0 +1,16 @@
+{
+  "_case": "onboarding_002_compliance_hold",
+  "_description": "Enterprise customer onboarding held because compliance attestation has not been submitted. All other fields valid. Expected outcome: pending_compliance_review — triggers HITL for compliance team.",
+  "onboarding_id": "ON-200002",
+  "customer_org_id": "ORG-NOVA-012",
+  "contact_role": "CTO",
+  "contract_ref": "CTR-2026-NOVA-001",
+  "compliance_attestation_status": "pending",
+  "requested_tier": "enterprise",
+  "estimated_seats": 400,
+  "identity_provisioning_status": "pending",
+  "submission_date": "2026-03-08",
+  "_expected_outcome": "pending_compliance_review",
+  "_hitl_trigger": "compliance_attestation_status == pending",
+  "_escalation_target": "Compliance Review Team"
+}

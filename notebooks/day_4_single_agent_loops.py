@@ -1043,5 +1043,52 @@ Open `notebooks/day_5_multi_agent_orchestration.py` when ready.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 04: Single-Agent Loops, Policy Overlay, and Failure Containment
+    
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Extraction Correctness | 25 |
+| Policy Over Model Precedence | 25 |
+| Reversible Irreversible Reasoning | 20 |
+| Test Quality | 15 |
+| Defense Quality | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. Which action in your risk register did you classify as irreversible and what deterministic policy prevents the model from triggering it?
+2. If the policy overlay fails open instead of closed, what is the blast radius across financial controls and who absorbs the liability?
+3. Who must approve a change to the policy precedence rules, and what test evidence would the approver require before accepting the change?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day04/ACTION_RISK_REGISTER.md`
+- `docs/curriculum/artifacts/day04/POLICY_PRECEDENCE.md`
+- `docs/curriculum/artifacts/day04/FAIL_CLOSED_TEST_CASES.json`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

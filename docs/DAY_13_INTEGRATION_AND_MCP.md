@@ -62,3 +62,33 @@ Available tools: `query_invoice_status`, `list_pending_approvals`, `get_vendor_p
 
 See `evals/failure_drills/drill_05_dlq_overflow.json` and
 `evals/failure_drills/drill_06_mcp_contract_break.json`.
+
+<!-- CAPSTONE_B -->
+
+---
+
+## FDE Rubric — Day 13 (100 points)
+
+| Dimension | Points |
+|---|---|
+| Boundary architecture correctness | 25 |
+| Reliability design | 20 |
+| Contract / versioning quality | 20 |
+| External stakeholder communication | 20 |
+| Oral defense | 15 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+**Capstone B day** — primary deliverables are in the claims intake transfer domain.
+
+## Oral Defense Prompts
+
+1. A partner demands direct access to the orchestrator. Walk through your boundary defense and what you offer instead.
+2. If a compensating action fails silently, what is the blast radius and what is your detection and recovery path?
+3. Who approves a breaking change to an external API contract, what is the minimum notice period, and what evidence must accompany the deprecation notice?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day13/EXTERNAL_CONTRACT_POLICY.md`
+- `docs/curriculum/artifacts/day13/COMPENSATING_ACTION_CATALOG.md`
+- `docs/curriculum/artifacts/day13/API_CHANGE_COMMUNICATION_PLAN.md`

@@ -57,3 +57,31 @@ Required env: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`,
   in production to prevent cross-request contamination.
 - **Scope creep** — request only the minimum scopes needed. Do not use
   `https://graph.microsoft.com/.default` if only reading group membership.
+
+---
+
+## FDE Rubric — Day 11 (100 points)
+
+| Dimension | Points |
+|---|---|
+| OBO correctness | 30 |
+| Threat model completeness | 20 |
+| Delegated authority boundary understanding | 20 |
+| Audit explanation quality | 15 |
+| Oral defense | 15 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+**Zero-tolerance conditions:** (1) actor binding broken — payload identity accepted without OBO; (2) OBO bypass approved for convenience without formal exception. Either condition overrides total to 0.
+
+## Oral Defense Prompts
+
+1. Walk through the authority confusion attack path you modelled and explain exactly which control in the OBO flow breaks the chain.
+2. A team asks to skip OBO for integration speed. What is the blast radius of granting that exception, and what compensating controls would you require?
+3. Who in the enterprise must approve an identity architecture exception, and what audit evidence would a security reviewer demand at the six-month review?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day11/APPROVAL_AUTHORITY_MODEL.md`
+- `docs/curriculum/artifacts/day11/OBO_THREAT_MODEL.md`
+- `docs/curriculum/artifacts/day11/IDENTITY_EXCEPTION_REQUEST_RESPONSE.md`

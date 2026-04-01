@@ -31,3 +31,29 @@ Execution exits early when any of these become true:
 - the recommendation gate can already prove the case is ineligible
 
 Forced-escalation scenarios can still execute `manual_escalation_package`, but downstream recommendation work is skipped.
+
+---
+
+## FDE Rubric — Day 4 (100 points)
+
+| Dimension | Points |
+|---|---|
+| Extraction correctness | 25 |
+| Policy over model precedence | 25 |
+| Reversible / irreversible reasoning | 20 |
+| Test quality | 15 |
+| Defense quality | 15 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+## Oral Defense Prompts
+
+1. Which action in your risk register did you classify as irreversible and what deterministic policy prevents the model from triggering it?
+2. If the policy overlay fails open instead of closed, what is the blast radius across financial controls and who absorbs the liability?
+3. Who must approve a change to the policy precedence rules, and what test evidence would the approver require before accepting the change?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day04/ACTION_RISK_REGISTER.md`
+- `docs/curriculum/artifacts/day04/POLICY_PRECEDENCE.md`
+- `docs/curriculum/artifacts/day04/FAIL_CLOSED_TEST_CASES.json`

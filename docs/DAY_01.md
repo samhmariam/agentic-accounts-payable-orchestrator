@@ -50,3 +50,29 @@ The default training case uses:
 - `src/aegisap/day_01/normalizers.py`
 - `src/aegisap/day_01/service.py`
 - `scripts/run_day1_intake.py`
+
+---
+
+## FDE Rubric — Day 1 (100 points)
+
+| Dimension | Points |
+|---|---|
+| Agent-fit signals | 25 |
+| Rejection criteria | 20 |
+| WAF / trust trade-off | 20 |
+| Business framing | 15 |
+| Oral defense | 20 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+## Oral Defense Prompts
+
+1. What alternative automation approach did you reject for this pain point, and why does the agent design win on this dimension?
+2. What is the blast radius if the agent acts on a misclassified invoice? Name the downstream systems and approvers affected.
+3. Who in a real enterprise must sign off on introducing an agentic system into a financial workflow, and what audit evidence would they demand before go-live?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day01/AGENT_FIT_MEMO.md`
+- `docs/curriculum/artifacts/day01/NO_AGENT_MEMO.md`
+- `docs/curriculum/artifacts/day01/FDE_MENTAL_MODELS.md`

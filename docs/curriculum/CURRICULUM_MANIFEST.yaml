@@ -1,0 +1,411 @@
+---
+# AegisAP Curriculum Manifest
+# Single source of truth for the 14-day FDE programme.
+# Tests, notebooks, and docs MUST derive from this file rather than duplicating values.
+#
+# Schema per day:
+#   id              : zero-padded day number (string)
+#   title           : canonical day title
+#   notebook_file   : repo-root-relative path to the Marimo notebook
+#   primary_doc_file: repo-root-relative path to the primary day doc (may not exist yet at manifest creation)
+#   legacy_doc_files: superseded docs kept for reference; listed here so tests can assert they still exist
+#   rubric_weights  : five dimensions summing exactly to 100
+#   artifact_files  : all trainee-produced artifact paths under docs/curriculum/artifacts/
+#   oral_defense_prompts: exactly 3 per day (universal + day-specific framing)
+#   zero_tolerance  : conditions that hard-fail the day regardless of total score;
+#                     applies to assessed artifacts and technical decisions, not oral-defense points alone
+#   capstone_flags  : capstone_a and capstone_b participation booleans
+
+daily_pass_bar: 80
+elite_pass_bar: 90
+
+graduation_tiers:
+  graduate:
+    average_score: 80
+    all_days_pass: true
+    all_zero_tolerance_pass: true
+    no_major_process_weakness: true
+  strong_fde:
+    average_score: 85
+    defends_tradeoffs: true
+    produces_reusable_artifacts: true
+    handles_hostile_review: true
+  top_talent:
+    average_score: 90
+    transfer_capstone_pass: true
+    executive_communication: true
+    auditor_communication: true
+    security_communication: true
+    ops_communication: true
+    correct_go_nogo_under_pressure: true
+
+days:
+  - id: "01"
+    title: "Agentic Systems Fundamentals, Business Value, and FDE Judgment"
+    notebook_file: notebooks/day_1_agentic_fundamentals.py
+    primary_doc_file: docs/DAY_01.md
+    legacy_doc_files: []
+    rubric_weights:
+      agent_fit_signals: 25
+      rejection_criteria: 20
+      waf_trust_tradeoff: 20
+      business_framing: 15
+      oral_defense: 20
+    artifact_files:
+      - docs/curriculum/artifacts/day01/AGENT_FIT_MEMO.md
+      - docs/curriculum/artifacts/day01/NO_AGENT_MEMO.md
+      - docs/curriculum/artifacts/day01/FDE_MENTAL_MODELS.md
+    oral_defense_prompts:
+      - "What alternative automation approach did you reject for this pain point, and why does the agent design win on this dimension?"
+      - "What is the blast radius if the agent acts on a misclassified invoice? Name the downstream systems and approvers affected."
+      - "Who in a real enterprise must sign off on introducing an agentic system into a financial workflow, and what audit evidence would they demand before go-live?"
+    zero_tolerance: []
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "02"
+    title: "Discovery, Scoping, NFRs, and Stakeholder Power Mapping"
+    notebook_file: notebooks/day_2_requirements_architecture.py
+    primary_doc_file: docs/DAY_02.md
+    legacy_doc_files: []
+    rubric_weights:
+      discovery_completeness: 20
+      nfr_quality_with_numeric_targets: 20
+      zero_tolerance_nfr_identification: 20
+      stakeholder_ownership_realism: 20
+      adr_tradeoff_defense: 20
+    artifact_files:
+      - docs/curriculum/artifacts/day02/STAKEHOLDER_MAP.md
+      - docs/curriculum/artifacts/day02/RACI_MATRIX.md
+      - docs/curriculum/artifacts/day02/NFR_REGISTER.md
+      - docs/curriculum/artifacts/day02/ADR_001_SCOPE_AND_BOUNDARIES.md
+    oral_defense_prompts:
+      - "Which NFR did you classify as zero-tolerance and why can it not be tuned post-launch without a full change-board review?"
+      - "If the security stakeholder and the process owner disagree on latency vs control, whose position wins and through what governance mechanism?"
+      - "Who must approve the scope ADR in production, what evidence section would they challenge first, and what would trigger a rollback?"
+    zero_tolerance: []
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "03"
+    title: "Azure AI Services, Framework Selection, and Architectural Choice"
+    notebook_file: notebooks/day_3_azure_ai_services.py
+    primary_doc_file: docs/DAY_03_FRAMEWORK_SELECTION_AND_CHOICE.md
+    legacy_doc_files:
+      - docs/DAY_03_DATA_AUTHORITY.md
+      - docs/DAY_03_EVALUATION.md
+      - docs/DAY_03_LIVE_AZURE_RETRIEVAL.md
+      - docs/DAY_03_MULTI_AGENT_RETRIEVAL.md
+    rubric_weights:
+      correct_technical_selection: 30
+      rejected_alternatives_strength: 20
+      azure_implementation_realism: 20
+      cost_latency_quality_tradeoff: 15
+      oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day03/FRAMEWORK_DECISION_MATRIX.md
+      - docs/curriculum/artifacts/day03/MODEL_ROUTING_POLICY_V1.yaml
+      - docs/curriculum/artifacts/day03/RAG_BOUNDARY_DECISION.md
+    oral_defense_prompts:
+      - "You chose one framework and rejected three. Explain the single strongest argument for each rejected alternative and why that argument was still insufficient."
+      - "If your framework choice turns out to be wrong at Day 10 scale, what is the migration blast radius in terms of state contracts and tool interfaces?"
+      - "Who in the enterprise approves a framework change after Day 3, and what evidence of migration risk would they require before signing off?"
+    zero_tolerance: []
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "04"
+    title: "Single-Agent Loops, Policy Overlay, and Failure Containment"
+    notebook_file: notebooks/day_4_single_agent_loops.py
+    primary_doc_file: docs/DAY_04_EXECUTION_FLOW.md
+    legacy_doc_files:
+      - docs/DAY_04_EXIT_CHECK.md
+      - docs/DAY_04_EXPLICIT_PLANNING.md
+      - docs/DAY_04_PLAN_SCHEMA.md
+    rubric_weights:
+      extraction_correctness: 25
+      policy_over_model_precedence: 25
+      reversible_irreversible_reasoning: 20
+      test_quality: 15
+      defense_quality: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day04/ACTION_RISK_REGISTER.md
+      - docs/curriculum/artifacts/day04/POLICY_PRECEDENCE.md
+      - docs/curriculum/artifacts/day04/FAIL_CLOSED_TEST_CASES.json
+    oral_defense_prompts:
+      - "Which action in your risk register did you classify as irreversible and what deterministic policy prevents the model from triggering it?"
+      - "If the policy overlay fails open instead of closed, what is the blast radius across financial controls and who absorbs the liability?"
+      - "Who must approve a change to the policy precedence rules, and what test evidence would the approver require before accepting the change?"
+    zero_tolerance: []
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "05"
+    title: "Multi-Agent Orchestration, State, and Human Approval Contracts"
+    notebook_file: notebooks/day_5_multi_agent_orchestration.py
+    primary_doc_file: docs/DAY_05_DURABLE_STATE_AND_RESUMPTION.md
+    legacy_doc_files: []
+    rubric_weights:
+      state_design: 25
+      resumption_safety: 20
+      hitl_contract_quality: 20
+      edge_case_handling: 20
+      oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day05/HUMAN_APPROVAL_CONTRACT.md
+      - docs/curriculum/artifacts/day05/PAUSE_RESUME_GOVERNANCE.md
+      - docs/curriculum/artifacts/day05/ESCALATION_TREE.md
+    oral_defense_prompts:
+      - "Which HITL failure mode did you consider but choose not to handle in the contract, and why is that an acceptable omission?"
+      - "If the system resumes from a checkpoint after an approver's decision has been overtaken by events, what state fields are now stale and what is the blast radius?"
+      - "Who owns the approval contract SLA in production, and what evidence would they need to audit a resume-after-timeout incident?"
+    zero_tolerance: []
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "06"
+    title: "Data Authority, System of Record, and Change Classification"
+    notebook_file: notebooks/day_6_data_ml_integration.py
+    primary_doc_file: docs/DAY_06_REFLECTION_AND_GRACEFUL_REFUSAL.md
+    legacy_doc_files: []
+    rubric_weights:
+      source_of_truth_hierarchy: 25
+      change_classification_rigor: 25
+      governance_realism: 20
+      incident_recovery_logic: 15
+      defense_quality: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day06/DATA_AUTHORITY_CHART.md
+      - docs/curriculum/artifacts/day06/CHANGE_CLASSIFICATION_MATRIX.md
+      - docs/curriculum/artifacts/day06/SOURCE_OF_TRUTH_CONFLICT_RUNBOOK.md
+    oral_defense_prompts:
+      - "Which data source did you demote in the authority hierarchy, and what scenario would cause a conflict between it and the authoritative source?"
+      - "If you classify a threshold change as a policy change rather than a model change, what approval path changes and what is the blast radius of the wrong classification?"
+      - "Who in the enterprise owns the data authority chart, and what evidence would an auditor require to prove it was followed during an incident?"
+    zero_tolerance: []
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "07"
+    title: "Evaluation, Guardrails, Structured Refusal, and Slice Governance"
+    notebook_file: notebooks/day_7_testing_eval_guardrails.py
+    primary_doc_file: docs/DAY_07_EVAL_GUARDRAILS_SLICE_GOVERNANCE.md
+    legacy_doc_files:
+      - docs/day7/DAY_07_SECURITY_IDENTITY_AUDITABILITY.md
+    rubric_weights:
+      zero_tolerance_metric_handling: 30
+      slice_based_reasoning: 20
+      refusal_schema_quality: 20
+      security_reasoning: 15
+      oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day07/EVAL_GOVERNANCE_POLICY.md
+      - docs/curriculum/artifacts/day07/SLICE_REGRESSION_DECISION_LOG.md
+      - docs/curriculum/artifacts/day07/REFUSAL_REASON_CODE_CATALOG.md
+    oral_defense_prompts:
+      - "The aggregate eval score improved but one critical slice regressed. Walk through your decision to block or release and name the approver chain."
+      - "If your refusal schema is incomplete for one action class, what is the blast radius in terms of audit evidence gaps and regulatory exposure?"
+      - "Who must sign off on a release where a zero-tolerance metric is borderline, and what evidence package is the minimum acceptable for that sign-off?"
+    zero_tolerance:
+      - condition: mandatory_escalation_missed_on_critical_slice_regression
+        consequence: hard_fail
+      - condition: refusal_schema_absent_for_high_risk_action_class
+        consequence: hard_fail
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "08"
+    title: "IaC, Identity Planes, and Secure Release Ownership"
+    notebook_file: notebooks/day_8_cicd_iac_deployment.py
+    primary_doc_file: docs/DAY_08_IAC_IDENTITY_RELEASE_OWNERSHIP.md
+    legacy_doc_files:
+      - docs/day8/DAY_08_OBSERVABILITY_AND_RELIABILITY.md
+      - docs/day8/FAILURE_TAXONOMY.md
+      - docs/day8/LATENCY_BUDGETS.md
+      - docs/day8/OBSERVABILITY_CONTRACT.md
+      - docs/day8/RETRY_POLICY.md
+    rubric_weights:
+      iac_correctness: 25
+      identity_security_reasoning: 25
+      ownership_clarity: 20
+      review_packet_quality: 15
+      oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day08/RELEASE_OWNERSHIP_MAP.md
+      - docs/curriculum/artifacts/day08/SECURITY_REVIEW_PACKET.md
+      - docs/curriculum/artifacts/day08/DRIFT_RESPONSE_PLAYBOOK.md
+    oral_defense_prompts:
+      - "Which IaC pattern did you choose over an alternative and what is the security consequence of the rejected approach?"
+      - "If federated credentials drift and the pipeline loses access at 2am, what is the blast radius and who is the first call?"
+      - "Who owns the release machinery in production, and what evidence would a platform team require before granting break-glass access?"
+    zero_tolerance: []
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "09"
+    title: "Observability, Routing, Cost, and Economic Control"
+    notebook_file: notebooks/day_9_scaling_monitoring_cost.py
+    primary_doc_file: docs/day9/DAY_09_COST_SPEED_ROUTING_CACHING_AND_OPTIMISATION.md
+    legacy_doc_files: []
+    rubric_weights:
+      routing_correctness: 25
+      cost_reasoning: 25
+      observability_as_control: 20
+      finance_communication_quality: 15
+      oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day09/CAPABILITY_ALLOCATION_MEMO.md
+      - docs/curriculum/artifacts/day09/COST_GOVERNANCE_POLICY.md
+      - docs/curriculum/artifacts/day09/PTU_PAYG_DECISION_NOTE.md
+    oral_defense_prompts:
+      - "Which capability did you route to the mini model and what is the quality degradation risk if that routing decision is wrong?"
+      - "Finance demands a 30% cost cut. Walk through which lever you would pull first and what zero-tolerance controls you would not touch."
+      - "Who approves a PTU commitment in your enterprise, and what observability evidence would they require before signing a two-year reservation?"
+    zero_tolerance: []
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "10"
+    title: "Production Acceptance, Release Evidence, and Change Board Readiness"
+    notebook_file: notebooks/day_10_production_operations.py
+    primary_doc_file: docs/DAY_10_DEPLOYMENT_AND_ACCEPTANCE.md
+    legacy_doc_files: []
+    rubric_weights:
+      technical_release_readiness: 25
+      evidence_pack_quality: 25
+      gate_exception_handling: 20
+      executive_communication: 15
+      oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day10/CAB_PACKET.md
+      - docs/curriculum/artifacts/day10/EXECUTIVE_RELEASE_BRIEF.md
+      - docs/curriculum/artifacts/day10/GATE_EXCEPTION_POLICY.md
+    oral_defense_prompts:
+      - "Walk through one gate in your CAB packet that almost failed and explain what evidence tipped the decision."
+      - "A late executive wants to override one gate for business urgency. What is your response and what is the blast radius if you comply?"
+      - "Who chairs the CAB for this system, what quorum is required, and what documented evidence must exist before the chair can approve?"
+    zero_tolerance:
+      - condition: pass_declared_when_gate_evidence_is_absent
+        consequence: hard_fail
+      - condition: gate_exception_approved_without_required_authority_or_expiry
+        consequence: hard_fail
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "11"
+    title: "Delegated Identity, OBO, and Authority Confusion Defense"
+    notebook_file: notebooks/day_11_delegated_identity_obo.py
+    primary_doc_file: docs/DAY_11_DELEGATED_IDENTITY.md
+    legacy_doc_files: []
+    rubric_weights:
+      obo_correctness: 30
+      threat_model_completeness: 20
+      delegated_authority_boundary_understanding: 20
+      audit_explanation_quality: 15
+      oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day11/APPROVAL_AUTHORITY_MODEL.md
+      - docs/curriculum/artifacts/day11/OBO_THREAT_MODEL.md
+      - docs/curriculum/artifacts/day11/IDENTITY_EXCEPTION_REQUEST_RESPONSE.md
+    oral_defense_prompts:
+      - "Walk through the authority confusion attack path you modelled and explain exactly which control in the OBO flow breaks the chain."
+      - "A team asks to skip OBO for integration speed. What is the blast radius of granting that exception, and what compensating controls would you require?"
+      - "Who in the enterprise must approve an identity architecture exception, and what audit evidence would a security reviewer demand at the six-month review?"
+    zero_tolerance:
+      - condition: actor_binding_broken_payload_identity_accepted_without_obo
+        consequence: hard_fail
+      - condition: obo_bypass_approved_for_convenience_without_formal_exception
+        consequence: hard_fail
+    capstone_flags:
+      capstone_a: true
+      capstone_b: false
+
+  - id: "12"
+    title: "Private Networking, Egress Control, and Security Dependency Management"
+    notebook_file: notebooks/day_12_private_networking_constraints.py
+    primary_doc_file: docs/DAY_12_PRIVATE_NETWORKING.md
+    legacy_doc_files: []
+    rubric_weights:
+      network_posture_design: 30
+      static_vs_live_proof_understanding: 20
+      dependency_management_realism: 20
+      security_exception_handling: 15
+      oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day12/NETWORK_DEPENDENCY_REGISTER.md
+      - docs/curriculum/artifacts/day12/SECURITY_EXCEPTION_REQUEST.md
+      - docs/curriculum/artifacts/day12/EGRESS_CONTROL_POLICY.md
+    oral_defense_prompts:
+      - "Which network dependency has the longest lead time and what is your plan if it is not resolved before production cutover?"
+      - "You temporarily enable a public endpoint in dev. Walk through every compensating control, the expiry date, and who holds the removal obligation."
+      - "Who approves a security exception in your enterprise, what evidence is mandatory in the request, and what happens at expiry if no renewal is filed?"
+    zero_tolerance:
+      - condition: public_endpoint_described_as_acceptable_in_production
+        consequence: hard_fail
+      - condition: security_exception_granted_with_no_expiry_or_compensating_control
+        consequence: hard_fail
+    capstone_flags:
+      capstone_a: true
+      capstone_b: true
+
+  - id: "13"
+    title: "Integration Boundaries, Async Reliability, and Contract Management"
+    notebook_file: notebooks/day_13_integration_boundary_and_mcp.py
+    primary_doc_file: docs/DAY_13_INTEGRATION_AND_MCP.md
+    legacy_doc_files: []
+    rubric_weights:
+      boundary_architecture_correctness: 25
+      reliability_design: 20
+      contract_versioning_quality: 20
+      external_stakeholder_communication: 20
+      oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day13/EXTERNAL_CONTRACT_POLICY.md
+      - docs/curriculum/artifacts/day13/COMPENSATING_ACTION_CATALOG.md
+      - docs/curriculum/artifacts/day13/API_CHANGE_COMMUNICATION_PLAN.md
+    oral_defense_prompts:
+      - "A partner demands direct access to the orchestrator. Walk through your boundary defense and what you offer instead."
+      - "If a compensating action fails silently, what is the blast radius and what is your detection and recovery path?"
+      - "Who approves a breaking change to an external API contract, what is the minimum notice period, and what evidence must accompany the deprecation notice?"
+    zero_tolerance: []
+    capstone_flags:
+      capstone_a: true
+      capstone_b: true
+
+  - id: "14"
+    title: "Elite Operations, Breaking Changes, and Executive Incident Leadership"
+    notebook_file: notebooks/day_14_breaking_changes_elite_ops.py
+    primary_doc_file: docs/DAY_14_BREAKING_CHANGES.md
+    legacy_doc_files: []
+    rubric_weights:
+      operational_correctness: 30
+      prioritisation_under_pressure: 20
+      executive_communication: 20
+      evidence_gates_in_decision_making: 15
+      final_oral_defense: 15
+    artifact_files:
+      - docs/curriculum/artifacts/day14/INCIDENT_COMMAND_PLAYBOOK.md
+      - docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md
+      - docs/curriculum/artifacts/day14/ELITE_READINESS_SCORECARD.md
+    oral_defense_prompts:
+      - "During the war-game, three failures arrive simultaneously. Walk through your triage order, the mental model driving each decision, and the first action you would not take."
+      - "You recommend a partial-service continuation. What is the blast radius of that choice, which gates are you explicitly bypassing, and who must countersign?"
+      - "The CTO asks for a one-page incident brief in ten minutes. Walk through exactly what goes in it, what you leave out, and who reviews it before it is sent."
+    zero_tolerance:
+      - condition: continue_service_recommended_when_binary_gates_are_failing
+        consequence: hard_fail
+      - condition: no_rollback_path_identified_during_war_game
+        consequence: hard_fail
+    capstone_flags:
+      capstone_a: true
+      capstone_b: true

@@ -98,4 +98,58 @@ Every day should end with:
 - one exit condition to prove
 - one Azure concept that becomes more concrete than the day before
 
+## Capstone B — Transfer Domain (Days 12–14)
+
+Capstone B introduces a second domain to test whether the trainee can apply
+AegisAP patterns without AegisAP's familiar fixtures.
+
+**Primary transfer domain:** Claims intake for a medical supplier.
+**Secondary:** Customer onboarding (product extension scenario).
+
+The trainee is given claims intake fixtures in `fixtures/capstone_b/claims_intake/`
+and must implement the same safety guarantees, governance process, and release
+evidence pack they built for invoices — but for an unfamiliar document schema
+with different compliance constraints.
+
+A hidden assessor case (`fixtures/capstone_b/_assessor_only/`) is used to test
+whether the trainee's implementation handles an adversarial input they have never
+seen. The trainee is informed this case exists but has not seen its contents.
+
+Capstone B scoring follows the same 100-point rubric. Days 12, 13, and 14 each
+require the CAPSTONE_B marker in their primary doc and in the oral defense session.
+
+## Eight Mental Models
+
+The programme develops eight permanent mental models. These are introduced across
+the first four days and are examinable from the moment they appear.
+
+See `docs/curriculum/MENTAL_MODELS.md` for full definitions and the day-presence
+matrix showing first appearance and reinforcement days.
+
+| Model | First appears |
+|---|---|
+| Build an agent or not | Day 1 |
+| Zero-tolerance vs tunable NFRs | Day 2 |
+| Authority and source-of-truth hierarchy | Day 2 |
+| Control plane vs data plane | Day 4 |
+| Reversible vs irreversible actions | Day 4 |
+| Blast radius minimisation | Day 1 |
+| Release evidence over intuition | Day 8 |
+| "Who must approve this" before "how to code this" | Day 2 |
+
+## Grading and Graduation
+
+Each day is scored on a 100-point scale (35/20/15/15/15 across five dimensions).
+The daily pass bar is **80**. The elite bar is **90**.
+
+Three graduation tiers:
+
+| Tier | Score threshold | Key differentiator |
+|---|---|---|
+| Graduate | ≥ 80 average, all days pass | Passed all gates |
+| Strong FDE | ≥ 85 average | Hostile review passed, reusable artifacts |
+| Top Talent | ≥ 90 average | Transfer capstone passed, multi-audience communication |
+
+Full tier definitions in `docs/curriculum/GRADUATION_RUBRIC.md`.
+
 That is the standard for all future curriculum expansion.

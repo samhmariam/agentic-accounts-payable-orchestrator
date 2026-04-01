@@ -1,0 +1,36 @@
+# Model Routing Policy — v1
+
+# Structural skeleton. Replace all <placeholder> values.
+
+routing_version: "1.0"
+effective_date: "<YYYY-MM-DD>"
+owner: "<role — e.g., Platform Architect>"
+approver: "<role — e.g., Head of Engineering>"
+review_cycle: "<e.g., quarterly or on any cost anomaly>"
+
+# Capability-to-model assignments
+# Each capability must have exactly one primary assignment.
+# Fallback is optional but must be justified.
+capabilities:
+  - name: "<capability_name — e.g., invoice_extraction>"
+    model: "<model_id — e.g., gpt-4o>"
+    justification: "<one sentence — why this model for this capability>"
+    fallback: "<model_id or null>"
+    fallback_condition: "<condition that triggers fallback, or null if no fallback>"
+    zero_tolerance_protected: <true|false>
+
+# Routing constraints
+constraints:
+  pii_data_must_stay_in_tenant: true
+  max_token_cost_per_run_usd: <number>
+  latency_budget_p95_ms: <number>
+  # Add further constraints as needed
+
+# Change control
+# Any change to capability-to-model assignments requires:
+change_control:
+  approver: "<role>"
+  required_evidence:
+    - "<eval metric or test suite name>"
+    - "<cost impact analysis>"
+  rollback_condition: "<observable signal that triggers rollback>"

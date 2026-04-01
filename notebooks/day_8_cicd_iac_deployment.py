@@ -1792,5 +1792,52 @@ Open `notebooks/day_9_scaling_monitoring_cost.py` when ready.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 08: IaC, Identity Planes, and Secure Release Ownership
+    
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Iac Correctness | 25 |
+| Identity Security Reasoning | 25 |
+| Ownership Clarity | 20 |
+| Review Packet Quality | 15 |
+| Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. Which IaC pattern did you choose over an alternative and what is the security consequence of the rejected approach?
+2. If federated credentials drift and the pipeline loses access at 2am, what is the blast radius and who is the first call?
+3. Who owns the release machinery in production, and what evidence would a platform team require before granting break-glass access?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day08/RELEASE_OWNERSHIP_MAP.md`
+- `docs/curriculum/artifacts/day08/SECURITY_REVIEW_PACKET.md`
+- `docs/curriculum/artifacts/day08/DRIFT_RESPONSE_PLAYBOOK.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

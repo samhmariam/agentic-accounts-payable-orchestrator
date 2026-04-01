@@ -1,0 +1,17 @@
+{
+  "_case": "claim_002_high_value",
+  "_description": "High-value DME claim above the USD 2,500 authorisation threshold. All fields valid. Expected outcome: pending_adjudicator_review.",
+  "claim_number": "CL-100002",
+  "claimant_id": "PT-0091",
+  "provider_id": "DME-PROV-0017",
+  "service_date": "2026-03-08",
+  "procedure_codes": ["K0005", "E1399"],
+  "diagnosis_codes": ["G80.1", "M62.50"],
+  "billed_amount_usd": "4850.00",
+  "authorisation_ref": "AUTH-20260225-0091",
+  "payer_id": "PAYER-BLUE-001",
+  "submission_date": "2026-03-11",
+  "place_of_service": "12",
+  "_hitl_trigger": "billed_amount_usd > 2500.00",
+  "_expected_outcome": "pending_adjudicator_review"
+}

@@ -1,0 +1,18 @@
+{
+  "_case": "claim_004_code_mismatch",
+  "_description": "Procedure code E0143 (walker) is inconsistent with diagnosis code J18.9 (pneumonia). Medical necessity cannot be established. Expected outcome: refused with reason code CODE_MISMATCH.",
+  "claim_number": "CL-100004",
+  "claimant_id": "PT-0073",
+  "provider_id": "DME-PROV-0017",
+  "service_date": "2026-03-07",
+  "procedure_codes": ["E0143"],
+  "diagnosis_codes": ["J18.9"],
+  "billed_amount_usd": "215.00",
+  "authorisation_ref": "AUTH-20260228-0073",
+  "payer_id": "PAYER-BLUE-001",
+  "submission_date": "2026-03-10",
+  "place_of_service": "12",
+  "_expected_outcome": "refused",
+  "_refusal_code": "CODE_MISMATCH",
+  "_mismatch_detail": "Procedure E0143 (walker) inconsistent with diagnosis J18.9 (pneumonia)"
+}

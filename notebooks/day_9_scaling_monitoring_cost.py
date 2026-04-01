@@ -1730,5 +1730,52 @@ Open `notebooks/day_10_production_operations.py` when ready.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 09: Observability, Routing, Cost, and Economic Control
+    
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Routing Correctness | 25 |
+| Cost Reasoning | 25 |
+| Observability As Control | 20 |
+| Finance Communication Quality | 15 |
+| Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. Which capability did you route to the mini model and what is the quality degradation risk if that routing decision is wrong?
+2. Finance demands a 30% cost cut. Walk through which lever you would pull first and what zero-tolerance controls you would not touch.
+3. Who approves a PTU commitment in your enterprise, and what observability evidence would they require before signing a two-year reservation?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day09/CAPABILITY_ALLOCATION_MEMO.md`
+- `docs/curriculum/artifacts/day09/COST_GOVERNANCE_POLICY.md`
+- `docs/curriculum/artifacts/day09/PTU_PAYG_DECISION_NOTE.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

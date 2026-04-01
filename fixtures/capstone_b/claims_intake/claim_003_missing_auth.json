@@ -1,0 +1,17 @@
+{
+  "_case": "claim_003_missing_auth",
+  "_description": "Claim with missing authorisation reference. The authorisation_ref field is null. Expected outcome: refused with reason code MISSING_AUTH.",
+  "claim_number": "CL-100003",
+  "claimant_id": "PT-0055",
+  "provider_id": "DME-PROV-0017",
+  "service_date": "2026-03-09",
+  "procedure_codes": ["E0162"],
+  "diagnosis_codes": ["M54.5"],
+  "billed_amount_usd": "780.00",
+  "authorisation_ref": null,
+  "payer_id": "PAYER-BLUE-001",
+  "submission_date": "2026-03-13",
+  "place_of_service": "12",
+  "_expected_outcome": "refused",
+  "_refusal_code": "MISSING_AUTH"
+}

@@ -1,0 +1,14 @@
+{
+  "_case": "onboarding_001_standard",
+  "_description": "Standard enterprise customer onboarding. All required fields present, compliance attestation submitted, contract signed. Expected outcome: provisioned.",
+  "onboarding_id": "ON-200001",
+  "customer_org_id": "ORG-HELIX-007",
+  "contact_role": "IT Director",
+  "contract_ref": "CTR-2026-HELIX-001",
+  "compliance_attestation_status": "submitted",
+  "requested_tier": "enterprise",
+  "estimated_seats": 150,
+  "identity_provisioning_status": "completed",
+  "submission_date": "2026-03-05",
+  "_expected_outcome": "provisioned"
+}

@@ -653,5 +653,54 @@ You have completed the AegisAP 14-day Elite Engineering curriculum.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 14: Elite Operations, Breaking Changes, and Executive Incident Leadership
+    
+> **Zero-tolerance day** — a hard-fail on any zero-tolerance condition sets the day score to 0.
+> **Capstone B day** — primary deliverables are in the claims intake transfer domain.
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Operational Correctness | 30 |
+| Prioritisation Under Pressure | 20 |
+| Executive Communication | 20 |
+| Evidence Gates In Decision Making | 15 |
+| Final Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. During the war-game, three failures arrive simultaneously. Walk through your triage order, the mental model driving each decision, and the first action you would not take.
+2. You recommend a partial-service continuation. What is the blast radius of that choice, which gates are you explicitly bypassing, and who must countersign?
+3. The CTO asks for a one-page incident brief in ten minutes. Walk through exactly what goes in it, what you leave out, and who reviews it before it is sent.
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day14/INCIDENT_COMMAND_PLAYBOOK.md`
+- `docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md`
+- `docs/curriculum/artifacts/day14/ELITE_READINESS_SCORECARD.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

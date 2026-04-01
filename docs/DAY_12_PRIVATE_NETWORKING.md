@@ -53,3 +53,35 @@ python scripts/verify_private_network_static.py
 
 See `evals/failure_drills/drill_03_dns_misconfiguration.json` and
 `evals/failure_drills/drill_04_public_endpoint_reenabled.json`.
+
+<!-- CAPSTONE_B -->
+
+---
+
+## FDE Rubric — Day 12 (100 points)
+
+| Dimension | Points |
+|---|---|
+| Network posture design | 30 |
+| Static vs live proof understanding | 20 |
+| Dependency management realism | 20 |
+| Security exception handling | 15 |
+| Oral defense | 15 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+**Zero-tolerance conditions:** (1) public endpoint described as acceptable in production; (2) security exception granted with no expiry or compensating control. Either condition overrides total to 0.
+
+**Capstone B day** — primary deliverables are in the claims intake transfer domain.
+
+## Oral Defense Prompts
+
+1. Which network dependency has the longest lead time and what is your plan if it is not resolved before production cutover?
+2. You temporarily enable a public endpoint in dev. Walk through every compensating control, the expiry date, and who holds the removal obligation.
+3. Who approves a security exception in your enterprise, what evidence is mandatory in the request, and what happens at expiry if no renewal is filed?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day12/NETWORK_DEPENDENCY_REGISTER.md`
+- `docs/curriculum/artifacts/day12/SECURITY_EXCEPTION_REQUEST.md`
+- `docs/curriculum/artifacts/day12/EGRESS_CONTROL_POLICY.md`

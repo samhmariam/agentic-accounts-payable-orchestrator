@@ -123,3 +123,29 @@ This must not proceed. The correct automated response is
 - `src/aegisap/day6/review/decision_mapping.py`
 - `scripts/run_day6_case.py`
 - `scripts/inspect_day6_review.py`
+
+---
+
+## FDE Rubric — Day 6 (100 points)
+
+| Dimension | Points |
+|---|---|
+| Source-of-truth hierarchy | 25 |
+| Change classification rigor | 25 |
+| Governance realism | 20 |
+| Incident recovery logic | 15 |
+| Defense quality | 15 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+## Oral Defense Prompts
+
+1. Which data source did you demote in the authority hierarchy, and what scenario would cause a conflict between it and the authoritative source?
+2. If you classify a threshold change as a policy change rather than a model change, what approval path changes and what is the blast radius of the wrong classification?
+3. Who in the enterprise owns the data authority chart, and what evidence would an auditor require to prove it was followed during an incident?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day06/DATA_AUTHORITY_CHART.md`
+- `docs/curriculum/artifacts/day06/CHANGE_CLASSIFICATION_MATRIX.md`
+- `docs/curriculum/artifacts/day06/SOURCE_OF_TRUTH_CONFLICT_RUNBOOK.md`

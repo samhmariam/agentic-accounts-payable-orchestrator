@@ -79,3 +79,29 @@ deploying the `infra/modules/container_app.bicep` module.
 - `scripts/apply_migrations.py`
 - `scripts/run_day5_pause_resume.py`
 - `scripts/resume_day5_case.py`
+
+---
+
+## FDE Rubric — Day 5 (100 points)
+
+| Dimension | Points |
+|---|---|
+| State design | 25 |
+| Resumption safety | 20 |
+| HITL contract quality | 20 |
+| Edge-case handling | 20 |
+| Oral defense | 15 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+## Oral Defense Prompts
+
+1. Which HITL failure mode did you consider but choose not to handle in the contract, and why is that an acceptable omission?
+2. If the system resumes from a checkpoint after an approver's decision has been overtaken by events, what state fields are now stale and what is the blast radius?
+3. Who owns the approval contract SLA in production, and what evidence would they need to audit a resume-after-timeout incident?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day05/HUMAN_APPROVAL_CONTRACT.md`
+- `docs/curriculum/artifacts/day05/PAUSE_RESUME_GOVERNANCE.md`
+- `docs/curriculum/artifacts/day05/ESCALATION_TREE.md`

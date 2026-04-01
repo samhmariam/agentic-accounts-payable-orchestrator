@@ -1,0 +1,29 @@
+[
+  {
+    "_comment": "Structural skeleton — replace all placeholder values. Remove _comment fields before submission.",
+    "test_suite": "fail_closed",
+    "version": "1.0",
+    "cases": [
+      {
+        "id": "FC-001",
+        "description": "<one-sentence description of the failure mode under test>",
+        "input": {
+          "_comment": "Minimal input that triggers the failure condition"
+        },
+        "policy_gate": "<name of the policy gate being tested>",
+        "expected_outcome": "<exact expected outcome — e.g., 'escalate_to_human', 'reject_with_code POLICY_BLOCK'>",
+        "expected_model_discretion": false,
+        "blast_radius_if_wrong": "<what goes wrong in production if this test were missing>"
+      },
+      {
+        "id": "FC-002",
+        "description": "<different failure mode>",
+        "input": {},
+        "policy_gate": "<policy gate name>",
+        "expected_outcome": "<outcome>",
+        "expected_model_discretion": false,
+        "blast_radius_if_wrong": "<blast radius>"
+      }
+    ]
+  }
+]

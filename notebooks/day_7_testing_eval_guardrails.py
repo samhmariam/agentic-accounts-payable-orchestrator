@@ -1600,5 +1600,53 @@ Open `notebooks/day_8_cicd_iac_deployment.py` when ready.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 07: Evaluation, Guardrails, Structured Refusal, and Slice Governance
+    
+> **Zero-tolerance day** — a hard-fail on any zero-tolerance condition sets the day score to 0.
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | Zero Tolerance Metric Handling | 30 |
+| Slice Based Reasoning | 20 |
+| Refusal Schema Quality | 20 |
+| Security Reasoning | 15 |
+| Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. The aggregate eval score improved but one critical slice regressed. Walk through your decision to block or release and name the approver chain.
+2. If your refusal schema is incomplete for one action class, what is the blast radius in terms of audit evidence gaps and regulatory exposure?
+3. Who must sign off on a release where a zero-tolerance metric is borderline, and what evidence package is the minimum acceptable for that sign-off?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day07/EVAL_GOVERNANCE_POLICY.md`
+- `docs/curriculum/artifacts/day07/SLICE_REGRESSION_DECISION_LOG.md`
+- `docs/curriculum/artifacts/day07/REFUSAL_REASON_CODE_CATALOG.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

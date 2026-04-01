@@ -15,15 +15,31 @@ movement through the program.
 
 ## Daily Operating Rhythm
 
-1. Pre-brief: review the day guide, expected artifact, checkpoint status, and
-   any open remediation notes from the prior day.
+Every day produces **four outputs**. The artifact pack is the exit ticket.
+See `docs/curriculum/templates/DAILY_ARTIFACT_PACK.md` for folder structure.
+The exact artifact filenames for each day are the authoritative source in
+`docs/curriculum/CURRICULUM_MANIFEST.yaml` under `artifact_files`.
+
+1. Pre-brief: review the day's manifest entry, expected artifact filenames,
+   checkpoint status, and any open remediation notes from the prior day.
 2. Theory block: deliver the theory segment before learners open notebooks.
-3. Lab block: keep the room moving toward the artifact and exit ticket, not
-   toward notebook completion for its own sake.
-4. Intervention sweep: scan for yellow/red learners every 10-15 minutes.
-5. Exit-ticket scoring: record artifact status, rubric scores, and remediation
-   in `docs/curriculum/templates/DAILY_SCORECARD.md`.
-6. End-of-day handoff: leave concise notes for the next trainer on blockers,
+   Introduce the three oral defense prompts for the day so learners can build
+   toward them during the lab.
+3. Lab block: keep the room moving toward all four outputs (technical build,
+   decision memo, corporate process artifact, oral defense prep). Notebook
+   completion alone is not the goal.
+4. Intervention sweep: scan for yellow/red learners every 10–15 minutes.
+5. Oral defense sessions: run after the lab block. Two assessors per trainee.
+   Score using `docs/curriculum/templates/ORAL_DEFENSE_SCORECARD.md` and the
+   band anchors in `docs/curriculum/ASSESSOR_CALIBRATION.md`.
+6. Exit-ticket scoring: record artifact status, 100-point rubric scores, and
+   remediation in `docs/curriculum/templates/DAILY_SCORECARD.md`. Mandatory
+   checkpoint days are Day 4, Day 8, and Day 10 — gate evidence must be
+   complete before the trainee enters capstone review.
+7. Zero-tolerance verification (Days 7, 10, 11, 12, 14): complete the
+   zero-tolerance check in the scorecard before finalising any score for
+   those days. A hard-fail overrides the total to 0.
+8. End-of-day handoff: leave concise notes for the next trainer on blockers,
    remediation, and who is not safe to advance.
 
 ## Learner Status Model
@@ -67,17 +83,29 @@ Record the following at the end of each day:
 Do not let a learner proceed to the next checkpoint or capstone if any of the
 following are true:
 
-- required artifact missing
-- mandatory checkpoint failed
-- `Technical Correctness` scored `1`
-- `Security Reasoning` scored `1`
+- required artifact missing (any of the four daily outputs)
+- mandatory checkpoint failed (Days 4, 8, 10)
+- `Technical Correctness` scored below 18 (beginning band)
+- `Security Reasoning` scored below 7 on any zero-tolerance day (Days 7, 10, 11, 12, 14)
 - learner cannot name the exact recovery command for their blocker
+- zero-tolerance hard-fail on a zero-tolerance day (score becomes 0 regardless of total)
+
+Scores are on the 100-point scale. The daily pass bar is **80**. The elite
+pass bar for Top Talent tier is **90**. See `docs/curriculum/ASSESSMENT_RUBRIC.md`
+for full band descriptors and `docs/curriculum/GRADUATION_RUBRIC.md` for
+graduation tier thresholds.
 
 ## Required Delivery Tools
 
 - [README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/README.md)
+- [CURRICULUM_MANIFEST.yaml](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml)
 - [ASSESSMENT_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/ASSESSMENT_RUBRIC.md)
+- [GRADUATION_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/GRADUATION_RUBRIC.md)
+- [MENTAL_MODELS.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/MENTAL_MODELS.md)
+- [ASSESSOR_CALIBRATION.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/ASSESSOR_CALIBRATION.md)
 - [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md)
 - [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md)
 - [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md)
-- [docs/curriculum/templates/DAILY_SCORECARD.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/DAILY_SCORECARD.md)
+- [templates/ORAL_DEFENSE_SCORECARD.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/ORAL_DEFENSE_SCORECARD.md)
+- [templates/DAILY_ARTIFACT_PACK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/DAILY_ARTIFACT_PACK.md)
+- [templates/DAILY_SCORECARD.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/DAILY_SCORECARD.md)

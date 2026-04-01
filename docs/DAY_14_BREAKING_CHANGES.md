@@ -66,3 +66,35 @@ python scripts/generate_cto_trace_report.py
 - [rollback_runbook.md](../runbooks/rollback_runbook.md)
 - [incident_response_runbook.md](../runbooks/incident_response_runbook.md)
 - [dlq_runbook.md](../runbooks/dlq_runbook.md)
+
+<!-- CAPSTONE_B -->
+
+---
+
+## FDE Rubric — Day 14 (100 points)
+
+| Dimension | Points |
+|---|---|
+| Operational correctness | 30 |
+| Prioritisation under pressure | 20 |
+| Executive communication | 20 |
+| Evidence / gates in decision-making | 15 |
+| Final oral defense | 15 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+**Zero-tolerance conditions:** (1) continue-service recommended when binary gates are failing; (2) no rollback path identified during war-game. Either condition overrides total to 0.
+
+**Capstone B day** — primary deliverables are in the claims intake transfer domain.
+
+## Oral Defense Prompts
+
+1. During the war-game, three failures arrive simultaneously. Walk through your triage order, the mental model driving each decision, and the first action you would not take.
+2. You recommend a partial-service continuation. What is the blast radius of that choice, which gates are you explicitly bypassing, and who must countersign?
+3. The CTO asks for a one-page incident brief in ten minutes. Walk through exactly what goes in it, what you leave out, and who reviews it before it is sent.
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day14/INCIDENT_COMMAND_PLAYBOOK.md`
+- `docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md`
+- `docs/curriculum/artifacts/day14/ELITE_READINESS_SCORECARD.md`

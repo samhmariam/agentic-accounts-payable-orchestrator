@@ -868,5 +868,52 @@ Open `notebooks/day_7_testing_eval_guardrails.py` when ready.
     return
 
 
+
+@app.cell
+def _fde_learning_contract(mo):
+    mo.md(r"""
+    ---
+    ## FDE Learning Contract — Day 05: Multi-Agent Orchestration, State, and Human Approval Contracts
+    
+
+    ### Four Daily Outputs
+
+    | # | Output type | Location |
+    |---|---|---|
+    | 1 | Technical build | `LAB_OUTPUT/` |
+    | 2 | Design defense memo | `DECISION_MEMOS/` |
+    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
+    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
+
+    ### Rubric Weights (100 points total)
+
+    | Dimension | Points |
+    |---|---|
+    | State Design | 25 |
+| Resumption Safety | 20 |
+| Hitl Contract Quality | 20 |
+| Edge Case Handling | 20 |
+| Oral Defense | 15 |
+
+    Pass bar: **80 / 100**   Elite bar: **90 / 100**
+
+    ### Oral Defense Prompts
+
+    1. Which HITL failure mode did you consider but choose not to handle in the contract, and why is that an acceptable omission?
+2. If the system resumes from a checkpoint after an approver's decision has been overtaken by events, what state fields are now stale and what is the blast radius?
+3. Who owns the approval contract SLA in production, and what evidence would they need to audit a resume-after-timeout incident?
+
+    ### Artifact Scaffolds
+
+    - `docs/curriculum/artifacts/day05/HUMAN_APPROVAL_CONTRACT.md`
+- `docs/curriculum/artifacts/day05/PAUSE_RESUME_GOVERNANCE.md`
+- `docs/curriculum/artifacts/day05/ESCALATION_TREE.md`
+
+    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
+    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()

@@ -101,3 +101,31 @@ Production promotion is manual and protected. The production workflow:
 
 If post-deploy validation fails, rollback should happen by activating the prior
 good ACA revision, not by rebuilding old code.
+
+---
+
+## FDE Rubric — Day 10 (100 points)
+
+| Dimension | Points |
+|---|---|
+| Technical release readiness | 25 |
+| Evidence pack quality | 25 |
+| Gate exception handling | 20 |
+| Executive communication | 15 |
+| Oral defense | 15 |
+
+**Pass bar: 80.  Elite bar: 90.**
+
+**Zero-tolerance conditions:** (1) pass declared when gate evidence is absent; (2) gate exception approved without required authority or expiry. Either condition overrides total to 0.
+
+## Oral Defense Prompts
+
+1. Walk through one gate in your CAB packet that almost failed and explain what evidence tipped the decision.
+2. A late executive wants to override one gate for business urgency. What is your response and what is the blast radius if you comply?
+3. Who chairs the CAB for this system, what quorum is required, and what documented evidence must exist before the chair can approve?
+
+## Artifact Scaffolds
+
+- `docs/curriculum/artifacts/day10/CAB_PACKET.md`
+- `docs/curriculum/artifacts/day10/EXECUTIVE_RELEASE_BRIEF.md`
+- `docs/curriculum/artifacts/day10/GATE_EXCEPTION_POLICY.md`

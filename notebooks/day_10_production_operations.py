@@ -42,10 +42,10 @@ def _title(mo):
     ## Learning Objectives
 
     1. Explain Azure Container Apps' revision model and how it enables zero-downtime releases.
-    2. Describe GitHub Actions OIDC federation and why it eliminates long-lived credentials.
+    2. Describe release authority, gate exceptions, and why green technical checks are still not enough without named owners.
     3. List the six implemented acceptance gates and describe what each verifies.
     4. Run the shared gate runner and interpret the release envelope it produces.
-    5. Distinguish between the six implemented training gates and optional production extensions.
+    5. Define halt criteria, error-budget thinking, and the incident roles required in the first 24 hours after release.
 
     ---
 
@@ -60,7 +60,23 @@ def _title(mo):
     Day 10 answers: **"How do we confirm that AegisAP is safe to promote to production?"**
     Every prior day produced an artifact. Today those artifacts are the evidence that the
     six acceptance gates consume.
+
+    Sections 1-4 intentionally **refresh** Day 8 deployment mechanics in production terms.
+    The genuinely new Day 10 material begins in Sections 5-8: halt criteria, release authority,
+    incident command, and evidence packaging for operators and change boards.
     """)
+    return
+
+
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 10 production operations",
+        core_outcome="treat a green deployment as the start of operator accountability rather than the end of engineering work",
+    )
     return
 
 
@@ -91,6 +107,57 @@ def _lab_overview(mo):
         implementation_exercise=(
             "Exercise 4: Design the rollback runbook and WAF gap analysis."
         ),
+    )
+    return
+
+
+@app.cell
+def _release_evidence_map(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Visual Guide — Release Evidence Map
+
+    ```
+    Day 5  ──► build/day5/golden_thread_day5_resumed.json ──► gate_resume_safety
+    Day 6  ──► build/day6/golden_thread_day6.json         ──► gate_refusal_safety
+    Day 8  ──► build/day8/regression_baseline.json        ──► gate_eval_regression
+    Day 9  ──► build/day9/routing_report.json             ──► gate_budget
+    Day 10 ──► runtime env + ACA revision health          ──► gate_security_posture / gate_aca_health
+                                                         └──► build/day10/release_envelope.json
+    ```
+
+    Read the map from left to right:
+    every Day 10 decision is only as trustworthy as the earlier artifact that feeds it.
+
+    | Operator question | Evidence source | Why it matters |
+    |---|---|---|
+    | "Will this deploy duplicate side effects?" | `build/day5/golden_thread_day5_resumed.json` | Rollback is safer when replay safety is already proven |
+    | "Did quality regress?" | `build/day8/regression_baseline.json` | Aggregate health is not enough without task-quality evidence |
+    | "Can finance tolerate this revision?" | `build/day9/routing_report.json` | Budget drift is a release decision, not a bookkeeping detail |
+    | "Is the runtime actually healthy?" | Container Apps revision health + env introspection | Technical evidence must match what is truly deployed |
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day10_mastery_checkpoint(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Mastery Checkpoint — Before You Trust A Green Envelope
+
+    You are ready to move past the Day 10 operator frame only if you can answer:
+    - which prior artifact each of the six gates depends on, without looking it up
+    - which gates are binary stop conditions versus gates that might require named override authority
+    - why `skip_deploy=True` is acceptable for training but insufficient for real production promotion
+    - what evidence a CAB or release manager would ask for if the deploy is technically green but financially or operationally suspicious
+    """
+        ),
+        kind="warn",
     )
     return
 
@@ -377,39 +444,40 @@ def _gate_runner_output(mo, _run_gates_btn):
 # ---------------------------------------------------------------------------
 @app.cell
 def _s5_header(mo):
-    mo.md("## 5. WAF Pillar Convergence")
+    mo.md("## 5. SLOs, Error Budgets & Halt Criteria")
     return
 
 
 @app.cell
 def _s5_body(mo):
     mo.md(r"""
-    Day 10 is where all five Azure Well-Architected Framework pillars converge.
-    The table below maps each pillar to the day(s) where it was addressed and
-    the Day 10 gate that verifies it.
+    Production operators do not ask only "did the gates pass?"
+    They ask:
 
-    | Pillar | Days | Day 10 gate / mechanism |
+    - What signal forces an immediate halt?
+    - How long can the system remain degraded before rollback is mandatory?
+    - Which owner is allowed to override a gate and under what evidence standard?
+
+    ### Recommended Day 10 halt criteria
+
+    | Condition | Halt immediately? | Why |
     |---|---|---|
-    | **Security** | 7, 8 | `security_posture` gate — OIDC, Managed Identity, Key Vault contract |
-    | **Reliability** | 5, 8 | `resume_safety` gate, `aca_health` gate, ACA revision model |
-    | **Cost Optimization** | 9 | `budget` gate — sample ledger within daily ceiling |
-    | **Operational Excellence** | 1–10 | IaC-only deployments, gate automation, release envelope |
-    | **Performance Efficiency** | 8, 9 | `eval_regression` gate — baseline scores maintained |
+    | `security_posture` fails | **Yes** | Secret or identity drift is a hard trust-boundary break |
+    | Critical slice regression | **Yes** | Aggregate scores can hide regulated-case regressions |
+    | `resume_safety` fails | **Yes** | Duplicate side effects can create irreversible damage |
+    | `budget` fails but all safety gates pass | Usually yes | Cost spikes are rarely worth live escalation without owner approval |
+    | `aca_health` flakes during staged rollout | Pause and diagnose | Health instability under canary means rollback may soon be needed |
 
-    ### The Day 1→10 arc at a glance
+    ### Error-budget framing for AegisAP
 
-    | Day | Theme | WAF focus |
+    | Signal | Example operating budget | What burns it down |
     |---|---|---|
-    | 1 | Agentic fundamentals | Operational Excellence |
-    | 2 | Requirements & architecture | All pillars (design) |
-    | 3 | Azure AI services & retrieval | Reliability, Security |
-    | 4 | Single-agent loops & planning | Operational Excellence |
-    | 5 | Multi-agent orchestration & durable state | Reliability |
-    | 6 | Data integration & policy review | Security, Cost Optimization |
-    | 7 | Testing, eval & guardrails | Reliability, Security |
-    | 8 | CI/CD, IaC & deployment | Security, Operational Excellence |
-    | 9 | Scaling, monitoring & cost | Cost Optimization, Performance |
-    | 10 | Deployment & acceptance gating | All pillars (verification) |
+    | Failed recommendations | `0` on zero-tolerance classes | Missed mandatory escalation, wrong approval path |
+    | User-visible health | Small, bounded budget | ACA revision instability, cold-start spikes |
+    | Cost variance | Daily ceiling from Day 9 | Routing drift, cache bypass explosion |
+
+    The key mental model: **a passing gate is not permission to relax.**
+    It is permission to start watching the right signals with the right owners on call.
     """)
     return
 
@@ -418,17 +486,17 @@ def _s5_body(mo):
 def _waf_pillar_explorer(mo):
     _pillar_picker = mo.ui.dropdown(
         options=[
-            "Security",
-            "Reliability",
-            "Cost Optimization",
-            "Operational Excellence",
-            "Performance Efficiency",
+            "Green canary",
+            "Eval slice regression",
+            "Security posture drift",
+            "Budget burn spike",
+            "Rollback readiness gap",
         ],
-        value="Security",
-        label="WAF Pillar",
+        value="Green canary",
+        label="Release state",
     )
     mo.vstack([
-        mo.md("### Explore a pillar — where was it addressed?"),
+        mo.md("### Explore a release state — halt, continue, or escalate?"),
         _pillar_picker,
     ])
     return (_pillar_picker,)
@@ -437,66 +505,95 @@ def _waf_pillar_explorer(mo):
 @app.cell
 def _waf_pillar_detail(mo, _pillar_picker):
     _detail = {
-        "Security": {
-            "days": "7, 8, 10",
-            "practices": [
-                "Day 7: Guardrails and structured refusal contracts prevent prompt injection",
-                "Day 8: Zero-stored-secrets via OIDC federation; Managed Identity for all Azure services",
-                "Day 8: Key Vault access contract — secrets in vault, not in environment variables",
-                "Day 10: `security_posture` gate fails any release that violates the contract",
+        "Green canary": {
+            "decision": "Continue cautiously",
+            "owner": "Release manager",
+            "evidence": "All six gates pass; no live error spike; rollback revision known",
+            "actions": [
+                "Keep traffic staged rather than jumping immediately to 100%",
+                "Watch Day 9 cost and latency signals during the first control window",
+                "Keep rollback authority explicit until the observation window closes",
             ],
-            "gate": "`security_posture`",
         },
-        "Reliability": {
-            "days": "5, 8, 10",
-            "practices": [
-                "Day 5: Durable state with saga-safe resume — zero duplicate side effects on replay",
-                "Day 8: ACA revision model — new revisions start at 0% traffic until gates pass",
-                "Day 8: Rollback procedure restores prior revision in < 2 minutes",
-                "Day 10: `resume_safety` and `aca_health` gates verify both properties",
+        "Eval slice regression": {
+            "decision": "Halt release",
+            "owner": "Model owner + product approver",
+            "evidence": "Protected slice regresses even if aggregate score improves",
+            "actions": [
+                "Block traffic shift immediately",
+                "Open the slice regression log and identify the business class affected",
+                "Require explicit override authority if anyone argues for release-with-monitoring",
             ],
-            "gate": "`resume_safety`, `aca_health`",
         },
-        "Cost Optimization": {
-            "days": "9, 10",
-            "practices": [
-                "Day 9: Task-class routing — light tier for routine tasks, strong only when needed",
-                "Day 9: Semantic caching for cacheable task classes",
-                "Day 9: PAYG vs PTU break-even analysis",
-                "Day 10: `budget` gate fails any release whose sample ledger exceeds the daily ceiling",
+        "Security posture drift": {
+            "decision": "Halt and investigate",
+            "owner": "Security approver or break-glass owner",
+            "evidence": "Forbidden secret present, MI drift, or identity contract violation",
+            "actions": [
+                "Treat as trust-boundary break, not a minor deploy issue",
+                "Rollback if the new revision has any live traffic",
+                "Preserve evidence before remediation so the incident can be audited",
             ],
-            "gate": "`budget`",
         },
-        "Operational Excellence": {
-            "days": "1–10",
-            "practices": [
-                "Day 2: Architecture decisions documented before implementation",
-                "Day 8: All infrastructure defined in Bicep — no portal edits in the release path",
-                "Day 8: CI/CD pipeline with no human approval needed for gate-passing releases",
-                "Day 10: Gate automation + release envelope = machine-readable deployment evidence",
+        "Budget burn spike": {
+            "decision": "Escalate before continuing",
+            "owner": "Service owner + finance/platform reviewer",
+            "evidence": "Day 9 ledger projection exceeds daily ceiling",
+            "actions": [
+                "Check whether routing drift or cache bypass changed the economics",
+                "Do not waive the budget gate silently; record the exception owner and expiry",
+                "Decide whether the business value of continued rollout justifies the spend",
             ],
-            "gate": "All gates collectively",
         },
-        "Performance Efficiency": {
-            "days": "8, 9",
-            "practices": [
-                "Day 8: Regression baseline established — score drops fail future releases",
-                "Day 9: Slice-level eval prevents aggregate scores hiding per-segment regressions",
-                "Day 9: APIM overflow routes PTU overflow to PAYG — no latency cliff under burst",
-                "Day 10: `eval_regression` gate verifies baseline maintained",
+        "Rollback readiness gap": {
+            "decision": "Stop promotion",
+            "owner": "Release manager",
+            "evidence": "Candidate looks healthy, but stable revision or runbook is not confidently available",
+            "actions": [
+                "Do not continue on optimism",
+                "Reconstruct the rollback path before any additional traffic shift",
+                "Treat missing rollback evidence as an operational correctness failure",
             ],
-            "gate": "`eval_regression`",
         },
     }
 
     chosen = _pillar_picker.value
     info = _detail[chosen]
     lines = [f"### {chosen}"]
-    lines.append(f"**Days:** {info['days']}  |  **Gate:** {info['gate']}\n")
-    lines.append("**Practices implemented:**")
-    for p in info["practices"]:
+    lines.append(f"**Recommended decision:** {info['decision']}  |  **Primary owner:** {info['owner']}\n")
+    lines.append(f"**Evidence threshold:** {info['evidence']}\n")
+    lines.append("**Immediate actions:**")
+    for p in info["actions"]:
         lines.append(f"- {p}")
     mo.md("\n".join(lines))
+    return
+
+
+@app.cell
+def _day10_war_room_drill(mo):
+    mo.callout(
+        mo.md(
+            r"""
+    ### War-Room Mini Drill — T+00 to T+20
+
+    Use this as a timed go / no-go rehearsal with a partner or out loud:
+
+    | Time | New information | Your decision |
+    |---|---|---|
+    | `T+00` | All six gates pass, canary starts at 10% | Do you proceed or hold for an operator brief? |
+    | `T+08` | p99 latency rises 18%, user-visible errors stay low | Which signal burns your error budget first? |
+    | `T+12` | Quarter-end business owner asks to keep moving because no hard failures exist yet | Who has authority to continue, and what evidence must they sign against? |
+    | `T+20` | Budget burn is now 2.2x the Day 9 expectation and rollback is still available | Do you halt, partially continue, or promote? Why? |
+
+    A strong answer names:
+    - the gate or live signal that changed the decision
+    - the owner allowed to approve an exception
+    - the expiry on that exception
+    - the rollback trigger if the next interval worsens
+    """
+        ),
+        kind="info",
+    )
     return
 
 
@@ -610,49 +707,36 @@ def _envelope_viewer_output(mo, Path, json, _view_envelope_btn):
 # ---------------------------------------------------------------------------
 @app.cell
 def _s7_header(mo):
-    mo.md("## 7. Continuous Improvement Loop")
+    mo.md("## 7. Incident Command, Exceptions & The First 24 Hours")
     return
 
 
 @app.cell
 def _s7_body(mo):
     mo.md(r"""
-    Day 10 is not the end of the story — it is the beginning of a continuous
-    improvement loop. Every production incident or new edge case feeds back into
-    the artefact chain:
+    The first 24 hours after release are where operator quality shows up.
 
-    ```
-    Production incident or new case type
-        │
-        ▼
-    Triage: which gate would have caught this?
-        │
-        ├── Missing eval case? → add to evals/synthetic_cases.jsonl
-        ├── Budget spike? → adjust routing policy or PTU threshold
-        ├── Refusal failure? → update policy guardrails (Day 6)
-        └── Resume replay bug? → fix saga transition (Day 5)
-        │
-        ▼
-    Re-run affected day's notebook → new artifact in build/
-        │
-        ▼
-    Re-run Day 10 gates → updated release_envelope.json
-        │
-        ▼
-    Merge to main → CI pipeline enforces all gates
-    ```
+    ### Minimum incident roles
 
-    ### Why this design is deliberately conservative
+    | Role | Responsibility |
+    |---|---|
+    | Incident commander | Owns triage order, stop/continue recommendation, and timeline discipline |
+    | Release manager | Knows the candidate revision, stable revision, and rollback steps |
+    | Domain owner | Explains business blast radius of degraded behavior |
+    | Security approver | Required if a trust-boundary exception is being considered |
 
-    - **Artifacts as proof:** Each `build/dayN/` artifact is immutable evidence
-      that a specific lab outcome was produced. CI cannot be fooled by
-      changing a threshold — the artifact must be regenerated.
-    - **Gate failures are informative:** A gate failure tells you exactly which
-      prior day needs attention, not just "build failed."
-    - **Human-readable evidence:** `release_envelope.json` can be attached to
-      a change request or audit log as structured proof of readiness.
+    ### Gate exceptions are not free passes
 
-    ### KQL query for post-deployment monitoring
+    If a team wants to continue despite a failing gate, the exception must name:
+    - the exact failing gate
+    - the bounded blast radius
+    - the counter-signing authority
+    - the expiry time
+    - the rollback trigger that ends the exception automatically
+
+    If any of those five are missing, it is not an exception process. It is wishful thinking.
+
+    ### First 24-hour monitoring query
 
     ```sql
     traces
@@ -664,8 +748,9 @@ def _s7_body(mo):
     | order by timestamp desc
     ```
 
-    Alert if the `case_refused` fraction rises above 5% — it may indicate
-    an upstream data quality regression or policy misconfiguration.
+    Alert if the `case_refused` fraction rises above 5% or if the high-value
+    approval path disappears from the stream. The first can indicate upstream
+    data quality drift; the second can indicate a dangerous routing regression.
     """)
     return
 
@@ -718,12 +803,12 @@ def _design_defense_form(mo):
     )
     _dd_deploy = mo.ui.text_area(
         placeholder=(
-            "Walk through the six gates. Which artifact does each gate consume? "
-            "Which gate would have blocked a specific failure mode?"
+            "Walk through the six gates, the halt criteria, and one exception you would NOT allow. "
+            "Which owner would you wake up at 2am and why?"
         ),
         label=(
-            "Deploy — Explain how the six acceptance gates together prove AegisAP is "
-            "safe to promote to production."
+            "Deploy — Explain how the six acceptance gates, halt criteria, and rollback authority "
+            "together prove AegisAP is safe to promote to production."
         ),
     )
     _dd_save_btn = mo.ui.run_button(label="Save Design Defense Artifact")
@@ -1267,7 +1352,7 @@ def _summary(mo):
     mo.md(r"""
 ---
 
-## Day 10 Summary
+## Day 10 Summary Checklist
 
 | Topic | Key insight |
 |---|---|
@@ -1281,6 +1366,11 @@ def _summary(mo):
 **Artifacts produced:**
 - `build/day10/release_envelope.json` — structured proof of release readiness
 - `build/day10/checkpoint_gate_extension.json` — training checkpoint with extension contract verification
+
+**Before you close Day 10, confirm you can:**
+- explain why a green training envelope is not the same as authoritative production evidence
+- name which upstream artifact feeds each gate and how to rebuild it
+- defend a stop-release decision using halt criteria, error budget posture, and release ownership
     """)
     return
 

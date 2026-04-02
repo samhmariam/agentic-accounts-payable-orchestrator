@@ -1,7 +1,12 @@
 # AegisAP Curriculum Guide
 
-This folder contains the theoretical foundations that prepare learners for each
-hands-on Marimo notebook lab. Every day has two documents:
+This folder contains the notebook-first delivery materials for the AegisAP FDE
+curriculum. The notebooks and
+[CURRICULUM_MANIFEST.yaml](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml)
+are the operational source of truth for live delivery.
+
+Trainer and trainee day documents still exist as supporting theory material for
+the foundational portions of the course:
 
 | Document | Audience | Purpose |
 |---|---|---|
@@ -11,6 +16,8 @@ hands-on Marimo notebook lab. Every day has two documents:
 Program-level operating guides live alongside the day materials:
 
 - [TRAINER_OPERATIONS.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINER_OPERATIONS.md)
+- [TRAINEE_PREFLIGHT_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md)
+- [FACILITATOR_DAY_START_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md)
 - [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md)
 - [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md)
 - [PILOT_MEASUREMENT_PLAN.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/PILOT_MEASUREMENT_PLAN.md)
@@ -36,23 +43,30 @@ Recommended pre-bootcamp setup:
 - `source ./scripts/setup-env.sh core` for Days 0-4
 - `source ./scripts/setup-env.sh full` before Day 5 and beyond
 
+Use
+[TRAINEE_PREFLIGHT_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md)
+as the launch-readiness checklist rather than relying on memory.
+
 ---
 
 ## Curriculum Map
 
-| Day | Notebook | Core Theme | Azure Services |
+| Day | Notebook | Core Theme | Azure Services / Enterprise Focus |
 |---|---|---|---|
-| 0 | `day0_azure_bootstrap.py` | Infrastructure as Code & Identity | Bicep, Key Vault, Managed Identity, ACA, ACR |
-| 1 | `day1_intake_canonicalization.py` | Trust Boundaries & Data Contracts | Azure OpenAI, schema validation |
-| 2 | `day2_stateful_workflow.py` | Workflow State Machines | LangGraph, Azure AI, structured telemetry |
-| 3 | `day3_retrieval_authority.py` | Retrieval-Augmented Generation | Azure AI Search, hybrid & semantic search |
-| 4 | `day4_explicit_planning.py` | Plan-First Agent Architecture | Azure OpenAI structured outputs |
-| 5 | `day5_durable_state.py` | Durable Workflows & Human-in-the-Loop | Azure PostgreSQL Flexible Server, ACA |
-| 6 | `day6_policy_review.py` | Responsible AI & Graceful Refusal | Azure Content Safety, prompt defense |
-| 7 | `day7_security_identity.py` | Zero Trust, PII & Audit | Managed Identity, Key Vault, RBAC |
-| 8 | `day8_observability.py` | Observability & Reliability Engineering | Azure Monitor, App Insights, OpenTelemetry |
-| 9 | `day9_cost_routing.py` | Cost Governance & Model Routing | Azure OpenAI tiers, semantic caching |
-| 10 | `day10_deployment_gates.py` | Deployment & Acceptance Gating | ACA revisions, GitHub Actions OIDC |
+| 1 | `day_1_agentic_fundamentals.py` | Agentic systems fundamentals and business value | Azure AI strategy, WAF, CAF |
+| 2 | `day_2_requirements_architecture.py` | Discovery, scoping, NFRs, architecture | Enterprise governance and stakeholder power |
+| 3 | `day_3_azure_ai_services.py` | Azure AI services and framework choice | Azure AI Search, Azure OpenAI |
+| 4 | `day_4_single_agent_loops.py` | Single-agent loops and fail-closed policy | Structured outputs, tool execution |
+| 5 | `day_5_multi_agent_orchestration.py` | Multi-agent orchestration and HITL | LangGraph, durable state |
+| 6 | `day_6_data_ml_integration.py` | Data authority and ML integration | ADF, Cosmos DB, MLflow |
+| 7 | `day_7_testing_eval_guardrails.py` | Evals, guardrails, and structured refusal | Content Safety, slice governance |
+| 8 | `day_8_cicd_iac_deployment.py` | CI/CD, IaC, identity, and secure release | Bicep, OIDC, ACA |
+| 9 | `day_9_scaling_monitoring_cost.py` | Observability, routing, scaling, and cost | Azure Monitor, App Insights, economic control |
+| 10 | `day_10_production_operations.py` | Production acceptance and release evidence | Release gates, CAB readiness |
+| 11 | `day_11_delegated_identity_obo.py` | Delegated identity and OBO | Entra, Key Vault, actor-bound approval |
+| 12 | `day_12_private_networking_constraints.py` | Private networking and security dependencies | Private Endpoints, DNS, egress policy |
+| 13 | `day_13_integration_boundary_and_mcp.py` | Integration boundaries, async reliability, MCP | Azure Functions, Service Bus, MCP |
+| 14 | `day_14_breaking_changes_elite_ops.py` | Elite operations and executive incident leadership | Canary evidence, trace correlation, incident command |
 
 ---
 
@@ -83,23 +97,24 @@ contract:
 
 ## Learning Arc
 
-The 11-day journey follows a single invoice case (`INV-3001 / Acme Office Supplies`)
-end-to-end. Days are cumulative — each adds a new production-readiness concern to
-exactly the same domain object. This design ensures learners experience the full
-lifecycle of an enterprise AI feature, not a series of isolated demos.
+The 14-day journey follows one system from concept to production discipline.
+Days are cumulative. Earlier architecture and governance decisions become later
+identity, network, boundary, and operations gates.
 
 ```
-Day 0  Extract & trust ──► Day 1
-Day 1  Canonical shape ──► Day 2
-Day 2  Explicit state ───► Day 3
-Day 3  Grounded evidence ► Day 4
-Day 4  Typed plan ────────► Day 5
-Day 5  Durable pause ────► Day 6
-Day 6  Safety gate ──────► Day 7
-Day 7  Identity hardening ► Day 8
-Day 8  Observability ────► Day 9
-Day 9  Cost governance ──► Day 10
-Day 10 Controlled release
+Day 1  Fundamentals ───► Day 2  Scope & architecture
+Day 2  Scope & architecture ─► Day 3  Azure AI choices
+Day 3  Azure AI choices ───► Day 4  Agent loop design
+Day 4  Agent loop design ──► Day 5  Multi-agent state
+Day 5  Multi-agent state ──► Day 6  Data authority
+Day 6  Data authority ─────► Day 7  Evals & guardrails
+Day 7  Evals & guardrails ─► Day 8  Secure deployment
+Day 8  Secure deployment ──► Day 9  Observability & cost
+Day 9  Observability & cost ► Day 10 Production operations
+Day 10 Production ops ─────► Day 11 Delegated identity
+Day 11 Delegated identity ─► Day 12 Private networking
+Day 12 Private networking ─► Day 13 Integration boundaries
+Day 13 Integration boundaries ► Day 14 Elite operations
 ```
 
 ---

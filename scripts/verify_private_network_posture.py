@@ -7,7 +7,6 @@ Runs NetworkPostureProbe against configured AI service hostnames and writes:
     build/day12/external_sink_disabled.json    (only if all_passed=True)
 
 Required for gate_private_network_posture (live staging gate).
-gate_private_network_static reads external_sink_disabled.json in CI.
 
 Environment variables:
     AEGISAP_AI_HOSTNAMES  Comma-separated hostnames to probe
@@ -35,24 +34,24 @@ def main() -> int:
         "AEGISAP_CORRELATION_ID", str(uuid.uuid4()))
 
     hostnames_raw = os.environ.get("AEGISAP_AI_HOSTNAMES", "")
+    sink_path = BUILD_DIR / "external_sink_disabled.json"
+
     if not hostnames_raw:
-        print("STUB: no AEGISAP_AI_HOSTNAMES set — writing stub artifacts")
+        print("TRAINING_ONLY: no AEGISAP_AI_HOSTNAMES set — writing preview artifact")
         posture = {
             "correlation_id": correlation_id,
-            "all_passed": True,
-            "services": [],
-            "note": "STUB: no hostnames configured",
-        }
-        sink = {
-            "correlation_id": correlation_id,
-            "external_sink_disabled": True,
+            "all_passed": False,
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "execution_tier": 1,
             "written_by": "verify_private_network_posture",
-            "services_checked": [],
-            "note": "STUB",
+            "services": [],
+            "note": "TRAINING_ONLY: no hostnames configured",
         }
         (BUILD_DIR / "private_network_posture.json").write_text(json.dumps(posture, indent=2))
-        (BUILD_DIR / "external_sink_disabled.json").write_text(json.dumps(sink, indent=2))
-        print(f"Wrote stub artifacts to {BUILD_DIR}")
+        if sink_path.exists():
+            sink_path.unlink()
+        print(f"Wrote training preview to {BUILD_DIR / 'private_network_posture.json'}")
         return 0
 
     try:
@@ -65,6 +64,16 @@ def main() -> int:
     probe = NetworkPostureProbe.from_env()
     result = probe.run()
     probe.write_artifacts(result)
+
+    posture_path = BUILD_DIR / "private_network_posture.json"
+    posture = json.loads(posture_path.read_text())
+    posture["correlation_id"] = correlation_id
+    posture_path.write_text(json.dumps(posture, indent=2))
+
+    if result.all_passed and sink_path.exists():
+        sink = json.loads(sink_path.read_text())
+        sink["correlation_id"] = correlation_id
+        sink_path.write_text(json.dumps(sink, indent=2))
 
     print(f"Probe complete: all_passed={result.all_passed}")
     for svc in result.services:

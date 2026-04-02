@@ -48,7 +48,7 @@ def main() -> int:
                        for r in allowed_raw.split(",") if r.strip()]
 
     if not subscription_id:
-        print("STUB: no AZURE_SUBSCRIPTION_ID set — writing stub data residency report")
+        print("TRAINING_ONLY: no AZURE_SUBSCRIPTION_ID set — writing preview data residency report")
         stub_resources = [
             {"resource": "aegisap-openai", "type": "Microsoft.CognitiveServices/accounts",
              "location": "uksouth", "public_network_access": "Disabled"},
@@ -61,12 +61,17 @@ def main() -> int:
         ]
         report = {
             "correlation_id": correlation_id,
-            "all_compliant": True,
+            "all_passed": False,
+            "all_compliant": False,
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "execution_tier": 1,
+            "approved_region": ",".join(allowed_regions),
             "allowed_regions": allowed_regions,
             "resources_checked": len(stub_resources),
             "violations": [],
             "resources": stub_resources,
-            "note": "STUB: no AZURE_SUBSCRIPTION_ID set",
+            "note": "TRAINING_ONLY: no AZURE_SUBSCRIPTION_ID set",
             "run_at": datetime.datetime.utcnow().isoformat() + "Z",
         }
         _write_report(report)
@@ -119,11 +124,17 @@ def main() -> int:
 
     report = {
         "correlation_id": correlation_id,
+        "all_passed": len(violations) == 0,
         "all_compliant": len(violations) == 0,
+        "training_artifact": False,
+        "authoritative_evidence": True,
+        "execution_tier": 2,
+        "approved_region": ",".join(allowed_regions),
         "allowed_regions": allowed_regions,
         "resources_checked": len(resources_checked),
         "violations": violations,
         "resources": resources_checked,
+        "note": "LIVE_ARM_QUERY",
         "run_at": datetime.datetime.utcnow().isoformat() + "Z",
     }
     _write_report(report)

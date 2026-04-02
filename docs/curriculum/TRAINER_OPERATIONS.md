@@ -4,6 +4,12 @@ Use this guide as the delivery control plane for the bootcamp. The day guides
 teach content. This document governs pacing, intervention, scoring, and learner
 movement through the program.
 
+Start each live day with
+[FACILITATOR_DAY_START_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md).
+Use
+[TRAINEE_PREFLIGHT_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md)
+as the required pre-cohort readiness contract for learners.
+
 ## Cohort Model
 
 - Target cohort size: 8-16 learners
@@ -22,6 +28,7 @@ The exact artifact filenames for each day are the authoritative source in
 
 1. Pre-brief: review the day's manifest entry, expected artifact filenames,
    checkpoint status, and any open remediation notes from the prior day.
+   Run the facilitator day-start checklist before learners enter the lab block.
 2. Theory block: deliver the theory segment before learners open notebooks.
    Introduce the three oral defense prompts for the day so learners can build
    toward them during the lab.
@@ -98,6 +105,8 @@ graduation tier thresholds.
 ## Required Delivery Tools
 
 - [README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/README.md)
+- [TRAINEE_PREFLIGHT_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md)
+- [FACILITATOR_DAY_START_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md)
 - [CURRICULUM_MANIFEST.yaml](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml)
 - [ASSESSMENT_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/ASSESSMENT_RUBRIC.md)
 - [GRADUATION_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/GRADUATION_RUBRIC.md)

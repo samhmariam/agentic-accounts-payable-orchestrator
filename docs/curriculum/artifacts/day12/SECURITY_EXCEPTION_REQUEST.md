@@ -23,6 +23,23 @@ endpoint or network control relaxation required during development or testing.
 - Who monitors for the exception being extended without a fresh approval?
 - What audit evidence must exist to prove the exception was removed as required?
 
+## Structural Example — Exception Summary Shape
+
+| Field | Example shape |
+|---|---|
+| Exception scope | Temporary public access to Azure AI Search in isolated staging only while private DNS link is repaired |
+| Business justification | Required to complete a time-boxed deployment rehearsal for `2026-04-18` CAB decision; expires `2026-04-20` |
+| Compensating controls | IP allowlist to build subnet, test dataset only, elevated monitoring, daily review by security lead |
+| Risk acceptor | Director of platform security accepts temporary search endpoint exposure in staging |
+| Removal obligation | Platform engineer removes exception by `2026-04-20 18:00 UTC`; security lead verifies via posture probe artifact |
+| Audit proof | Ticket link, approval chain, before/after probe outputs, and closure comment in change record |
+
+## Anti-Patterns To Avoid
+
+- Do not ask for an exception on behalf of "the team"; name the risk acceptor and removal owner.
+- Do not describe an exception as temporary without a calendar expiry and verification method.
+- Do not use broader scope than necessary; "all AI services public for testing" is a design failure, not an exception request.
+
 ## Acceptance Criteria
 
 - Exception scope names the specific control and environment (not "dev environment networking")

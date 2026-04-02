@@ -16,7 +16,7 @@ def _bootstrap():
     for _p in [str(_root / "src"), str(_root / "notebooks")]:
         if _p not in sys.path:
             sys.path.insert(0, _p)
-    return (mo,)
+    return json, mo
 
 
 @app.cell
@@ -24,10 +24,10 @@ def _title(mo):
     mo.md("""
     # Day 1 — Agentic Systems Fundamentals & Business Value on Azure
 
-    > **WAF Pillars covered:** Operational Excellence · Security · Reliability
+    > **Framework lenses:** Azure Well-Architected Framework · Cloud Adoption Framework for Azure (AI adoption)
     > **Estimated time:** 2.5 hours
     > **Sources:** `docs/curriculum/trainee/DAY_00_TRAINEE.md`, `docs/curriculum/trainee/DAY_01_TRAINEE.md`,
-    > `docs/curriculum/trainer/DAY_00_TRAINER.md`
+    > `docs/curriculum/trainer/DAY_00_TRAINER.md`, and the 14-lesson notebook sequence under `notebooks/`
     > **Prerequisite:** None — this is Day 1. Open cold and follow along.
 
     ---
@@ -42,6 +42,7 @@ def _title(mo):
     4. Name every Azure AI service used in AegisAP and state why each exists.
     5. Explain the Azure identity model (`DefaultAzureCredential`) and why API keys are forbidden.
     6. Identify the five Azure Well-Architected Framework (WAF) pillars and how they apply to AI workloads.
+    7. Align an AI or agent initiative to the Cloud Adoption Framework for Azure and design a phased business-solution strategy.
 
     ---
 
@@ -60,6 +61,18 @@ def _title(mo):
 
     Today is the conceptual foundation. No Azure environment is required — every code cell runs locally on synthetic data.
     """)
+    return
+
+
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 1 fundamentals and business framing",
+        core_outcome="explain what makes AegisAP agentic and why Azure is part of the operating model, not just the hosting choice",
+    )
     return
 
 
@@ -339,7 +352,13 @@ def _decision_sliders(mo):
         ds_auditability,
         ds_change_vel,
     ])
-    return ds_auditability, ds_change_vel, ds_decision_cx, ds_exception_rate, ds_input_var
+    return (
+        ds_auditability,
+        ds_change_vel,
+        ds_decision_cx,
+        ds_exception_rate,
+        ds_input_var,
+    )
 
 
 @app.cell
@@ -398,16 +417,83 @@ def _decision_verdict(
     )
     mo.callout(
         mo.md(f"""
-**Score: {_score:.1f} / 10 — {_title}**
+    **Score: {_score:.1f} / 10 — {_title}**
 
-{_advice}
+    {_advice}
 
-| Signal | Your score |
-|---|---|
-{_rows}
+    | Signal | Your score |
+    |---|---|
+    {_rows}
         """),
         kind=_kind,
     )
+    return
+
+
+@app.cell
+def _caf_alignment_header(mo):
+    mo.md("""
+    ### Azure CAF Alignment: From Business Idea to Managed Agent Estate
+
+    Microsoft positions the **Cloud Adoption Framework for Azure (CAF)** as the
+    operating model around workload design. For AI and agents, that means Day 1
+    should not stop at "is this agentic?" It should also answer:
+
+    1. What business outcome are we pursuing?
+    2. Which adoption phase are we in right now?
+    3. What evidence do we need before we scale this workload?
+    """)
+    return
+
+
+@app.cell
+def _caf_alignment_body(mo):
+    mo.md("""
+    | CAF methodology | Question to answer | What it means for AI and agents | Where this programme covers it |
+    |---|---|---|---|
+    | **Strategy** | Why are we doing this? | Define KPI improvement, select a high-value use case, reject low-value "AI for AI's sake" ideas | Days 1–2 |
+    | **Plan** | How should we approach it? | Decide build vs buy, SaaS agent vs custom agent, team roles, responsible AI, and data readiness | Days 1–3, 6–7 |
+    | **Ready** | Is the platform safe to host it? | Landing zones, identity, CI/CD, networking, delegated identity, private access | Days 1, 8, 11, 12 |
+    | **Adopt** | How do we prove and deliver value? | Build the workload, start with a narrow pilot, integrate tools, then harden orchestration | Days 4, 5, 13 |
+    | **Govern / Secure / Manage** | How do we control and operate it at scale? | Guardrails, observability, cost controls, incident response, change management, elite operations | Days 7, 9, 10, 14 |
+
+    > **Practical rule:** use **WAF** to judge workload quality and **CAF** to judge
+    > adoption readiness. A design can be elegant yet still fail if the organisation,
+    > platform, or governance model is not ready to absorb it.
+    """)
+    return
+
+
+@app.cell
+def _business_strategy_header(mo):
+    mo.md("""
+    ### Strategy for Building AI and Agents in Business Solutions
+    """)
+    return
+
+
+@app.cell
+def _business_strategy_body(mo):
+    mo.md("""
+    Use this sequence when designing an enterprise AI solution:
+
+    | Step | Decision | What "good" looks like | AegisAP example |
+    |---|---|---|---|
+    | **1. Anchor on value** | Choose one workflow and 2–3 measurable KPIs | Time saved, error reduction, cycle-time reduction, compliance uplift | Invoice cycle time, data-entry errors, auditability |
+    | **2. Prove agent fit** | Decide between deterministic automation, copilots, single-agent, or multi-agent | Agents only where reasoning, tool orchestration, or adaptive behaviour are required | Unstructured invoices + policy-aware routing justify an agent |
+    | **3. Choose the delivery model** | Adopt SaaS if it meets needs; otherwise build custom | Lowest-complexity platform that still meets integration, security, and audit needs | Custom Azure-native agent because AP needs ERP integration and durable HITL |
+    | **4. Define trust boundaries** | Separate untrusted inputs from canonical business objects | Typed schemas, explicit rejection, no raw free text crossing core boundaries | `CanonicalInvoice` boundary before downstream actions |
+    | **5. Design human control points** | Decide where humans approve, override, or review | HITL at material-risk steps, not everywhere | High-value approval and low-confidence escalation |
+    | **6. Ready the platform** | Identity, networking, deployment, telemetry, cost controls are in place before scale | Managed identity, private networking where required, repeatable deploys, observability by default | Days 8, 9, 11, 12 |
+    | **7. Scale with governance** | Standardise evaluation, incident response, and lifecycle management | Every agent has owner, KPI, budget, rollback path, and retirement criteria | Days 7, 10, 14 |
+
+    **Recommended starting pattern**
+
+    1. Start with one high-friction workflow and a narrow KPI target.
+    2. Pilot a **single agent** unless the use case clearly spans domains, trust boundaries, or future delegation needs.
+    3. Add **multi-agent orchestration** only after a single-agent pilot proves value and exposes a real decomposition boundary.
+    4. Treat governance, security, and operations as part of the build, not a later clean-up phase.
+    """)
     return
 
 
@@ -451,7 +537,7 @@ def _section_3_body(mo):
                                     Day 5 Resume ──► RecommendationPackage
     ```
 
-    ### The 10-Day Build Arc
+    ### The 14-Lesson Build Arc
 
     | Day | Title | System capability added |
     |---|---|---|
@@ -465,6 +551,10 @@ def _section_3_body(mo):
     | **8** | CI/CD & Deployment | Bicep IaC, OIDC federation, ACA revision model |
     | **9** | Observability & Cost | OTEL, KQL, task routing, cost ledger |
     | **10** | Production Ops | Acceptance gates, incident response, CI loop |
+    | **11** | Delegated Identity & OBO | User delegation, downstream authorization, actor verification |
+    | **12** | Private Networking Constraints | Private endpoints, egress restrictions, network-aware design |
+    | **13** | Integration Boundaries & MCP | Tool contracts, protocol boundaries, enterprise integrations |
+    | **14** | Breaking Changes & Elite Ops | Controlled change, traceability, operating the agent estate at scale |
     """)
     return
 
@@ -474,14 +564,15 @@ def _journey_chart(mo):
     try:
         import plotly.graph_objects as _go
 
-        _days = list(range(1, 11))
+        _days = list(range(1, 15))
         _labels = [
             "Fundamentals", "Architecture", "AI Services", "Single Agent",
             "Multi-Agent", "Data & ML", "Testing", "CI/CD", "Observability", "Prod Ops",
+            "OBO", "Networking", "MCP", "Elite Ops",
         ]
         # Rough "production-readiness score" added by each day
-        _readiness = [5, 10, 20, 40, 55, 65, 75, 85, 92, 100]
-        _week = ["Week 1"] * 5 + ["Week 2"] * 5
+        _readiness = [5, 10, 20, 38, 50, 60, 70, 78, 85, 90, 94, 96, 98, 100]
+        _phase = ["Foundation"] * 5 + ["Production"] * 5 + ["Enterprise"] * 4
 
         _fig = _go.Figure()
         _fig.add_trace(_go.Scatter(
@@ -489,17 +580,19 @@ def _journey_chart(mo):
             mode="lines+markers+text",
             line=dict(color="#4A90D9", width=3),
             marker=dict(size=12, color=[
-                        "#27AE60" if w == "Week 1" else "#E67E22" for w in _week]),
+                        "#27AE60" if p == "Foundation" else "#E67E22" if p == "Production" else "#C0392B" for p in _phase]),
             text=_labels,
             textposition="top center",
-            textfont=dict(size=10),
+            textfont=dict(size=9),
         ))
         _fig.add_vrect(x0=0.5, x1=5.5, fillcolor="rgba(39,174,96,0.07)", line_width=0,
-                       annotation_text="Week 1: Prototype", annotation_position="top left")
+                       annotation_text="Days 1-5: Foundations", annotation_position="top left")
         _fig.add_vrect(x0=5.5, x1=10.5, fillcolor="rgba(230,126,34,0.07)", line_width=0,
-                       annotation_text="Week 2: Production", annotation_position="top left")
+                       annotation_text="Days 6-10: Production", annotation_position="top left")
+        _fig.add_vrect(x0=10.5, x1=14.5, fillcolor="rgba(192,57,43,0.07)", line_width=0,
+                       annotation_text="Days 11-14: Enterprise Scale", annotation_position="top left")
         _fig.update_layout(
-            title="Production Readiness Score by Day",
+            title="Programme Readiness Score by Lesson",
             xaxis_title="Day", yaxis_title="Production Readiness (%)",
             xaxis=dict(tickvals=_days, ticktext=[f"D{d}" for d in _days]),
             height=380,
@@ -787,9 +880,11 @@ def _waf_radar(mo):
             "Day 7":  [9,  7,  6,  4,  8],
             "Day 8":  [9,  8,  6,  5,  9],
             "Day 10": [9, 10,  9,  9, 10],
+            "Day 12": [10, 10,  8,  8, 10],
+            "Day 14": [10, 10, 10, 10, 10],
         }
-        _colors = ["#BDC3C7", "#7B68EE", "#4A90D9",
-                   "#F5A623", "#E74C3C", "#27AE60"]
+        _colors = ["#BDC3C7", "#7B68EE", "#4A90D9", "#F5A623",
+                   "#E74C3C", "#27AE60", "#16A085", "#2C3E50"]
 
         _fig = _go.Figure()
         for (day, scores), color in zip(_day_scores.items(), _colors):
@@ -1075,35 +1170,35 @@ def _exercise_4(mo):
     mo.accordion({
         "Exercise 4 — Client Scenario A: Weekly Price Feed": mo.vstack([
             mo.md("""
-**Scenario:** A large national supermarket chain wants to automate their weekly supplier
-price updates. Every Monday, 40 suppliers email a price spreadsheet to a shared inbox.
-Every spreadsheet uses the same negotiated column structure: `SKU`, `new_price`,
-`effective_date`, `currency`. There is no approval step — new prices simply supersede
-the old ones. The rules have not changed in five years and each file contains
-approximately 2,000 rows.
+    **Scenario:** A large national supermarket chain wants to automate their weekly supplier
+    price updates. Every Monday, 40 suppliers email a price spreadsheet to a shared inbox.
+    Every spreadsheet uses the same negotiated column structure: `SKU`, `new_price`,
+    `effective_date`, `currency`. There is no approval step — new prices simply supersede
+    the old ones. The rules have not changed in five years and each file contains
+    approximately 2,000 rows.
 
-**Before looking at the solution:** use the Scored Decision Tool in Section 2 to rate
-this scenario against the five signals. Note your score and verdict.
+    **Before looking at the solution:** use the Scored Decision Tool in Section 2 to rate
+    this scenario against the five signals. Note your score and verdict.
             """),
             mo.accordion({
                 "Show solution": mo.md("""
-**Recommendation: Scripted automation / ETL pipeline — Score ≈ 1.4 / 10**
+    **Recommendation: Scripted automation / ETL pipeline — Score ≈ 1.4 / 10**
 
-| Signal | Score | Rationale |
-|---|---|---|
-| Input variability | **1** | Fixed schema, known columns, identical structure every week |
-| Decision complexity | **1** | No judgment required — new price replaces existing price |
-| Exception rate | **2** | Rare format deviations; a validation step handles these, not an LLM |
-| Auditability | **2** | Effective date + new price constitutes a complete audit record |
-| Change velocity | **1** | Update rules unchanged for five years |
+    | Signal | Score | Rationale |
+    |---|---|---|
+    | Input variability | **1** | Fixed schema, known columns, identical structure every week |
+    | Decision complexity | **1** | No judgment required — new price replaces existing price |
+    | Exception rate | **2** | Rare format deviations; a validation step handles these, not an LLM |
+    | Auditability | **2** | Effective date + new price constitutes a complete audit record |
+    | Change velocity | **1** | Update rules unchanged for five years |
 
-An **Azure Data Factory pipeline** reading from the shared inbox, validating column
-structure, and writing to the pricing database is the correct solution.
-Using an LLM here would add cost, latency, hallucination risk, and non-determinism
-for a task that is entirely mechanical. Any FDE who proposes an agentic solution to
-this client should reframe: the win is a reliable, cheap, fast ETL pipeline — not
-an AI agent. **This is the most common over-engineering mistake FDEs encounter in
-the field.**
+    An **Azure Data Factory pipeline** reading from the shared inbox, validating column
+    structure, and writing to the pricing database is the correct solution.
+    Using an LLM here would add cost, latency, hallucination risk, and non-determinism
+    for a task that is entirely mechanical. Any FDE who proposes an agentic solution to
+    this client should reframe: the win is a reliable, cheap, fast ETL pipeline — not
+    an AI agent. **This is the most common over-engineering mistake FDEs encounter in
+    the field.**
                 """),
             }),
         ]),
@@ -1116,44 +1211,44 @@ def _exercise_5(mo):
     mo.accordion({
         "Exercise 5 — Client Scenario B: Insurance Claim Pre-Screening": mo.vstack([
             mo.md("""
-**Scenario:** A mid-size commercial insurance company wants to automate pre-screening
-of incoming liability claim submissions. Each claim arrives as an 8–15 page PDF
-attached to an email from one of dozens of brokers and law firms — each using their
-own document format.
+    **Scenario:** A mid-size commercial insurance company wants to automate pre-screening
+    of incoming liability claim submissions. Each claim arrives as an 8–15 page PDF
+    attached to an email from one of dozens of brokers and law firms — each using their
+    own document format.
 
-Pre-screening requires:
-- Cross-referencing the claimant against a fraud indicator database
-- Identifying applicable policy sections across a 40-document policy library
-- Estimating a reserve amount based on claim type and historical settlements
-- Flagging non-standard coverage clauses for specialist adjuster review
+    Pre-screening requires:
+    - Cross-referencing the claimant against a fraud indicator database
+    - Identifying applicable policy sections across a 40-document policy library
+    - Estimating a reserve amount based on claim type and historical settlements
+    - Flagging non-standard coverage clauses for specialist adjuster review
 
-Approximately 30% of claims require escalation to specialist adjusters.
-The claims team updates exception rules every 3–4 weeks as new case law emerges.
+    Approximately 30% of claims require escalation to specialist adjusters.
+    The claims team updates exception rules every 3–4 weeks as new case law emerges.
 
-**Before looking at the solution:** use the Scored Decision Tool in Section 2 to rate
-this scenario. Compare your verdict to Scenario A.
+    **Before looking at the solution:** use the Scored Decision Tool in Section 2 to rate
+    this scenario. Compare your verdict to Scenario A.
             """),
             mo.accordion({
                 "Show solution": mo.md("""
-**Recommendation: Build an agent — Score ≈ 7.8 / 10**
+    **Recommendation: Build an agent — Score ≈ 7.8 / 10**
 
-| Signal | Score | Rationale |
-|---|---|---|
-| Input variability | **9** | Unstructured PDFs from many sources; no standard schema |
-| Decision complexity | **8** | Multi-step: fraud check, policy retrieval, reserve estimation, routing |
-| Exception rate | **8** | 30% escalation rate — HITL path is a first-class architectural concern |
-| Auditability | **7** | Regulator requires explanation of each coverage decision |
-| Change velocity | **7** | Rules updated every 3–4 weeks; hard-coded rules become stale quickly |
+    | Signal | Score | Rationale |
+    |---|---|---|
+    | Input variability | **9** | Unstructured PDFs from many sources; no standard schema |
+    | Decision complexity | **8** | Multi-step: fraud check, policy retrieval, reserve estimation, routing |
+    | Exception rate | **8** | 30% escalation rate — HITL path is a first-class architectural concern |
+    | Auditability | **7** | Regulator requires explanation of each coverage decision |
+    | Change velocity | **7** | Rules updated every 3–4 weeks; hard-coded rules become stale quickly |
 
-This maps almost exactly to the AegisAP design:
-- **Observe:** Extract claim fields from unstructured PDF using Azure OpenAI structured output
-- **Plan:** Generate a typed task list — fraud check, policy retrieval, reserve estimation, routing
-- **Act:** Execute tasks sequentially — fraud DB lookup, AI Search for policy chunks, LLM reserve estimate
-- **Reflect:** Was confidence high enough? Is the claimant on the fraud list? Route accordingly.
+    This maps almost exactly to the AegisAP design:
+    - **Observe:** Extract claim fields from unstructured PDF using Azure OpenAI structured output
+    - **Plan:** Generate a typed task list — fraud check, policy retrieval, reserve estimation, routing
+    - **Act:** Execute tasks sequentially — fraud DB lookup, AI Search for policy chunks, LLM reserve estimate
+    - **Reflect:** Was confidence high enough? Is the claimant on the fraud list? Route accordingly.
 
-The 30% escalation rate justifies a durable HITL pause (Day 5 pattern).
-The 3–4 week rule change cadence justifies externalising rules to a policy document
-store retrieved via RAG (Day 3 pattern).
+    The 30% escalation rate justifies a durable HITL pause (Day 5 pattern).
+    The 3–4 week rule change cadence justifies externalising rules to a policy document
+    store retrieved via RAG (Day 3 pattern).
                 """),
             }),
         ]),
@@ -1185,50 +1280,10 @@ def _reflection(mo):
 
 
 @app.cell
-def _summary(mo):
-    mo.md("""
-    ## Day 1 Summary Checklist
-
-    Before moving to Day 2, confirm you can:
-
-    - [ ] Draw the observe → plan → act → reflect loop from memory and label each node
-    - [ ] List all eight Azure services in AegisAP and state why each exists
-    - [ ] Explain why `DefaultAzureCredential` is preferred over API keys
-    - [ ] Name the four identity planes and one RBAC role per plane
-    - [ ] State the five WAF pillars and one AI-specific concern per pillar
-    - [ ] Explain what "fail closed" means and give an AegisAP example
-    - [ ] Describe one production failure mode and its AegisAP defence
-    - [ ] Map all six Responsible AI principles to AegisAP controls (with Day numbers)
-    - [ ] Name the three agentic threat classes and one AegisAP defence for each
-    - [ ] Confirm `build/day1/threat_model_day1.json` was written by the artifact cell
-    """)
-    return
-
-
-@app.cell
-def _forward(mo):
-    mo.callout(
-        mo.md("""
-    **Tomorrow — Day 2: Requirements Gathering, Scoping & Architecture Blueprints**
-
-    We move from concepts to structured discovery. You will learn how to turn a
-    vague business request ("we need to automate invoices") into a scoped architecture
-    blueprint with documented decisions, an NFR framework, and a data-flow narrative
-    that the whole team agrees on.
-
-    Open `notebooks/day_2_requirements_architecture.py` when ready.
-        """),
-        kind="success",
-    )
-    return
-
-
-# ---------------------------------------------------------------------------
-# Section 7 – Responsible AI Principles in AegisAP
-# ---------------------------------------------------------------------------
-@app.cell
 def _s_ra_header(mo):
-    mo.md("## 7. Responsible AI Principles in AegisAP")
+    mo.md("""
+    ## 9. Responsible AI Principles in AegisAP
+    """)
     return
 
 
@@ -1256,12 +1311,11 @@ def _s_ra_principles(mo):
     return
 
 
-# ---------------------------------------------------------------------------
-# Section 8 – Agentic Threat Classes
-# ---------------------------------------------------------------------------
 @app.cell
 def _s_threat_model_header(mo):
-    mo.md("## 8. Agentic Threat Classes")
+    mo.md("""
+    ## 10. Agentic Threat Classes
+    """)
     return
 
 
@@ -1273,7 +1327,8 @@ def _s_threat_classes(mo):
 
     ### Threat 1: Prompt Injection
     **What:** Malicious content inside an invoice (or a vendor name) is crafted to
-    change the agent's behaviour — e.g., `Vendor name: ACME\nIgnore prior instructions…`
+    change the agent's behaviour — e.g., `Vendor name: ACME
+    Ignore prior instructions…`
 
     **AegisAP defence:** Content safety pre-filter (Day 7 gate); structured-output
     extraction enforced by Pydantic schema (Day 4); policy overlay rejects plans whose
@@ -1299,26 +1354,26 @@ def _s_threat_classes(mo):
 
 
 @app.cell
-def _s_threat_artifact(mo, json):
-    from pathlib import Path
-    _build = Path(__file__).resolve().parents[1] / "build" / "day1"
+def _s_threat_artifact(json, mo):
+    from pathlib import Path as _Path
+    _build = _Path(__file__).resolve().parents[1] / "build" / "day1"
     _build.mkdir(parents=True, exist_ok=True)
     _artifact = {
         "day": 1,
         "threat_model": {
             "prompt_injection": {
                 "defence": "content_safety_prefilter + structured_output_schema + policy_overlay_allowlist",
-                "day_introduced": 1,
+                "day_introduced": 7,
                 "gate": "gate_refusal_safety",
             },
             "authority_confusion": {
                 "defence": "obo_token_exchange + actor_oid_binding",
-                "day_introduced": 1,
+                "day_introduced": 11,
                 "gate": "gate_delegated_identity",
             },
             "state_poisoning": {
                 "defence": "replay_idempotency_gate + keyvault_state_binding",
-                "day_introduced": 1,
+                "day_introduced": 5,
                 "gate": "gate_resume_safety",
             },
         },
@@ -1331,13 +1386,53 @@ def _s_threat_artifact(mo, json):
     return
 
 
+@app.cell
+def _summary(mo):
+    mo.md("""
+    ## Day 1 Summary Checklist
+
+    Before moving to Day 2, confirm you can:
+
+    - [ ] Draw the observe → plan → act → reflect loop from memory and label each node
+    - [ ] List all eight Azure services in AegisAP and state why each exists
+    - [ ] Explain why `DefaultAzureCredential` is preferred over API keys
+    - [ ] Name the four identity planes and one RBAC role per plane
+    - [ ] State the five WAF pillars and one AI-specific concern per pillar
+    - [ ] Explain how CAF Strategy, Plan, Ready, Adopt, Govern, Secure, and Manage apply to AI and agents
+    - [ ] Design a first-pass business strategy for an AI solution: KPI, delivery model, trust boundary, and human control points
+    - [ ] Explain what "fail closed" means and give an AegisAP example
+    - [ ] Describe one production failure mode and its AegisAP defence
+    - [ ] Map all six Responsible AI principles to AegisAP controls (with Day numbers)
+    - [ ] Name the three agentic threat classes and one AegisAP defence for each
+    - [ ] Confirm `build/day1/threat_model_day1.json` was written by the artifact cell
+    """)
+    return
+
+
+@app.cell
+def _forward(mo):
+    mo.callout(
+        mo.md("""
+    **Tomorrow — Day 2: Requirements Gathering, Scoping & Architecture Blueprints**
+
+    We move from concepts to structured discovery. You will learn how to turn a
+    vague business request ("we need to automate invoices") into a scoped architecture
+    blueprint with documented decisions, an NFR framework, a data-flow narrative,
+    and a CAF-aligned adoption plan that the whole team agrees on.
+
+    Open `notebooks/day_2_requirements_architecture.py` when ready.
+        """),
+        kind="success",
+    )
+    return
+
 
 @app.cell
 def _fde_learning_contract(mo):
     mo.md(r"""
     ---
     ## FDE Learning Contract — Day 01: Agentic Systems Fundamentals, Business Value, and FDE Judgment
-    
+
 
     ### Four Daily Outputs
 
@@ -1353,24 +1448,24 @@ def _fde_learning_contract(mo):
     | Dimension | Points |
     |---|---|
     | Agent Fit Signals | 25 |
-| Rejection Criteria | 20 |
-| Waf Trust Tradeoff | 20 |
-| Business Framing | 15 |
-| Oral Defense | 20 |
+    | Rejection Criteria | 20 |
+    | Waf Trust Tradeoff | 20 |
+    | Business Framing | 15 |
+    | Oral Defense | 20 |
 
     Pass bar: **80 / 100**   Elite bar: **90 / 100**
 
     ### Oral Defense Prompts
 
     1. What alternative automation approach did you reject for this pain point, and why does the agent design win on this dimension?
-2. What is the blast radius if the agent acts on a misclassified invoice? Name the downstream systems and approvers affected.
-3. Who in a real enterprise must sign off on introducing an agentic system into a financial workflow, and what audit evidence would they demand before go-live?
+    2. What is the blast radius if the agent acts on a misclassified invoice? Name the downstream systems and approvers affected.
+    3. Who in a real enterprise must sign off on introducing an agentic system into a financial workflow, and what audit evidence would they demand before go-live?
 
     ### Artifact Scaffolds
 
     - `docs/curriculum/artifacts/day01/AGENT_FIT_MEMO.md`
-- `docs/curriculum/artifacts/day01/NO_AGENT_MEMO.md`
-- `docs/curriculum/artifacts/day01/FDE_MENTAL_MODELS.md`
+    - `docs/curriculum/artifacts/day01/NO_AGENT_MEMO.md`
+    - `docs/curriculum/artifacts/day01/FDE_MENTAL_MODELS.md`
 
     See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
     See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.

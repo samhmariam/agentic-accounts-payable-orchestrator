@@ -69,6 +69,18 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 7 testing, evals, and guardrails",
+        core_outcome="defend why slice-level evidence and refusal behavior are release criteria rather than nice-to-have metrics",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 – Why Evals, Not Just Unit Tests
 # ---------------------------------------------------------------------------

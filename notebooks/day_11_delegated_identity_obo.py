@@ -71,6 +71,68 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 11 delegated identity and OBO flows",
+        core_outcome="prove that approval authority stays attached to the right human actor even when services call services",
+    )
+    return
+
+
+@app.cell
+def _day11_lineage_map(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Visual Guide — Identity Lineage Into OBO
+
+    ```
+    Day 3 identity planes
+        └─► Day 8 workload federation and managed identity deployment
+              └─► Day 11 delegated identity contract
+                    ├─► build/day11/obo_contract.json
+                    └─► gate_delegated_identity
+                          └─► Days 13-14 actor-bound writes and executive traceability
+    ```
+
+    OBO is not an isolated identity trick. It is the continuation of the identity model
+    introduced earlier, now attached to human approval authority.
+
+    | Prior evidence | Day 11 dependency |
+    |---|---|
+    | Day 3 plane separation | Prevents service identity from being confused with actor identity |
+    | Day 8 managed identity / OIDC hardening | Makes the service-to-service path trustworthy before delegation is layered on top |
+    | Day 11 contract artifact | Feeds later write-path and audit assumptions in Days 13-14 |
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day11_mastery_checkpoint(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Mastery Checkpoint — Delegation Without Confusion
+
+    Do not progress if you cannot answer:
+    - which identity in the flow is workload authority versus human authority
+    - what exact evidence proves the actor belongs to the required group now, not last week
+    - what breaks if a payload field is trusted more than token claims
+    - why managed identity alone is insufficient for delegated approval
+    """
+        ),
+        kind="warn",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 — The Four Identity Planes Revisited
 # ---------------------------------------------------------------------------
@@ -630,6 +692,27 @@ def _s6_body(mo):
     2. "How do you verify the OID is authorised?" → **Graph `transitiveMemberOf` API**
     3. "What prevents the orchestrator from forging approvals itself?" → **OBO requires real user token; MI cannot impersonate users**
     """)
+    return
+
+
+@app.cell
+def _day11_unscaffolded_block(mo):
+    from _shared.curriculum_scaffolds import render_unscaffolded_block
+
+    render_unscaffolded_block(
+        mo,
+        title="Unscaffolded Afternoon Block — Delegated Approval Defense",
+        brief=(
+            "Write a short approval-flow defense for a new enterprise action that must be "
+            "performed on behalf of a real human. Name the token exchange, actor verification "
+            "step, safe secret storage, and one attack path that would invalidate the design."
+        ),
+        done_when=(
+            "The write-up distinguishes system identity from human authority clearly.",
+            "At least one attack path is named along with the exact control that breaks it.",
+            "The design could be reviewed by security without needing the notebook examples nearby.",
+        ),
+    )
     return
 
 

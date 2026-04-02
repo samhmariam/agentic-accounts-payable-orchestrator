@@ -39,6 +39,41 @@ class GateResult:
     evidence: dict | None = None
 
 
+def _artifact_is_training_only(data: dict) -> bool:
+    note = str(data.get("note", "")).upper()
+    return (
+        data.get("training_artifact") is True
+        or data.get("authoritative_evidence") is False
+        or data.get("execution_tier") == 1
+        or note.startswith("STUB")
+        or "TRAINING_ONLY" in note
+    )
+
+
+def _require_authoritative_evidence(
+    *,
+    gate_name: str,
+    data: dict,
+    remediation: str,
+) -> GateResult | None:
+    if not _artifact_is_training_only(data):
+        return None
+    return GateResult(
+        name=gate_name,
+        passed=False,
+        detail=(
+            "Training-only artifact detected; authoritative production evidence is still missing. "
+            + remediation
+        ),
+        evidence={
+            "training_artifact": data.get("training_artifact"),
+            "authoritative_evidence": data.get("authoritative_evidence"),
+            "execution_tier": data.get("execution_tier"),
+            "note": data.get("note"),
+        },
+    )
+
+
 # ---------------------------------------------------------------------------
 # Gate 7 — Delegated Identity (composite)
 # ---------------------------------------------------------------------------
@@ -217,6 +252,16 @@ def gate_private_network_posture() -> GateResult:
                 ),
             )
         data = json.loads(posture_path.read_text())
+        training_only = _require_authoritative_evidence(
+            gate_name="private_network_posture",
+            data=data,
+            remediation=(
+                "Run the live posture probe from the VNET-injected staging environment "
+                "to verify DNS and public-endpoint inaccessibility."
+            ),
+        )
+        if training_only is not None:
+            return training_only
         passed = bool(data.get("all_passed", False))
         services = data.get("services", [])
         failed_services = [s["hostname"]
@@ -260,6 +305,16 @@ def gate_trace_correlation() -> GateResult:
                 ),
             )
         data = json.loads(report_path.read_text())
+        training_only = _require_authoritative_evidence(
+            gate_name="trace_correlation",
+            data=data,
+            remediation=(
+                "Export live traces to the required sink(s) and regenerate the "
+                "correlation report from real telemetry."
+            ),
+        )
+        if training_only is not None:
+            return training_only
 
         # Derive dual-sink requirement from Day 12 network posture evidence.
         dual_sink_required = False
@@ -320,6 +375,16 @@ def gate_data_residency() -> GateResult:
                 ),
             )
         data = json.loads(residency_path.read_text())
+        training_only = _require_authoritative_evidence(
+            gate_name="data_residency",
+            data=data,
+            remediation=(
+                "Query the ARM API against the target resource group to produce a "
+                "real region-verification report."
+            ),
+        )
+        if training_only is not None:
+            return training_only
         passed = bool(data.get("all_passed", False))
         approved_region = data.get("approved_region", "unknown")
         violations = data.get("violations", [])
@@ -359,6 +424,16 @@ def gate_dlq_drain_health() -> GateResult:
                 ),
             )
         data = json.loads(dlq_path.read_text())
+        training_only = _require_authoritative_evidence(
+            gate_name="dlq_drain_health",
+            data=data,
+            remediation=(
+                "Drain the real dead-letter queue and record the resulting DLQ report "
+                "before claiming production reliability."
+            ),
+        )
+        if training_only is not None:
+            return training_only
         error_count = int(data.get("error_count", 0))
         total = int(data.get("total", 0))
         passed = error_count == 0
@@ -394,6 +469,16 @@ def gate_mcp_contract_integrity() -> GateResult:
                 ),
             )
         data = json.loads(contract_path.read_text())
+        training_only = _require_authoritative_evidence(
+            gate_name="mcp_contract_integrity",
+            data=data,
+            remediation=(
+                "Fetch `/capabilities` from the live MCP server and validate the "
+                "declared tool contract, including the write-path tool."
+            ),
+        )
+        if training_only is not None:
+            return training_only
         passed = bool(data.get("passed", False))
         errors = data.get("errors", [])
         detail = (
@@ -428,6 +513,16 @@ def gate_canary_regression() -> GateResult:
                 ),
             )
         data = json.loads(canary_path.read_text())
+        training_only = _require_authoritative_evidence(
+            gate_name="canary_regression",
+            data=data,
+            remediation=(
+                "Run a real canary against the candidate revision and compare it to "
+                "the protected Day 8 baseline before promotion."
+            ),
+        )
+        if training_only is not None:
+            return training_only
         passed = bool(data.get("passed", False))
         regressions = data.get("regressions", [])
         detail = (
@@ -508,6 +603,16 @@ def gate_webhook_reliability() -> GateResult:
                 ),
             )
         data = json.loads(report_path.read_text())
+        training_only = _require_authoritative_evidence(
+            gate_name="webhook_reliability",
+            data=data,
+            remediation=(
+                "Exercise the live integration boundary and capture the real webhook "
+                "reliability report before marking the boundary release-ready."
+            ),
+        )
+        if training_only is not None:
+            return training_only
         passed = bool(data.get("all_handled", False))
         unhandled = int(data.get("unhandled_count", 0))
         detail = (

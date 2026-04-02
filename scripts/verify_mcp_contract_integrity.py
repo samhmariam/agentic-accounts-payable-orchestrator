@@ -41,14 +41,19 @@ def main() -> int:
     mcp_url = os.environ.get("AEGISAP_MCP_URL", "")
 
     if not mcp_url:
-        print("STUB: no AEGISAP_MCP_URL set — writing stub MCP contract report")
+        print("TRAINING_ONLY: no AEGISAP_MCP_URL set — writing preview MCP contract report")
         report = {
             "correlation_id": correlation_id,
             "capabilities_ok": True,
             "tools_present": sorted(_REQUIRED_TOOLS),
             "tools_missing": [],
-            "contract_valid": True,
-            "note": "STUB: no AEGISAP_MCP_URL set",
+            "contract_valid": False,
+            "passed": False,
+            "errors": ["training-only preview: no live /capabilities request made"],
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "execution_tier": 1,
+            "note": "TRAINING_ONLY: no AEGISAP_MCP_URL set",
         }
         _write(report)
         return 0
@@ -72,6 +77,12 @@ def main() -> int:
             "capabilities_ok": False,
             "error": str(exc),
             "contract_valid": False,
+            "passed": False,
+            "errors": [str(exc)],
+            "training_artifact": False,
+            "authoritative_evidence": True,
+            "execution_tier": 2,
+            "note": "LIVE_MCP_QUERY_ERROR",
         }
         _write(report)
         return 1
@@ -85,6 +96,12 @@ def main() -> int:
         "tools_present": sorted(present),
         "tools_missing": missing,
         "contract_valid": len(missing) == 0,
+        "passed": len(missing) == 0,
+        "errors": [f"missing tool: {name}" for name in missing],
+        "training_artifact": False,
+        "authoritative_evidence": True,
+        "execution_tier": 2,
+        "note": "LIVE_CAPABILITIES_CHECK",
     }
     _write(report)
 

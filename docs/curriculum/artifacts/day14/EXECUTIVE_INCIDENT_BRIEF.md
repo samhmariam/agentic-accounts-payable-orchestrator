@@ -25,6 +25,20 @@ technical background.
 - What is the worst thing to leave out of this brief?
 - At what point of recovery do you send a follow-up brief, and who owns that trigger?
 
+## Structural Example — Executive Brief Shape
+
+- Headline: `Claims intake automation is operating in degraded mode, no data loss is confirmed, and 18% of new submissions are waiting for manual review as of 14:20 UTC.`
+- Customer / business impact: `Provider-submitted claims are still being received, but exceptions are taking 25-40 minutes longer to route. No payments have been released incorrectly.`
+- Current status: `The incident commander has halted the canary rollout, restored traffic to the prior version, and assigned platform and integration leads to verify queue recovery and private connectivity.`
+- Recovery timeline: `We expect a stable state in 30-60 minutes if the rollback holds; otherwise we will shift all intake to the manual queue and provide a revised estimate within 20 minutes.`
+- Actions required: `Approve temporary overtime coverage for the claims operations team if manual backlog exceeds 250 cases by 16:00 UTC.`
+
+## Anti-Patterns To Avoid
+
+- Do not lead with internal system names or acronyms.
+- Do not say "no impact" if impact is still being assessed; say what is known and unknown.
+- Do not give a point estimate unless the recovery step is already complete.
+
 ## Acceptance Criteria
 
 - Total length: 1 page or fewer (approximately 400 words maximum)

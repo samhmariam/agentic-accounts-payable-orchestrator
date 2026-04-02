@@ -20,6 +20,20 @@ business outcomes, risk, and decision — not technical implementation.
 - How do you quantify business value without overpromising?
 - What is the rollback impact in business terms (not technical terms)?
 
+## Structural Example — Brief Shape
+
+- Release headline: `Tomorrow's release moves low-value invoice recommendations into managed staging approval, reducing manual triage time while keeping high-value cases under finance control.`
+- Business value: `If the guarded rollout behaves as expected, AP analysts recover 6-8 hours per day of manual triage time without changing current approval authority.`
+- Risk and mitigations: `Primary risks are regression in compliance-sensitive routing, deployment drift, and rollout cost variance; each is covered by pre-release gates, named owners, and rollback within the same shift.`
+- Decision required: `Approve staging-to-production promotion only if all six gates stay green through the observation window and no exception request is opened.`
+- Rollback position: `If rollback is required, analysts continue the existing manual process and no supplier-facing workflow changes are exposed.`
+
+## Anti-Patterns To Avoid
+
+- Do not write a technical status report and rename it an executive brief.
+- Do not describe rollback as "revert to previous revision" without the business effect.
+- Do not claim business value with fake precision if the baseline is not yet measured.
+
 ## Acceptance Criteria
 
 - Total length: 1 page or fewer (approximately 400 words maximum)

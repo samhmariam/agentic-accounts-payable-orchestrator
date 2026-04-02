@@ -22,6 +22,22 @@ so that failure modes have explicit, tested responses rather than implicit handl
 - If compensating actions A and B both fire for the same failure, is there a conflict?
 - Who would investigate a compensating action failure at 03:00 on a Sunday?
 
+## Structural Example — Compensating Action Rows
+
+| Action ID | Trigger condition | Compensating action | Idempotency guarantee | Blast radius if action fails |
+|---|---|---|---|---|
+| CA-01 | Service Bus handler exceeds max retries on invoice extraction | Move message to DLQ and create analyst review task | Safe to replay task creation once because task key is deterministic | Exception workload becomes invisible and misses SLA |
+| CA-02 | Duplicate payment-hold event received | Ignore duplicate and append audit log entry only | Safe to replay indefinitely because natural key is event ID | Duplicate downstream holds or confused finance analyst |
+| CA-03 | Claims adjudication enrichment timeout | Persist partial case with `external_data_pending` state and schedule retry | Safe to replay up to 3 times with same case ID | Claim remains stuck without visibility into missing dependency |
+| CA-04 | MCP tool invocation fails after mutation side effect begins | Issue compensating reversal command and notify operator | Safe once; second replay is a no-op because reversal token is single-use | External system remains in mismatched state with AegisAP |
+| CA-05 | OBO token exchange fails after boundary validation | Reject request and write actor-bound audit event for manual replay | Safe to replay request after auth repair because no business mutation occurred | Unauthorized work is attempted without traceable actor context |
+
+## Anti-Patterns To Avoid
+
+- Do not use "retry" as the entire compensating action if business state already changed.
+- Do not claim idempotency without saying what key or state makes it safe.
+- Do not leave night/weekend ownership implicit for high-blast-radius actions.
+
 ## Acceptance Criteria
 
 - Minimum 5 compensating actions

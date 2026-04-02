@@ -71,6 +71,122 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 13 integration boundaries and MCP",
+        core_outcome="show that external boundaries can stay reliable, actor-bound, and contract-disciplined even under transfer-domain pressure",
+        afternoon_focus="Use the transfer-domain lens to reason through an unseen boundary case before any unsafe mutation is allowed.",
+    )
+    return
+
+
+@app.cell
+def _capstone_b_transfer_lens(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Capstone B Transfer Lens
+
+    For Capstone B, treat today’s integration boundary as a **claims intake**
+    boundary rather than an AP boundary:
+    - HTTP trigger: intake from a payer or provider portal
+    - Service Bus: asynchronous adjudication or exception-routing events
+    - MCP: controlled tool surface for specialist agents working claim cases
+
+    Use:
+    - `docs/curriculum/CAPSTONE_B_TRANSFER.md`
+    - `fixtures/capstone_b/claims_intake/`
+
+    The transfer test today is not "can you rename invoice to claim" but
+    "can you preserve identity, reliability, and contract discipline when the
+    vocabulary and compliance regime change."
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day13_lineage_map(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Visual Guide — Day 13 Boundary Evidence Flow
+
+    ```
+    Day 11 OBO identity ──► HTTP boundary trusts actor context
+                       │
+                       ├─► Service Bus delivery + DLQ drain report
+                       │     └─► gate_dlq_drain_health
+                       │
+                       └─► MCP /capabilities contract snapshot
+                             └─► gate_mcp_contract_integrity
+    ```
+
+    Day 13 turns "integration works" into auditable evidence:
+    reliable recovery and disciplined external contracts both have to be proven.
+
+    | Boundary concern | Artifact / proof | Why Day 14 depends on it |
+    |---|---|---|
+    | Async recovery is real, not assumed | `build/day13/dlq_drain_report.json` | Rollback confidence is lower if failed messages cannot be drained safely |
+    | External tool surface stayed compatible | `build/day13/mcp_contract_report.json` | Breaking changes later look like regressions, not surprises |
+    | Webhook path remains reliable | `build/day13/webhook_reliability_report.json` | Elite ops cannot defend a rollout if ingress is already unstable |
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day13_mastery_checkpoint(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Mastery Checkpoint — Boundary Ownership
+
+    You are ready for Day 14 only if you can explain:
+    - why a retry is not always a compensating action
+    - which failures require actor-bound audit evidence before replay
+    - what makes an MCP change breaking even when one known consumer still succeeds
+    - how the claims-intake transfer domain changes the blast radius of a missed DLQ or contract failure
+    """
+        ),
+        kind="warn",
+    )
+    return
+
+
+@app.cell
+def _day13_hidden_case_preview(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Hidden-Case Drill Preview — Unseen Transfer Input
+
+    An assessor-only claims-intake case exists. Do **not** open it.
+
+    Assume it is close enough to reach your boundary but unsafe to trust without disciplined validation.
+    Prepare to explain:
+    - where the boundary should reject, hold, or dead-letter the request
+    - what actor-bound audit evidence must still be written even when business processing is denied
+    - whether a compensating action is required, and why retry alone is not enough
+    - how you communicate the refusal or hold to an external consumer without breaking contract discipline
+
+    Weak answer pattern:
+    "We would retry a few times and patch the parser if it still fails."
+    """
+        ),
+        kind="warn",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 — Integration Boundary Architecture
 # ---------------------------------------------------------------------------
@@ -321,50 +437,68 @@ def _s5_header(mo):
 @app.cell
 def _s5_lab_dlq(mo, json, os, Path):
     """Lab cell: DLQ drain report"""
-    import asyncio
-
     _build = Path(__file__).resolve().parents[1] / "build" / "day13"
     _build.mkdir(parents=True, exist_ok=True)
 
-    _sb_conn = os.environ.get("AZURE_SERVICE_BUS_CONNECTION_STRING", "")
-    _has_live = bool(_sb_conn)
+    _sb_namespace = os.environ.get("AZURE_SERVICEBUS_NAMESPACE_FQDN", "")
+    _sb_queue = os.environ.get("AZURE_SERVICEBUS_QUEUE_NAME", "")
+    _has_live = bool(_sb_namespace and _sb_queue)
 
     if _has_live:
         try:
             from aegisap.integration.dlq_consumer import DlqConsumer
             _consumer = DlqConsumer.from_env()
-            _report = asyncio.run(_consumer.drain())
+            _report = _consumer.drain()
             _report_dict = _report.to_dict()
+            _report_dict["training_artifact"] = False
+            _report_dict["authoritative_evidence"] = True
+            _report_dict["execution_tier"] = 2
+            _report_dict["note"] = "LIVE"
             _kind = "success"
             _msg = (
                 f"Live DLQ drain complete.\n\n"
-                f"Drained: {_report_dict.get('drained', 0)} messages\n\n"
-                f"Transient: {_report_dict.get('transient_count', 0)} | "
-                f"Non-transient: {_report_dict.get('non_transient_count', 0)}"
+                f"Processed: {_report_dict.get('total', 0)} messages\n\n"
+                f"Errors: {_report_dict.get('error_count', 0)}"
             )
         except Exception as _exc:
-            _report_dict = {"error": str(
-                _exc), "drained": 0, "all_handled": False}
+            _report_dict = {
+                "error": str(_exc),
+                "total": 0,
+                "error_count": 1,
+                "errors": [str(_exc)],
+                "training_artifact": False,
+                "authoritative_evidence": True,
+                "execution_tier": 2,
+                "note": "LIVE_ERROR",
+            }
             _kind = "danger"
             _msg = f"DLQ drain error: `{_exc}`"
     else:
         _report_dict = {
-            "drained": 0,
-            "transient_count": 0,
-            "non_transient_count": 0,
+            "total": 0,
+            "retried": 0,
+            "archived": 0,
+            "error_count": 0,
+            "errors": [],
             "all_handled": True,
             "messages": [],
-            "note": "STUB: no AZURE_SERVICE_BUS_CONNECTION_STRING set",
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "execution_tier": 1,
+            "note": "TRAINING_ONLY: no AZURE_SERVICE_BUS_CONNECTION_STRING set",
         }
         _kind = "neutral"
         _msg = (
-            "No `AZURE_SERVICE_BUS_CONNECTION_STRING` set — writing stub DLQ report.\n\n"
-            "`all_handled=True` (empty DLQ) → `gate_dlq_drain_health` will pass."
+            "No `AZURE_SERVICEBUS_NAMESPACE_FQDN` + `AZURE_SERVICEBUS_QUEUE_NAME` set — "
+            "writing a training-only DLQ preview.\n\n"
+            "`gate_dlq_drain_health` will remain red until a real DLQ drain report is produced.\n\n"
+            "Canonical live command:\n"
+            "```\nuv run python scripts/verify_webhook_reliability.py\n```"
         )
 
     (_build / "dlq_drain_report.json").write_text(json.dumps(_report_dict, indent=2))
     mo.callout(mo.md(_msg), kind=_kind)
-    return asyncio
+    return
 
 
 @app.cell
@@ -400,6 +534,12 @@ def _s5_lab_mcp(mo, json, os, Path):
                 "tools_present": sorted(_present),
                 "tools_missing": _missing,
                 "contract_valid": len(_missing) == 0,
+                "passed": len(_missing) == 0,
+                "errors": [f"missing tool: {name}" for name in _missing],
+                "training_artifact": False,
+                "authoritative_evidence": True,
+                "execution_tier": 2,
+                "note": "LIVE",
             }
             _kind = "success" if _report_dict["contract_valid"] else "danger"
             _msg = f"MCP capabilities fetched. Contract valid: `{_report_dict['contract_valid']}`"
@@ -408,6 +548,12 @@ def _s5_lab_mcp(mo, json, os, Path):
                 "capabilities_ok": False,
                 "error": str(_exc),
                 "contract_valid": False,
+                "passed": False,
+                "errors": [str(_exc)],
+                "training_artifact": False,
+                "authoritative_evidence": True,
+                "execution_tier": 2,
+                "note": "LIVE_ERROR",
             }
             _kind = "danger"
             _msg = f"MCP contract check failed: `{_exc}`"
@@ -421,13 +567,20 @@ def _s5_lab_mcp(mo, json, os, Path):
                 "submit_payment_hold",
             ],
             "tools_missing": [],
-            "contract_valid": True,
-            "note": "STUB: no AEGISAP_MCP_URL set",
+            "contract_valid": False,
+            "passed": False,
+            "errors": ["training-only preview: live /capabilities response not queried"],
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "execution_tier": 1,
+            "note": "TRAINING_ONLY: no AEGISAP_MCP_URL set",
         }
         _kind = "neutral"
         _msg = (
-            "No `AEGISAP_MCP_URL` set — writing stub MCP contract report.\n\n"
-            "`contract_valid=True` → `gate_mcp_contract_integrity` will pass.\n\n"
+            "No `AEGISAP_MCP_URL` set — writing a training-only MCP contract preview.\n\n"
+            "`gate_mcp_contract_integrity` will remain red until `/capabilities` is queried from a live server.\n\n"
+            "Canonical live command:\n"
+            "```\nuv run python scripts/verify_mcp_contract_integrity.py\n```\n\n"
             "Set `AEGISAP_MCP_URL=http://localhost:8001` and start the MCP server with:\n"
             "```\nuvicorn aegisap.mcp.server:app --port 8001\n```"
         )
@@ -596,6 +749,7 @@ def _summary(mo):
     - [ ] Confirm `build/day13/write_path_exercise.json` exists with `all_controls_verified=True`
     - [ ] State the three write-path controls: actor group check, idempotency key, compensating action
     - [ ] Explain how `McpAuthMiddleware` validates caller identity
+    - [ ] Explain what your boundary does with an unseen transfer-domain case before any unsafe mutation can occur
     """)
     return
 
@@ -655,6 +809,7 @@ def _fde_learning_contract(mo):
     1. A partner demands direct access to the orchestrator. Walk through your boundary defense and what you offer instead.
 2. If a compensating action fails silently, what is the blast radius and what is your detection and recovery path?
 3. Who approves a breaking change to an external API contract, what is the minimum notice period, and what evidence must accompany the deprecation notice?
+4. An assessor-only claims case reaches your boundary with unfamiliar but plausible structure. Explain your validation, DLQ, audit, and consumer-communication path without opening the hidden file.
 
     ### Artifact Scaffolds
 

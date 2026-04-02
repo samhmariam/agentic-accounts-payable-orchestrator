@@ -64,6 +64,121 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 12 private networking constraints",
+        core_outcome="prove private-only network posture in both AegisAP and the claims-intake transfer domain",
+        afternoon_focus="Use the transfer-domain lens and policy artifacts to defend the network design without resorting to a public fallback.",
+    )
+    return
+
+
+@app.cell
+def _capstone_b_transfer_lens(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Capstone B Transfer Lens
+
+    Days 12-14 are assessed in the **claims intake** transfer domain as well as AegisAP.
+
+    Use today’s network posture work to reason about:
+    - private access to payer and policy systems in `fixtures/capstone_b/claims_intake/`
+    - zero-tolerance exposure of healthcare-regulated claim content
+    - whether a security exception would still be acceptable when the external dependency is a payer portal rather than an AP system
+
+    Keep the transfer pack open alongside this notebook:
+    - `docs/curriculum/CAPSTONE_B_TRANSFER.md`
+    - `fixtures/capstone_b/claims_intake/`
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day12_lineage_map(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Visual Guide — Day 12 Evidence Flow
+
+    ```
+    Day 2 NFR intent
+      "AI services are private-endpoint only"
+             │
+             ├─► Day 8 IaC and deployment wiring
+             │
+             ├─► build/day12/static_bicep_analysis.json
+             │     └─► gate_private_network_static (CI proof)
+             │
+             └─► build/day12/private_network_posture.json
+                   + build/day12/external_sink_disabled.json
+                   └─► gate_private_network_posture (staging proof)
+    ```
+
+    Static IaC proof and live posture proof are related, but they are not interchangeable.
+
+    | Question | Artifact that answers it | Transfer-domain equivalent |
+    |---|---|---|
+    | "Did we declare private-only intent in code?" | `build/day12/static_bicep_analysis.json` | Claims services still forbid public endpoints in Bicep |
+    | "Does the deployed hostname really resolve privately?" | `build/day12/private_network_posture.json` | Payer or policy endpoints resolve only inside approved network paths |
+    | "Did we disable public fallback?" | `build/day12/external_sink_disabled.json` | No emergency internet bypass for regulated claim content |
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day12_mastery_checkpoint(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Mastery Checkpoint — Networking Discipline
+
+    Before moving on, make sure you can say clearly:
+    - why `gate_private_network_static` and `gate_private_network_posture` must both exist
+    - which artifact is training-only versus authoritative live evidence
+    - why a public fallback for claims-intake or AP regulated content is a governance failure, not a clever contingency
+    - what a temporary security exception would have to name: owner, expiry, compensating controls, and removal proof
+    """
+        ),
+        kind="warn",
+    )
+    return
+
+
+@app.cell
+def _day12_hidden_case_preview(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Hidden-Case Drill Preview — Assessor Pressure Test
+
+    An assessor-only claims-intake case exists. Do **not** open it.
+
+    Treat it as a late-breaking transfer-domain surprise and prepare your Day 12 defense:
+    - Which new or updated entry would appear in the network dependency register?
+    - What evidence proves you preserved private-only posture instead of taking a public shortcut?
+    - Which gate should fail if someone proposes temporary public exposure to "keep the test moving"?
+    - What security exception request would be rejected outright even before compensating controls are discussed?
+
+    Weak answer pattern:
+    "We would temporarily allow public access and clean it up later."
+    """
+        ),
+        kind="warn",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 — Private Networking Architecture
 # ---------------------------------------------------------------------------
@@ -232,6 +347,12 @@ def _s3_body(mo):
       that `violations == []` — no Azure access required in the CI runner.
     - **Staging gate:** reads the full posture report — requires a live probe run against the
       staging environment from a machine inside the VNet.
+
+    Canonical live command:
+
+    ```bash
+    uv run python scripts/verify_private_network_posture.py
+    ```
     """)
     return
 
@@ -262,19 +383,31 @@ def _s4_lab(mo, json, os, Path):
             _result = _probe.run()
             _probe.write_artifacts(_result)
             _report = _result.to_dict()
+            _report["training_artifact"] = False
+            _report["authoritative_evidence"] = True
+            _report["execution_tier"] = 2
+            _report["note"] = "LIVE"
             _kind = "success" if _result.all_passed else "danger"
             _msg = (
                 f"Live probe complete: `all_passed={_result.all_passed}`\n\n"
                 f"Services probed: {len(_result.services)}"
             )
         except Exception as _exc:
-            _report = {"error": str(_exc), "all_passed": False}
+            _report = {
+                "error": str(_exc),
+                "all_passed": False,
+                "training_artifact": False,
+                "authoritative_evidence": True,
+                "execution_tier": 2,
+                "note": "LIVE_ERROR",
+            }
             _kind = "danger"
             _msg = f"Probe error: `{_exc}`"
     else:
-        # Training stub — write stub artifacts so gates pass
+        # Training preview only — useful for learning the artifact shape,
+        # but intentionally not acceptable as authoritative gate evidence.
         _report = {
-            "all_passed": True,
+            "all_passed": False,
             "services": [
                 {
                     "hostname": "aegisap-openai.openai.azure.com",
@@ -282,7 +415,7 @@ def _s4_lab(mo, json, os, Path):
                     "dns_ip": "10.0.1.4",
                     "public_reachable": False,
                     "passed": True,
-                    "detail": "STUB: DNS → 10.0.1.4 (private); public endpoint not reachable.",
+                    "detail": "TRAINING_ONLY: sample DNS -> 10.0.1.4 (private); not a live verification result.",
                 },
                 {
                     "hostname": "aegisap-search.search.windows.net",
@@ -290,16 +423,20 @@ def _s4_lab(mo, json, os, Path):
                     "dns_ip": "10.0.2.5",
                     "public_reachable": False,
                     "passed": True,
-                    "detail": "STUB: DNS → 10.0.2.5 (private); public endpoint not reachable.",
+                    "detail": "TRAINING_ONLY: sample DNS -> 10.0.2.5 (private); not a live verification result.",
                 },
             ],
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "execution_tier": 1,
+            "note": "TRAINING_ONLY: no AEGISAP_AI_HOSTNAMES set",
         }
         (_build / "private_network_posture.json").write_text(json.dumps(_report, indent=2))
         _kind = "warn"
         _msg = (
-            "No `AEGISAP_AI_HOSTNAMES` set — posture artifact written for training environment.\n\n"
-            "**`gate_private_network_posture`**: stub artifact written → "
-            "`build/day12/private_network_posture.json` ✅\n\n"
+            "No `AEGISAP_AI_HOSTNAMES` set — training preview written to `build/day12/private_network_posture.json`.\n\n"
+            "**`gate_private_network_posture`** will remain **red** until you run the probe from a live "
+            "VNET-injected environment and produce authoritative evidence.\n\n"
             "**`gate_private_network_static`**: `static_bicep_analysis.json` is **NOT** written here — "
             "run `scripts/check_private_network_static.py` in CI (or locally against your Bicep files) "
             "to produce a real artifact.\n\n"
@@ -423,6 +560,7 @@ def _summary(mo):
     - [ ] State what `static_bicep_analysis.json` contains and how `check_private_network_static.py` produces it
     - [ ] Confirm `build/day12/private_network_posture.json` and `static_bicep_analysis.json` exist
     - [ ] Describe how DNS resolution is used to verify a private endpoint is correctly configured
+    - [ ] Defend how you would handle an unseen transfer-domain dependency without introducing a public fallback
     """)
     return
 
@@ -483,6 +621,7 @@ def _fde_learning_contract(mo):
     1. Which network dependency has the longest lead time and what is your plan if it is not resolved before production cutover?
 2. You temporarily enable a public endpoint in dev. Walk through every compensating control, the expiry date, and who holds the removal obligation.
 3. Who approves a security exception in your enterprise, what evidence is mandatory in the request, and what happens at expiry if no renewal is filed?
+4. An assessor introduces an unseen claims-intake dependency during cutover pressure. Explain why your design still refuses a public shortcut and which Day 12 artifacts prove that decision.
 
     ### Artifact Scaffolds
 

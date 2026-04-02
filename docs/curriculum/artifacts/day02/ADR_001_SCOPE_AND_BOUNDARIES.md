@@ -29,6 +29,19 @@ and its boundaries with external systems, data owners, and human actors.
 - Which boundary is most likely to be violated by a feature request and who holds the line?
 - What would a hostile architecture reviewer challenge first in the rationale section?
 
+## Structural Example — Option Comparison
+
+| Option | Boundary choice | Why it is attractive | Why it loses or wins |
+|---|---|---|---|
+| A | AegisAP performs extraction, routing, and low-value approval only | Keeps blast radius bounded and lets finance retain authority for high-value cases | Wins because it matches the Day 4 MVP and still leaves a clean path to Day 10 governance |
+| B | AegisAP becomes the full system of record for invoice approvals and vendor policy | Fewer hops for the user and a stronger automation story | Loses because it collapses ERP authority boundaries and expands audit risk too early |
+
+## Anti-Patterns To Avoid
+
+- Do not write "future integrations are out of scope" without naming the actual system boundary today.
+- Do not choose the broadest option just because it sounds more strategic.
+- Do not leave decision rights at "the architecture team"; name the role that can reverse the ADR.
+
 ## Acceptance Criteria
 
 - At least two options considered, each with a specific distinguishing characteristic

@@ -20,6 +20,20 @@ including slice-level requirements and zero-tolerance metric handling.
 - Who has authority to approve a release when a borderline metric is "close enough"?
 - How long must eval evidence be retained to satisfy a financial audit?
 
+## Structural Example — Release Decision Table
+
+| Metric or slice | Threshold | Breach effect | Override allowed? | Required approver |
+|---|---|---|---|---|
+| Mandatory escalation recall | `= 1.0` | Automatic block | No | None |
+| High-value invoice slice F1 | `>= 0.98` | Automatic block pending review | Rarely | Product + risk owner |
+| Aggregate extraction F1 | `>= 0.95` | Block or monitored release depending on slice results | Yes | Model owner |
+
+## Anti-Pattern To Avoid
+
+- Do not allow aggregate pass rates to erase a protected-slice regression.
+- Do not define override authority without naming the evidence bundle required.
+- Do not say "retain evals for compliance" without a duration and storage location.
+
 ## Acceptance Criteria
 
 - Release criteria table has numeric thresholds (not "good performance")

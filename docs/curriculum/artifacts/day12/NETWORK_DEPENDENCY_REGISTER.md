@@ -31,6 +31,22 @@ status, lead time, and contingency for each.
 - What is the blast radius if a private endpoint approval is not obtained before cutover?
 - Who holds the network dependency register during the deployment window?
 
+## Structural Example — Dependency Inventory Rows
+
+| ID | Dependency | Type | Required by | Approval owner | Status | Lead time | Contingency |
+|---|---|---|---|---|---|---|---|
+| NET-01 | Azure OpenAI private endpoint approval | PE | 10 business days before staging cutover | Platform networking manager | Approved | 7 business days | Hold go-live; no public fallback permitted |
+| NET-02 | Private DNS zone link for `privatelink.openai.azure.com` | DNS-private-zone link | 5 business days before probe run | Cloud platform lead | In progress | 3 business days | Manual hosts-file validation in staging only, then re-run automated probe |
+| NET-03 | Service Bus namespace firewall exception for build agent subnet | Firewall rule opening | 3 business days before release rehearsal | Messaging owner | Approved | 2 business days | Shift rehearsal to self-hosted runner in approved subnet |
+| NET-04 | Payer portal VNet peering for claims transfer domain | VNet peering | 15 business days before UAT | Enterprise network architect | Requested | 10 business days | Use recorded fixture responses for training only; cannot count as production evidence |
+| NET-05 | Storage account private endpoint for document blobs | PE | 7 business days before validation run | Data platform owner | Approved | 5 business days | Block ingestion tests until PE resolves privately |
+
+## Anti-Patterns To Avoid
+
+- Do not mark every dependency as critical path; reserve that label for actual go-live blockers.
+- Do not treat a training-only contingency as an acceptable production workaround.
+- Do not leave approval owner blank because "the network team" is known informally.
+
 ## Acceptance Criteria
 
 - Minimum 5 dependencies registered

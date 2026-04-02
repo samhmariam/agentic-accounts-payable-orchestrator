@@ -87,6 +87,19 @@ class TestGatesV2PassWithStubArtifacts:
         result = gate_private_network_posture()
         assert result.passed is True
 
+    def test_gate_private_network_posture_fails_on_training_artifact(self):
+        _write_artifact("build/day12/private_network_posture.json", {
+            "all_passed": True,
+            "services": [],
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "note": "TRAINING_ONLY",
+        })
+        from aegisap.deploy.gates_v2 import gate_private_network_posture
+        result = gate_private_network_posture()
+        assert result.passed is False
+        assert "training-only" in result.detail.lower()
+
     def test_gate_dlq_drain_health(self):
         _write_artifact("build/day13/dlq_drain_report.json", {
             "all_handled": True,
@@ -106,6 +119,19 @@ class TestGatesV2PassWithStubArtifacts:
         from aegisap.deploy.gates_v2 import gate_mcp_contract_integrity
         result = gate_mcp_contract_integrity()
         assert result.passed is True
+
+    def test_gate_mcp_contract_integrity_fails_on_training_artifact(self):
+        _write_artifact("build/day13/mcp_contract_report.json", {
+            "passed": True,
+            "errors": [],
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "note": "TRAINING_ONLY",
+        })
+        from aegisap.deploy.gates_v2 import gate_mcp_contract_integrity
+        result = gate_mcp_contract_integrity()
+        assert result.passed is False
+        assert "training-only" in result.detail.lower()
 
     def test_gate_trace_correlation(self):
         _write_artifact("build/day14/trace_correlation_report.json", {
@@ -129,6 +155,20 @@ class TestGatesV2PassWithStubArtifacts:
         result = gate_data_residency()
         assert result.passed is True
 
+    def test_gate_data_residency_fails_on_training_artifact(self):
+        _write_artifact("build/day14/data_residency_report.json", {
+            "all_passed": True,
+            "approved_region": "eastus",
+            "violations": [],
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "note": "TRAINING_ONLY",
+        })
+        from aegisap.deploy.gates_v2 import gate_data_residency
+        result = gate_data_residency()
+        assert result.passed is False
+        assert "training-only" in result.detail.lower()
+
     def test_gate_canary_regression(self):
         _write_artifact("build/day14/canary_regression_report.json", {
             "passed": True,
@@ -137,6 +177,19 @@ class TestGatesV2PassWithStubArtifacts:
         from aegisap.deploy.gates_v2 import gate_canary_regression
         result = gate_canary_regression()
         assert result.passed is True
+
+    def test_gate_canary_regression_fails_on_training_artifact(self):
+        _write_artifact("build/day14/canary_regression_report.json", {
+            "passed": True,
+            "regressions": [],
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "note": "TRAINING_ONLY",
+        })
+        from aegisap.deploy.gates_v2 import gate_canary_regression
+        result = gate_canary_regression()
+        assert result.passed is False
+        assert "training-only" in result.detail.lower()
 
     def test_gate_fails_when_artifact_missing(self, tmp_path):
         """Remove the artifact and verify the gate returns passed=False."""

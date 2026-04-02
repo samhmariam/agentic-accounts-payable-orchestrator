@@ -23,6 +23,19 @@ across the 14 days.
 - What surprised you most about the claims intake transfer domain?
 - If you were assessing someone else on Day 14, what would you most want to see in their defense?
 
+## Structural Example — Evidence Line
+
+Use short, evidence-backed entries rather than generic reflection:
+
+- `Authority is not provenance` — Day 11 changed my integration design because I stopped trusting queue payload identity and required OBO-bound actor verification before write-path approval.
+- `Operational elegance is reversible evidence` — Day 14 changed my rollout posture because canary promotion without rollback readiness is not operational excellence, it is optimism.
+
+## Honesty Guardrail
+
+- A self-score without a cited day, artifact, or gate is incomplete.
+- "I improved a lot" is not evidence.
+- If a dimension is weak, say so plainly and name the next concrete practice step.
+
 ## Acceptance Criteria
 
 - All 8 mental models addressed with a specific day reference (not generic statements)

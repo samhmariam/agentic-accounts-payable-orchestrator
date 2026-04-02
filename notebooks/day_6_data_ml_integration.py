@@ -65,6 +65,18 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 6 data authority and ML integration",
+        core_outcome="reason clearly about data authority, source-of-truth conflicts, and how ML outputs become governed recommendations",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 – Data Authority Pyramid
 # ---------------------------------------------------------------------------

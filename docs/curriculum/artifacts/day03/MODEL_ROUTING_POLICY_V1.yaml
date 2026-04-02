@@ -34,3 +34,29 @@ change_control:
     - "<eval metric or test suite name>"
     - "<cost impact analysis>"
   rollback_condition: "<observable signal that triggers rollback>"
+
+# Structural example (replace rather than copy verbatim)
+#
+# capabilities:
+#   - name: "invoice_extraction"
+#     model: "gpt-4.1-mini"
+#     justification: "Routine extraction is high-volume and schema-constrained."
+#     fallback: "gpt-4.1"
+#     fallback_condition: "Escalate when extraction confidence < 0.92"
+#     zero_tolerance_protected: false
+#   - name: "compliance_review"
+#     model: "gpt-4.1"
+#     justification: "High-risk policy reasoning requires the stronger tier."
+#     fallback: null
+#     fallback_condition: null
+#     zero_tolerance_protected: true
+#
+# constraints:
+#   pii_data_must_stay_in_tenant: true
+#   max_token_cost_per_run_usd: 0.10
+#   latency_budget_p95_ms: 15000
+#
+# Anti-patterns:
+# - Do not route every capability to the strongest model without cost justification.
+# - Do not assign a fallback for zero-tolerance capabilities unless the approval
+#   path and rollback trigger are explicit.

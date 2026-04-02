@@ -20,6 +20,21 @@ ambiguity about who holds accountability when a release degrades or must roll ba
 - What is the blast radius if break-glass is used without audit logging?
 - Who owns the decision to roll back — the platform team, the product team, or the CAB chair?
 
+## Structural Example — Ownership Rows
+
+| Release element | Owner role | Deputy | Decision authority | Escalation if unavailable |
+|---|---|---|---|---|
+| GitHub Actions deployment pipeline | Platform engineer | DevSecOps lead | Pause or re-run workflow | CAB chair for cutover delay |
+| ACA revision traffic shift | Operations lead | Platform engineer | Promote, pause, or rollback | Incident commander once live traffic is affected |
+| Gate exception record | Service owner | Product director | Request exception, not self-approve | CAB chair plus security lead |
+| Break-glass credential use | Platform security lead | Operations manager | Authorize emergency use only | CTO delegate if both unavailable |
+
+## Anti-Patterns To Avoid
+
+- Do not name a deputy who cannot actually exercise the authority.
+- Do not describe ownership transfer as "deployment team takes over" without a specific moment and record.
+- Do not let rollback authority float between teams during the highest-risk window.
+
 ## Acceptance Criteria
 
 - Every release element has an owner and a deputy (not "TBD")

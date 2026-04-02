@@ -64,6 +64,18 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 5 multi-agent orchestration and pause/resume",
+        core_outcome="explain when multi-agent coordination is worth the complexity and how durable state preserves safety",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 – WorkflowState
 # ---------------------------------------------------------------------------

@@ -20,6 +20,20 @@ classification, and ownership — before any implementation decision is made.
 - If two NFRs conflict under load, which wins — and is that decision documented anywhere?
 - Which NFR is currently unmeasurable and what does that mean for go-live readiness?
 
+## Structural Example — NFR Row Shape
+
+| ID | Category | Description | Target | Measurement method | Zero-tolerance | Owner |
+|---|---|---|---|---|---|---|
+| NFR-SEC-01 | Security | No AI service public endpoint reachable from internet | `publicNetworkAccess=Disabled` on all AI services | Day 12 static + live posture gates | Yes | Platform security |
+| NFR-REL-02 | Reliability | Duplicate side effects on workflow resume | `0` duplicates | Day 5 resume artifact + Day 10 gate | Yes | Workflow owner |
+| NFR-PERF-03 | Performance | Invoice extraction latency | `p99 < 15s` | App Insights / trace sample | No | Engineering lead |
+
+## Anti-Pattern To Avoid
+
+- Do not write targets like "fast", "cheap", or "secure enough".
+- Do not mark an NFR zero-tolerance without naming the release-blocking evidence.
+- Do not leave ownership at "team"; name a role that would be accountable in production.
+
 ## Acceptance Criteria
 
 - Minimum 8 NFRs across at least 3 categories (performance, security, compliance, operability)

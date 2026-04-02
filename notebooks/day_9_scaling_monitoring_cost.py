@@ -68,6 +68,18 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 9 observability, scaling, and cost control",
+        core_outcome="show how telemetry, routing, and budget controls keep agentic systems operable at enterprise scale",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 – Three Pillars of Observability
 # ---------------------------------------------------------------------------

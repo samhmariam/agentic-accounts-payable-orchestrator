@@ -31,6 +31,20 @@ targeting all consumer types at the right altitude and with the right lead time.
 | Final reminder | `<date>` | `<channel>` | Non-migrated consumers | `<role>` |
 | Cutover | `<date>` | `<channel>` | All consumers | `<role>` |
 
+## Structural Example — Consumer Inventory Row
+
+| Consumer | Criticality | Migration effort | Support needed | Fallback if late |
+|---|---|---|---|---|
+| Payer portal claims client | High | 2 sprints | Sample payloads, validation sandbox, named technical contact | Hold cutover or route to compatibility facade for bounded period |
+| Internal case-routing worker | Medium | 3 engineering days | Updated event schema and replay-safe migration notes | Pause new field enforcement until worker is upgraded |
+| External agent using MCP tool wrapper | Medium | 1 sprint | Capability diff, deprecation notice, office-hours session | Deny removed tool calls with explicit version error |
+
+## Anti-Patterns To Avoid
+
+- Do not assume "internal consumer" means low communication burden.
+- Do not set a cutover date without naming what happens to the consumers that miss it.
+- Do not communicate only the API change; communicate the business deadline, support path, and monitoring after cutover.
+
 ## Acceptance Criteria
 
 - Consumer inventory has at least 3 distinct consumer types

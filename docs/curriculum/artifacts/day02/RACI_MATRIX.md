@@ -20,6 +20,21 @@ in the AegisAP system, from design through operation.
 - Who is Accountable for the agent's classification decision at 23:00 on a Friday?
 - Which role is over-consulted (present in Consulted on nearly every row) and is that realistic?
 
+## Structural Example — Activity Rows
+
+| Activity | Product owner | FDE | Platform engineer | Security lead | Operations lead |
+|---|---|---|---|---|---|
+| Approve Day 2 scope boundary | A | R | C | C | I |
+| Update Bicep for staging deployment | I | C | A/R | C | I |
+| Decide whether to override a failing gate | C | R | C | C | A |
+| Execute rollback during live incident | I | C | R | I | A |
+
+## Anti-Patterns To Avoid
+
+- Do not assign two Accountable owners because both are senior.
+- Do not hide a gap by marking everyone Responsible and no one Accountable.
+- Do not invent role names here that do not match the stakeholder map.
+
 ## Acceptance Criteria
 
 - Minimum 10 distinct activities covering design, build, deploy, operate, and audit phases

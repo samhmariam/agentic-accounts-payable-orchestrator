@@ -64,6 +64,18 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 4 single-agent loop design",
+        core_outcome="build a single-agent loop that makes explicit decisions, respects policy, and fails closed under uncertainty",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 – Invoice Extraction Pipeline
 # ---------------------------------------------------------------------------

@@ -69,6 +69,67 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 8 CI/CD, IaC, and secure deployment",
+        core_outcome="connect Bicep, identity, release automation, and gate evidence into one deployable operating model",
+    )
+    return
+
+
+@app.cell
+def _day8_lineage_map(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Visual Guide — Deployment Evidence Lineage
+
+    ```
+    Day 7 safety and eval posture
+        └─► Day 8 Bicep, identity, OIDC, gate runner
+              ├─► build/day8/deployment_design.json
+              ├─► build/day8/regression_baseline.json
+              ├─► Day 10 release envelope and operator decisions
+              └─► Day 11-14 identity, networking, and elite gate expansion
+    ```
+
+    Day 8 is the point where earlier design decisions become a repeatable release system.
+
+    | Day 8 output | Later dependency |
+    |---|---|
+    | Regression baseline | Day 10 `eval_regression`, Day 14 canary comparison |
+    | Deployment design artifact | Day 10 release packaging and ownership conversation |
+    | OIDC + identity plane wiring | Day 11 delegated identity and Day 12 private posture realism |
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day8_mastery_checkpoint(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Mastery Checkpoint — Before You Trust The Pipeline
+
+    You are ready to progress only if you can explain:
+    - why the release system is weaker than it looks without the Day 7 safety evidence
+    - which identity plane is performing each deployment action
+    - why a portal hotfix is not operational speed but configuration debt
+    - what Day 10 can decide because Day 8 wrote machine-readable evidence first
+    """
+        ),
+        kind="warn",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 – Why IaC is Mandatory
 # ---------------------------------------------------------------------------
@@ -1747,6 +1808,27 @@ def _reflection(mo):
        is compromised via a container escape. Map the exact blast radius:
        what can the attacker read, write, or delete?  What data and services are safe?
     """)
+    return
+
+
+@app.cell
+def _day8_unscaffolded_block(mo):
+    from _shared.curriculum_scaffolds import render_unscaffolded_block
+
+    render_unscaffolded_block(
+        mo,
+        title="Unscaffolded Afternoon Block — Release Architecture From Scratch",
+        brief=(
+            "Without using the nearby Bicep and gate examples, draft the minimum secure "
+            "release architecture for a new agentic service: identity planes, IaC boundary, "
+            "secrets policy, rollback unit, and one gate that would block production."
+        ),
+        done_when=(
+            "The design names the rollback unit and the authority that can trigger it.",
+            "No long-lived credential is required for the normal release path.",
+            "At least one gate consumes prior-day evidence instead of only live health.",
+        ),
+    )
     return
 
 

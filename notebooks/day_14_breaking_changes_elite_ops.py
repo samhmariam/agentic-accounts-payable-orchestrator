@@ -65,6 +65,96 @@ def _title(mo):
     return
 
 
+@app.cell
+def _full_day_agenda(mo):
+    from _shared.curriculum_scaffolds import render_full_day_agenda
+
+    render_full_day_agenda(
+        mo,
+        day_label="Day 14 elite operations and breaking changes",
+        core_outcome="defend rollout, rollback, and executive communication decisions with authoritative evidence rather than optimism",
+        afternoon_focus="Treat the afternoon as a live defense rehearsal: operate under time pressure, keep the evidence chain intact, and stay transfer-domain correct.",
+    )
+    return
+
+
+@app.cell
+def _capstone_b_transfer_lens(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Capstone B Transfer Lens
+
+    This final day is assessed primarily in the **claims intake** transfer domain.
+
+    Keep these open while you work:
+    - `docs/curriculum/CAPSTONE_B_TRANSFER.md`
+    - `fixtures/capstone_b/claims_intake/`
+    - `fixtures/capstone_b/_assessor_only/claims_intake/claim_006_assessor_only.json`
+
+    Your Day 14 standard is not only "can you operate AegisAP" but
+    "can you preserve the same gate discipline, rollback posture, and executive
+    communication quality when the domain changes under pressure."
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day14_convergence_map(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Visual Guide — Final Convergence Map
+
+    ```
+    Day 11 identity evidence      ┐
+    Day 12 network evidence       ├─► gates 7-11
+    Day 13 boundary evidence      ┘
+    Day 14 canary / residency / trace evidence ─► gates 12-17
+                                                   │
+                                                   └─► build/day14/cto_trace_report.json
+    ```
+
+    A Day 14 claim is only elite-grade when the evidence chain stays intact:
+
+    | Late-stage question | Minimum artifact chain |
+    |---|---|
+    | "Can we trust the actor?" | Day 11 OBO artifacts -> `gate_delegated_identity` |
+    | "Can the data plane stay private?" | Day 12 static + live posture artifacts -> `gate_private_network_*` |
+    | "Can the boundary fail safely?" | Day 13 DLQ + MCP reports -> `gate_dlq_drain_health`, `gate_mcp_contract_integrity` |
+    | "Can we operate change under pressure?" | Day 14 canary, residency, trace, rollback artifacts -> final CTO trace report |
+
+    Training previews help you learn the shape of the evidence.
+    They do not count as the evidence itself.
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day14_mastery_checkpoint(mo):
+    mo.callout(
+        mo.md(
+            """
+    ## Mastery Checkpoint — Elite Defense Readiness
+
+    Do not claim Day 14 readiness unless you can defend all four statements:
+    - I know which late-stage artifacts are still training previews and which ones are authoritative
+    - I can name the exact gate that should fail for each of the 10 drills
+    - I can justify a halt, rollback, or partial-service decision in business language, not only technical language
+    - I can repeat the same reasoning in the claims-intake transfer domain without relaxing the evidence bar
+    """
+        ),
+        kind="warn",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 1 — 10 Breaking-Change Drills
 # ---------------------------------------------------------------------------
@@ -159,7 +249,48 @@ def _s2_body(mo):
 
     Gate `gate_canary_regression` reads `build/day14/canary_regression_report.json`
     and checks that the promoted revision had F1 ≥ baseline and error rate ≤ threshold.
+    The notebook lab below delegates to a shared verification script so that the same
+    command can be used in training or in a real promotion pipeline.
     """)
+    return
+
+
+@app.cell
+def _s2_live_runbook(mo):
+    mo.callout(
+        mo.md(
+            """
+    ### Live Evidence Runbook — Canary Verification
+
+    Produce authoritative canary evidence with the same artifact shape the gate consumes:
+
+    1. Route a bounded percentage of traffic to the candidate revision.
+    2. Collect the protected canary metrics from your eval runner and live telemetry.
+    3. Export the metrics into the shell:
+
+    ```bash
+    export AEGISAP_CANARY_REVISION=aegisap-worker--candidate
+    export AEGISAP_STABLE_REVISION=aegisap-worker--stable
+    export AEGISAP_CANARY_F1=0.947
+    export AEGISAP_ERROR_RATE_CANARY=0.0015
+    export AEGISAP_ERROR_RATE_STABLE=0.0017
+    uv run python scripts/verify_canary_regression.py
+    ```
+
+    Optional live inputs:
+    - `AEGISAP_BASELINE_F1` if you want to override the Day 8 baseline artifact
+    - `AEGISAP_CANARY_REGRESSIONS` for named slice regressions from your eval runner
+    - `AEGISAP_CANARY_PROMOTED` / `AEGISAP_CANARY_ROLLED_BACK` to record the actual decision
+
+    Authoritative success means:
+    - `build/day14/canary_regression_report.json` has `training_artifact: false`
+    - `authoritative_evidence: true`
+    - `passed: true`
+    - `regressions: []`
+    """
+        ),
+        kind="info",
+    )
     return
 
 
@@ -185,7 +316,7 @@ def _s3_body(mo):
 
     ### The Right Approach: ARM API
 
-    `check_arm_data_residency.py` calls the Azure Resource Manager to get the
+    `scripts/verify_private_network_static.py` calls the Azure Resource Manager to get the
     actual resource properties and checks `location` + `publicNetworkAccess`:
 
     ```python
@@ -203,6 +334,12 @@ def _s3_body(mo):
 
     The gate `gate_data_residency` reads `build/day14/data_residency_report.json`
     and verifies `all_passed: true`.
+
+    Canonical live command:
+
+    ```bash
+    uv run python scripts/verify_private_network_static.py
+    ```
 
     ### Allowed Regions for AegisAP
 
@@ -230,10 +367,15 @@ def _s4_body(mo):
     The `TraceCorrelator` in `src/aegisap/traceability/correlation.py`:
 
     1. Reads `build/day12/private_network_posture.json` to determine mode (`dual_sink` vs isolated)
-    2. Checks correlation ID coverage across all gate artifacts (target: 100 %)
-    3. If `dual_sink` mode: verifies that both Azure Monitor and OTLP endpoints
-       are configured and reachable
+    2. Checks correlation ID coverage across trace evidence
+    3. If `dual_sink` mode: verifies that both Azure Monitor and the secondary sink are present
     4. Writes `build/day14/trace_correlation_report.json`
+
+    Canonical command:
+
+    ```bash
+    uv run python scripts/verify_trace_correlation.py
+    ```
 
     ### Correlation ID Discipline
 
@@ -268,6 +410,41 @@ def _s4_body(mo):
     return
 
 
+@app.cell
+def _s4_live_runbook(mo):
+    mo.callout(
+        mo.md(
+            """
+    ### Live Evidence Runbook — Cross-Sink Trace Verification
+
+    Run this from an authenticated shell after the candidate revision has emitted real traces:
+
+    ```bash
+    export AEGISAP_WORKFLOW_RUN_ID=gha-123456789
+    export AEGISAP_DEPLOYMENT_REVISION=aegisap-worker--candidate
+    export AEGISAP_AZURE_APP_ID=<app-insights-app-id>
+    export AEGISAP_LANGSMITH_PROJECT=aegisap-staging
+    uv run python scripts/verify_trace_correlation.py
+    uv run python scripts/generate_cto_trace_report.py
+    ```
+
+    The live trace script verifies:
+    - Azure Monitor contains the candidate workflow run
+    - LangSmith contains the same workflow run and revision
+    - `build/day14/log_analytics_sink_verified.json` exists when dual-sink proof is required
+
+    Authoritative success means:
+    - `build/day14/trace_correlation_report.json` has `training_artifact: false`
+    - `authoritative_evidence: true`
+    - `passed: true`
+    - the final CTO trace report reflects the real trace artifact, not a preview
+    """
+        ),
+        kind="info",
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Section 5 — Lab: Write All Day-14 Gate Artifacts
 # ---------------------------------------------------------------------------
@@ -278,35 +455,49 @@ def _s5_header(mo):
 
 
 @app.cell
-def _s5_lab_canary(mo, json, os, Path, datetime):
-    _build = Path(__file__).resolve().parents[1] / "build" / "day14"
-    _build.mkdir(parents=True, exist_ok=True)
+def _s5_lab_canary(mo, json, Path):
+    import subprocess
+    import sys
 
-    _has_live = bool(os.environ.get("AZURE_SUBSCRIPTION_ID", ""))
-
-    _canary_report = {
-        "canary_revision": os.environ.get("AEGISAP_CANARY_REVISION", "aegisap-canary-stub"),
-        "stable_revision": os.environ.get("AEGISAP_STABLE_REVISION", "aegisap-stable-stub"),
-        "baseline_f1": 0.92,
-        "canary_f1": 0.93,
-        "f1_delta": 0.01,
-        "error_rate_stable": 0.002,
-        "error_rate_canary": 0.002,
-        "promoted": True,
-        "rolled_back": False,
-        "passed": True,
-        "promotion_gate_passed": True,
-        "note": "STUB" if not _has_live else "LIVE",
-        "run_at": datetime.datetime.utcnow().isoformat() + "Z",
-    }
-    (_build / "canary_regression_report.json").write_text(json.dumps(_canary_report, indent=2))
-    mo.callout(
-        mo.md(
-            f"Canary regression report written.\n\n"
-            f"F1 delta: `{_canary_report['f1_delta']:+.3f}` | Promoted: `{_canary_report['promoted']}`"
-        ),
-        kind="success" if _canary_report["promotion_gate_passed"] else "danger",
+    _root = Path(__file__).resolve().parents[1]
+    _cmd = [sys.executable, str(_root / "scripts" / "verify_canary_regression.py")]
+    _result = subprocess.run(
+        _cmd, cwd=_root, capture_output=True, text=True, check=False
     )
+    _report_path = _root / "build" / "day14" / "canary_regression_report.json"
+    if not _report_path.exists():
+        mo.callout(
+            mo.md(
+                f"Canary verification did not produce `{_report_path}`.\n\n"
+                f"stderr:\n\n```text\n{_result.stderr.strip() or 'no stderr'}\n```"
+            ),
+            kind="danger",
+        )
+        return
+
+    _report = json.loads(_report_path.read_text())
+    _training = bool(_report.get("training_artifact", False))
+    if _training:
+        _kind = "warn"
+        _msg = (
+            f"Training-only canary preview written.\n\n"
+            f"F1 delta: `{_report.get('f1_delta', 0.0):+.3f}` | "
+            f"Candidate revision: `{_report.get('canary_revision')}`\n\n"
+            "Provide live canary metrics and run:\n\n"
+            "`uv run python scripts/verify_canary_regression.py`\n\n"
+            "`gate_canary_regression` stays red until this artifact is authoritative."
+        )
+    else:
+        _kind = "success" if _report.get("passed", False) else "danger"
+        _msg = (
+            f"Authoritative canary evidence written.\n\n"
+            f"F1 delta: `{_report.get('f1_delta', 0.0):+.3f}` | "
+            f"Error rate (canary): `{_report.get('error_rate_canary', 0.0):.4f}` | "
+            f"Regressions: `{len(_report.get('regressions', []))}`"
+        )
+    if _result.stderr.strip():
+        _msg += f"\n\nstderr:\n\n```text\n{_result.stderr.strip()}\n```"
+    mo.callout(mo.md(_msg), kind=_kind)
     return
 
 
@@ -343,6 +534,11 @@ def _s5_lab_residency(mo, json, os, Path, datetime):
                 _checked.append(_entry)
             _report = {
                 "all_passed": len(_violations) == 0,
+                "training_artifact": False,
+                "authoritative_evidence": True,
+                "execution_tier": 2,
+                "approved_region": ",".join(_allowed_regions),
+                "note": "LIVE_ARM_QUERY",
                 "allowed_regions": _allowed_regions,
                 "resources_checked": len(_checked),
                 "violations": _violations,
@@ -351,16 +547,27 @@ def _s5_lab_residency(mo, json, os, Path, datetime):
             _kind = "success" if _report["all_passed"] else "danger"
             _msg = f"Data residency check: `all_passed={_report['all_passed']}` ({len(_checked)} resources checked)"
         except Exception as _exc:
-            _report = {"all_passed": False, "error": str(_exc)}
+            _report = {
+                "all_passed": False,
+                "error": str(_exc),
+                "training_artifact": False,
+                "authoritative_evidence": True,
+                "execution_tier": 2,
+                "note": "LIVE_ARM_QUERY_ERROR",
+            }
             _kind = "danger"
             _msg = f"Data residency check error: `{_exc}`"
     else:
         _report = {
-            "all_passed": True,
+            "all_passed": False,
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "execution_tier": 1,
+            "approved_region": ",".join(_allowed_regions),
             "allowed_regions": _allowed_regions,
             "resources_checked": 4,
             "violations": [],
-            "note": "STUB: no AZURE_SUBSCRIPTION_ID set",
+            "note": "TRAINING_ONLY: no AZURE_SUBSCRIPTION_ID set",
             "run_at": datetime.datetime.utcnow().isoformat() + "Z",
             "stub_resources": [
                 {"resource": "aegisap-openai",
@@ -375,9 +582,9 @@ def _s5_lab_residency(mo, json, os, Path, datetime):
         }
         _kind = "neutral"
         _msg = (
-            f"No `AZURE_SUBSCRIPTION_ID` set — writing stub data residency report.\n\n"
+            f"No `AZURE_SUBSCRIPTION_ID` set — writing a training-only data residency preview.\n\n"
             f"Allowed regions: `{', '.join(_allowed_regions)}`\n\n"
-            "Set `AZURE_SUBSCRIPTION_ID` + `AZURE_RESOURCE_GROUP` for a live check."
+            "`gate_data_residency` stays red until the ARM API is queried against the real resource group."
         )
 
     (_build / "data_residency_report.json").write_text(json.dumps(_report, indent=2))
@@ -386,37 +593,48 @@ def _s5_lab_residency(mo, json, os, Path, datetime):
 
 
 @app.cell
-def _s5_lab_trace(mo, json, os, Path, datetime):
-    _build = Path(__file__).resolve().parents[1] / "build" / "day14"
-    _build.mkdir(parents=True, exist_ok=True)
+def _s5_lab_trace(mo, json, Path):
+    import subprocess
+    import sys
 
-    _monitor_ep = os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING", "")
-    _otlp_ep = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "")
-    _dual_sink = bool(_monitor_ep and _otlp_ep)
-
-    _corr_report = {
-        "mode": "dual_sink" if _dual_sink else "isolated",
-        "correlation_id_coverage": 1.0,
-        "uncorrelated": 0,
-        "total_traces": 0,
-        "dual_sink_ok": _dual_sink,
-        "azure_monitor_configured": bool(_monitor_ep),
-        "otlp_configured": bool(_otlp_ep),
-        "passed": True,
-        "note": "STUB" if not _dual_sink else "LIVE",
-        "run_at": datetime.datetime.utcnow().isoformat() + "Z",
-    }
-    (_build / "trace_correlation_report.json").write_text(json.dumps(_corr_report, indent=2))
-    _kind = "success" if _corr_report["passed"] else "danger"
-    mo.callout(
-        mo.md(
-            f"Trace correlation report written.\n\n"
-            f"Mode: `{_corr_report['mode']}` | "
-            f"Coverage: `{_corr_report['correlation_id_coverage']:.0%}` | "
-            f"Passed: `{_corr_report['passed']}`"
-        ),
-        kind=_kind,
+    _root = Path(__file__).resolve().parents[1]
+    _cmd = [sys.executable, str(_root / "scripts" / "verify_trace_correlation.py")]
+    _result = subprocess.run(
+        _cmd, cwd=_root, capture_output=True, text=True, check=False
     )
+    _report_path = _root / "build" / "day14" / "trace_correlation_report.json"
+    if not _report_path.exists():
+        mo.callout(
+            mo.md(
+                f"Trace verification did not produce `{_report_path}`.\n\n"
+                f"stderr:\n\n```text\n{_result.stderr.strip() or 'no stderr'}\n```"
+            ),
+            kind="danger",
+        )
+        return
+
+    _corr_report = json.loads(_report_path.read_text())
+    _training = bool(_corr_report.get("training_artifact", False))
+    if _training:
+        _kind = "warn"
+        _msg = (
+            f"Training-only trace preview written.\n\n"
+            f"Coverage: `{_corr_report.get('correlation_id_coverage', 0.0):.0%}` | "
+            f"Mode: `{_corr_report.get('mode', 'unknown')}`\n\n"
+            "Provide live trace inputs and run:\n\n"
+            "`uv run python scripts/verify_trace_correlation.py`\n\n"
+            "`gate_trace_correlation` stays red until real telemetry is exported and checked."
+        )
+    else:
+        _kind = "success" if _corr_report.get("passed", False) else "danger"
+        _msg = (
+            f"Authoritative trace evidence written.\n\n"
+            f"Correlated: `{_corr_report.get('correlated', 0)}` / `{_corr_report.get('total_traces', 0)}` | "
+            f"Dual-sink satisfied: `{_corr_report.get('dual_sink_satisfied', False)}`"
+        )
+    if _result.stderr.strip():
+        _msg += f"\n\nstderr:\n\n```text\n{_result.stderr.strip()}\n```"
+    mo.callout(mo.md(_msg), kind=_kind)
     return
 
 
@@ -609,6 +827,28 @@ def _s6_cto_report(mo, json, Path, datetime, os):
     return
 
 
+@app.cell
+def _day14_unscaffolded_block(mo):
+    from _shared.curriculum_scaffolds import render_unscaffolded_block
+
+    render_unscaffolded_block(
+        mo,
+        title="Unscaffolded Afternoon Block — Operator Judgment Under Pressure",
+        brief=(
+            "Set the notebook aside and draft a one-page go / no-go note for a candidate "
+            "revision. You must choose promote, pause, rollback, or partial continuation. "
+            "Use only the artifacts and gates, not intuition, and include the transfer-domain "
+            "implication for claims intake."
+        ),
+        done_when=(
+            "A single decision is stated clearly with named evidence and named authority.",
+            "The note explains what would change your decision in the next observation window.",
+            "The reasoning still holds if the same situation appears in the claims-intake transfer domain.",
+        ),
+    )
+    return
+
+
 # ---------------------------------------------------------------------------
 # Summary + Graduation
 # ---------------------------------------------------------------------------
@@ -619,8 +859,10 @@ def _summary(mo):
 
     - [ ] Describe all 10 breaking-change drills and their detection mechanisms
     - [ ] Configure canary traffic split in ACA Bicep and state the rollback command
+    - [ ] Run `uv run python scripts/verify_canary_regression.py` with live canary metrics or explain why the notebook remains in preview mode
     - [ ] Explain why ARM API is used for data residency (not string matching)
     - [ ] State what `TraceCorrelator` checks in `dual_sink` mode
+    - [ ] Run `uv run python scripts/verify_trace_correlation.py` with live trace identifiers or explain why the notebook remains in preview mode
     - [ ] Confirm `build/day14/` has all artifacts: `canary_regression_report.json`,
           `data_residency_report.json`, `trace_correlation_report.json`,
           `rollback_readiness_report.json`, `cto_trace_report.json`

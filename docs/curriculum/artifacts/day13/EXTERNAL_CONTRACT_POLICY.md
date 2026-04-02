@@ -22,6 +22,20 @@ external systems — ensuring versioning discipline and breaking-change communic
 - Who holds accountability when a consumer fails to migrate by the deprecation deadline?
 - What is the minimum notice period for the most tightly-coupled external consumer?
 
+## Structural Example — Contract Inventory Row
+
+| Contract | Consumer class | Versioning rule | Breaking example | Minimum notice |
+|---|---|---|---|---|
+| `POST /invoice-events` | ERP boundary client | Path version + schema contract | Required field renamed or removed | 30 calendar days |
+| Service Bus event schema | Internal async consumers | Event version in envelope | Enum meaning changes or field deleted | 14 calendar days |
+| MCP `/capabilities` tool list | External agent clients | Additive by default; removal is breaking | `submit_payment_hold` removed or renamed | 30 calendar days |
+
+## Anti-Pattern To Avoid
+
+- Do not call a change "non-breaking" just because one known consumer can tolerate it.
+- Do not rely on chat or verbal notice as the only deprecation mechanism.
+- Do not approve a breaking change without naming the accountable authority.
+
 ## Acceptance Criteria
 
 - Minimum 3 external contracts in inventory

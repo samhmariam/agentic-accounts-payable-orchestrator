@@ -9,6 +9,7 @@
 ## Session Goals
 
 By the end of Day 0, every learner should be able to:
+- Walk the Day 0 portal surface and name the Azure resources before the scripts create or verify them
 - Run `az deployment sub create` against the `core` Bicep template
 - Verify a deployed environment using `verify_env.py` without portal access
 - Explain why Managed Identity replaces API keys in Azure AI workloads
@@ -25,7 +26,7 @@ By the end of Day 0, every learner should be able to:
 - [ ] A `.env` file seeded from `scripts/setup-env.sh` or `.env.example`
 - [ ] Bicep CLI installed: `az bicep install`
 
-**Expected artifact:** `build/day0/env_report.json`
+**Expected artifact:** `.day0/core.json` or `.day0/full.json`
 
 ---
 
@@ -42,7 +43,7 @@ By the end of Day 0, every learner should be able to:
 3. Show how `az deployment sub validate` catches errors before they reach Azure.
 4. Introduce the two tracks: `core` (Days 0–4) and `full` (Days 5+).
 
-**Key message:** "The portal is for exploration. Bicep is the truth."
+**Key message:** "The portal is for first-pass understanding. Bicep is the truth."
 
 ---
 
@@ -57,7 +58,7 @@ By the end of Day 0, every learner should be able to:
 2. Open `src/aegisap/security/credentials.py` and show the
    `DefaultAzureCredential` usage. Highlight that no API key is imported.
 3. Demo: `az login` on a dev machine. Show what happens when you print the
-   token with `az account get-access-token --resource https://cognitiveservices.azure.com`.
+   token with `az account get-access-token --scope https://ai.azure.com/.default`.
 4. Explain system-assigned vs. user-assigned identity with the ACR pull example.
 5. Show `infra/modules/role_assignments.bicep` and trace one role assignment
    from identity to resource to permission.
@@ -74,7 +75,7 @@ provisioned yet — not as a permanent pattern."
 **Talking points:**
 1. Draw the service map on a whiteboard or show the diagram:
    ```
-   [ACA API] ──► [Azure OpenAI]
+   [ACA API] ──► [Foundry]
         │──────► [Azure AI Search]
         │──────► [PostgreSQL]  (full track only)
         └──────► [Key Vault]
@@ -90,19 +91,17 @@ provisioned yet — not as a permanent pattern."
 
 ## Lab Walkthrough Notes
 
-### Key cells to call out in `day0_azure_bootstrap.py`:
+### Key commands and outputs to call out in Day 0:
 
-1. **Environment check cell** — shows which env vars are set and which are missing.
-   Ask learners: "Which variables should never be absent in the full track?"
+1. **`pwsh ./scripts/provision-core.ps1` or `pwsh ./scripts/provision-full.ps1`** — show that Day 0 emits a persisted `.day0/*.json` state file rather than relying on portal screenshots or hand-edited shell state.
 
-2. **Resource inventory cell** — lists provisioned resources via Azure SDK.
-   Connecting to Azure correctly here means all subsequent days work.
+2. **`source ./scripts/setup-env.sh core` or `. ./scripts/setup-env.ps1 -Track core`** — explain that later days inherit the Day 0 contract from the generated state file.
 
-3. **Role assignment verification cell** — confirms the identity has the expected
-   roles. If this shows missing roles, the deployment is incomplete.
+3. **`uv run python scripts/verify_env.py --track core --env`** — call out the contract-only check before learners chase live-service failures.
 
-4. **Azure OpenAI ping cell** — the first live API call. Walk through what
-   `DefaultAzureCredential` is doing under the hood.
+4. **`uv run python scripts/verify_env.py --track core`** — the first live Foundry inference call. Walk through what `DefaultAzureCredential` is doing under the hood and why the repo still uses the OpenAI-compatible endpoint on top of a Foundry resource.
+
+5. **`.day0/core.json` or `.day0/full.json`** — open the generated state file and point out the Foundry endpoint, OpenAI-compatible endpoint, Search endpoint, and storage settings that later days inherit.
 
 ### Expected lab friction points
 
@@ -111,7 +110,7 @@ provisioned yet — not as a permanent pattern."
 | `az login` asks for device code | Browser not opening | Run `az login --use-device-code` |
 | `AZURE_SUBSCRIPTION_ID` not set | `.env` not loaded | `source scripts/setup-env.sh` |
 | Role assignment fails | Insufficient permission on subscription | Verify `Owner` role or add `User Access Administrator` |
-| Azure OpenAI call returns 401 | Missing `Cognitive Services OpenAI User` role | Check Bicep role_assignments module; re-deploy |
+| Foundry inference call returns 401 | Missing `Cognitive Services User` role on the learner principal or missing `Cognitive Services OpenAI User` on the runtime identity | Check the Day 0 RBAC assignments; re-deploy |
 
 ---
 
@@ -120,18 +119,18 @@ provisioned yet — not as a permanent pattern."
 ### Observable Mastery Signals
 
 - Learner can identify the production credential source without guessing.
-- Learner regenerates `build/day0/env_report.json` instead of relying on portal screenshots.
+- Learner reruns `verify_env.py` and inspects `.day0/*.json` instead of relying on portal screenshots.
 - Learner distinguishes `core` and `full` track requirements in terms of runtime contracts, not just service names.
 
 ### Intervention Cues
 
 - If a learner proposes long-lived secrets, stop and reconnect to the Day 0 zero-secret runtime contract.
-- If debugging turns into portal clicking, bring them back to `verify_env.py` and the notebook probes.
+- If debugging turns into portal clicking, bring them back to `verify_env.py` and the `.day0` state file.
 - If Azure access is the blocker, require the learner to name the failed probe before offering help.
 
 ### Fallback Path
 
-- If Azure access is unstable, use a saved `build/day0/env_report.json` and whiteboard the failed probe instead of spending the session on tenant issues.
+- If Azure access is unstable, use a saved `.day0/core.json` or `.day0/full.json` plus a saved `verify_env.py` transcript and whiteboard the failed probe instead of spending the session on tenant issues.
 
 ### Exit Ticket Answer Key
 
@@ -186,4 +185,5 @@ Close Day 0 with:
 > Tomorrow we take our first raw invoice and apply a trust boundary —
 > turning noisy OCR text into a typed, auditable `CanonicalInvoice`.
 > The infrastructure we provisioned today is what makes that call to
-> Azure OpenAI happen without a single API key in our code."
+> Foundry happen without a single API key in our code, even though the app still
+> uses the OpenAI-compatible inference surface."

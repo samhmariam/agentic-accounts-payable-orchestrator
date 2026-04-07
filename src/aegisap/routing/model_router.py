@@ -7,6 +7,7 @@ from functools import lru_cache
 from typing import Any
 
 from aegisap.cache.cache_policy import build_cache_key, evaluate_cache_policy
+from aegisap.common.openai_compat import build_chat_completion_kwargs
 from aegisap.cache.semantic_cache import InMemorySemanticCache
 from aegisap.common.hashing import stable_sha256
 from aegisap.cost.cost_ledger import CostLedgerEntry
@@ -234,14 +235,14 @@ class ModelGateway:
                     dependency_name="azure_openai",
                     idempotent=True,
                     decision_reason_code=decision.reason,
-                    kwargs={
-                        "model": decision.deployment_name,
-                        "messages": [
+                    kwargs=build_chat_completion_kwargs(
+                        model=decision.deployment_name,
+                        messages=[
                             {"role": "system", "content": request.system_instruction},
                             {"role": "user", "content": request.user_prompt},
                         ],
-                        "temperature": request.temperature,
-                    },
+                        temperature=request.temperature,
+                    ),
                 )
         finally:
             self._inflight_by_tier[decision.deployment_tier] = max(

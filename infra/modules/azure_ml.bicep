@@ -1,7 +1,6 @@
-// infra/modules/azure_ml.bicep
-// Azure Machine Learning Workspace — stub for Days 8-10 (MLflow tracking, eval runs).
-// Requires storage, key vault, and application insights as associated resources.
-// All three must already exist; their resource IDs are passed as parameters.
+targetScope = 'resourceGroup'
+
+// Compatibility shim. Prefer infra/data/azure_ml.bicep.
 
 param mlWorkspaceName string
 param location string
@@ -15,25 +14,17 @@ param keyVaultId string
 @description('Resource ID of the Application Insights instance created in the full tier')
 param appInsightsId string
 
-resource mlWorkspace 'Microsoft.MachineLearningServices/workspaces@2024-04-01' = {
-  name: mlWorkspaceName
-  location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
-  sku: {
-    name: 'Basic'
-    tier: 'Basic'
-  }
-  properties: {
-    storageAccount: storageAccountId
-    keyVault: keyVaultId
-    applicationInsights: appInsightsId
-    publicNetworkAccess: 'Enabled'
-    v1LegacyMode: false
+module impl '../data/azure_ml.bicep' = {
+  name: '${deployment().name}-impl'
+  params: {
+    mlWorkspaceName: mlWorkspaceName
+    location: location
+    storageAccountId: storageAccountId
+    keyVaultId: keyVaultId
+    appInsightsId: appInsightsId
   }
 }
 
-output mlWorkspaceId string = mlWorkspace.id
-output mlWorkspaceName string = mlWorkspace.name
-output mlPrincipalId string = mlWorkspace.identity.principalId
+output mlWorkspaceId string = impl.outputs.mlWorkspaceId
+output mlWorkspaceName string = impl.outputs.mlWorkspaceName
+output mlPrincipalId string = impl.outputs.mlPrincipalId

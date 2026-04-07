@@ -18,9 +18,13 @@ def test_container_app_contract_does_not_inject_search_keys() -> None:
 
 
 def test_full_bicep_keeps_search_local_auth_disabled() -> None:
-    template = (ROOT / "infra" / "full.bicep").read_text(encoding="utf-8")
+    full_template = (ROOT / "infra" / "full.bicep").read_text(encoding="utf-8")
+    core_template = (ROOT / "infra" / "core.bicep").read_text(encoding="utf-8")
+    search_template = (ROOT / "infra" / "foundations" / "search_service.bicep").read_text(encoding="utf-8")
 
-    assert "disableLocalAuth: true" in template
+    assert "module core './core.bicep'" in full_template
+    assert "module search './foundations/search_service.bicep'" in core_template
+    assert "disableLocalAuth: true" in search_template
 
 
 def test_role_assignments_keep_runtime_search_access_reader_only() -> None:
@@ -33,8 +37,8 @@ def test_role_assignments_keep_runtime_search_access_reader_only() -> None:
 
 
 def test_key_vault_diagnostics_module_is_wired() -> None:
-    module_template = (ROOT / "infra" / "modules" / "diagnostic_settings.bicep").read_text(encoding="utf-8")
+    module_template = (ROOT / "infra" / "foundations" / "diagnostic_settings.bicep").read_text(encoding="utf-8")
     full_template = (ROOT / "infra" / "full.bicep").read_text(encoding="utf-8")
 
     assert "AuditEvent" in module_template
-    assert "module keyVaultDiagnostics './modules/diagnostic_settings.bicep'" in full_template
+    assert "module keyVaultDiagnostics './foundations/diagnostic_settings.bicep'" in full_template

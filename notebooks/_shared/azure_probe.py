@@ -40,33 +40,45 @@ class ProbeResult:
 
 
 def probe_openai() -> ProbeResult:
-    """Verify Azure OpenAI is reachable with DefaultAzureCredential."""
+    """Verify Foundry inference is reachable through the OpenAI-compatible endpoint."""
     t0 = time.monotonic()
     try:
         from azure.identity import get_bearer_token_provider, DefaultAzureCredential  # type: ignore
         from openai import AzureOpenAI  # type: ignore
 
         endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
+        deployment = os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT", "")
         api_version = os.environ.get(
             "AZURE_OPENAI_API_VERSION", "2024-12-01-preview")
         if not endpoint:
-            return ProbeResult("Azure OpenAI", False, detail="AZURE_OPENAI_ENDPOINT not set")
+            return ProbeResult("Foundry inference", False, detail="AZURE_OPENAI_ENDPOINT not set")
+        if not deployment:
+            return ProbeResult("Foundry inference", False, detail="AZURE_OPENAI_CHAT_DEPLOYMENT not set")
         cred = DefaultAzureCredential(
             exclude_interactive_browser_credential=True)
         token_provider = get_bearer_token_provider(
-            cred, "https://cognitiveservices.azure.com/.default"
+            cred, "https://ai.azure.com/.default"
         )
         client = AzureOpenAI(
             azure_endpoint=endpoint,
             azure_ad_token_provider=token_provider,
             api_version=api_version,
         )
-        client.models.list()
+        client.chat.completions.create(
+            model=deployment,
+            messages=[{"role": "user", "content": "Reply with OK"}],
+            max_tokens=1,
+        )
         ms = int((time.monotonic() - t0) * 1000)
-        return ProbeResult("Azure OpenAI", True, latency_ms=ms, detail=endpoint)
+        return ProbeResult(
+            "Foundry inference",
+            True,
+            latency_ms=ms,
+            detail=f"{endpoint} :: deployment {deployment}",
+        )
     except Exception as exc:  # noqa: BLE001
         ms = int((time.monotonic() - t0) * 1000)
-        return ProbeResult("Azure OpenAI", False, latency_ms=ms, detail=str(exc)[:120])
+        return ProbeResult("Foundry inference", False, latency_ms=ms, detail=str(exc)[:120])
 
 
 def probe_search() -> ProbeResult:

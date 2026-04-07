@@ -1,0 +1,508 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "7ce2e3ca805076a815bf3f947b669ab4",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "4c9f5b5b6b6ebcee2b74057a5abdcb49",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "511bfed9c3cfecb896ec304925ab4e2f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-5-multi-agent-orchestration-with-langgraph\">Day 5 \u2014 Multi-Agent Orchestration with LangGraph</h1>\n<blockquote>\n<span class=\"paragraph\"><strong>WAF Pillars covered:</strong> Reliability \u00b7 Operational Excellence \u00b7 Performance Efficiency\n<strong>Estimated time:</strong> 2.5 hours\n<strong>Sources:</strong> <code>docs/curriculum/trainee/DAY_02_TRAINEE.md</code>,\n<code>docs/curriculum/trainee/DAY_05_TRAINEE.md</code>\n<strong>Prerequisites:</strong> Day 4 complete; you have a working single-agent extraction + planning loop.</span>\n</blockquote>\n<hr />\n<h2 id=\"learning-objectives\">Learning Objectives</h2>\n<ol>\n<li>Model the AegisAP <code>WorkflowState</code> TypedDict and review how it wires through a LangGraph <code>StateGraph</code>.</li>\n<li>Analyze how specialist agents (extraction, planning, policy, execution) connect as LangGraph nodes.</li>\n<li>Review conditional routing with <code>add_conditional_edges</code>.</li>\n<li>Attach a PostgreSQL checkpointer so the workflow survives process restarts.</li>\n<li>Simulate a crash-and-resume scenario using the checkpoint store.</li>\n<li>Explain the HITL (Human-in-the-Loop) pause/resume pattern and its safety constraints.</li>\n</ol>\n<hr />\n<h2 id=\"where-day-5-sits-in-the-full-arc\">Where Day 5 Sits in the Full Arc</h2>\n<span class=\"paragraph\"><div class=\"language-pycon codehilite\"><pre><span></span><code><span class=\"go\">... Day 4 \u2500\u2500\u25ba[Day 5]\u2500\u2500\u25ba Day 6 \u2500\u2500\u25ba Day 7 \u2500\u2500\u25ba ...</span>\n<span class=\"go\">     Single  MULTI-     Data &amp;   Testing &amp;</span>\n<span class=\"go\">     Agent   AGENT      ML       Evals</span>\n</code></pre></div>\nToday everything from Days 3 and 4 is connected into a single, durable state machine.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "d41cf366cc167e63b0bc2dd3f02a31c1",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_bkHC_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "9204760d7f486fed985e9b74ceb1053e",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_lEQa_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "PKri",
+      "code_hash": "05e6b5a09ff1507f545f3c3fe71a731c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-workflowstate-the-shared-data-contract\">1. WorkflowState \u2014 The Shared Data Contract</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "28ef7605cdd68b2895185900fb3a1dcb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">In LangGraph, every node receives and returns a <strong>state object</strong>.\nThe state is the single shared data contract across the entire workflow.\nAll agents read from it; all agents write back to it via a partial update.</span>\n<h3 id=\"aegisap-workflowstate\">AegisAP WorkflowState</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">typing</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">TypedDict</span><span class=\"p\">,</span> <span class=\"n\">Literal</span><span class=\"p\">,</span> <span class=\"n\">Any</span>\n\n<span class=\"k\">class</span><span class=\"w\"> </span><span class=\"nc\">WorkflowState</span><span class=\"p\">(</span><span class=\"n\">TypedDict</span><span class=\"p\">,</span> <span class=\"n\">total</span><span class=\"o\">=</span><span class=\"kc\">False</span><span class=\"p\">):</span>\n    <span class=\"c1\"># --- Input ---</span>\n    <span class=\"n\">invoice_raw</span><span class=\"p\">:</span> <span class=\"nb\">str</span>               <span class=\"c1\"># original document text</span>\n    <span class=\"n\">invoice_id</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n\n    <span class=\"c1\"># --- Extraction ---</span>\n    <span class=\"n\">invoice_candidate</span><span class=\"p\">:</span> <span class=\"nb\">dict</span>        <span class=\"c1\"># InvoiceCandidate (nullable fields)</span>\n    <span class=\"n\">canonical_invoice</span><span class=\"p\">:</span> <span class=\"nb\">dict</span>        <span class=\"c1\"># CanonicalInvoice (validated)</span>\n    <span class=\"n\">extraction_rejection_codes</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">[</span><span class=\"nb\">str</span><span class=\"p\">]</span>\n\n    <span class=\"c1\"># --- Planning ---</span>\n    <span class=\"n\">execution_plan</span><span class=\"p\">:</span> <span class=\"nb\">dict</span>           <span class=\"c1\"># ExecutionPlan (JSON)</span>\n    <span class=\"n\">plan_policy_approved</span><span class=\"p\">:</span> <span class=\"nb\">bool</span>\n    <span class=\"n\">plan_violations</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">[</span><span class=\"nb\">str</span><span class=\"p\">]</span>\n\n    <span class=\"c1\"># --- Execution results ---</span>\n    <span class=\"n\">vendor_policy_chunks</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">[</span><span class=\"nb\">dict</span><span class=\"p\">]</span>\n    <span class=\"n\">compliance_chunks</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">[</span><span class=\"nb\">dict</span><span class=\"p\">]</span>\n    <span class=\"n\">po_validated</span><span class=\"p\">:</span> <span class=\"nb\">bool</span>\n    <span class=\"n\">recommendation</span><span class=\"p\">:</span> <span class=\"nb\">dict</span>           <span class=\"c1\"># RecommendationPackage</span>\n\n    <span class=\"c1\"># --- Routing ---</span>\n    <span class=\"n\">routing</span><span class=\"p\">:</span> <span class=\"n\">Literal</span><span class=\"p\">[</span>\n        <span class=\"s2\">&quot;auto_approve&quot;</span><span class=\"p\">,</span>\n        <span class=\"s2\">&quot;request_approval&quot;</span><span class=\"p\">,</span>\n        <span class=\"s2\">&quot;escalate_to_controller&quot;</span><span class=\"p\">,</span>\n        <span class=\"s2\">&quot;reject_invoice&quot;</span><span class=\"p\">,</span>\n        <span class=\"s2\">&quot;pending_human&quot;</span><span class=\"p\">,</span>\n    <span class=\"p\">]</span>\n\n    <span class=\"c1\"># --- HITL ---</span>\n    <span class=\"n\">human_decision</span><span class=\"p\">:</span> <span class=\"n\">Literal</span><span class=\"p\">[</span><span class=\"s2\">&quot;approved&quot;</span><span class=\"p\">,</span> <span class=\"s2\">&quot;rejected&quot;</span><span class=\"p\">]</span> <span class=\"o\">|</span> <span class=\"kc\">None</span>\n    <span class=\"n\">reviewer_notes</span><span class=\"p\">:</span> <span class=\"nb\">str</span> <span class=\"o\">|</span> <span class=\"kc\">None</span>\n    <span class=\"n\">resume_token</span><span class=\"p\">:</span> <span class=\"nb\">str</span> <span class=\"o\">|</span> <span class=\"kc\">None</span>       <span class=\"c1\"># opaque reference to the paused checkpoint</span>\n\n    <span class=\"c1\"># --- Telemetry ---</span>\n    <span class=\"n\">workflow_run_id</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n    <span class=\"n\">total_tokens</span><span class=\"p\">:</span> <span class=\"nb\">int</span>\n    <span class=\"n\">error</span><span class=\"p\">:</span> <span class=\"nb\">str</span> <span class=\"o\">|</span> <span class=\"kc\">None</span>\n</code></pre></div>\n<blockquote>\n<span class=\"paragraph\"><code>total=False</code> makes all fields optional \u2014 each node only writes the fields it owns.\nThis avoids coupling: the planning node does not know the structure of the HITL fields\nand does not need to provide them.</span>\n</blockquote>\n<h3 id=\"node-ownership-map\">Node ownership map</h3>\n<table>\n<thead>\n<tr>\n<th>Node</th>\n<th>Reads</th>\n<th>Writes</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>extract</code></td>\n<td><code>invoice_raw</code></td>\n<td><code>invoice_candidate</code>, <code>canonical_invoice</code>, <code>extraction_rejection_codes</code></td>\n</tr>\n<tr>\n<td><code>plan</code></td>\n<td><code>canonical_invoice</code></td>\n<td><code>execution_plan</code>, <code>plan_policy_approved</code>, <code>plan_violations</code></td>\n</tr>\n<tr>\n<td><code>retrieve</code></td>\n<td><code>canonical_invoice</code>, <code>execution_plan</code></td>\n<td><code>vendor_policy_chunks</code>, <code>compliance_chunks</code></td>\n</tr>\n<tr>\n<td><code>execute</code></td>\n<td><code>execution_plan</code>, <code>vendor_policy_chunks</code>, <code>compliance_chunks</code></td>\n<td><code>recommendation</code>, <code>routing</code></td>\n</tr>\n<tr>\n<td><code>hitl_pause</code></td>\n<td><code>recommendation</code>, <code>routing</code></td>\n<td><code>resume_token</code>, <code>routing=pending_human</code></td>\n</tr>\n<tr>\n<td><code>hitl_resume</code></td>\n<td><code>resume_token</code>, <code>human_decision</code></td>\n<td><code>routing</code> (final decision)</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "793b8e7fc61ec92201cfee4ac6df976b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-building-the-langgraph-state-machine\">2. Building the LangGraph State Machine</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "947364b3eecacf028a44e39bc1968318",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">langgraph.graph</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">StateGraph</span><span class=\"p\">,</span> <span class=\"n\">END</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">langgraph.checkpoint.postgres</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">PostgresSaver</span>\n<span class=\"kn\">import</span><span class=\"w\"> </span><span class=\"nn\">psycopg</span><span class=\"o\">,</span><span class=\"w\"> </span><span class=\"nn\">os</span>\n\n<span class=\"c1\"># 1. Define the graph with the state schema</span>\n<span class=\"n\">graph</span> <span class=\"o\">=</span> <span class=\"n\">StateGraph</span><span class=\"p\">(</span><span class=\"n\">WorkflowState</span><span class=\"p\">)</span>\n\n<span class=\"c1\"># 2. Add nodes (each is a Python callable)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_node</span><span class=\"p\">(</span><span class=\"s2\">&quot;extract&quot;</span><span class=\"p\">,</span>      <span class=\"n\">extract_node</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_node</span><span class=\"p\">(</span><span class=\"s2\">&quot;plan&quot;</span><span class=\"p\">,</span>         <span class=\"n\">plan_node</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_node</span><span class=\"p\">(</span><span class=\"s2\">&quot;retrieve&quot;</span><span class=\"p\">,</span>     <span class=\"n\">retrieve_node</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_node</span><span class=\"p\">(</span><span class=\"s2\">&quot;execute&quot;</span><span class=\"p\">,</span>      <span class=\"n\">execute_node</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_node</span><span class=\"p\">(</span><span class=\"s2\">&quot;hitl_pause&quot;</span><span class=\"p\">,</span>   <span class=\"n\">hitl_pause_node</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_node</span><span class=\"p\">(</span><span class=\"s2\">&quot;hitl_resume&quot;</span><span class=\"p\">,</span>  <span class=\"n\">hitl_resume_node</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_node</span><span class=\"p\">(</span><span class=\"s2\">&quot;auto_approve&quot;</span><span class=\"p\">,</span> <span class=\"n\">auto_approve_node</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_node</span><span class=\"p\">(</span><span class=\"s2\">&quot;reject&quot;</span><span class=\"p\">,</span>       <span class=\"n\">reject_node</span><span class=\"p\">)</span>\n\n<span class=\"c1\"># 3. Set the entry point</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">set_entry_point</span><span class=\"p\">(</span><span class=\"s2\">&quot;extract&quot;</span><span class=\"p\">)</span>\n\n<span class=\"c1\"># 4. Linear edges</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_edge</span><span class=\"p\">(</span><span class=\"s2\">&quot;extract&quot;</span><span class=\"p\">,</span> <span class=\"s2\">&quot;plan&quot;</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_edge</span><span class=\"p\">(</span><span class=\"s2\">&quot;plan&quot;</span><span class=\"p\">,</span>    <span class=\"s2\">&quot;retrieve&quot;</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_edge</span><span class=\"p\">(</span><span class=\"s2\">&quot;retrieve&quot;</span><span class=\"p\">,</span><span class=\"s2\">&quot;execute&quot;</span><span class=\"p\">)</span>\n\n<span class=\"c1\"># 5. Conditional routing after execution</span>\n<span class=\"k\">def</span><span class=\"w\"> </span><span class=\"nf\">route_after_execute</span><span class=\"p\">(</span><span class=\"n\">state</span><span class=\"p\">:</span> <span class=\"n\">WorkflowState</span><span class=\"p\">)</span> <span class=\"o\">-&gt;</span> <span class=\"nb\">str</span><span class=\"p\">:</span>\n    <span class=\"n\">routing</span> <span class=\"o\">=</span> <span class=\"n\">state</span><span class=\"o\">.</span><span class=\"n\">get</span><span class=\"p\">(</span><span class=\"s2\">&quot;routing&quot;</span><span class=\"p\">)</span>\n    <span class=\"k\">if</span> <span class=\"n\">routing</span> <span class=\"o\">==</span> <span class=\"s2\">&quot;auto_approve&quot;</span><span class=\"p\">:</span>          <span class=\"k\">return</span> <span class=\"s2\">&quot;auto_approve&quot;</span>\n    <span class=\"k\">if</span> <span class=\"n\">routing</span> <span class=\"o\">==</span> <span class=\"s2\">&quot;reject_invoice&quot;</span><span class=\"p\">:</span>        <span class=\"k\">return</span> <span class=\"s2\">&quot;reject&quot;</span>\n    <span class=\"k\">if</span> <span class=\"n\">routing</span> <span class=\"ow\">in</span> <span class=\"p\">(</span><span class=\"s2\">&quot;request_approval&quot;</span><span class=\"p\">,</span>\n                   <span class=\"s2\">&quot;escalate_to_controller&quot;</span><span class=\"p\">):</span> <span class=\"k\">return</span> <span class=\"s2\">&quot;hitl_pause&quot;</span>\n    <span class=\"k\">return</span> <span class=\"s2\">&quot;reject&quot;</span>   <span class=\"c1\"># fail-closed default</span>\n\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_conditional_edges</span><span class=\"p\">(</span>\n    <span class=\"s2\">&quot;execute&quot;</span><span class=\"p\">,</span>\n    <span class=\"n\">route_after_execute</span><span class=\"p\">,</span>\n    <span class=\"p\">{</span>\n        <span class=\"s2\">&quot;auto_approve&quot;</span><span class=\"p\">:</span> <span class=\"s2\">&quot;auto_approve&quot;</span><span class=\"p\">,</span>\n        <span class=\"s2\">&quot;reject&quot;</span><span class=\"p\">:</span>       <span class=\"s2\">&quot;reject&quot;</span><span class=\"p\">,</span>\n        <span class=\"s2\">&quot;hitl_pause&quot;</span><span class=\"p\">:</span>   <span class=\"s2\">&quot;hitl_pause&quot;</span><span class=\"p\">,</span>\n    <span class=\"p\">},</span>\n<span class=\"p\">)</span>\n\n<span class=\"c1\"># 6. HITL resume path</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_edge</span><span class=\"p\">(</span><span class=\"s2\">&quot;hitl_pause&quot;</span><span class=\"p\">,</span>  <span class=\"n\">END</span><span class=\"p\">)</span>       <span class=\"c1\"># workflow suspends here</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_edge</span><span class=\"p\">(</span><span class=\"s2\">&quot;hitl_resume&quot;</span><span class=\"p\">,</span> <span class=\"s2\">&quot;auto_approve&quot;</span><span class=\"p\">)</span>  <span class=\"c1\"># human approved</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_edge</span><span class=\"p\">(</span><span class=\"s2\">&quot;auto_approve&quot;</span><span class=\"p\">,</span> <span class=\"n\">END</span><span class=\"p\">)</span>\n<span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">add_edge</span><span class=\"p\">(</span><span class=\"s2\">&quot;reject&quot;</span><span class=\"p\">,</span>       <span class=\"n\">END</span><span class=\"p\">)</span>\n\n<span class=\"c1\"># 7. Compile with PostgreSQL checkpointer</span>\n<span class=\"n\">conn</span> <span class=\"o\">=</span> <span class=\"n\">psycopg</span><span class=\"o\">.</span><span class=\"n\">connect</span><span class=\"p\">(</span><span class=\"n\">os</span><span class=\"o\">.</span><span class=\"n\">environ</span><span class=\"p\">[</span><span class=\"s2\">&quot;POSTGRES_CONNECTION_STRING&quot;</span><span class=\"p\">])</span>\n<span class=\"n\">checkpointer</span> <span class=\"o\">=</span> <span class=\"n\">PostgresSaver</span><span class=\"p\">(</span><span class=\"n\">conn</span><span class=\"p\">)</span>\n<span class=\"n\">checkpointer</span><span class=\"o\">.</span><span class=\"n\">setup</span><span class=\"p\">()</span>   <span class=\"c1\"># creates the checkpoint tables</span>\n\n<span class=\"n\">workflow</span> <span class=\"o\">=</span> <span class=\"n\">graph</span><span class=\"o\">.</span><span class=\"n\">compile</span><span class=\"p\">(</span><span class=\"n\">checkpointer</span><span class=\"o\">=</span><span class=\"n\">checkpointer</span><span class=\"p\">)</span>\n</code></pre></div>\n<h3 id=\"why-postgresql-not-sqlite-or-in-memory\">Why PostgreSQL, not SQLite or in-memory?</h3>\n<table>\n<thead>\n<tr>\n<th>Concern</th>\n<th>In-memory</th>\n<th>SQLite</th>\n<th>PostgreSQL</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Survives process restart</td>\n<td>\u274c</td>\n<td>\u2705</td>\n<td>\u2705</td>\n</tr>\n<tr>\n<td>Concurrent workers</td>\n<td>\u274c</td>\n<td>\u274c (file lock)</td>\n<td>\u2705</td>\n</tr>\n<tr>\n<td>Transactional safety</td>\n<td>\u274c</td>\n<td>Partial</td>\n<td>\u2705 Full ACID</td>\n</tr>\n<tr>\n<td>Azure-managed offering</td>\n<td>\u274c</td>\n<td>\u274c</td>\n<td>\u2705 Azure Database for PostgreSQL</td>\n</tr>\n<tr>\n<td>Managed Identity auth</td>\n<td>\u274c</td>\n<td>\u274c</td>\n<td>\u2705 Entra-based psycopg auth</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">AegisAP targets Azure Container Apps with scale-out to N workers.\nSQLite state would be per-instance; PostgreSQL is shared across all workers.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "b01578a577f5c12a7ccadc70877b9255",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-visualising-the-aegisap-workflow\">3. Visualising the AegisAP Workflow</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "ca5417cf912d68d319acee681b6b636c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><div class=\"language-ini codehilite\"><pre><span></span><code><span class=\"k\">[START]</span>\n<span class=\"w\">   </span><span class=\"na\">\u2502</span>\n<span class=\"w\">   </span><span class=\"na\">\u25bc</span>\n<span class=\"k\">[ extract ]  \u2500\u2500\u2500\u2500\u2500\u2500 extraction failure? \u2500\u2500\u25ba [ reject ]</span>\n<span class=\"w\">   </span><span class=\"na\">\u2502 (valid canonical invoice)</span>\n<span class=\"w\">   </span><span class=\"na\">\u25bc</span>\n<span class=\"k\">[ plan ]  \u2500\u2500\u2500\u2500\u2500\u2500\u2500 policy violation? \u2500\u2500\u25ba [ reject ]</span>\n<span class=\"w\">   </span><span class=\"na\">\u2502 (approved plan)</span>\n<span class=\"w\">   </span><span class=\"na\">\u25bc</span>\n<span class=\"na\">[ retrieve ]  (vendor policy + compliance chunks)</span>\n<span class=\"w\">   </span><span class=\"na\">\u2502</span>\n<span class=\"w\">   </span><span class=\"na\">\u25bc</span>\n<span class=\"k\">[ execute ]</span>\n<span class=\"w\">   </span><span class=\"na\">\u2502</span>\n<span class=\"w\">   </span><span class=\"na\">\u251c\u2500\u2500 routing</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"s\">auto_approve \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25ba [ auto_approve ] \u2500\u2500\u25ba [END]</span>\n<span class=\"w\">   </span><span class=\"na\">\u2502</span>\n<span class=\"w\">   </span><span class=\"na\">\u251c\u2500\u2500 routing</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"s\">reject_invoice \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25ba [ reject ] \u2500\u2500\u2500\u2500\u2500\u25ba [END]</span>\n<span class=\"w\">   </span><span class=\"na\">\u2502</span>\n<span class=\"w\">   </span><span class=\"na\">\u2514\u2500\u2500 routing</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"s\">request_approval / escalate \u25ba [ hitl_pause ] \u2500\u2500\u25ba [END: SUSPENDED]</span>\n<span class=\"w\">                                                       </span><span class=\"na\">\u2502</span>\n<span class=\"w\">                                                       </span><span class=\"na\">\u2502 (reviewer acts via API)</span>\n<span class=\"w\">                                                       </span><span class=\"na\">\u25bc</span>\n<span class=\"w\">                                               </span><span class=\"k\">[ hitl_resume ]</span>\n<span class=\"w\">                                                       </span><span class=\"na\">\u2502</span>\n<span class=\"w\">                                                </span><span class=\"na\">approved? \u2500\u2500\u25ba [ auto_approve ] \u2500\u2500\u25ba [END]</span>\n<span class=\"w\">                                                </span><span class=\"na\">rejected? \u2500\u2500\u25ba [ reject ] \u2500\u2500\u2500\u2500\u2500\u25ba [END]</span>\n</code></pre></div>\n<h3 id=\"key-design-decisions\">Key design decisions</h3>\n<ol>\n<li><strong><code>END</code> after <code>hitl_pause</code></strong>: The workflow thread suspends. The checkpointer persists\n   the full state. A future API call to <code>hitl_resume</code> picks up exactly where it left off\n   using the <code>thread_id</code> and <code>resume_token</code>.</li>\n<li><strong>Fail-closed default in routing</strong>: If <code>routing</code> is an unexpected value, the default\n   branch is <code>reject</code>, not <code>auto_approve</code>. This is the policy overlay in graph form.</li>\n<li><strong>No cycles</strong> (except intentional retry): Retries are implemented as explicit retry nodes,\n   not implicit graph cycles. This makes the audit trail linear and predictable.</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "cac34f4d4af7321c984d0f2f1ec32f5b",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_emfo_.py&quot;</span>, line <span class=\"m\">35</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">plotly</span><span class=\"p\">(</span><span class=\"n\">fig</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "11956a3292e82dab89b8485e0e20f65d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-durable-state-checkpoint-tables-resume\">4. Durable State: Checkpoint Tables &amp; Resume</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "b63b76ccdf8fee584b67329cac67a8dd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">LangGraph's PostgreSQL checkpointer creates four tables in your database:</span>\n<table>\n<thead>\n<tr>\n<th>Table</th>\n<th>Contents</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>checkpoints</code></td>\n<td>One row per checkpoint \u2014 full state snapshot serialised as JSON</td>\n</tr>\n<tr>\n<td><code>checkpoint_blobs</code></td>\n<td>Large binary values (e.g., embedded vectors) stored separately</td>\n</tr>\n<tr>\n<td><code>checkpoint_writes</code></td>\n<td>Pending node outputs buffered before state merge</td>\n</tr>\n<tr>\n<td><code>checkpoint_migrations</code></td>\n<td>Schema version tracking</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"how-the-checkpoint-cycle-works\">How the checkpoint cycle works</h3>\n<div class=\"language-componentpascal codehilite\"><pre><span></span><code><span class=\"n\">invoke</span><span class=\"p\">({</span><span class=\"s\">&quot;invoice_raw&quot;</span><span class=\"p\">:</span> <span class=\"s\">&quot;...&quot;</span><span class=\"p\">,</span> <span class=\"s\">&quot;invoice_id&quot;</span><span class=\"p\">:</span> <span class=\"s\">&quot;INV-001&quot;</span><span class=\"p\">},</span>\n       <span class=\"n\">config</span><span class=\"o\">=</span><span class=\"p\">{</span><span class=\"s\">&quot;configurable&quot;</span><span class=\"p\">:</span> <span class=\"p\">{</span><span class=\"s\">&quot;thread_id&quot;</span><span class=\"p\">:</span> <span class=\"s\">&quot;INV-001&quot;</span><span class=\"p\">}})</span>\n\n<span class=\"err\">\u2460</span> <span class=\"n\">Before</span> <span class=\"n\">each</span> <span class=\"n\">node</span> <span class=\"n\">executes</span><span class=\"p\">:</span>\n   <span class=\"n\">LangGraph</span> <span class=\"n\">reads</span> <span class=\"n\">the</span> <span class=\"n\">latest</span> <span class=\"n\">checkpoint</span> <span class=\"n\">for</span> <span class=\"n\">thread_id</span> <span class=\"s\">&quot;INV-001&quot;</span>\n\n<span class=\"err\">\u2461</span> <span class=\"n\">After</span> <span class=\"n\">each</span> <span class=\"n\">node</span> <span class=\"n\">returns</span><span class=\"p\">:</span>\n   <span class=\"n\">LangGraph</span> <span class=\"n\">writes</span> <span class=\"n\">a</span> <span class=\"n\">new</span> <span class=\"n\">checkpoint</span> <span class=\"n\">with</span> <span class=\"n\">the</span> <span class=\"n\">merged</span> <span class=\"n\">state</span> <span class=\"n\">update</span>\n\n<span class=\"err\">\u2462</span> <span class=\"n\">If</span> <span class=\"n\">the</span> <span class=\"n\">process</span> <span class=\"n\">crashes</span> <span class=\"n\">after</span> <span class=\"err\">\u2461</span> <span class=\"n\">but</span> <span class=\"n\">before</span> <span class=\"err\">\u2462</span><span class=\"p\">:</span>\n   <span class=\"n\">On</span> <span class=\"n\">restart</span><span class=\"p\">,</span> <span class=\"n\">LangGraph</span> <span class=\"n\">re</span><span class=\"o\">-</span><span class=\"n\">reads</span> <span class=\"n\">the</span> <span class=\"n\">latest</span> <span class=\"n\">checkpoint</span> <span class=\"n\">and</span>\n   <span class=\"n\">re</span><span class=\"o\">-</span><span class=\"n\">runs</span> <span class=\"n\">the</span> <span class=\"n\">node</span> <span class=\"p\">(</span><span class=\"n\">nodes</span> <span class=\"n\">must</span> <span class=\"n\">be</span> <span class=\"n\">idempotent</span> <span class=\"n\">for</span> <span class=\"n\">this</span> <span class=\"n\">to</span> <span class=\"n\">be</span> <span class=\"n\">safe</span><span class=\"p\">)</span>\n\n<span class=\"err\">\u2463</span> <span class=\"n\">When</span> <span class=\"n\">the</span> <span class=\"n\">workflow</span> <span class=\"n\">hits</span> <span class=\"n\">hitl_pause</span> <span class=\"err\">\u2192</span> <span class=\"kr\">END</span><span class=\"p\">:</span>\n   <span class=\"n\">The</span> <span class=\"n\">final</span> <span class=\"n\">checkpoint</span> <span class=\"n\">contains</span> <span class=\"n\">the</span> <span class=\"n\">full</span> <span class=\"n\">state</span> <span class=\"n\">including</span> <span class=\"n\">resume_token</span><span class=\"p\">.</span>\n   <span class=\"n\">The</span> <span class=\"n\">thread</span> <span class=\"n\">is</span> <span class=\"n\">SUSPENDED</span> <span class=\"err\">\u2014</span> <span class=\"n\">no</span> <span class=\"n\">further</span> <span class=\"n\">execution</span> <span class=\"n\">until</span> <span class=\"n\">resumed</span><span class=\"p\">.</span>\n\n<span class=\"err\">\u2464</span> <span class=\"n\">Resume</span> <span class=\"n\">via</span> <span class=\"n\">API</span><span class=\"p\">:</span>\n   <span class=\"n\">workflow</span><span class=\"p\">.</span><span class=\"n\">invoke</span><span class=\"p\">(</span>\n       <span class=\"p\">{</span><span class=\"s\">&quot;human_decision&quot;</span><span class=\"p\">:</span> <span class=\"s\">&quot;approved&quot;</span><span class=\"p\">,</span> <span class=\"s\">&quot;reviewer_notes&quot;</span><span class=\"p\">:</span> <span class=\"s\">&quot;Verified with vendor&quot;</span><span class=\"p\">},</span>\n       <span class=\"n\">config</span><span class=\"o\">=</span><span class=\"p\">{</span>\n           <span class=\"s\">&quot;configurable&quot;</span><span class=\"p\">:</span> <span class=\"p\">{</span>\n               <span class=\"s\">&quot;thread_id&quot;</span><span class=\"p\">:</span> <span class=\"s\">&quot;INV-001&quot;</span><span class=\"p\">,</span>\n               <span class=\"s\">&quot;checkpoint_id&quot;</span><span class=\"p\">:</span> <span class=\"n\">resume_token</span><span class=\"p\">,</span>   <span class=\"o\">#</span> <span class=\"n\">pick</span> <span class=\"n\">up</span> <span class=\"n\">from</span> <span class=\"n\">suspension</span> <span class=\"n\">point</span>\n           <span class=\"p\">}</span>\n       <span class=\"p\">}</span>\n   <span class=\"p\">)</span>\n</code></pre></div>\n<blockquote>\n<span class=\"paragraph\"><strong>Idempotency requirement:</strong> Every node must produce the same output for the same\nstate input. If the <code>extract</code> node is re-run after a crash, it must not create a\nduplicate database record. Use <code>ON CONFLICT DO NOTHING</code> or upsert semantics.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "71ac8054ed741a878b512c4e6f3fa22a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"crash-and-resume-simulator\">Crash-and-Resume Simulator</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "3e76d9739d38a270c734b5e43347bd14",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_ZHCJ_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">crashed</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">switch</span><span class=\"p\">(</span>\n<span class=\"w\">              </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "05b771dde8f832ee1eb3bb594da8b74a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "1c7065c0db4965da5498d32195b3e62f",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_qnkX_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "935094e0c611a09050be8aaaf6817c38",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-human-in-the-loop-hitl-pattern\">5. Human-in-the-Loop (HITL) Pattern</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "eedcaee8d19343bbfff66cf19eaa31fe",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_Vxnm_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">hitl_type</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">radio</span><span class=\"p\">(</span>\n<span class=\"w\">                </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "f308c13a83598ee53db29267d1ca8be0",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "376bf28055c46c8a0719c656b9c13846",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-output-packages\">6. Output Packages</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "52a1dd9c305bdbcd9592a386e90d0189",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">The <code>execute</code> node produces one of two output packages depending on routing:</span>\n<h3 id=\"recommendationpackage-auto-approve-or-manager-approval\">RecommendationPackage (auto-approve or manager approval)</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"k\">class</span><span class=\"w\"> </span><span class=\"nc\">RecommendationPackage</span><span class=\"p\">(</span><span class=\"n\">BaseModel</span><span class=\"p\">):</span>\n    <span class=\"n\">invoice_id</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n    <span class=\"n\">recommendation</span><span class=\"p\">:</span> <span class=\"n\">Literal</span><span class=\"p\">[</span><span class=\"s2\">&quot;approve&quot;</span><span class=\"p\">,</span> <span class=\"s2\">&quot;reject&quot;</span><span class=\"p\">,</span> <span class=\"s2\">&quot;request_approval&quot;</span><span class=\"p\">]</span>\n    <span class=\"n\">confidence</span><span class=\"p\">:</span> <span class=\"nb\">float</span>           <span class=\"c1\"># 0.0\u20131.0</span>\n    <span class=\"n\">primary_reason</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n    <span class=\"n\">supporting_evidence</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">[</span><span class=\"n\">Citation</span><span class=\"p\">]</span>   <span class=\"c1\"># top citations</span>\n    <span class=\"n\">risk_flags</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">[</span><span class=\"nb\">str</span><span class=\"p\">]</span>       <span class=\"c1\"># any concerns (not blocking, but noted)</span>\n    <span class=\"n\">total_tokens</span><span class=\"p\">:</span> <span class=\"nb\">int</span>\n</code></pre></div>\n<h3 id=\"escalationpackage-controller-escalation\">EscalationPackage (controller escalation)</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"k\">class</span><span class=\"w\"> </span><span class=\"nc\">EscalationPackage</span><span class=\"p\">(</span><span class=\"n\">BaseModel</span><span class=\"p\">):</span>\n    <span class=\"n\">invoice_id</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n    <span class=\"n\">escalation_reason</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n    <span class=\"n\">escalation_tier</span><span class=\"p\">:</span> <span class=\"n\">Literal</span><span class=\"p\">[</span><span class=\"s2\">&quot;controller&quot;</span><span class=\"p\">,</span> <span class=\"s2\">&quot;compliance_edd&quot;</span><span class=\"p\">]</span>\n    <span class=\"n\">evidence_summary</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n    <span class=\"n\">all_citations</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">[</span><span class=\"n\">Citation</span><span class=\"p\">]</span>   <span class=\"c1\"># complete evidence chain</span>\n    <span class=\"n\">relevant_policy_rules</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">[</span><span class=\"nb\">str</span><span class=\"p\">]</span>\n    <span class=\"n\">risk_assessment</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n</code></pre></div>\n<span class=\"paragraph\">The distinction matters: a <code>RecommendationPackage</code> gives the manager a\nsummary to act on quickly. An <code>EscalationPackage</code> gives the controller the\ncomplete evidence chain needed to make a fully-informed decision on a high-risk case.</span>\n<blockquote>\n<span class=\"paragraph\"><strong>Required telemetry fields:</strong> Both packages must include <code>total_tokens</code> so the\ncost accounting module (Day 9) can calculate per-invoice processing cost.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "9f32f3c2d130aae9cb4902d041e9fd85",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"exercises\">Exercises</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "a6433bd8f9cd7b985aeb4fe7fd951090",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_ZBYS_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "43921858472da26f8c49c990fb66d034",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_aLJB_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "bfab1c7a3a5feaf81e207edbdb6c0cc9",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_nHfw_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "18900e70e921b393c428df4c0996fe34",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "/tmp/marimo_87220/__marimo__cell_xXTn_.py:6: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  \"completed_at\": datetime.datetime.utcnow().isoformat() + \"Z\",\n",
+          "mimetype": "text/plain"
+        },
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_xXTn_.py&quot;</span>, line <span class=\"m\">24</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">out_dir</span> <span class=\"o\">=</span> <span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">parents</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">]</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;build&quot;</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;day5&quot;</span>\n<span class=\"w\">              </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "2983192a018617471a016112997a277d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"production-reflection\">Production Reflection</h2>\n<ol>\n<li><strong>Idempotency in practice:</strong> The <code>extract</code> node crashes halfway through writing to\n   the <code>invoice_candidates</code> table. LangGraph retries it. What happens if the node\n   tries to <code>INSERT</code> a row that already exists? Design the SQL statement (or ORM logic)\n   that handles this safely.</li>\n<li><strong>HITL expiry:</strong> A manager goes on leave and does not act on an approval request\n   within the 72-hour SLA. What should the workflow do automatically?\n   Sketch the monitoring check and the automated escalation path.</li>\n<li><strong>Graph observability:</strong> An AP manager reports \"invoice INV-2024-0042 is stuck.\"\n   What is the first query you run against the PostgreSQL checkpoint tables to\n   diagnose the state of that workflow thread?</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "a7a72680445faac4ec3d988f7bab127f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"day-5-summary-checklist\">Day 5 Summary Checklist</h2>\n<ul class=\"task-list\">\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Define a <code>WorkflowState</code> TypedDict with all required AegisAP fields</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Wire extraction, planning, retrieval, and execution nodes into a <code>StateGraph</code></li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain <code>add_conditional_edges</code> with a fail-closed default branch</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain how PostgreSQL checkpointing enables crash-and-resume</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain the HITL pause/resume pattern with an opaque resume token</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Describe the difference between <code>RecommendationPackage</code> and <code>EscalationPackage</code></li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Artifact <code>build/day5/golden_thread_day5_resumed.json</code> exists and <code>gate_passed = true</code></li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "2876fad0d3509f7f054d829222f0728f",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_87220/__marimo__cell_NCOB_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "92356e18cc6192f91b297f03630c6a1b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"fde-learning-contract-day-05-multi-agent-orchestration-state-and-human-approval-contracts\">FDE Learning Contract \u2014 Day 05: Multi-Agent Orchestration, State, and Human Approval Contracts</h2>\n<h3 id=\"four-daily-outputs\">Four Daily Outputs</h3>\n<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Output type</th>\n<th>Location</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td>Technical build</td>\n<td><code>LAB_OUTPUT/</code></td>\n</tr>\n<tr>\n<td>2</td>\n<td>Design defense memo</td>\n<td><code>DECISION_MEMOS/</code></td>\n</tr>\n<tr>\n<td>3</td>\n<td>Corporate process artifact</td>\n<td><code>PROCESS_ARTIFACTS/</code></td>\n</tr>\n<tr>\n<td>4</td>\n<td>Oral defense prep notes</td>\n<td><code>ORAL_DEFENSE/</code></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"rubric-weights-100-points-total\">Rubric Weights (100 points total)</h3>\n<table>\n<thead>\n<tr>\n<th>Dimension</th>\n<th>Points</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>State Design</td>\n<td>25</td>\n</tr>\n<tr>\n<td>Resumption Safety</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Hitl Contract Quality</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Edge Case Handling</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Oral Defense</td>\n<td>15</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Pass bar: <strong>80 / 100</strong>   Elite bar: <strong>90 / 100</strong></span>\n<h3 id=\"oral-defense-prompts\">Oral Defense Prompts</h3>\n<ol>\n<li>Which HITL failure mode did you consider but choose not to handle in the contract, and why is that an acceptable omission?</li>\n<li>If the system resumes from a checkpoint after an approver's decision has been overtaken by events, what state fields are now stale and what is the blast radius?</li>\n<li>Who owns the approval contract SLA in production, and what evidence would they need to audit a resume-after-timeout incident?</li>\n</ol>\n<h3 id=\"artifact-scaffolds\">Artifact Scaffolds</h3>\n<ul>\n<li><code>docs/curriculum/artifacts/day05/HUMAN_APPROVAL_CONTRACT.md</code></li>\n<li><code>docs/curriculum/artifacts/day05/PAUSE_RESUME_GOVERNANCE.md</code></li>\n<li><code>docs/curriculum/artifacts/day05/ESCALATION_TREE.md</code></li>\n</ul>\n<span class=\"paragraph\">See <code>docs/curriculum/MENTAL_MODELS.md</code> for mental models reference.\nSee <code>docs/curriculum/ASSESSOR_CALIBRATION.md</code> for scoring anchors.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

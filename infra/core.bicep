@@ -15,100 +15,77 @@ param searchName string
 @description('Starter search index name for Day 0')
 param searchIndexName string = 'documents'
 
-@description('Azure OpenAI account name')
+@description('Microsoft Foundry resource name')
 param openAiName string
 
-@description('Azure OpenAI data-plane API version exported into the local environment')
+@description('OpenAI-compatible API version exported into the local environment')
 param openAiApiVersion string = '2024-08-01-preview'
 
-@description('Azure OpenAI chat deployment name exported into the local environment')
+@description('OpenAI-compatible chat deployment name exported into the local environment')
 param openAiChatDeploymentName string
 
-@description('Optional Azure OpenAI chat model name for automatic deployment creation')
+@description('Optional OpenAI-compatible chat model name for automatic deployment creation')
 param openAiChatModelName string = ''
 
-@description('Optional Azure OpenAI chat model version for automatic deployment creation')
+@description('Optional OpenAI-compatible chat model version for automatic deployment creation')
 param openAiChatModelVersion string = ''
 
-@description('Optional Azure OpenAI deployment SKU name')
+@description('Optional chat deployment SKU name')
 param openAiChatSkuName string = 'Standard'
 
-@description('Optional Azure OpenAI deployment capacity')
+@description('Optional chat deployment capacity')
 param openAiChatCapacity int = 0
 
-resource st 'Microsoft.Storage/storageAccounts@2025-06-01' = {
-  name: storageAccountName
-  location: location
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    allowBlobPublicAccess: false
-    allowSharedKeyAccess: false
-    defaultToOAuthAuthentication: true
-    minimumTlsVersion: 'TLS1_2'
-    supportsHttpsTrafficOnly: true
+module storage './foundations/storage.bicep' = {
+  name: '${deployment().name}-storage'
+  params: {
+    location: location
+    storageAccountName: storageAccountName
+    storageContainerName: storageContainerName
   }
 }
 
-resource stBlob 'Microsoft.Storage/storageAccounts/blobServices@2025-06-01' = {
-  parent: st
-  name: 'default'
-}
-
-resource stContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2025-06-01' = {
-  parent: stBlob
-  name: storageContainerName
-  properties: {
-    publicAccess: 'None'
+module search './foundations/search_service.bicep' = {
+  name: '${deployment().name}-search'
+  params: {
+    location: location
+    searchName: searchName
+    searchIndexName: searchIndexName
   }
 }
 
-resource srch 'Microsoft.Search/searchServices@2025-05-01' = {
-  name: searchName
-  location: location
-  sku: {
-    name: 'basic'
-  }
-  properties: {
-    disableLocalAuth: true
-    hostingMode: 'Default'
-    partitionCount: 1
-    publicNetworkAccess: 'enabled'
-    replicaCount: 1
-  }
-}
-
-resource aoai 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
-  name: openAiName
-  location: location
-  kind: 'OpenAI'
-  sku: {
-    name: 'S0'
-  }
-  properties: {
-    customSubDomainName: openAiName
-    disableLocalAuth: true
-    publicNetworkAccess: 'Enabled'
+module foundry './foundations/foundry_account.bicep' = {
+  name: '${deployment().name}-foundry'
+  params: {
+    location: location
+    openAiName: openAiName
+    openAiApiVersion: openAiApiVersion
+    openAiChatDeploymentName: openAiChatDeploymentName
+    openAiChatModelName: openAiChatModelName
+    openAiChatModelVersion: openAiChatModelVersion
+    openAiChatSkuName: openAiChatSkuName
+    openAiChatCapacity: openAiChatCapacity
   }
 }
 
 output location string = location
-output openAiApiVersion string = openAiApiVersion
-output openAiChatCapacity int = openAiChatCapacity
-output openAiChatDeploymentName string = openAiChatDeploymentName
-output openAiChatModelName string = openAiChatModelName
-output openAiChatModelVersion string = openAiChatModelVersion
-output openAiChatSkuName string = openAiChatSkuName
-output openAiEndpoint string = 'https://${openAiName}.openai.azure.com/'
-output openAiId string = aoai.id
-output openAiName string = aoai.name
-output searchEndpoint string = srch.properties.endpoint
-output searchIndexName string = searchIndexName
-output searchName string = srch.name
-output searchServiceId string = srch.id
-output storageAccountId string = st.id
-output storageAccountName string = st.name
-output storageAccountUrl string = st.properties.primaryEndpoints.blob
-output storageContainerName string = stContainer.name
+output foundryEndpoint string = foundry.outputs.foundryEndpoint
+output foundryId string = foundry.outputs.foundryId
+output foundryName string = foundry.outputs.foundryName
+output openAiApiVersion string = foundry.outputs.openAiApiVersion
+output openAiChatCapacity int = foundry.outputs.openAiChatCapacity
+output openAiChatDeploymentName string = foundry.outputs.openAiChatDeploymentName
+output openAiChatModelName string = foundry.outputs.openAiChatModelName
+output openAiChatModelVersion string = foundry.outputs.openAiChatModelVersion
+output openAiChatSkuName string = foundry.outputs.openAiChatSkuName
+output openAiEndpoint string = foundry.outputs.openAiEndpoint
+output openAiId string = foundry.outputs.openAiId
+output openAiName string = foundry.outputs.openAiName
+output searchEndpoint string = search.outputs.searchEndpoint
+output searchIndexName string = search.outputs.searchIndexName
+output searchName string = search.outputs.searchName
+output searchServiceId string = search.outputs.searchServiceId
+output storageAccountId string = storage.outputs.storageAccountId
+output storageAccountName string = storage.outputs.storageAccountName
+output storageAccountUrl string = storage.outputs.storageAccountUrl
+output storageContainerName string = storage.outputs.storageContainerName

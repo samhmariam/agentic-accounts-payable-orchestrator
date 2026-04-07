@@ -51,13 +51,13 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
 }
 
-resource developerOpenAiAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(developerPrincipalId)) {
-  name: guid(openAi.id, developerPrincipalId, cognitiveServicesOpenAiUserRoleDefinitionId)
+resource developerFoundryAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(developerPrincipalId)) {
+  name: guid(openAi.id, developerPrincipalId, cognitiveServicesUserRoleDefinitionId)
   scope: openAi
   properties: {
     principalId: developerPrincipalId
     principalType: developerPrincipalType
-    roleDefinitionId: cognitiveServicesOpenAiUserRoleDefinitionId
+    roleDefinitionId: cognitiveServicesUserRoleDefinitionId
   }
 }
 

@@ -79,6 +79,92 @@ def _full_day_agenda(mo):
     )
     return
 
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Make the deployed system operable at scale by connecting telemetry, routing, caching, and budget decisions.',
+        prerequisites=['Day 8 complete.', '`build/day8/regression_baseline.json` is available.', 'No live telemetry backend is required to follow the notebook examples.'],
+        resources=['`notebooks/day_9_scaling_monitoring_cost.py`', '`build/day8/regression_baseline.json` as the upstream baseline', '`build/day9/` for `routing_report.json`', '`docs/curriculum/artifacts/day09/` for policy and decision templates'],
+        setup_sequence=['Run the opening cells after confirming the Day 8 baseline exists.', 'Treat telemetry, routing, and cost as one operating loop rather than separate topics.', 'Use notebook examples first before dropping into any external dashboards or scripts.'],
+        run_steps=['Work through observability, KQL, regression thinking, routing, PTU versus PAYG, and cache bypass in order.', 'Use the interactive sections to see how one operational signal affects release decisions.', 'Run the artifact cell that writes `build/day9/routing_report.json`.', 'Finish by checking how Day 10 will consume this artifact in the budget gate.'],
+        output_interpretation=['The main completion signal is `build/day9/routing_report.json` with a populated `sample_ledger`.', 'Interpret notebook outputs as operator evidence: why the system routed a task, how much it cost, and what telemetry proves it.', 'A good Day 9 outcome makes the Day 10 budget and readiness conversation concrete.'],
+        troubleshooting=['If logs, metrics, and traces blur together, return to the three-pillar table and tie each to a distinct question.', 'If routing feels arbitrary, trace one task class from SLO and risk requirements to model choice and cost.', 'If the artifact is missing, rerun the final Day 9 artifact cell after the routing sections complete.'],
+        outside_references=['Long-form theory: `docs/curriculum/trainee/DAY_08_TRAINEE.md` and `docs/curriculum/trainee/DAY_09_TRAINEE.md`', 'Trainer notes: `docs/curriculum/trainer/DAY_09_TRAINER.md`', 'Reusable references: `docs/curriculum/artifacts/day09/`'],
+    )
+    return
+
+
+@app.cell
+def _azure_mastery_guide(mo):
+    from _shared.lab_guide import render_azure_mastery_guide
+
+    render_azure_mastery_guide(
+        mo,
+        focus="Day 9 mastery means you can move from telemetry theory to live Azure evidence: inspect the right blades, run KQL from the command line, recognise the minimal Azure Monitor SDK wiring, and connect routing or cost claims to observable signals.",
+        portal_tasks="""
+- Open **Application Insights** and use **Transaction search** or **Distributed tracing** to inspect one workflow run end to end.
+- Open **Metrics** and track latency, failure rate, and throughput so you can distinguish a cost problem from a reliability problem.
+- Open the linked **Log Analytics workspace** and run the notebook's KQL patterns against `requests`, `dependencies`, and `traces`.
+- Inspect the **Container App** metrics and scale charts so routing, caching, and replica behaviour stay connected to real Azure demand signals.
+""",
+        cli_verification="""
+**Query live telemetry from Log Analytics**
+
+```bash
+az monitor log-analytics query \
+  --workspace "$AZURE_LOG_ANALYTICS_WORKSPACE_ID" \
+  --analytics-query '
+requests
+| summarize p95_duration=percentile(duration, 95) by operation_Name
+| order by p95_duration desc
+'
+```
+
+**Look for escalation spikes in the trace stream**
+
+```bash
+az monitor log-analytics query \
+  --workspace "$AZURE_LOG_ANALYTICS_WORKSPACE_ID" \
+  --analytics-query '
+traces
+| where message has "needs_human_review"
+| summarize escalations=count() by bin(timestamp, 1h)
+| order by timestamp desc
+'
+```
+
+**Inspect the Day 9 routing artifact from the command line**
+
+```bash
+python -m json.tool build/day9/routing_report.json
+```
+""",
+        sdk_snippet="""
+The shortest useful Azure SDK shape on Day 9 is the Azure Monitor OpenTelemetry bootstrap.
+
+```python
+from azure.monitor.opentelemetry import configure_azure_monitor
+import os
+
+configure_azure_monitor(
+    connection_string=os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"]
+)
+```
+
+That one call wires traces, metrics, logs, and Azure SDK span correlation into Azure Monitor.
+""",
+        proof_in_azure="""
+- Application Insights or Log Analytics shows the workflow spans and correlations you describe in the notebook, not just local preview data.
+- The KQL queries surface at least one latency, error, or escalation pattern you can explain in operator language.
+- `build/day9/routing_report.json` exists with a populated `sample_ledger`, and the routing story matches the telemetry story.
+- Day 9 is only operationally mature when you can defend routing and budget decisions with live signals rather than intuition.
+""",
+    )
+    return
+
 
 # ---------------------------------------------------------------------------
 # Section 1 – Three Pillars of Observability
@@ -1246,7 +1332,7 @@ to verify that a vendor is listed on the approved-supplier register.
 
 1. Which model tier (`light` or `strong`) should `regulatory_lookup` use by default?
 2. Should the cache be allowed? If yes, with what TTL policy?
-3. Write the routing decision logic (pseudocode or Python) that would extend
+3. Sketch the routing decision logic (pseudocode or Python) that would extend
    `route_task` in `routing_policy.py` to handle this new task class.
 4. What new KQL query would you add to monitor `regulatory_lookup` costs?
             """),
@@ -1419,7 +1505,7 @@ explicitly in the architecture decision record.
 @app.cell
 def _exercise_4(mo):
     mo.accordion({
-        "Exercise 4 — Implement Cost-Aware Cache Bypass Logic": mo.vstack([
+        "Exercise 4 — Review Cost-Aware Cache Bypass Logic": mo.vstack([
             mo.md("""
 **Scenario:**
 
@@ -1434,7 +1520,7 @@ the risk of a stale or inappropriate cached response.
 **Task:**
 
 1. Where in the AegisAP codebase would you add this check?
-2. Write the Python logic (as a function or a conditional block) that implements it.
+2. Sketch the Python logic (as a function or a conditional block) that implements it.
 3. What span attribute would you emit to make this bypass visible in KQL?
 4. Would you apply this rule to `compliance_review`? Why or why not?
             """),

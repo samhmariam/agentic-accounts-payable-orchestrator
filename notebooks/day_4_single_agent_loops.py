@@ -42,8 +42,8 @@ def _title(mo):
 
     ## Learning Objectives
 
-    1. Implement the `InvoiceCandidate → CanonicalInvoice` extraction pipeline with structured outputs.
-    2. Build the planner-executor pattern with a typed, schema-validated JSON plan.
+    1. Review the `InvoiceCandidate → CanonicalInvoice` extraction contract and the structured-output failure modes it must prevent.
+    2. Design the planner-executor pattern with a typed, schema-validated JSON plan.
     3. Apply the AegisAP policy overlay (fail-closed) before any plan executes.
     4. Trace agent execution end-to-end (tools used, tokens consumed, decision rationale).
     5. Identify and handle the five canonical extraction failure modes.
@@ -72,6 +72,23 @@ def _full_day_agenda(mo):
         mo,
         day_label="Day 4 single-agent loop design",
         core_outcome="build a single-agent loop that makes explicit decisions, respects policy, and fails closed under uncertainty",
+    )
+    return
+
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Study the single-agent extraction-planning-execution loop that becomes the core decision brain for AegisAP.',
+        prerequisites=['Day 3 retrieval and authority concepts complete.', 'Understand `DefaultAzureCredential` and Azure OpenAI client patterns.', 'Local notebook execution environment is working.'],
+        resources=['`notebooks/day_4_single_agent_loops.py`', '`src/aegisap/` implementation examples referenced throughout the notebook', '`docs/curriculum/artifacts/day04/` policy and fail-closed references', '`build/day4/` for the generated golden-thread artifact'],
+        setup_sequence=['Run the opening cells so imports and local fixtures are available.', 'Keep Day 3 output in mind because retrieval and authority are upstream assumptions for the planner.', 'Open `docs/curriculum/artifacts/day04/` only when you need the policy reference or fail-closed examples.'],
+        run_steps=['Work through extraction, canonicalisation, planning, policy overlay, and execution in order.', 'Use the notebook examples to understand why each failure mode is caught before execution.', 'Run the artifact-writing cell that produces `build/day4/golden_thread_day4.json`.', 'Finish by checking the Day 4 readiness checklist.'],
+        output_interpretation=['The main success signal is a valid `build/day4/golden_thread_day4.json` with `gate_passed = true`.', 'Notebook outputs should show how raw invoice data becomes a structured, policy-checked action path.', 'If the artifact exists but the logic is unclear, revisit the extraction and fail-closed sections before moving on.'],
+        troubleshooting=['If JSON examples or validation steps seem disconnected, follow the state transformation from `InvoiceCandidate` to `CanonicalInvoice` one section at a time.', 'If the artifact is missing, rerun the Day 4 artifact cell and confirm earlier dependency cells completed.', 'If you are tempted to skip policy overlay, remember Day 5 assumes Day 4 already fails closed.'],
+        outside_references=['Long-form theory: `docs/curriculum/trainee/DAY_04_TRAINEE.md`', 'Trainer notes: `docs/curriculum/trainer/DAY_04_TRAINER.md`', 'Reusable references: `docs/curriculum/artifacts/day04/`'],
     )
     return
 
@@ -778,14 +795,14 @@ def _exercises_header(mo):
 @app.cell
 def _exercise_1(mo):
     mo.accordion({
-        "Exercise 1 — Write the Canonicalisation Function": mo.vstack([
+        "Exercise 1 — Review the Canonicalisation Strategy": mo.vstack([
             mo.md("""
 **Task:** The `locale_mismatch` fixture fails because:
 1. The amount uses a European decimal comma (`1.250,00`)
 2. The date uses `DD/MM/YYYY` format
 
-Write a `pre_process(raw_text: str) -> dict` function that normalises
-both before the LLM sees the text, OR write a `post_process_candidate(candidate: dict) -> dict`
+Sketch or review a `pre_process(raw_text: str) -> dict` function that normalises
+both before the LLM sees the text, OR a `post_process_candidate(candidate: dict) -> dict`
 that fixes these in the candidate before canonicalisation.
             """),
             mo.accordion({
@@ -861,7 +878,7 @@ You may assume:
 - `canonical` has an `edd_vendor` boolean field (True if the vendor is on the EDD list)
 - The plan has a step with `action = "escalate_to_controller"` if and only if it intends to escalate
 
-Write the new rule and explain why it must be deterministic code, not an LLM prompt.
+Sketch the new rule and explain why it must be deterministic code, not an LLM prompt.
             """),
             mo.accordion({
                 "Show solution": mo.md("""

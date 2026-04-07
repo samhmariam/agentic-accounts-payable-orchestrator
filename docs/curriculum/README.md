@@ -1,17 +1,31 @@
 # AegisAP Curriculum Guide
 
-This folder contains the notebook-first delivery materials for the AegisAP FDE
-curriculum. The notebooks and
+This folder contains the portal-first and notebook-led delivery materials for
+the AegisAP FDE curriculum. The notebooks and
 [CURRICULUM_MANIFEST.yaml](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml)
 are the operational source of truth for live delivery.
+
+Use [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md)
+as the single navigation layer for daily delivery. It tells you which notebook,
+primary doc, portal guide, command path, and artifact matter for each day.
+
+The new manual-first Azure layer lives in
+[portal/README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/README.md).
+Use it to start each day in Azure first, then return to the notebook and only
+after that to the scripts or modules that abstract the same work.
 
 Trainer and trainee day documents still exist as supporting theory material for
 the foundational portions of the course:
 
 | Document | Audience | Purpose |
 |---|---|---|
+| `portal/DAY_XX_PORTAL.md` | Trainer + learner | Manual Azure-first guide: what to inspect or operate in the portal before the notebook |
 | `trainer/DAY_XX_TRAINER.md` | Instructor | Facilitation guide, talking points, Q&A, common mistakes |
 | `trainee/DAY_XX_TRAINEE.md` | Learner | Pre-lab reading, theory, Azure best practices, self-check |
+
+Portal guides now cover Days 00-14. Trainer and trainee companion day docs
+currently cover Days 00-10. Days 11-14 use the portal guide, notebook, primary
+day doc, and artifact templates instead of separate trainer/trainee files.
 
 Program-level operating guides live alongside the day materials:
 
@@ -135,7 +149,7 @@ artifacts as hard blockers unless a recovery command is supplied.
 
 | Day | Primary artifact | Consumed by |
 |---|---|---|
-| 0 | `build/day0/env_report.json` | Day 1 |
+| 0 | `.day0/core.json` or `.day0/full.json` | Day 1 and local environment setup |
 | 1 | `build/day1/golden_thread_day1.json` | Day 2 |
 | 2 | `build/day2/golden_thread_day2.json` | Day 3 |
 | 3 | `build/day3/golden_thread_day3.json` | Day 4 |
@@ -182,17 +196,20 @@ callouts rather than skipping a day.
 
 ### For Trainers
 1. Read [TRAINER_OPERATIONS.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINER_OPERATIONS.md) before the cohort begins.
-2. Read `trainer/DAY_XX_TRAINER.md` the evening before each session.
-3. Score learners with `docs/curriculum/templates/DAILY_SCORECARD.md`.
-4. Use [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md) for the unsignposted failure drill on Days 8-10.
-5. Use [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md) and [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md) together for the final review.
-6. Each trainer file ends with a **Next-Day Bridge** — use it to close the session.
+2. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) and follow the day row for the session you are delivering.
+3. For Days 00-10, read `trainer/DAY_XX_TRAINER.md` the evening before each session. For Days 11-14, use the notebook plus the primary day doc.
+4. Score learners with `docs/curriculum/templates/DAILY_SCORECARD.md`.
+5. Use [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md) for the unsignposted failure drill on Days 8-10.
+6. Use [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md) and [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md) together for the final review.
+7. Each trainer file ends with a **Next-Day Bridge** — use it to close the session.
 
 ### For Trainees
-1. Read `trainee/DAY_XX_TRAINEE.md` before the session starts (or the night before).
-2. The **Check Your Understanding** questions at the end are not graded — they are
+1. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) first and use it to find the current portal guide, notebook, and primary day doc.
+2. Start with `portal/DAY_XX_PORTAL.md` for the day before opening the notebook.
+3. For Days 00-10, read `trainee/DAY_XX_TRAINEE.md` before the session starts. For Days 11-14, use the portal guide, notebook, and primary day doc.
+4. The **Check Your Understanding** questions at the end are not graded — they are
    designed to reveal gaps before you hit them in the notebook.
-3. Refer back to the **Glossary** and **Azure Best Practices** sections while
+5. Refer back to the **Glossary** and **Azure Best Practices** sections while
    working through the notebook cells.
 
 ---

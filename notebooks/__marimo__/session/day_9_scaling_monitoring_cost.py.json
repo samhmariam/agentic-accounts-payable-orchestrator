@@ -1,0 +1,749 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "7de421815fea6f0b11d87fc8e00fc29a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "4c9f5b5b6b6ebcee2b74057a5abdcb49",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'os' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "6b32dde9cbbb76a9f4fb307dd566e0d8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-9-scaling-monitoring-cost-optimisation\">Day 9 \u2014 Scaling, Monitoring &amp; Cost Optimisation</h1>\n<blockquote>\n<span class=\"paragraph\"><strong>WAF Pillars covered:</strong> Cost Optimisation \u00b7 Performance Efficiency \u00b7 Operational Excellence\n<strong>Estimated time:</strong> 2.5 hours\n<strong>Sources:</strong> <code>docs/curriculum/trainee/DAY_08_TRAINEE.md</code> (observability, OTEL, KQL, eval regression),\n<code>docs/curriculum/trainee/DAY_09_TRAINEE.md</code> (billing models, task routing, cost ledger, semantic caching)\n<strong>Prerequisites:</strong> Day 8 complete; <code>build/day8/regression_baseline.json</code> exists.</span>\n</blockquote>\n<hr />\n<h2 id=\"learning-objectives\">Learning Objectives</h2>\n<ol>\n<li>Explain the three pillars of observability and which questions each one answers uniquely.</li>\n<li>Describe the OpenTelemetry data model: traces, spans, metrics, and logs.</li>\n<li>Write KQL queries for diagnosing latency outliers, error rates, and escalation spikes.</li>\n<li>Explain how evaluation baselines become regression tests and why slice-level breakdown matters.</li>\n<li>Compare Azure OpenAI PAYG and PTU billing models and identify when each is appropriate.</li>\n<li>Define task-class routing and explain why routing decisions must be explicit and traceable.</li>\n<li>Describe the cost ledger pattern and build a <code>routing_report.json</code> artifact for Day 10.</li>\n<li>Enumerate the four conditions under which AegisAP bypasses the semantic cache.</li>\n</ol>\n<hr />\n<h2 id=\"where-day-9-sits-in-the-full-arc\">Where Day 9 Sits in the Full Arc</h2>\n<div class=\"language-text codehilite\"><pre><span></span><code>Day 7  \u2500\u2500 Day 8 \u2500\u2500\u25ba[Day 9]\u2500\u2500\u25ba Day 10\nTesting  CI/CD &amp;   Scaling  Production\n&amp; Safety  IaC      &amp; Cost   Operations\n</code></pre></div>\n<span class=\"paragraph\">Day 9 answers: <strong>\"Once AegisAP is deployed, how do we observe what it is doing,\ncontrol what models it uses, and ensure it stays within budget?\"</strong>\nThe deployment pipeline was proven in Day 8; now we operate it at scale.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "6eada5d495a5295c15b313e10629a31a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_bkHC_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "16881b901b993c0ab2909d172cf14031",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_lEQa_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "PKri",
+      "code_hash": "7c56787586626f70d2b8efdf7bda4256",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_PKri_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Xref",
+      "code_hash": "e32855a60ebe95f50f209d34acb01db7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-the-three-pillars-of-observability\">1. The Three Pillars of Observability</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "5647932c5777644804817148107f6e43",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Observability</strong> means being able to understand what is happening inside a\nrunning system from its external outputs alone.  Three complementary signal\ntypes each answer a different question:</span>\n<table>\n<thead>\n<tr>\n<th>Pillar</th>\n<th>What it captures</th>\n<th>The question it answers</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Logs</strong></td>\n<td>Discrete events with context</td>\n<td>\"What happened, and when?\"</td>\n</tr>\n<tr>\n<td><strong>Metrics</strong></td>\n<td>Numeric measurements over time</td>\n<td>\"How fast, how often, how much?\"</td>\n</tr>\n<tr>\n<td><strong>Traces</strong></td>\n<td>End-to-end journey of a request across components</td>\n<td>\"Why was this specific invoice slow?\"</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">No single pillar is sufficient:</span>\n<ul>\n<li><strong>Logs only</strong> cannot answer \"how slow is it today compared to last Tuesday?\"</li>\n<li><strong>Metrics only</strong> cannot answer \"which exact invoice triggered the p99 regression?\"</li>\n<li><strong>Traces only</strong> do not alert on sustained error-rate spikes without aggregation.</li>\n</ul>\n<span class=\"paragraph\">A production AI workload needs all three.</span>\n<h3 id=\"why-this-matters-for-aegisap\">Why this matters for AegisAP</h3>\n<span class=\"paragraph\">AegisAP's workflow spans at least six processing nodes across two processes\n(API server and resume worker).  A user complaint about \"the invoice was slow\"\ncould be caused by:</span>\n<ul>\n<li>LLM latency regression (metrics + traces)</li>\n<li>Retrieval quality drop causing extra reflection loops (traces)</li>\n<li>A silent failure in checkpoint writing delaying resume (logs + metrics)</li>\n<li>A cost gate triggering escalation unexpectedly (logs + traces)</li>\n</ul>\n<span class=\"paragraph\">Only a combination of all three pillars narrows the diagnosis to one root cause.</span>\n<h3 id=\"silent-failures-the-most-dangerous-mode\">Silent failures \u2014 the most dangerous mode</h3>\n<span class=\"paragraph\">A silent failure is a system degradation that produces <strong>no errors</strong> but\ndegrades output quality.  Common examples in AegisAP:</span>\n<table>\n<thead>\n<tr>\n<th>Failure</th>\n<th>Observable symptom</th>\n<th>Signal type needed</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>LLM latency regression</td>\n<td>p99 extraction time &gt; 2\u00d7 baseline</td>\n<td>Metric</td>\n</tr>\n<tr>\n<td>Retrieval quality drop</td>\n<td>Rising <code>INSUFFICIENT_EVIDENCE</code> refusal rate</td>\n<td>Metric + Trace attribute</td>\n</tr>\n<tr>\n<td>Spurious escalations</td>\n<td><code>needs_human_review</code> rate rising without cause</td>\n<td>Metric</td>\n</tr>\n<tr>\n<td>Checkpoint write latency</td>\n<td>Growing resume times</td>\n<td>Metric + Trace</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Without metrics, none of these produce an alert.  Without traces, none of\nthem can be attributed to a specific workflow node.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "baf3d0e7d87307ad813d0e6bf9af952d",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_BYtC_.py&quot;</span>, line <span class=\"m\">25</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">pillar_picker</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">radio</span><span class=\"p\">(</span>\n<span class=\"w\">                    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "b7b12129056d74f0f65800514bb68ebb",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'p' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "6d650800785489fa147df7eb0a962aa9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-opentelemetry-the-cncf-telemetry-standard\">2. OpenTelemetry: The CNCF Telemetry Standard</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "a3220ce054ebd9a6a928c34345b36a2d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>OpenTelemetry (OTEL)</strong> is the CNCF standard for vendor-neutral distributed\ntelemetry.  It provides a unified API and SDK for producing traces, metrics, and\nlogs \u2014 and exporters that forward data to any compliant backend (Azure Monitor,\nJaeger, Grafana, etc.) without changing application code.</span>\n<h3 id=\"the-otel-data-model\">The OTEL data model</h3>\n<div class=\"language-scdoc codehilite\"><pre><span></span><code>Trace\n\u2514\u2500\u2500 Root Span: &quot;workflow.run&quot;  (trace_id=abc, span_id=001, parent=none)\n    \u251c\u2500\u2500 Child Span: &quot;day1.extract&quot;          (span_id=002, parent=001)\n    \u251c\u2500\u2500 Child Span: &quot;day3.retrieve&quot;         (span_id=003, parent=001)\n    \u2502   \u251c\u2500\u2500 Child Span: &quot;search.vendor_policy&quot;  (span_id=004, parent=003)\n    \u2502   \u2514\u2500\u2500 Child Span: &quot;search.compliance&quot;     (span_id=005, parent=003)\n    \u251c\u2500\u2500 Child Span: &quot;day4.plan&quot;             (span_id=006, parent=001)\n    \u2502   \u2514\u2500\u2500 Child Span: &quot;openai.chat&quot;       (span_id=007, parent=006)\n    \u251c\u2500\u2500 Child Span: &quot;day6.review&quot;           (span_id=008, parent=001)\n    \u2514\u2500\u2500 Child Span: &quot;day5.checkpoint_write&quot; (span_id=009, parent=001)\n</code></pre></div>\n<span class=\"paragraph\">Each <strong>span</strong> carries:</span>\n<table>\n<thead>\n<tr>\n<th>Field</th>\n<th>Type</th>\n<th>Description</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>trace_id</code></td>\n<td>128-bit hex</td>\n<td>Same for all spans in one workflow run</td>\n</tr>\n<tr>\n<td><code>span_id</code></td>\n<td>64-bit hex</td>\n<td>Unique per span</td>\n</tr>\n<tr>\n<td><code>parent_span_id</code></td>\n<td>64-bit hex</td>\n<td>Links child to parent</td>\n</tr>\n<tr>\n<td><code>start_time</code> + <code>end_time</code></td>\n<td>Timestamps</td>\n<td>Duration computed from these</td>\n</tr>\n<tr>\n<td><code>attributes</code></td>\n<td>Key-value map</td>\n<td>Domain metadata \u2014 <code>aegis.case_id</code>, <code>aegis.outcome_type</code>, etc.</td>\n</tr>\n<tr>\n<td><code>status</code></td>\n<td><code>OK</code> / <code>ERROR</code></td>\n<td>Whether this span succeeded</td>\n</tr>\n<tr>\n<td><code>events</code></td>\n<td>List of timestamped annotations</td>\n<td>Point-in-time markers within the span</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"azure-monitor-opentelemetry-distro\">Azure Monitor OpenTelemetry Distro</h3>\n<span class=\"paragraph\">Use <code>azure-monitor-opentelemetry</code> instead of manually wiring the OTEL SDK:</span>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">azure.monitor.opentelemetry</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">configure_azure_monitor</span>\n\n<span class=\"n\">configure_azure_monitor</span><span class=\"p\">(</span>\n    <span class=\"n\">connection_string</span><span class=\"o\">=</span><span class=\"n\">os</span><span class=\"o\">.</span><span class=\"n\">environ</span><span class=\"p\">[</span><span class=\"s2\">&quot;APPLICATIONINSIGHTS_CONNECTION_STRING&quot;</span><span class=\"p\">],</span>\n<span class=\"p\">)</span>\n<span class=\"c1\"># All Azure SDK calls (OpenAI, Search, Storage) now auto-instrument spans</span>\n<span class=\"c1\"># Correlation context propagates through HTTP headers automatically</span>\n</code></pre></div>\n<span class=\"paragraph\"><strong>Why the distro, not raw OTEL?</strong></span>\n<ul>\n<li>Wires the OTLP exporter to App Insights automatically</li>\n<li>Propagates W3C <code>traceparent</code> headers through Azure SDK calls</li>\n<li>Correlates infrastructure metrics (CPU, memory) with application spans</li>\n<li>AegisAP-specific attributes (<code>aegis.*</code>) appear in <code>customDimensions</code> in KQL</li>\n</ul>\n<h3 id=\"correlation-ids-in-aegisap\">Correlation IDs in AegisAP</h3>\n<table>\n<thead>\n<tr>\n<th>ID</th>\n<th>Scope</th>\n<th>Where persisted</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>trace_id</code></td>\n<td>One OTEL trace (one HTTP request or workflow run)</td>\n<td>Span context only</td>\n</tr>\n<tr>\n<td><code>workflow_run_id</code></td>\n<td>One execution of the business workflow</td>\n<td>Durable state + span attributes</td>\n</tr>\n<tr>\n<td><code>thread_id</code></td>\n<td>The resumable business thread (survives multiple runs)</td>\n<td>Durable state</td>\n</tr>\n<tr>\n<td><code>case_id</code></td>\n<td>The invoice business identity</td>\n<td>All outputs + audit log</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Incident response workflow:</span>\n<ol>\n<li>Start with <code>case_id</code> from a complaint</li>\n<li>Look up <code>thread_id</code> in the audit log</li>\n<li>Find the <code>workflow_run_id</code> for the failing run</li>\n<li>Look up <code>trace_id</code> to pivot to the full distributed trace in App Insights</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "a0a72b10d29d6b6f2ee2ce339ac23e5f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-kql-fundamentals-for-ai-workflow-incident-response\">3. KQL Fundamentals for AI Workflow Incident Response</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "83cafe35e438cfb72609e1914f13d05a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_nWHF_.py&quot;</span>, line <span class=\"m\">73</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">kql_picker</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">dropdown</span><span class=\"p\">(</span>\n<span class=\"w\">                 </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "iLit",
+      "code_hash": "d9def880e03d7a22a4f29fd9a534d253",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "7c020c073f1d4f29c90af7534aa09fb1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-evaluation-as-regression-testing-aggregate-vs-slice\">4. Evaluation as Regression Testing: Aggregate vs. Slice</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "816035b9a3fed13d75e2eb578f6c44d2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Day 8 turned evaluation scores into a baseline.  Day 9 introduces the critical\nnuance: <strong>aggregate scores can hide per-slice regressions</strong>.</span>\n<h3 id=\"why-aggregate-evaluation-is-not-enough\">Why aggregate evaluation is not enough</h3>\n<span class=\"paragraph\">Consider a model update that improves average faithfulness from 0.87 \u2192 0.89.\nThat looks like a win.  But broken down by slice:</span>\n<table>\n<thead>\n<tr>\n<th>Slice</th>\n<th>Before</th>\n<th>After</th>\n<th>Delta</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>extraction_standard / auto_approve</code></td>\n<td>0.92</td>\n<td>0.94</td>\n<td>+0.02 \u2705</td>\n</tr>\n<tr>\n<td><code>planning_low_risk / auto_approve</code></td>\n<td>0.88</td>\n<td>0.91</td>\n<td>+0.03 \u2705</td>\n</tr>\n<tr>\n<td><strong><code>review_compliance / high_value</code></strong></td>\n<td><strong>0.91</strong></td>\n<td><strong>0.83</strong></td>\n<td><strong>\u22120.08 \u274c</strong></td>\n</tr>\n<tr>\n<td><code>extraction_complex / high_risk</code></td>\n<td>0.80</td>\n<td>0.81</td>\n<td>+0.01 \u2705</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">The aggregate improved because three out of four slices improved.  But the\n<strong>most critical slice</strong> \u2014 compliance review on high-value invoices \u2014 regressed\nsignificantly.  A pure aggregate evaluation would have shipped this regression.</span>\n<h3 id=\"why-this-is-catastrophic-for-aegisap\">Why this is catastrophic for AegisAP</h3>\n<span class=\"paragraph\"><code>review_compliance / high_value</code> is the slice that decides whether a large\ninvoice bypasses human review.  A faithfulness drop from 0.91 \u2192 0.83 means\nthe model is increasingly making claims that are not grounded in the retrieved\nevidence.  On a high-value invoice, an unsupported claim that \"all vendor checks\npassed\" is a compliance failure \u2014 not just an accuracy metric.</span>\n<h3 id=\"the-four-evaluation-dimensions-for-aegisap\">The four evaluation dimensions for AegisAP</h3>\n<table>\n<thead>\n<tr>\n<th>Dimension</th>\n<th>What it measures</th>\n<th>Target</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Faithfulness</strong></td>\n<td>Do claims reference retrieved evidence?</td>\n<td>\u2265 0.85</td>\n</tr>\n<tr>\n<td><strong>Compliance accuracy</strong></td>\n<td>Are compliance-sensitive decisions correct?</td>\n<td>\u2265 0.90</td>\n</tr>\n<tr>\n<td><strong>Mandatory escalation recall</strong></td>\n<td>Are ALL must-escalate cases escalated?</td>\n<td>= 1.0 (zero tolerance)</td>\n</tr>\n<tr>\n<td><strong>Refusal precision</strong></td>\n<td>Of refusals, what fraction were correct?</td>\n<td>\u2265 0.80</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Mandatory escalation recall is the only zero-tolerance metric.  Any drop below\n1.0 means a high-risk invoice was processed automatically without human review.\nThis is the highest-severity failure mode and always blocks release.</span>\n<h3 id=\"azure-best-practice\">Azure best practice</h3>\n<span class=\"paragraph\">Store baselines in <code>build/day8/regression_baseline.json</code> in source control.\nRun slice-level evaluation in a dedicated Container App Job on a schedule \u2014\nnever on the primary API path.  Alert on any per-slice degradation greater than\nthe threshold in <code>evals/score_thresholds.yaml</code>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "c0729a85b70facb3ef46d0f4595b27b9",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'go' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "9a374603614482a65f571f8a171dcda5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-azure-openai-billing-payg-vs-ptu\">5. Azure OpenAI Billing: PAYG vs. PTU</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "413e2c4e7e3e45ffa87caf3b339f1218",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Azure OpenAI offers two fundamentally different billing models.  Choosing\nthe wrong one at the wrong traffic level is a significant cost lever.</span>\n<table>\n<thead>\n<tr>\n<th>Model</th>\n<th>How you pay</th>\n<th>Latency</th>\n<th>Best for</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Pay-as-you-go (PAYG)</strong></td>\n<td>Per token consumed</td>\n<td>Variable; may queue at peak</td>\n<td>Unpredictable load, development, low volume</td>\n</tr>\n<tr>\n<td><strong>Provisioned Throughput Units (PTU)</strong></td>\n<td>Reserved capacity per hour, regardless of usage</td>\n<td>Consistent; bounded queue</td>\n<td>Predictable high-throughput production workloads</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"trade-offs-in-detail\">Trade-offs in detail</h3>\n<table>\n<thead>\n<tr>\n<th>Concern</th>\n<th>PAYG</th>\n<th>PTU</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Cost at low utilisation</td>\n<td>Low \u2014 you pay per token</td>\n<td>Fixed and expensive (idle capacity wasted)</td>\n</tr>\n<tr>\n<td>Cost at high utilisation</td>\n<td>Can spike; may throttle (HTTP 429)</td>\n<td>Predictable cap; overflow to PAYG via APIM</td>\n</tr>\n<tr>\n<td>Latency consistency</td>\n<td>Variable \u2014 depends on platform load</td>\n<td>Bounded \u2014 reservation guarantees throughput</td>\n</tr>\n<tr>\n<td>Minimum commitment</td>\n<td>None</td>\n<td>Monthly or annual commitment</td>\n</tr>\n<tr>\n<td>Overflow behaviour</td>\n<td>System returns 429</td>\n<td>APIM can spill excess to a PAYG deployment</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"aegisap-decision-rule\">AegisAP decision rule</h3>\n<ul>\n<li>Use <strong>PAYG</strong> during development, staging, and the first three months of production.</li>\n<li>Commit to <strong>PTU</strong> for your highest-traffic task classes once you have a stable\n  utilisation baseline (typically Day 4 <code>plan</code> calls \u2014 the most expensive per token).</li>\n<li>Configure <strong>APIM</strong> as the gateway so overflow from PTU automatically routes to\n  PAYG \u2014 never hardcode the endpoint to a specific deployment.</li>\n</ul>\n<h3 id=\"break-even-formula\">Break-even formula</h3>\n<span class=\"paragraph\">If your daily PAYG spend for a task class is $P and the PTU reservation costs\n$R per day, PTU is economical when:</span>\n<marimo-tex class=\"arithmatex\">||[P &gt; R \\times \\text{target utilisation}^{-1}||]</marimo-tex><span class=\"paragraph\">In practice: PTU breaks even when you can sustain \u2265 60\u201370% utilisation.\nBelow that, PAYG is cheaper.</span>\n<blockquote>\n<span class=\"paragraph\"><strong>Monitoring:</strong> Watch the <code>Utilization</code> and <code>Queued Requests</code> metrics on\nyour PTU deployment.  If utilisation drops below 60% for 30 consecutive days,\nconsider reducing the PTU reservation or reverting to PAYG.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "0c0756b60e80a81ff1e5a2933461377d",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_DnEU_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">daily_requests</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">slider</span><span class=\"p\">(</span>\n<span class=\"w\">                     </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "6409c2e4a6c162ea0204be3ac1a657c4",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'go' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'p' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "d332fb590d16f3c943bbaf5afe15b564",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-task-class-aware-model-routing\">6. Task-Class-Aware Model Routing</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "8b0c6e31d0a61194593f315b43c37003",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Not every LLM call needs the same model.  AegisAP defines <strong>task classes</strong> \u2014\nnamed categories of model invocation with defined capability and latency\nrequirements \u2014 and routes each one to the appropriate tier.</span>\n<h3 id=\"aegisap-task-classes\">AegisAP task classes</h3>\n<table>\n<thead>\n<tr>\n<th>Task class</th>\n<th>Example use</th>\n<th>Default tier</th>\n<th>Cache allowed?</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>extract</code></td>\n<td>Day 1 invoice extraction, standard OCR</td>\n<td>Light (<code>gpt-4.1-mini</code>)</td>\n<td>Yes (when cache enabled)</td>\n</tr>\n<tr>\n<td><code>extract</code> + risk flags</td>\n<td>Day 1 with <code>high_value</code>/<code>missing_po</code> escalators</td>\n<td>Escalated to Strong</td>\n<td>No</td>\n</tr>\n<tr>\n<td><code>retrieve_summarise</code></td>\n<td>Day 3 RAG summary</td>\n<td>Light</td>\n<td>Yes (TTL capped)</td>\n</tr>\n<tr>\n<td><code>plan</code></td>\n<td>Day 4 planning \u2014 all cases</td>\n<td><strong>Always Strong</strong> (<code>gpt-4.1</code>)</td>\n<td>No</td>\n</tr>\n<tr>\n<td><code>compliance_review</code></td>\n<td>Day 6 policy review</td>\n<td>Always Strong</td>\n<td><strong>Never</strong></td>\n</tr>\n<tr>\n<td><code>reflection</code></td>\n<td>Day 6 bounded reflection</td>\n<td>Always Strong</td>\n<td>No</td>\n</tr>\n<tr>\n<td><code>final_render</code></td>\n<td>Final audit output assembly</td>\n<td>Light (Strong if sensitive)</td>\n<td>Yes (unless sensitive)</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"why-routing-must-be-explicit\">Why routing must be explicit</h3>\n<span class=\"paragraph\">Implicit routing (\"just always use the best model\") produces:</span>\n<ul>\n<li><strong>Unnecessary cost</strong> \u2014 gpt-4.1 on a simple extraction costs 10\u201320\u00d7 more per\n  token than gpt-4.1-mini with no quality benefit</li>\n<li><strong>No observability</strong> \u2014 you cannot attribute cost to specific decisions</li>\n<li><strong>No A/B control</strong> \u2014 you cannot safely experiment with model tiers without\n  touching every task at once</li>\n</ul>\n<span class=\"paragraph\">Explicit routing produces:</span>\n<ul>\n<li>Traceable routing decisions in every span (<code>aegis.task_class</code>, <code>aegis.deployment_tier</code>)</li>\n<li>Cost attribution by task class and case class</li>\n<li>Safe experiments: swap <code>extract</code> tier without touching <code>compliance_review</code></li>\n</ul>\n<blockquote>\n<span class=\"paragraph\"><strong>Implementation note:</strong> <code>plan</code>, <code>reflection</code>, and <code>compliance_review</code> always\ndefault to the strong tier regardless of risk flags. Risk flags escalate\nlight-tier tasks (e.g. <code>extract</code>) to strong; they do not change already-strong tasks.</span>\n</blockquote>\n<h3 id=\"how-route_task-works\">How <code>route_task</code> works</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">aegisap.routing.routing_policy</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">route_task</span>\n\n<span class=\"c1\"># extract with risk flag \u2192 escalated to strong</span>\n<span class=\"n\">decision</span> <span class=\"o\">=</span> <span class=\"n\">route_task</span><span class=\"p\">(</span>\n    <span class=\"n\">task_class</span><span class=\"o\">=</span><span class=\"s2\">&quot;extract&quot;</span><span class=\"p\">,</span>\n    <span class=\"n\">risk_flags</span><span class=\"o\">=</span><span class=\"p\">[</span><span class=\"s2\">&quot;high_value&quot;</span><span class=\"p\">,</span> <span class=\"s2\">&quot;missing_po&quot;</span><span class=\"p\">],</span>\n<span class=\"p\">)</span>\n<span class=\"c1\"># decision.deployment_tier == &quot;strong&quot;</span>\n<span class=\"c1\"># decision.cache_allowed  == False</span>\n<span class=\"c1\"># decision.reason         == &quot;risk_escalator_selected_strong_model&quot;</span>\n\n<span class=\"c1\"># plan \u2192 always strong (no risk flags needed)</span>\n<span class=\"n\">decision2</span> <span class=\"o\">=</span> <span class=\"n\">route_task</span><span class=\"p\">(</span><span class=\"n\">task_class</span><span class=\"o\">=</span><span class=\"s2\">&quot;plan&quot;</span><span class=\"p\">)</span>\n<span class=\"c1\"># decision2.deployment_tier == &quot;strong&quot;</span>\n</code></pre></div>\n<span class=\"paragraph\">The decision is recorded in the span attributes so every KQL query can filter\nby which tier handled which decision.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "2be2afa35c8089bf3b6afef08faffc6c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_ZBYS_.py&quot;</span>, line <span class=\"m\">12</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">task_picker</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">dropdown</span><span class=\"p\">(</span>\n<span class=\"w\">                  </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "c83c9a71ad9d9eb9814c3ec1761246e8",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "3caa107883c0b69ef238a8d3afa3a6d4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"7-the-cost-ledger-pattern\">7. The Cost Ledger Pattern</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "f1bdd71731c4bccca1735f303a9ca55b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Every successful model call writes a <strong>cost ledger entry</strong> \u2014 a durable, queryable\nrecord of what was called, what it cost, and whether the cache was hit.</span>\n<h3 id=\"ledger-entry-schema\">Ledger entry schema</h3>\n<div class=\"language-json codehilite\"><pre><span></span><code><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;entry_id&quot;</span><span class=\"p\">:</span><span class=\"w\">           </span><span class=\"s2\">&quot;ledger-abc-001&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;thread_id&quot;</span><span class=\"p\">:</span><span class=\"w\">          </span><span class=\"s2\">&quot;thread-inv-3001&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;workflow_run_id&quot;</span><span class=\"p\">:</span><span class=\"w\">    </span><span class=\"s2\">&quot;run-xyz-789&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;task_class&quot;</span><span class=\"p\">:</span><span class=\"w\">         </span><span class=\"s2\">&quot;planning_high_risk&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;model_deployment&quot;</span><span class=\"p\">:</span><span class=\"w\">   </span><span class=\"s2\">&quot;gpt-4.1&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;prompt_tokens&quot;</span><span class=\"p\">:</span><span class=\"w\">      </span><span class=\"mi\">1240</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;completion_tokens&quot;</span><span class=\"p\">:</span><span class=\"w\">  </span><span class=\"mi\">312</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;total_tokens&quot;</span><span class=\"p\">:</span><span class=\"w\">       </span><span class=\"mi\">1552</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;estimated_cost&quot;</span><span class=\"p\">:</span><span class=\"w\">     </span><span class=\"mf\">0.004725</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;cache_hit&quot;</span><span class=\"p\">:</span><span class=\"w\">          </span><span class=\"kc\">false</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;created_at&quot;</span><span class=\"p\">:</span><span class=\"w\">         </span><span class=\"s2\">&quot;2024-03-26T14:32:00Z&quot;</span>\n<span class=\"p\">}</span>\n</code></pre></div>\n<span class=\"paragraph\">The field <code>estimated_cost</code> uses token-rate approximations:</span>\n<ul>\n<li>Light tier (<code>gpt-4.1-mini</code>): ~<marimo-tex class=\"arithmatex\">||(0.15/1M input tokens, ~||)</marimo-tex>0.60/1M output tokens</li>\n<li>Strong tier (<code>gpt-4.1</code>): ~<marimo-tex class=\"arithmatex\">||(2.00/1M input tokens, ~||)</marimo-tex>8.00/1M output tokens</li>\n</ul>\n<h3 id=\"what-the-ledger-answers\">What the ledger answers</h3>\n<table>\n<thead>\n<tr>\n<th>Question</th>\n<th>KQL / query</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Average cost per invoice class</td>\n<td>Group by <code>case_class</code>, sum <code>estimated_cost</code></td>\n</tr>\n<tr>\n<td>Monthly cache savings</td>\n<td>Sum <code>estimated_cost</code> where <code>cache_hit = true</code></td>\n</tr>\n<tr>\n<td>Which task class is most expensive?</td>\n<td>Group by <code>task_class</code>, sum <code>estimated_cost</code></td>\n</tr>\n<tr>\n<td>Is <code>planning_high_risk</code> exceeding its ceiling?</td>\n<td>Filter <code>task_class = planning_high_risk</code>, sum vs. ceiling</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"cost-gate\">Cost gate</h3>\n<span class=\"paragraph\">If <code>accumulated_cost</code> for a single workflow run exceeds the per-run ceiling,\nAegisAP emits a <strong>cost gate exception</strong> and escalates to human review.</span>\n<table>\n<thead>\n<tr>\n<th>Case class</th>\n<th>Per-run ceiling</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Standard</td>\n<td>$0.10</td>\n</tr>\n<tr>\n<td>High-value</td>\n<td>$0.25</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">This prevents runaway spending from model loops, infinite retries, or\nunexpectedly expensive plans.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "85cea8b5628eb7c9f8e9d91578841d67",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_AjVT_.py&quot;</span>, line <span class=\"m\">8</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">volume_slider</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">slider</span><span class=\"p\">(</span>\n<span class=\"w\">                    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "ec7632d41f24c700d2ed423d9df5ca6f",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "cdf49d91666bd4bc8c432d187339b9ae",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_NCOB_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "a97505066c6659b8d443b5e8efb26996",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"8-semantic-cache-bypass-policy\">8. Semantic Cache Bypass Policy</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "6920110cce06c6da3e6a44d132aef3a5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Semantic caching</strong> stores LLM responses and reuses them when a new request\nis semantically similar enough (cosine similarity \u2265 threshold).</span>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"n\">New</span><span class=\"w\"> </span><span class=\"n\">request</span><span class=\"w\"> </span><span class=\"n\">embedding</span>\n<span class=\"w\">    </span><span class=\"err\">\u2502</span>\n<span class=\"w\">    </span><span class=\"err\">\u25bc</span>\n<span class=\"p\">[</span><span class=\"w\"> </span><span class=\"n\">Cache</span><span class=\"w\"> </span><span class=\"n\">lookup</span><span class=\"w\"> </span><span class=\"p\">]</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">cosine</span><span class=\"w\"> </span><span class=\"n\">similarity</span><span class=\"w\"> </span><span class=\"n\">score</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u2500\u2500\u25ba</span>\n<span class=\"w\">    </span><span class=\"err\">\u2502</span>\n<span class=\"w\">    </span><span class=\"err\">\u251c\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">score</span><span class=\"w\"> </span><span class=\"err\">\u2265</span><span class=\"w\"> </span><span class=\"n\">threshold</span><span class=\"w\">  </span><span class=\"err\">\u2192</span><span class=\"w\">  </span><span class=\"k\">return</span><span class=\"w\"> </span><span class=\"n\">cached</span><span class=\"w\"> </span><span class=\"n\">response</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"n\">no</span><span class=\"w\"> </span><span class=\"n\">LLM</span><span class=\"w\"> </span><span class=\"n\">call</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"err\">\u2502</span>\n<span class=\"w\">    </span><span class=\"err\">\u2514\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">score</span><span class=\"w\"> </span><span class=\"o\">&lt;</span><span class=\"w\"> </span><span class=\"n\">threshold</span><span class=\"w\">  </span><span class=\"err\">\u2192</span><span class=\"w\">  </span><span class=\"n\">call</span><span class=\"w\"> </span><span class=\"n\">LLM</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">store</span><span class=\"w\"> </span><span class=\"n\">result</span><span class=\"w\"> </span><span class=\"k\">in</span><span class=\"w\"> </span><span class=\"n\">cache</span>\n</code></pre></div>\n<h3 id=\"benefits-and-risks\">Benefits and risks</h3>\n<table>\n<thead>\n<tr>\n<th>Benefit</th>\n<th>Risk</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Reduces PAYG token cost on repetitive queries</td>\n<td>Stale cache may return outdated policy answers</td>\n</tr>\n<tr>\n<td>Reduces p99 latency on cache hits</td>\n<td>Semantically similar \u2260 actually equivalent</td>\n</tr>\n<tr>\n<td>Predictable cost on high-repetition workloads</td>\n<td>Compliance decisions must never be served from cache</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"aegisaps-four-cache-bypass-conditions\">AegisAP's four cache bypass conditions</h3>\n<table>\n<thead>\n<tr>\n<th>Condition</th>\n<th>Why bypass the cache</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Task class is <code>compliance_review</code></td>\n<td>Policy compliance decisions must always use current context and the full evidence set</td>\n</tr>\n<tr>\n<td>Evidence freshness flag is set</td>\n<td>Retrieved documents may have changed since the cache entry was created</td>\n</tr>\n<tr>\n<td>Case risk score is HIGH</td>\n<td>High-risk cases require fresh model inference \u2014 slight semantic drift is not acceptable</td>\n</tr>\n<tr>\n<td>Cache TTL has expired</td>\n<td>All cache entries have a configurable TTL; after expiry the entry is treated as a miss</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"azure-best-practice\">Azure best practice</h3>\n<span class=\"paragraph\">Use <strong>Azure Cache for Redis</strong> as the cache backend if deploying with multiple\nContainer App replicas.  In-memory caches:</span>\n<ul>\n<li>Do not survive process restarts</li>\n<li>Are not shared across replicas \u2014 each replica has its own cold cache</li>\n<li>Cannot be invalidated centrally when policy documents change</li>\n</ul>\n<span class=\"paragraph\">Redis solves all three problems.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "9aab3ca6618520a4aa0ed2c84631ecfb",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_TXez_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">task_class_cache</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">dropdown</span><span class=\"p\">(</span>\n<span class=\"w\">                       </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "5d116dcde11550f45db793f06ec40b56",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "9b684db9a9adf980a2cd877b98a52781",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"9-aca-auto-scaling-for-ai-workloads\">9. ACA Auto-Scaling for AI Workloads</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "13084805ae4df5f174383a62c38c24f6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Azure Container Apps scales replicas based on <strong>scaling rules</strong> \u2014 triggers\nthat define conditions for adding or removing instances.</span>\n<h3 id=\"scaling-rule-types-relevant-to-aegisap\">Scaling rule types relevant to AegisAP</h3>\n<table>\n<thead>\n<tr>\n<th>Rule type</th>\n<th>Trigger</th>\n<th>AegisAP use</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>HTTP concurrency</strong></td>\n<td>Active HTTP requests per replica</td>\n<td>API server: scale on request queue depth</td>\n</tr>\n<tr>\n<td><strong>Azure Queue</strong></td>\n<td>Messages in a Storage Queue</td>\n<td>Worker: scale on pending workflow jobs</td>\n</tr>\n<tr>\n<td><strong>Custom KEDA</strong></td>\n<td>Any external metric via KEDA</td>\n<td>Cost-aware: scale-down when budget headroom is low</td>\n</tr>\n<tr>\n<td><strong>CPU / Memory</strong></td>\n<td>Resource utilisation %</td>\n<td>Fallback; not recommended as primary trigger for AI workloads</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"recommended-aegisap-scaling-configuration\">Recommended AegisAP scaling configuration</h3>\n<div class=\"language-yaml codehilite\"><pre><span></span><code><span class=\"c1\"># containerapp.yaml excerpt</span>\n<span class=\"nt\">scale</span><span class=\"p\">:</span>\n<span class=\"w\">  </span><span class=\"nt\">minReplicas</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">1</span>\n<span class=\"w\">  </span><span class=\"nt\">maxReplicas</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">10</span>\n<span class=\"w\">  </span><span class=\"nt\">rules</span><span class=\"p\">:</span>\n\n<span class=\"w\">    </span><span class=\"p p-Indicator\">-</span><span class=\"w\"> </span><span class=\"nt\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">http-scaling</span>\n<span class=\"w\">      </span><span class=\"nt\">http</span><span class=\"p\">:</span>\n<span class=\"w\">        </span><span class=\"nt\">metadata</span><span class=\"p\">:</span>\n<span class=\"w\">          </span><span class=\"nt\">concurrentRequests</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"s\">&quot;10&quot;</span><span class=\"w\">  </span><span class=\"c1\"># scale-out trigger per replica</span>\n\n<span class=\"w\">    </span><span class=\"p p-Indicator\">-</span><span class=\"w\"> </span><span class=\"nt\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">queue-scaling</span>\n<span class=\"w\">      </span><span class=\"nt\">azureQueue</span><span class=\"p\">:</span>\n<span class=\"w\">        </span><span class=\"nt\">queueName</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">aegisap-jobs</span>\n<span class=\"w\">        </span><span class=\"nt\">queueLength</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"s\">&quot;5&quot;</span><span class=\"w\">            </span><span class=\"c1\"># 1 new replica per 5 pending jobs</span>\n<span class=\"w\">        </span><span class=\"nt\">auth</span><span class=\"p\">:</span>\n\n<span class=\"w\">        </span><span class=\"p p-Indicator\">-</span><span class=\"w\"> </span><span class=\"nt\">secretRef</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">storage-connection-string</span>\n<span class=\"w\">            </span><span class=\"l l-Scalar l-Scalar-Plain\">triggerParameter</span><span class=\"p p-Indicator\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">connection</span>\n</code></pre></div>\n<h3 id=\"cost-aware-scaling\">Cost-aware scaling</h3>\n<span class=\"paragraph\">ACA is billed per replica-second.  An idle replica in a non-PTU workload\nstill costs money but produces no token throughput.</span>\n<span class=\"paragraph\">Best practices:</span>\n<ul>\n<li>Set <code>minReplicas: 0</code> for jobs (eval runs, index ingestion) \u2014 zero cost at rest</li>\n<li>Set <code>minReplicas: 1</code> for the API server \u2014 avoids cold-start latency on the first request</li>\n<li>Use a <strong>scale-down stabilisation window</strong> (KEDA default: 5 minutes) to avoid\n  thrashing during bursty invoice ingestion</li>\n</ul>\n<h3 id=\"interaction-with-ptu\">Interaction with PTU</h3>\n<span class=\"paragraph\">If you have a PTU reservation and too many replicas, each replica will compete\nfor the same throughput budget.  The optimal replica count for a PTU deployment is:</span>\n<marimo-tex class=\"arithmatex\">||[\\text{replicas} = \\left\\lceil \\frac{\\text{PTU capacity (tokens/min)}}{\\text{max tokens/min per replica}} \\right\\rceil||]</marimo-tex><span class=\"paragraph\">Exceeding this causes queuing at the PTU layer, and under-supplying it wastes\nthe reservation.  Monitor <code>Utilization</code> on the PTU deployment alongside ACA replica count.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "9f32f3c2d130aae9cb4902d041e9fd85",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"exercises\">Exercises</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "bcceeccc4259567fe0db0fc5e84c4731",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_wAgl_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "rEll",
+      "code_hash": "c2ad4c7921e70d17aee2e928ce019a8d",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_rEll_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "c39b313068975015f84eedab3b4d691f",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_dGlV_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "SdmI",
+      "code_hash": "a22110b15d81e9b89e5b7e697137a3c9",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_SdmI_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "lgWD",
+      "code_hash": "71d830fc54e3a00a4e35f77ed231df44",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'os' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yOPj",
+      "code_hash": "04e9495c5563f75ac61e47ed09af91c1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"production-reflection\">Production Reflection</h1>\n<ol>\n<li>** Silent failure diagnosis: ** Your incident dashboard shows that <code>needs_human_review</code>\n   outcomes have increased 40 % this week, but there are no exceptions in the log.\n   Walk through the investigation: which metrics do you query first, which KQL\n   queries do you run, and what root causes would each query help rule out?</li>\n<li>** Slice regression in production: ** You deploy a new embedding model for the\n   retrieval node. The aggregate evaluation score improves by 0.03. Before shifting\n   100 % traffic, you run slice-level evaluation and find that\n   <code>review_compliance / high_value</code> drops from 0.91 \u2192 0.84. What is your decision,\n   and how do you document it in the release process?</li>\n<li>** PTU utilisation drift: ** Three months into production, you notice the PTU\n   reservation for <code>compliance_review</code> is running at 35 % average utilisation.\n   What are the three most likely explanations, and what action would you take\n   for each?</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "fwwy",
+      "code_hash": "31f87c18968c80056007e827fb1f1053",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-9-summary-checklist\">Day 9 Summary Checklist</h1>\n<ul>\n<li>[] Name the three pillars of observability and state the unique question each one answers</li>\n<li>[] Describe the OTEL span data model: <code>trace_id</code>, <code>span_id</code>, <code>parent_span_id</code>, attributes, status</li>\n<li>[] Explain why the Azure Monitor OpenTelemetry Distro is preferred over raw OTEL SDK wiring</li>\n<li>[] Write a KQL query for p99 latency by workflow node and one for escalation spike detection</li>\n<li>[] Explain why aggregate evaluation scores can hide per-slice regressions(use the table example)</li>\n<li>[] State the mandatory escalation recall target and why it is 1.0 not 0.95</li>\n<li>[] Compare PAYG and PTU billing: cost profile, latency profile, optimal use case for each</li>\n<li>[] State the five AegisAP task classes and their default routing tier</li>\n<li>[] Name the four conditions under which AegisAP bypasses the semantic cache</li>\n<li>[] Describe a cost ledger entry: all fields and what business questions each answers</li>\n<li>[] Explain why <code>minReplicas: 0</code> is appropriate for ACA Jobs but not for the API server</li>\n<li>[] Artifact <code>build/day9/routing_report.json</code> exists with a <code>sample_ledger</code> key</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "LJZf",
+      "code_hash": "efc617332cf90de949cff5380547ae1c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88738/__marimo__cell_LJZf_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "urSm",
+      "code_hash": "e74f1bb3fe5197d42167d99c8c948dad",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"fde-learning-contract-day-09-observability-routing-cost-and-economic-control\">FDE Learning Contract \u2014 Day 09: Observability, Routing, Cost, and Economic Control</h2>\n<h3 id=\"four-daily-outputs\">Four Daily Outputs</h3>\n<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Output type</th>\n<th>Location</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td>Technical build</td>\n<td><code>LAB_OUTPUT/</code></td>\n</tr>\n<tr>\n<td>2</td>\n<td>Design defense memo</td>\n<td><code>DECISION_MEMOS/</code></td>\n</tr>\n<tr>\n<td>3</td>\n<td>Corporate process artifact</td>\n<td><code>PROCESS_ARTIFACTS/</code></td>\n</tr>\n<tr>\n<td>4</td>\n<td>Oral defense prep notes</td>\n<td><code>ORAL_DEFENSE/</code></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"rubric-weights-100-points-total\">Rubric Weights (100 points total)</h3>\n<table>\n<thead>\n<tr>\n<th>Dimension</th>\n<th>Points</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Routing Correctness</td>\n<td>25</td>\n</tr>\n<tr>\n<td>Cost Reasoning</td>\n<td>25</td>\n</tr>\n<tr>\n<td>Observability As Control</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Finance Communication Quality</td>\n<td>15</td>\n</tr>\n<tr>\n<td>Oral Defense</td>\n<td>15</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Pass bar: <strong>80 / 100</strong>   Elite bar: <strong>90 / 100</strong></span>\n<h3 id=\"oral-defense-prompts\">Oral Defense Prompts</h3>\n<ol>\n<li>Which capability did you route to the mini model and what is the quality degradation risk if that routing decision is wrong?</li>\n<li>Finance demands a 30% cost cut. Walk through which lever you would pull first and what zero-tolerance controls you would not touch.</li>\n<li>Who approves a PTU commitment in your enterprise, and what observability evidence would they require before signing a two-year reservation?</li>\n</ol>\n<h3 id=\"artifact-scaffolds\">Artifact Scaffolds</h3>\n<ul>\n<li><code>docs/curriculum/artifacts/day09/CAPABILITY_ALLOCATION_MEMO.md</code></li>\n<li><code>docs/curriculum/artifacts/day09/COST_GOVERNANCE_POLICY.md</code></li>\n<li><code>docs/curriculum/artifacts/day09/PTU_PAYG_DECISION_NOTE.md</code></li>\n</ul>\n<span class=\"paragraph\">See <code>docs/curriculum/MENTAL_MODELS.md</code> for mental models reference.\nSee <code>docs/curriculum/ASSESSOR_CALIBRATION.md</code> for scoring anchors.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

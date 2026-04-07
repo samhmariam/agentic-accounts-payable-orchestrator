@@ -83,6 +83,102 @@ def _full_day_agenda(mo):
     )
     return
 
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Design safe external boundaries by combining HTTP, Service Bus, compensating actions, and MCP contract discipline.',
+        prerequisites=['Days 11-12 complete.', 'Understand actor binding and private network posture before opening external boundaries.', 'Live MCP or webhook verification is optional beyond the notebook learning path.'],
+        resources=['`notebooks/day_13_integration_boundary_and_mcp.py`', '`build/day13/` for `dlq_drain_report.json`, `mcp_contract_report.json`, and `write_path_exercise.json`', '`scripts/verify_mcp_contract_integrity.py` and related boundary scripts for live follow-up', '`docs/curriculum/artifacts/day13/` and `docs/curriculum/CAPSTONE_B_TRANSFER.md`'],
+        setup_sequence=["Start with the transfer-lens and lineage cells so today's boundaries are framed as reliability and contract problems.", 'Decide whether you are staying in notebook or training mode or validating a live MCP surface afterward.', 'Keep the notebook as the primary route; use scripts only after the contract model makes sense.'],
+        run_steps=['Work through HTTP boundary, DLQ handling, compensating actions, MCP exposure, and write-path safety in order.', 'Use the exercises to reason about failure handling before attempting any live verification.', 'Run the cells that write `build/day13/dlq_drain_report.json`, `build/day13/mcp_contract_report.json`, and `build/day13/write_path_exercise.json`.', 'Finish with the checklist so the difference between training previews and authoritative reports is explicit.'],
+        output_interpretation=['The main completion signals are the three Day 13 build artifacts, especially `mcp_contract_report.json` and `write_path_exercise.json`.', 'Interpret outputs as boundary evidence: can external callers rely on the contract, and can failures recover safely?', 'If a report says `training_artifact: true`, treat it as a learning preview rather than final operational proof.'],
+        troubleshooting=['If MCP feels detached from the rest of the day, anchor on contract stability and safe tool exposure.', 'If DLQ handling feels purely operational, connect it back to compensating actions and rollback confidence.', 'If live contract verification is blocked, finish the notebook first and treat the script as second-pass validation.'],
+        outside_references=['Capstone transfer domain: `docs/curriculum/CAPSTONE_B_TRANSFER.md`', 'Reusable references: `docs/curriculum/artifacts/day13/`', 'Boundary verification scripts in `scripts/`'],
+    )
+    return
+
+
+@app.cell
+def _three_surface_linkage(mo):
+    from _shared.lab_guide import render_surface_linkage
+
+    render_surface_linkage(
+        mo,
+        portal_guide="docs/curriculum/portal/DAY_13_PORTAL.md",
+        portal_activity="Inspect the live boundary host, Service Bus queue and DLQ, monitoring traces, and MCP host in Azure before you trust contract or recovery reports.",
+        notebook_activity="Use the HTTP boundary, DLQ, compensating-action, MCP, and write-path safety sections to interpret what the live Azure boundary means for reliability and contract safety.",
+        automation_steps=[
+            "`uv run python scripts/verify_mcp_contract_integrity.py` formalizes the MCP surface you inspected.",
+            "`uv run python scripts/verify_webhook_reliability.py` checks the same recovery story the portal showed through queues and telemetry.",
+            "`uv run python -m pytest tests/day13 -q` keeps the boundary and recovery contract repeatable in CI.",
+        ],
+        evidence_checks=[
+            "Service Bus queue and DLQ state should line up with the failure and recovery narrative in the notebook.",
+            "`build/day13/dlq_drain_report.json`, `build/day13/mcp_contract_report.json`, and `build/day13/webhook_reliability_report.json` should agree with the live boundary state.",
+            "If the Azure boundary and the generated contract artifacts disagree, stop before treating the write path as safe.",
+        ],
+    )
+    return
+
+
+@app.cell
+def _azure_mastery_guide(mo):
+    from _shared.lab_guide import render_azure_mastery_guide
+
+    render_azure_mastery_guide(
+        mo,
+        focus="Day 13 mastery means you can inspect the live boundary surfaces in Azure, verify the webhook and MCP contract paths from the command line, recognise the minimal Service Bus recovery code, and prove that external callers can fail safely without breaking the contract.",
+        portal_tasks="""
+- Open the deployed boundary surface, whether Azure Functions or Container Apps, and inspect auth, identity, and ingress so the exposed contract is visible in Azure.
+- Open **Service Bus** and inspect the queue plus dead-letter count so recovery is treated as an observable Azure concern rather than a hidden implementation detail.
+- Inspect **Application Insights** or the relevant monitoring blade for webhook handling, DLQ drain activity, and compensating-action traces.
+- If the MCP server is deployed, inspect its hosting resource and logs so `/capabilities` checks are tied back to a real Azure surface.
+""",
+        cli_verification="""
+**Start the MCP server and verify the contract**
+
+```bash
+uvicorn aegisap.mcp.server:app --port 8001
+
+export AEGISAP_MCP_URL=http://localhost:8001
+uv run python scripts/verify_mcp_contract_integrity.py
+```
+
+**Verify webhook reliability and DLQ handling**
+
+```bash
+uv run python scripts/verify_webhook_reliability.py
+```
+
+**Inspect the advertised MCP surface directly**
+
+```bash
+curl -s "$AEGISAP_MCP_URL/capabilities"
+```
+""",
+        sdk_snippet="""
+The Azure-heavy recovery path is the DLQ consumer that drains Service Bus using managed identity.
+
+```python
+from aegisap.integration.dlq_consumer import DlqConsumer
+
+consumer = DlqConsumer.from_env()
+report = consumer.drain(max_messages=50)
+print(report.summary())
+```
+""",
+        proof_in_azure="""
+- `build/day13/mcp_contract_report.json` is authoritative and shows `contract_valid: true` with the required tools present.
+- `build/day13/dlq_drain_report.json` and `build/day13/webhook_reliability_report.json` are authoritative and show no unhandled failures.
+- The Service Bus DLQ count and the portal monitoring view agree with the recovery story in the artifacts.
+- Day 13 is only really proven when the external contract, the recovery evidence, and the live Azure boundary all line up.
+""",
+    )
+    return
+
 
 @app.cell
 def _capstone_b_transfer_lens(mo):

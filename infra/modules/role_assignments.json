@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.41.2.15936",
-      "templateHash": "4279509151500191399"
+      "templateHash": "16759168022606358886"
     }
   },
   "parameters": {
@@ -23,6 +23,13 @@
     },
     "acrName": {
       "type": "string"
+    },
+    "contentSafetyName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional: Content Safety account name for Cognitive Services User role assignment"
+      }
     },
     "developerPrincipalId": {
       "type": "string",
@@ -71,6 +78,13 @@
     },
     "acrPullRoleDefinitionId": {
       "type": "string"
+    },
+    "cognitiveServicesUserRoleDefinitionId": {
+      "type": "string",
+      "defaultValue": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')]",
+      "metadata": {
+        "description": "Cognitive Services User role — grants read access to Content Safety and other Cognitive Services endpoints. Defaults to the well-known built-in role ID."
+      }
     }
   },
   "resources": [
@@ -79,11 +93,11 @@
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
       "scope": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName'))]",
-      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName')), parameters('developerPrincipalId'), parameters('cognitiveServicesOpenAiUserRoleDefinitionId'))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiName')), parameters('developerPrincipalId'), parameters('cognitiveServicesUserRoleDefinitionId'))]",
       "properties": {
         "principalId": "[parameters('developerPrincipalId')]",
         "principalType": "[parameters('developerPrincipalType')]",
-        "roleDefinitionId": "[parameters('cognitiveServicesOpenAiUserRoleDefinitionId')]"
+        "roleDefinitionId": "[parameters('cognitiveServicesUserRoleDefinitionId')]"
       }
     },
     {
@@ -240,6 +254,18 @@
         "principalId": "[parameters('runtimeApiPrincipalId')]",
         "principalType": "ServicePrincipal",
         "roleDefinitionId": "[parameters('keyVaultUserRoleId')]"
+      }
+    },
+    {
+      "condition": "[and(not(empty(parameters('developerPrincipalId'))), not(empty(parameters('contentSafetyName'))))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.CognitiveServices/accounts', if(not(empty(parameters('contentSafetyName'))), parameters('contentSafetyName'), 'placeholder'))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', if(not(empty(parameters('contentSafetyName'))), parameters('contentSafetyName'), 'placeholder')), parameters('developerPrincipalId'), parameters('cognitiveServicesUserRoleDefinitionId'))]",
+      "properties": {
+        "principalId": "[parameters('developerPrincipalId')]",
+        "principalType": "[parameters('developerPrincipalType')]",
+        "roleDefinitionId": "[parameters('cognitiveServicesUserRoleDefinitionId')]"
       }
     }
   ]

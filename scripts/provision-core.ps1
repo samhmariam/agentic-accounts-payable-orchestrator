@@ -66,15 +66,15 @@ $outputs = $deployment.properties.outputs
 
 if (-not $SkipRoleAssignments) {
     Write-Host "Applying core RBAC role assignments..." -ForegroundColor Cyan
-    Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Cognitive Services OpenAI User" -Scope (Get-OutputValue -Outputs $outputs -Name "openAiId")
+    Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Cognitive Services User" -Scope (Get-OutputValue -Outputs $outputs -Name "foundryId")
     Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Search Service Contributor" -Scope (Get-OutputValue -Outputs $outputs -Name "searchServiceId")
     Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Search Index Data Contributor" -Scope (Get-OutputValue -Outputs $outputs -Name "searchServiceId")
     Ensure-RoleAssignment -PrincipalId $DeveloperPrincipalId -PrincipalType $DeveloperPrincipalType -RoleName "Storage Blob Data Contributor" -Scope (Get-OutputValue -Outputs $outputs -Name "storageAccountId")
 }
 
-Ensure-OpenAiDeployment `
+Ensure-FoundryChatDeployment `
     -ResourceGroup $ResourceGroup `
-    -OpenAiName (Get-OutputValue -Outputs $outputs -Name "openAiName") `
+    -FoundryName (Get-OutputValue -Outputs $outputs -Name "foundryName") `
     -DeploymentName (Get-OutputValue -Outputs $outputs -Name "openAiChatDeploymentName") `
     -ModelName (Get-OutputValue -Outputs $outputs -Name "openAiChatModelName") `
     -ModelVersion (Get-OutputValue -Outputs $outputs -Name "openAiChatModelVersion") `
@@ -97,6 +97,8 @@ $environment = [ordered]@{
     AZURE_SUBSCRIPTION_ID = $SubscriptionId
     AZURE_RESOURCE_GROUP = $ResourceGroup
     AZURE_LOCATION = $Location
+    AZURE_FOUNDRY_ENDPOINT = Get-OutputValue -Outputs $outputs -Name "foundryEndpoint"
+    AZURE_FOUNDRY_RESOURCE_NAME = Get-OutputValue -Outputs $outputs -Name "foundryName"
     AZURE_OPENAI_ENDPOINT = Get-OutputValue -Outputs $outputs -Name "openAiEndpoint"
     AZURE_OPENAI_API_VERSION = Get-OutputValue -Outputs $outputs -Name "openAiApiVersion"
     AZURE_OPENAI_CHAT_DEPLOYMENT = Get-OutputValue -Outputs $outputs -Name "openAiChatDeploymentName"
@@ -108,6 +110,7 @@ $environment = [ordered]@{
 }
 
 $resources = [ordered]@{
+    foundryName = Get-OutputValue -Outputs $outputs -Name "foundryName"
     openAiName = Get-OutputValue -Outputs $outputs -Name "openAiName"
     searchName = Get-OutputValue -Outputs $outputs -Name "searchName"
     searchDay3IndexName = $Day3SearchIndexName
@@ -125,7 +128,7 @@ Write-Day0State `
     -Resources $resources
 
 Write-Host ""
-Write-Host "Core Day 0 provisioning complete." -ForegroundColor Green
+Write-Host "Core Day 0 provisioning complete with a Foundry-first baseline." -ForegroundColor Green
 Write-Host "State file: $OutputsFile"
 Write-Host "Next: . ./scripts/setup-env.ps1 -Track core"
 Write-Host "Then: python scripts/verify_env.py --track core"

@@ -42,12 +42,12 @@ def _title(mo):
 
     ## Learning Objectives
 
-    1. Implement the AegisAP `WorkflowState` TypedDict and wire it through a LangGraph `StateGraph`.
-    2. Connect specialist agents (extraction, planning, policy, execution) as LangGraph nodes.
-    3. Implement conditional routing with `add_conditional_edges`.
+    1. Model the AegisAP `WorkflowState` TypedDict and review how it wires through a LangGraph `StateGraph`.
+    2. Analyze how specialist agents (extraction, planning, policy, execution) connect as LangGraph nodes.
+    3. Review conditional routing with `add_conditional_edges`.
     4. Attach a PostgreSQL checkpointer so the workflow survives process restarts.
     5. Simulate a crash-and-resume scenario using the checkpoint store.
-    6. Implement the HITL (Human-in-the-Loop) pause/resume pattern.
+    6. Explain the HITL (Human-in-the-Loop) pause/resume pattern and its safety constraints.
 
     ---
 
@@ -72,6 +72,23 @@ def _full_day_agenda(mo):
         mo,
         day_label="Day 5 multi-agent orchestration and pause/resume",
         core_outcome="explain when multi-agent coordination is worth the complexity and how durable state preserves safety",
+    )
+    return
+
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Connect specialist logic into a durable LangGraph state machine with pause/resume and checkpoint safety.',
+        prerequisites=['Day 4 single-agent loop understood.', 'Comfort reading typed state and routing logic.', 'PostgreSQL is conceptual context for checkpointing even if you stay in notebook mode.'],
+        resources=['`notebooks/day_5_multi_agent_orchestration.py`', '`docs/curriculum/artifacts/day05/` for governance and HITL references', '`build/day5/` for the resumed golden-thread artifact', '`langgraph.checkpoint.postgres.PostgresSaver` patterns shown in the notebook'],
+        setup_sequence=['Run the bootstrap and title/agenda cells first.', 'Review the Day 4 artifact shape because Day 5 builds on the same invoice flow.', 'Treat the PostgreSQL sections as a durability design exercise even if you are not connecting to a live database here.'],
+        run_steps=['Read the `WorkflowState` and routing sections before the checkpoint sections.', 'Follow the crash, pause, resume, and replay examples in order.', 'Use the exercises to map state fields to nodes and understand resume-token design.', 'Run the artifact-writing cell that produces `build/day5/golden_thread_day5_resumed.json`.'],
+        output_interpretation=['Success means you can explain why the workflow can stop and safely continue without duplicate side effects.', 'The concrete completion signal is `build/day5/golden_thread_day5_resumed.json` with `gate_passed = true`.', 'Checkpoint tables, resume semantics, and HITL governance should feel like one system rather than separate features.'],
+        troubleshooting=['If the graph feels too abstract, anchor on one invoice thread moving through state updates over time.', 'If the checkpoint section feels database-heavy, focus on what must survive restarts rather than memorising table names.', 'If the artifact is missing, rerun the final artifact cell after the resume examples.'],
+        outside_references=['Long-form theory: `docs/curriculum/trainee/DAY_05_TRAINEE.md`', 'Trainer notes: `docs/curriculum/trainer/DAY_05_TRAINER.md`', 'Reusable references: `docs/curriculum/artifacts/day05/`'],
     )
     return
 
@@ -669,13 +686,13 @@ Nodes: `extract`, `plan`, `retrieve`, `execute`, `hitl_pause`
 @app.cell
 def _exercise_2(mo):
     mo.accordion({
-        "Exercise 2 — Implement `route_after_execute`": mo.vstack([
+        "Exercise 2 — Review `route_after_execute` Fail-Closed Logic": mo.vstack([
             mo.md("""
 **Task:** Extend `route_after_execute` with two additional requirements:
 1. If `state.get("error")` is not None, route to `"reject"` regardless of other state
 2. If `state.get("plan_policy_approved")` is False, route to `"reject"` with message
 
-Write the complete function including these cases. Ensure fail-closed semantics.
+Sketch or review the complete function including these cases. Ensure fail-closed semantics.
             """),
             mo.accordion({
                 "Show solution": mo.md("""
@@ -852,9 +869,9 @@ def _summary(mo):
 
     - [ ] Define a `WorkflowState` TypedDict with all required AegisAP fields
     - [ ] Wire extraction, planning, retrieval, and execution nodes into a `StateGraph`
-    - [ ] Implement `add_conditional_edges` with a fail-closed default branch
+    - [ ] Explain `add_conditional_edges` with a fail-closed default branch
     - [ ] Explain how PostgreSQL checkpointing enables crash-and-resume
-    - [ ] Implement the HITL pause/resume pattern with an opaque resume token
+    - [ ] Explain the HITL pause/resume pattern with an opaque resume token
     - [ ] Describe the difference between `RecommendationPackage` and `EscalationPackage`
     - [ ] Artifact `build/day5/golden_thread_day5_resumed.json` exists and `gate_passed = true`
     """)

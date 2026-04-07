@@ -1,0 +1,442 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "7ce2e3ca805076a815bf3f947b669ab4",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "4c9f5b5b6b6ebcee2b74057a5abdcb49",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "bf3160fff8260c553a19a753ac309ca0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-11-delegated-identity-on-behalf-of-obo-flows\">Day 11 \u2014 Delegated Identity &amp; On-Behalf-Of (OBO) Flows</h1>\n<blockquote>\n<span class=\"paragraph\"><strong>WAF Pillars covered:</strong> Security \u00b7 Operational Excellence\n<strong>Estimated time:</strong> 2.5 hours\n<strong>Prerequisites:</strong>\n- <strong>Day 3</strong> Identity Plane Bridge (four planes, blast-radius model)\n- <strong>Day 8</strong> OIDC workload federation &amp; Managed Identity deployment hardening\n- <strong>Day 7</strong> Key Vault secret rotation (OBO client secret stored in KV)\n<strong>New gate:</strong> <code>gate_delegated_identity</code> (3 sub-checks: app_identity, obo_exchange, actor_binding)</span>\n</blockquote>\n<hr />\n<h2 id=\"learning-objectives\">Learning Objectives</h2>\n<span class=\"paragraph\">By the end of this notebook you will be able to:</span>\n<ol>\n<li>Explain why <code>DefaultAzureCredential</code> is insufficient for delegated approval flows.</li>\n<li>Trace the OAuth 2.0 On-Behalf-Of flow using MSAL <code>ConfidentialClientApplication</code> and identify its trust boundaries.</li>\n<li>Verify that an OBO token's <code>oid</code> claim belongs to the required Entra group.</li>\n<li>Validate a Day 11 OBO contract artifact that passes all three sub-gate checks.</li>\n<li>Describe the authority-confusion threat and the AegisAP defence.</li>\n</ol>\n<hr />\n<h2 id=\"where-day-11-sits-in-the-full-arc\">Where Day 11 Sits in the Full Arc</h2>\n<div class=\"language-tsql codehilite\"><pre><span></span><code><span class=\"nf\">Day</span><span class=\"w\"> </span><span class=\"mi\">1</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u25ba</span><span class=\"w\"> </span><span class=\"p\">...</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u25ba</span><span class=\"w\"> </span><span class=\"nf\">Day</span><span class=\"w\"> </span><span class=\"mi\">8</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u25ba</span><span class=\"w\"> </span><span class=\"nf\">Day</span><span class=\"w\"> </span><span class=\"mi\">9</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u25ba</span><span class=\"w\"> </span><span class=\"nf\">Day</span><span class=\"w\"> </span><span class=\"mi\">10</span>\n<span class=\"n\">Fund</span><span class=\"p\">.</span><span class=\"w\">            </span><span class=\"n\">CI</span><span class=\"o\">/</span><span class=\"n\">CD</span><span class=\"w\">    </span><span class=\"n\">Observ</span><span class=\"p\">.</span><span class=\"w\">   </span><span class=\"n\">Ops</span>\n<span class=\"err\">\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500</span>\n<span class=\"nf\">Day</span><span class=\"w\"> </span><span class=\"mi\">11</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u25ba</span><span class=\"w\"> </span><span class=\"nf\">Day</span><span class=\"w\"> </span><span class=\"mi\">12</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u25ba</span><span class=\"w\"> </span><span class=\"nf\">Day</span><span class=\"w\"> </span><span class=\"mi\">13</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u25ba</span><span class=\"w\"> </span><span class=\"nf\">Day</span><span class=\"w\"> </span><span class=\"mi\">14</span>\n<span class=\"o\">[</span><span class=\"n\">OBO</span><span class=\"o\">]</span><span class=\"w\">      </span><span class=\"n\">Networking</span><span class=\"w\">  </span><span class=\"n\">Integration</span><span class=\"w\">  </span><span class=\"n\">Elite</span><span class=\"w\"> </span><span class=\"n\">Ops</span>\n</code></pre></div>\n<span class=\"paragraph\">Day 11 extends Day 8's identity hardening into the <em>delegation plane</em>:\nnot just \"which system is calling\" (managed identity) but \"on behalf of\nwhich specific human approver\" (OBO token exchange).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "56407a4750098dd93779fd44ff39a586",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85829/__marimo__cell_bkHC_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "065f3c2e2cacbc08fb39c3251e88550e",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85829/__marimo__cell_lEQa_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "PKri",
+      "code_hash": "ac44d9bc8631c228bfe1bf3a86dab67d",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85829/__marimo__cell_PKri_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Xref",
+      "code_hash": "dda1bda3b93bf09256309b601310512f",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85829/__marimo__cell_Xref_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "6dd6d8da066fab97b54541983a85a029",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85829/__marimo__cell_SFPL_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "4c5e6cfc68720de0d833db90a82baca7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-the-four-identity-planes-delegation-plane-deep-dive\">1. The Four Identity Planes \u2014 Delegation Plane Deep Dive</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "880eb629cf7a25e646f03a46890e07d9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Day 3 introduced all four planes. Today we implement the <strong>delegation plane</strong>.</span>\n<table>\n<thead>\n<tr>\n<th>Plane</th>\n<th>Mechanism</th>\n<th>Day hardened</th>\n<th>What AegisAP does</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Control plane</td>\n<td>Azure RBAC</td>\n<td>8</td>\n<td>CI/CD OIDC; no human Owner login to prod</td>\n</tr>\n<tr>\n<td>Data plane</td>\n<td>Service RBAC</td>\n<td>1, 3, 8</td>\n<td>MI for Search/OpenAI/Storage</td>\n</tr>\n<tr>\n<td>Application plane</td>\n<td>Entra App Roles</td>\n<td>4, 8</td>\n<td>Policy overlay uses app-role claims</td>\n</tr>\n<tr>\n<td><strong>Delegation plane</strong></td>\n<td><strong>OBO + Entra group check</strong></td>\n<td><strong>11</strong></td>\n<td><strong>Approval carries human OID</strong></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"why-does-this-matter-for-accounts-payable\">Why Does This Matter for Accounts Payable?</h3>\n<span class=\"paragraph\">When AegisAP auto-approves an invoice, the approval record in the audit trail must\nshow: who approved it, not which service processed it.</span>\n<span class=\"paragraph\">Without OBO:\n<div class=\"language-scdoc codehilite\"><pre><span></span><code>approved_by: &quot;managed-identity-object-id&quot;   \u2190 useless in an audit\n</code></pre></div></span>\n<span class=\"paragraph\">With OBO:\n<div class=\"language-tsql codehilite\"><pre><span></span><code><span class=\"nl\">approved_by_oid</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"ss\">&quot;a3b4c5d6-...&quot;</span><span class=\"w\">  </span><span class=\"err\">\u2190</span><span class=\"w\"> </span><span class=\"n\">Entra</span><span class=\"w\"> </span><span class=\"n\">OID</span><span class=\"w\"> </span><span class=\"k\">of</span><span class=\"w\"> </span><span class=\"n\">the</span><span class=\"w\"> </span><span class=\"n\">finance</span><span class=\"w\"> </span><span class=\"n\">director</span>\n<span class=\"nl\">approved_by_upn</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"ss\">&quot;j.smith@contoso.com&quot;</span>\n<span class=\"nl\">group_verified</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"k\">true</span>\n</code></pre></div></span>\n<span class=\"paragraph\">A regulatory audit can now map every approval to a named individual with\nevidence that they were authorised at the time.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "a556164dd0deee3e612b0bbf6a738d75",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-obo-token-exchange-step-by-step\">2. OBO Token Exchange \u2014 Step by Step</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "56c4c9fea3544bc89ff3681aebcb9ca7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">The OAuth 2.0 On-Behalf-Of (RFC 8693) flow has four participants:</span>\n<ol>\n<li><strong>User</strong> \u2014 the finance director, authenticated in Entra</li>\n<li><strong>Front-end</strong> \u2014 the AegisAP approval UI (SPA or Teams tab)</li>\n<li><strong>Orchestrator API</strong> \u2014 AegisAP backend (Container App with Managed Identity)</li>\n<li><strong>Entra</strong> \u2014 token authority</li>\n</ol>\n<div class=\"language-scdoc codehilite\"><pre><span></span><code>User \u2500\u2500(1. authenticate)\u2500\u2500\u25ba Entra\n                              \u2502 (2. access_token scoped to AegisAP front-end app)\nUser \u25c4\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n  \u2502\n  \u2502 (3. POST /approve { invoice_id, access_token })\n  \u25bc\nOrchestrator API\n  \u2502\n  \u2502 (4. MSAL OBO: exchange user access_token for downstream token)\n  \u25bc\nEntra \u2500\u2500(5. downstream_token with user OID)\u2500\u2500\u25ba Orchestrator API\n  \u2502\n  \u2502 (6. Graph API: check OID is in Finance-Approvers group)\n  \u25bc\nMicrosoft Graph \u2500\u2500(7. group membership confirmed)\u2500\u2500\u25ba Orchestrator API\n  \u2502\n  \u2502 (8. approval committed with actor_oid = user OID)\n  \u25bc\nAudit table\n</code></pre></div>\n<span class=\"paragraph\">Three things must ALL pass for the <code>gate_delegated_identity</code> gate to succeed:</span>\n<ul>\n<li><strong>Sub-check 1 \u2014 app_identity_check:</strong> the orchestrator's MI can acquire its own token</li>\n<li><strong>Sub-check 2 \u2014 obo_exchange_check:</strong> MSAL OBO exchange succeeds and returns a token</li>\n<li><strong>Sub-check 3 \u2014 actor_binding_check:</strong> the OID from the OBO token is in the required group</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "f2ec974a9ad0ecc02724e0dea19b317a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-implementing-obo-aegisapidentityobo\">3. Implementing OBO \u2014 <code>aegisap.identity.obo</code></h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "45b588cc297523428992188828e8166e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">The <code>OboTokenProvider</code> in <code>src/aegisap/identity/obo.py</code> wraps MSAL's\n<code>ConfidentialClientApplication.acquire_token_on_behalf_of()</code>.</span>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">aegisap.identity.obo</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">OboTokenProvider</span>\n\n<span class=\"n\">provider</span> <span class=\"o\">=</span> <span class=\"n\">OboTokenProvider</span><span class=\"o\">.</span><span class=\"n\">from_env</span><span class=\"p\">()</span>\n<span class=\"c1\"># user_access_token = token received from the front-end Authorization header</span>\n<span class=\"n\">result</span> <span class=\"o\">=</span> <span class=\"n\">provider</span><span class=\"o\">.</span><span class=\"n\">exchange</span><span class=\"p\">(</span>\n    <span class=\"n\">user_assertion</span><span class=\"o\">=</span><span class=\"n\">user_access_token</span><span class=\"p\">,</span>\n    <span class=\"n\">scopes</span><span class=\"o\">=</span><span class=\"p\">[</span><span class=\"s2\">&quot;api://&lt;downstream-resource-app-id&gt;/.default&quot;</span><span class=\"p\">],</span>\n<span class=\"p\">)</span>\n<span class=\"nb\">print</span><span class=\"p\">(</span><span class=\"n\">result</span><span class=\"o\">.</span><span class=\"n\">oid</span><span class=\"p\">)</span>      <span class=\"c1\"># Entra user object ID</span>\n<span class=\"nb\">print</span><span class=\"p\">(</span><span class=\"n\">result</span><span class=\"o\">.</span><span class=\"n\">access_token</span><span class=\"p\">[:</span><span class=\"mi\">20</span><span class=\"p\">],</span> <span class=\"s2\">&quot;...&quot;</span><span class=\"p\">)</span>\n</code></pre></div>\n<span class=\"paragraph\">Required environment variables:</span>\n<ul>\n<li><code>AZURE_TENANT_ID</code> \u2014 Entra tenant</li>\n<li><code>AZURE_CLIENT_ID</code> \u2014 App registration for the orchestrator</li>\n<li><code>AZURE_CLIENT_SECRET</code> \u2014 Client secret (stored in Key Vault, injected via KV ref)</li>\n</ul>\n<blockquote>\n<span class=\"paragraph\"><strong>Security note:</strong> <code>AZURE_CLIENT_SECRET</code> must NEVER appear in source code or\ncommitted to git. Always use a Key Vault reference in the Container App\nenvironment variable: <code>@Microsoft.KeyVault(SecretUri=https://...)</code>.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "caa853625402e279ec4bff5089f4af8a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-actor-verification-aegisapidentityactor_verifier\">4. Actor Verification \u2014 <code>aegisap.identity.actor_verifier</code></h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "2f944a5771fe98dd89a775a1ec773a97",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Knowing the OID is not enough \u2014 the orchestrator must confirm the OID belongs\nto the correct Entra security group.  The <code>ActorVerifier</code> calls the Microsoft\nGraph <code>transitiveMemberOf</code> API because nested groups (e.g., a user in\n<code>Finance-UK</code> which is nested in <code>Finance-Global-Approvers</code>) must be resolved.</span>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">aegisap.identity.actor_verifier</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">ActorVerifier</span>\n\n<span class=\"n\">verifier</span> <span class=\"o\">=</span> <span class=\"n\">ActorVerifier</span><span class=\"o\">.</span><span class=\"n\">from_env</span><span class=\"p\">()</span>\n<span class=\"n\">result</span> <span class=\"o\">=</span> <span class=\"n\">verifier</span><span class=\"o\">.</span><span class=\"n\">verify</span><span class=\"p\">(</span><span class=\"n\">oid</span><span class=\"o\">=</span><span class=\"s2\">&quot;&lt;user-oid-from-obo-claims&gt;&quot;</span><span class=\"p\">)</span>\n<span class=\"k\">if</span> <span class=\"ow\">not</span> <span class=\"n\">result</span><span class=\"o\">.</span><span class=\"n\">is_member</span><span class=\"p\">:</span>\n    <span class=\"k\">raise</span> <span class=\"ne\">PermissionError</span><span class=\"p\">(</span><span class=\"sa\">f</span><span class=\"s2\">&quot;Actor </span><span class=\"si\">{</span><span class=\"n\">result</span><span class=\"o\">.</span><span class=\"n\">oid</span><span class=\"si\">}</span><span class=\"s2\"> is not an authorised approver&quot;</span><span class=\"p\">)</span>\n</code></pre></div>\n<span class=\"paragraph\">Required environment variables:</span>\n<ul>\n<li><code>AZURE_TENANT_ID</code></li>\n<li><code>AEGISAP_APPROVER_GROUP_ID</code> \u2014 Object ID of the Finance-Approvers Entra group</li>\n</ul>\n<span class=\"paragraph\">The verifier uses <code>DefaultAzureCredential</code> with the Graph scope \u2014 the orchestrator's\nMI must have <code>Group.Read.All</code> OR a scoped <code>Member.Read.Hidden</code> role on the group.</span>\n<blockquote>\n<span class=\"paragraph\"><strong>Principle of least privilege:</strong> Prefer <code>GroupMember.Read.All</code> (reads only groups\nthe MI has been explicitly added to) over <code>Group.Read.All</code> which exposes all tenant groups.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "cc6a8c014022a06770f74ea6cba712eb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-lab-validate-the-obo-contract-artifact\">5. Lab \u2014 Validate the OBO Contract Artifact</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "5baa11f90b80de3fa44f363ee1cb7891",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">This cell writes <code>build/day11/obo_contract.json</code> \u2014 the gate evidence artifact for\n<code>gate_delegated_identity</code>.</span>\n<span class=\"paragraph\"><strong>Two artifacts, two purposes:</strong></span>\n<table>\n<thead>\n<tr>\n<th>Artifact</th>\n<th>Purpose</th>\n<th>Authoritative for gate?</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>build/day11/obo_simulation_results.json</code></td>\n<td>Pedagogical walkthrough \u2014 written in Sections 1\u20133</td>\n<td>No \u2014 teaching only</td>\n</tr>\n<tr>\n<td><code>build/day11/obo_contract.json</code></td>\n<td>Gate evidence for <code>gate_delegated_identity</code></td>\n<td><strong>Only when <code>training_artifact: false</code></strong> (Tier 2+)</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">In the training environment (Tier 1, no live Entra available):</span>\n<ul>\n<li><code>obo_contract.json</code> is written with <code>training_artifact: true</code> and all sub-checks <code>passed: false</code></li>\n<li><code>gate_delegated_identity</code> will <strong>fail</strong> \u2014 this is correct and expected behaviour</li>\n<li>Set <code>AZURE_TENANT_ID</code>, <code>AZURE_CLIENT_ID</code>, <code>AZURE_CLIENT_SECRET</code>, and\n  <code>AEGISAP_TEST_USER_ASSERTION</code> to run a real OBO exchange (Tier 2) and produce\n  authoritative gate evidence with <code>training_artifact: false</code></li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "2007affd59ed006c2c4dd00845696494",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"obo-simulation-three-execution-paths\">OBO Simulation \u2014 Three Execution Paths</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "63b6e7ae39bbdfb7840a974bf8dd3621",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "54e5e543dc27f3abcdbcd64eabf0816c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "21baa4180396800a6cf6c531296f8d31",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "0e16c20e12f7c2cf5bbe42007a920adf",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85829/__marimo__cell_ecfG_.py&quot;</span>, line <span class=\"m\">3</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">_build</span> <span class=\"o\">=</span> <span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">parents</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">]</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;build&quot;</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;day11&quot;</span>\n<span class=\"w\">             </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "8937d8b76c85cdaec0b314a83b59e698",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-authority-confusion-production-attack-patterns\">6. Authority Confusion \u2014 Production Attack Patterns</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "4d7a4a1b03672f71f4bebf33dcc37cf3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"how-the-attack-works\">How the Attack Works</h3>\n<span class=\"paragraph\">A malicious actor submits an invoice via the Service Bus with a crafted message body:</span>\n<div class=\"language-json codehilite\"><pre><span></span><code><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;invoice_id&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"s2\">&quot;INV-666&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;amount&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"mf\">95000.00</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;actor_oid&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&quot;a3b4c5d6-...  \u2190 forged OID of the CFO</span>\n<span class=\"err\">}</span>\n</code></pre></div>\n<span class=\"paragraph\">If the orchestrator trusts the <code>actor_oid</code> field in the message body rather than\nverifying it against an authenticated token, the approval record will show the CFO\nauthorised a \u00a395,000 expense they never saw.</span>\n<h3 id=\"aegisap-defence\">AegisAP Defence</h3>\n<ol>\n<li><strong>Never trust actor identity from the message payload.</strong> The <code>actor_oid</code> in the\n   approval record must come from the OBO token claims, not the Service Bus message.</li>\n<li><strong>Verify group membership on every approval.</strong>  Even if an OBO token is genuine,\n   verify the actor is currently in the required group \u2014 group membership can change.</li>\n<li><strong>Audit every access.</strong> App Insights records the OID in every approval span;\n   Microsoft Entra audit logs record every group membership change.</li>\n</ol>\n<h3 id=\"the-three-line-test\">The Three-Line Test</h3>\n<span class=\"paragraph\">An FDE should be able to answer these three questions in a whiteboard interview:</span>\n<ol>\n<li>\"Where does the <code>actor_oid</code> in the approval record come from?\" \u2192 <strong>OBO token <code>oid</code> claim</strong></li>\n<li>\"How do you verify the OID is authorised?\" \u2192 <strong>Graph <code>transitiveMemberOf</code> API</strong></li>\n<li>\"What prevents the orchestrator from forging approvals itself?\" \u2192 <strong>OBO requires real user token; MI cannot impersonate users</strong></li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "2ce88cf4e7989ab72a6bfe88f46a0b25",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85829/__marimo__cell_aLJB_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "86ac59be5e33958dc82bc722d440ae94",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"day-11-summary-checklist\">Day 11 Summary Checklist</h2>\n<ul class=\"task-list\">\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain why <code>DefaultAzureCredential</code> alone is insufficient for delegated approval flows</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Describe the four steps of the OBO token exchange</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> State what <code>transitiveMemberOf</code> does and why it is used instead of <code>memberOf</code></li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain the authority-confusion attack and the AegisAP three-layer defence</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Confirm <code>build/day11/obo_contract.json</code> exists; if <code>training_artifact: true</code>, explain why <code>gate_delegated_identity</code> is red and which env vars promote to Tier 2 (live OBO)</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Name the <code>AZURE_CLIENT_SECRET</code> safe-storage requirement (Key Vault reference)</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "8b246d4ca41e8c54af8064e602caa28b",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85829/__marimo__cell_xXTn_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "9ea3ed7ff0cbfa8e266f5eeb78ccfd62",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"fde-learning-contract-day-11-delegated-identity-obo-and-authority-confusion-defense\">FDE Learning Contract \u2014 Day 11: Delegated Identity, OBO, and Authority Confusion Defense</h2>\n<blockquote>\n<span class=\"paragraph\"><strong>Zero-tolerance day</strong> \u2014 a hard-fail on any zero-tolerance condition sets the day score to 0.</span>\n</blockquote>\n<h3 id=\"four-daily-outputs\">Four Daily Outputs</h3>\n<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Output type</th>\n<th>Location</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td>Technical build</td>\n<td><code>LAB_OUTPUT/</code></td>\n</tr>\n<tr>\n<td>2</td>\n<td>Design defense memo</td>\n<td><code>DECISION_MEMOS/</code></td>\n</tr>\n<tr>\n<td>3</td>\n<td>Corporate process artifact</td>\n<td><code>PROCESS_ARTIFACTS/</code></td>\n</tr>\n<tr>\n<td>4</td>\n<td>Oral defense prep notes</td>\n<td><code>ORAL_DEFENSE/</code></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"rubric-weights-100-points-total\">Rubric Weights (100 points total)</h3>\n<table>\n<thead>\n<tr>\n<th>Dimension</th>\n<th>Points</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Obo Correctness</td>\n<td>30</td>\n</tr>\n<tr>\n<td>Threat Model Completeness</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Delegated Authority Boundary Understanding</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Audit Explanation Quality</td>\n<td>15</td>\n</tr>\n<tr>\n<td>Oral Defense</td>\n<td>15</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Pass bar: <strong>80 / 100</strong>   Elite bar: <strong>90 / 100</strong></span>\n<h3 id=\"oral-defense-prompts\">Oral Defense Prompts</h3>\n<ol>\n<li>Walk through the authority confusion attack path you modelled and explain exactly which control in the OBO flow breaks the chain.</li>\n<li>A team asks to skip OBO for integration speed. What is the blast radius of granting that exception, and what compensating controls would you require?</li>\n<li>Who in the enterprise must approve an identity architecture exception, and what audit evidence would a security reviewer demand at the six-month review?</li>\n</ol>\n<h3 id=\"artifact-scaffolds\">Artifact Scaffolds</h3>\n<ul>\n<li><code>docs/curriculum/artifacts/day11/APPROVAL_AUTHORITY_MODEL.md</code></li>\n<li><code>docs/curriculum/artifacts/day11/OBO_THREAT_MODEL.md</code></li>\n<li><code>docs/curriculum/artifacts/day11/IDENTITY_EXCEPTION_REQUEST_RESPONSE.md</code></li>\n</ul>\n<span class=\"paragraph\">See <code>docs/curriculum/MENTAL_MODELS.md</code> for mental models reference.\nSee <code>docs/curriculum/ASSESSOR_CALIBRATION.md</code> for scoring anchors.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

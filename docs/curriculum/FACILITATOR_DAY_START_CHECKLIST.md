@@ -26,6 +26,7 @@ az account show
 
 5. Open these side by side:
 - `docs/curriculum/CURRICULUM_MANIFEST.yaml`
+- the day portal guide in `docs/curriculum/portal/`
 - the day notebook
 - `docs/curriculum/TRAINER_OPERATIONS.md`
 - the prior day's handoff notes
@@ -77,6 +78,7 @@ Say these five things out loud before the lab begins:
 ## First 15 Minutes Of The Session
 
 - Check that learners can open the repo and activate the right shell.
+- Check that learners know the portal guide is today's first surface before the notebook.
 - Confirm who already ran the trainee preflight and who did not.
 - Identify the first artifact or prerequisite that could stall the room.
 - State the fallback path before the first live command is run.

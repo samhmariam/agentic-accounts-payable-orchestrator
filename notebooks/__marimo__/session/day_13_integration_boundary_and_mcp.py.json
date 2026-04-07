@@ -1,0 +1,470 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "7ce2e3ca805076a815bf3f947b669ab4",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "4c9f5b5b6b6ebcee2b74057a5abdcb49",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "bbfa0762732393eecc28a60c978b2e3d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-13-integration-boundaries-model-context-protocol-mcp\">Day 13 \u2014 Integration Boundaries &amp; Model Context Protocol (MCP)</h1>\n<blockquote>\n<span class=\"paragraph\"><strong>WAF Pillars:</strong> Reliability \u00b7 Operational Excellence \u00b7 Security\n<strong>Estimated time:</strong> 3.5 hours\n<strong>Prerequisites:</strong> Day 8 ACA deployment, Day 11 OBO identity, Day 12 VNET\n<strong>New gates:</strong> <code>gate_dlq_drain_health</code> \u00b7 <code>gate_mcp_contract_integrity</code></span>\n</blockquote>\n<hr />\n<h2 id=\"learning-objectives\">Learning Objectives</h2>\n<ol>\n<li>Explain the two integration patterns: HTTP trigger (synchronous LOB boundary)\n   and Service Bus (async reliable transport).</li>\n<li>Write an Azure Functions HTTP trigger that accepts a validated payload and\n   delegates processing via OBO identity.</li>\n<li>Configure a Dead-Letter Queue (DLQ) consumer with compensating actions.</li>\n<li>Stand up an MCP server using the provided scaffold, add a new tool, and\n   validate the contract with <code>gate_mcp_contract_integrity</code>.</li>\n<li>Explain what a compensating action is and give two concrete examples\n   relevant to an accounts-payable orchestrator.</li>\n</ol>\n<hr />\n<h2 id=\"arc-position\">Arc Position</h2>\n<div class=\"language-text codehilite\"><pre><span></span><code>Day 11 \u2500\u2500\u25ba Day 12 \u2500\u2500\u25ba[Day 13]\u2500\u2500\u25ba Day 14\nOBO        VNET       Integration  Elite Ops\n                      &amp; MCP\n</code></pre></div>\n<span class=\"paragraph\">Day 13 is where AegisAP grows external interfaces:</span>\n<ul>\n<li><strong>Azure Functions</strong> acts as a thin, authenticated boundary between AegisAP\n  and existing LOB systems (ERP, invoice portal).</li>\n<li><strong>Service Bus</strong> decouples processing \u2014 if the LLM orchestrator is slow,\n  messages queue safely.</li>\n<li><strong>MCP</strong> exposes AegisAP tools to external AI agents (Copilot Studio, Azure AI).</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "864617ef4b7e59d52c2ce5815b6462da",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_bkHC_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "fffacb8c5d8e39978bde9e0e3663f027",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_lEQa_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "PKri",
+      "code_hash": "0fbe2780edac94f75d995c52519c3957",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_PKri_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Xref",
+      "code_hash": "00dc1e0660288e95524b76aca5bcd3cb",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_Xref_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "8e9aeef9c7778cea89cda83c1780aefc",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_SFPL_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "5ddcc1c6ac135326a6a24898f0afba6c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_BYtC_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "6f01d57fc070442bd29efae38320d06a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_RGSE_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "33c638ebb116eb94bc6fc4b1c77c8d5f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-integration-boundary-architecture\">1. Integration Boundary Architecture</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "512634d77d5c5ffcd23360829ee6f413",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"why-a-boundary-layer\">Why a Boundary Layer?</h3>\n<span class=\"paragraph\">AegisAP's orchestrator should never be called directly by LOB systems because:</span>\n<ul>\n<li>It may be unavailable (ACA scaling, deployment), causing direct callers to fail</li>\n<li>It uses streaming tokens, not compatible with most ERP HTTP clients</li>\n<li>Coupling the ERP to AegisAP's internal API makes both harder to evolve</li>\n</ul>\n<h3 id=\"pattern-two-integration-surfaces\">Pattern: Two Integration Surfaces</h3>\n<div class=\"language-teratermmacro codehilite\"><pre><span></span><code>\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510<span class=\"w\">        </span>\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502<span class=\"w\">  </span><span class=\"nv\">ERP</span><span class=\"w\"> </span><span class=\"o\">/</span><span class=\"w\"> </span><span class=\"nv\">Invoice</span><span class=\"w\">   </span>\u2502<span class=\"w\">        </span>\u2502<span class=\"w\">  </span><span class=\"nv\">Azure</span><span class=\"w\"> </span><span class=\"nv\">Functions</span><span class=\"w\"> </span><span class=\"ss\">(</span><span class=\"nv\">boundary</span><span class=\"ss\">)</span><span class=\"w\">         </span>\u2502\n\u2502<span class=\"w\">  </span><span class=\"nv\">Portal</span><span class=\"w\">          </span>\u251c\u2500\u2500<span class=\"nv\">HTTP</span>\u2500\u25ba\u2502<span class=\"w\">  </span>\u2022<span class=\"w\"> </span><span class=\"nv\">MI</span><span class=\"w\"> </span>\u2192<span class=\"w\"> </span><span class=\"nv\">OBO</span><span class=\"w\"> </span><span class=\"k\">for</span><span class=\"w\"> </span><span class=\"nv\">caller</span><span class=\"w\"> </span><span class=\"nv\">identity</span><span class=\"w\">     </span>\u2502\n\u2502<span class=\"w\">  </span><span class=\"ss\">(</span><span class=\"nv\">synchronous</span><span class=\"ss\">)</span><span class=\"w\">   </span>\u2502<span class=\"w\">        </span>\u2502<span class=\"w\">  </span>\u2022<span class=\"w\"> </span><span class=\"nv\">Schema</span><span class=\"w\"> </span><span class=\"nv\">validation</span><span class=\"w\"> </span><span class=\"ss\">(</span><span class=\"nv\">Pydantic</span><span class=\"ss\">)</span><span class=\"w\">     </span>\u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518<span class=\"w\">        </span>\u2502<span class=\"w\">  </span>\u2022<span class=\"w\"> </span><span class=\"nv\">Writes</span><span class=\"w\"> </span><span class=\"nv\">to</span><span class=\"w\"> </span><span class=\"nv\">Service</span><span class=\"w\"> </span><span class=\"nv\">Bus</span><span class=\"w\">            </span>\u2502\n<span class=\"w\">                            </span>\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510<span class=\"w\">                        </span>\u2502\n\u2502<span class=\"w\">  </span><span class=\"nv\">ERP</span><span class=\"w\"> </span><span class=\"nv\">events</span><span class=\"w\">      </span>\u251c\u2500\u2500<span class=\"nv\">SB</span><span class=\"w\"> </span>\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25ba\u2502\n\u2502<span class=\"w\">  </span><span class=\"ss\">(</span><span class=\"nv\">async</span><span class=\"ss\">)</span><span class=\"w\">         </span>\u2502<span class=\"w\">        </span><span class=\"nv\">Service</span><span class=\"w\"> </span><span class=\"nv\">Bus</span><span class=\"w\"> </span><span class=\"nv\">Queue</span><span class=\"o\">/</span><span class=\"nv\">Topic</span>\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518<span class=\"w\">                        </span>\u2502\n<span class=\"w\">                                            </span>\u25bc\n<span class=\"w\">                            </span>\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n<span class=\"w\">                            </span>\u2502<span class=\"w\">  </span><span class=\"nv\">AegisAP</span><span class=\"w\"> </span><span class=\"nv\">Worker</span><span class=\"w\"> </span><span class=\"ss\">(</span><span class=\"nv\">ACA</span><span class=\"ss\">)</span><span class=\"w\">             </span>\u2502\n<span class=\"w\">                            </span>\u2502<span class=\"w\">  </span>\u2022<span class=\"w\"> </span><span class=\"nv\">Receives</span><span class=\"w\"> </span><span class=\"nv\">messages</span><span class=\"w\"> </span><span class=\"nv\">from</span><span class=\"w\"> </span><span class=\"nv\">SB</span><span class=\"w\">      </span>\u2502\n<span class=\"w\">                            </span>\u2502<span class=\"w\">  </span>\u2022<span class=\"w\"> </span><span class=\"nv\">Processes</span><span class=\"w\"> </span><span class=\"nv\">with</span><span class=\"w\"> </span><span class=\"nv\">LLM</span><span class=\"w\"> </span><span class=\"nv\">orchestrator</span>\u2502\n<span class=\"w\">                            </span>\u2502<span class=\"w\">  </span>\u2022<span class=\"w\"> </span><span class=\"nv\">Writes</span><span class=\"w\"> </span><span class=\"nb\">result</span><span class=\"w\"> </span><span class=\"nv\">to</span><span class=\"w\"> </span><span class=\"nv\">SB</span><span class=\"w\"> </span><span class=\"nv\">reply</span><span class=\"w\"> </span><span class=\"nv\">topic</span>\u2502\n<span class=\"w\">                            </span>\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n<span class=\"w\">                            </span><span class=\"nv\">DLQ</span><span class=\"w\"> </span><span class=\"ss\">(</span><span class=\"nv\">Service</span><span class=\"w\"> </span><span class=\"nv\">Bus</span><span class=\"w\"> </span><span class=\"nv\">Dead</span><span class=\"o\">-</span><span class=\"nv\">Letter</span><span class=\"w\"> </span><span class=\"nv\">Queue</span><span class=\"ss\">)</span>\n<span class=\"w\">                              </span><span class=\"k\">If</span><span class=\"w\"> </span><span class=\"nv\">processing</span><span class=\"w\"> </span><span class=\"nv\">fails</span><span class=\"w\"> </span><span class=\"nv\">after</span><span class=\"w\"> </span><span class=\"nv\">retries</span><span class=\"w\"> </span>\u2192\n<span class=\"w\">                              </span><span class=\"nv\">DlqConsumer</span>.<span class=\"nv\">drain</span><span class=\"ss\">()</span><span class=\"w\"> </span><span class=\"o\">+</span><span class=\"w\"> </span><span class=\"nv\">CompensatingAction</span>\n</code></pre></div>\n<table>\n<thead>\n<tr>\n<th>Component</th>\n<th>Class</th>\n<th>File</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>HTTP boundary</td>\n<td><code>FunctionsBoundaryClient</code></td>\n<td><code>src/aegisap/integration/azure_functions_boundary.py</code></td>\n</tr>\n<tr>\n<td>Service Bus send/receive</td>\n<td><code>ServiceBusHandler</code></td>\n<td><code>src/aegisap/integration/service_bus_handler.py</code></td>\n</tr>\n<tr>\n<td>DLQ drain + classify</td>\n<td><code>DlqConsumer</code></td>\n<td><code>src/aegisap/integration/dlq_consumer.py</code></td>\n</tr>\n<tr>\n<td>Compensating actions</td>\n<td><code>CompensatingActionRunner</code></td>\n<td><code>src/aegisap/integration/compensating_action.py</code></td>\n</tr>\n<tr>\n<td>MCP server</td>\n<td><code>create_mcp_app()</code></td>\n<td><code>src/aegisap/mcp/server.py</code></td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "97f9546a1c55178a5f76062349d029f6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-azure-functions-http-trigger-scaffold\">2. Azure Functions \u2014 HTTP Trigger Scaffold</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "dbb7237411a34fadbe5ca305ba26a5ac",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"scaffold-walkthrough\">Scaffold Walkthrough</h3>\n<span class=\"paragraph\">The scaffold at <code>src/aegisap/integration/_scaffold/function_app_host.py</code> is a\ncopy-paste starting point.  Key design decisions already built in:</span>\n<ol>\n<li><strong>Managed Identity token</strong> \u2014 acquires a token for <code>AEGISAP_WORKER_APP_ID</code>\n   using <code>DefaultAzureCredential</code>, not a stored secret.</li>\n<li><strong>OBO delegation</strong> \u2014 passes the caller's <code>Authorization</code> header through\n   <code>OboTokenProvider.exchange()</code> to propagate identity into AegisAP.</li>\n<li><strong>Pydantic validation</strong> \u2014 all incoming payloads are parsed through a model;\n   400 is returned for malformed input before any processing.</li>\n<li><strong>Tenacity retry</strong> \u2014 transient 429/503 from AegisAP Worker retried with\n   exponential backoff; non-transient errors returned immediately.</li>\n</ol>\n<h3 id=\"minimal-runnable-example\">Minimal Runnable Example</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">import</span><span class=\"w\"> </span><span class=\"nn\">azure.functions</span><span class=\"w\"> </span><span class=\"k\">as</span><span class=\"w\"> </span><span class=\"nn\">func</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">pydantic</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">BaseModel</span>\n\n<span class=\"k\">class</span><span class=\"w\"> </span><span class=\"nc\">InvoiceSubmission</span><span class=\"p\">(</span><span class=\"n\">BaseModel</span><span class=\"p\">):</span>\n    <span class=\"n\">invoice_id</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n    <span class=\"n\">vendor_id</span><span class=\"p\">:</span> <span class=\"nb\">str</span>\n    <span class=\"n\">amount_gbp</span><span class=\"p\">:</span> <span class=\"nb\">float</span>\n\n<span class=\"n\">app</span> <span class=\"o\">=</span> <span class=\"n\">func</span><span class=\"o\">.</span><span class=\"n\">FunctionApp</span><span class=\"p\">(</span><span class=\"n\">http_auth_level</span><span class=\"o\">=</span><span class=\"n\">func</span><span class=\"o\">.</span><span class=\"n\">AuthLevel</span><span class=\"o\">.</span><span class=\"n\">FUNCTION</span><span class=\"p\">)</span>\n\n<span class=\"nd\">@app</span><span class=\"o\">.</span><span class=\"n\">route</span><span class=\"p\">(</span><span class=\"n\">route</span><span class=\"o\">=</span><span class=\"s2\">&quot;submit-invoice&quot;</span><span class=\"p\">,</span> <span class=\"n\">methods</span><span class=\"o\">=</span><span class=\"p\">[</span><span class=\"s2\">&quot;POST&quot;</span><span class=\"p\">])</span>\n<span class=\"k\">def</span><span class=\"w\"> </span><span class=\"nf\">submit_invoice</span><span class=\"p\">(</span><span class=\"n\">req</span><span class=\"p\">:</span> <span class=\"n\">func</span><span class=\"o\">.</span><span class=\"n\">HttpRequest</span><span class=\"p\">)</span> <span class=\"o\">-&gt;</span> <span class=\"n\">func</span><span class=\"o\">.</span><span class=\"n\">HttpResponse</span><span class=\"p\">:</span>\n    <span class=\"k\">try</span><span class=\"p\">:</span>\n        <span class=\"n\">body</span> <span class=\"o\">=</span> <span class=\"n\">InvoiceSubmission</span><span class=\"o\">.</span><span class=\"n\">model_validate_json</span><span class=\"p\">(</span><span class=\"n\">req</span><span class=\"o\">.</span><span class=\"n\">get_body</span><span class=\"p\">())</span>\n    <span class=\"k\">except</span> <span class=\"ne\">Exception</span> <span class=\"k\">as</span> <span class=\"n\">exc</span><span class=\"p\">:</span>\n        <span class=\"k\">return</span> <span class=\"n\">func</span><span class=\"o\">.</span><span class=\"n\">HttpResponse</span><span class=\"p\">(</span><span class=\"nb\">str</span><span class=\"p\">(</span><span class=\"n\">exc</span><span class=\"p\">),</span> <span class=\"n\">status_code</span><span class=\"o\">=</span><span class=\"mi\">400</span><span class=\"p\">)</span>\n    <span class=\"c1\"># \u2026 forward to Service Bus \u2026</span>\n    <span class=\"k\">return</span> <span class=\"n\">func</span><span class=\"o\">.</span><span class=\"n\">HttpResponse</span><span class=\"p\">(</span><span class=\"s1\">&#39;{&quot;status&quot;:&quot;accepted&quot;}&#39;</span><span class=\"p\">,</span> <span class=\"n\">mimetype</span><span class=\"o\">=</span><span class=\"s2\">&quot;application/json&quot;</span><span class=\"p\">)</span>\n</code></pre></div>\n<h3 id=\"why-not-expose-aegisap-worker-directly\">Why Not Expose AegisAP Worker Directly?</h3>\n<span class=\"paragraph\">The Worker ACA app is VNET-internal (<code>internal: true</code>).  External callers\ncannot reach it.  Functions is the controlled ingress point with:</span>\n<ul>\n<li>Azure AD authentication requirement</li>\n<li>Rate limiting via Azure API Management</li>\n<li>Payload size limits and schema gatekeeping</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "bf27bcb0b9ab2855c835273ec5398ff2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-service-bus-dlq-and-compensating-actions\">3. Service Bus, DLQ, and Compensating Actions</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "3e6934f4cd8fbf59cfb3bcae132bc7a8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"service-bus-message-lifecycle\">Service Bus Message Lifecycle</h3>\n<div class=\"language-tsql codehilite\"><pre><span></span><code><span class=\"n\">Producer</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u25ba</span><span class=\"w\"> </span><span class=\"o\">[</span><span class=\"n\">Queue</span><span class=\"o\">]</span><span class=\"w\"> </span><span class=\"err\">\u2500\u2500\u25ba</span><span class=\"w\"> </span><span class=\"n\">Consumer</span>\n<span class=\"w\">                            </span><span class=\"err\">\u2502</span>\n<span class=\"w\">                      </span><span class=\"n\">success</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">complete</span><span class=\"p\">()</span>\n<span class=\"w\">                      </span><span class=\"n\">transient</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">abandon</span><span class=\"p\">()</span><span class=\"w\"> </span><span class=\"o\">[</span><span class=\"n\">up to maxDeliveryCount</span><span class=\"o\">]</span>\n<span class=\"w\">                      </span><span class=\"n\">non</span><span class=\"o\">-</span><span class=\"n\">transient</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">dead_letter</span><span class=\"p\">(</span><span class=\"n\">reason</span><span class=\"o\">=</span><span class=\"p\">...)</span>\n<span class=\"w\">                            </span><span class=\"err\">\u2502</span>\n<span class=\"w\">                      </span><span class=\"o\">[</span><span class=\"n\">Dead-Letter Queue</span><span class=\"o\">]</span>\n<span class=\"w\">                            </span><span class=\"err\">\u2502</span>\n<span class=\"w\">                      </span><span class=\"n\">DlqConsumer</span><span class=\"p\">.</span><span class=\"n\">drain</span><span class=\"p\">()</span>\n<span class=\"w\">                            </span><span class=\"err\">\u2502</span>\n<span class=\"w\">                 </span><span class=\"n\">transient</span><span class=\"w\"> </span><span class=\"n\">errors</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">re</span><span class=\"o\">-</span><span class=\"n\">queue</span><span class=\"w\"> </span><span class=\"o\">/</span><span class=\"w\"> </span><span class=\"n\">alert</span>\n<span class=\"w\">                 </span><span class=\"n\">non</span><span class=\"o\">-</span><span class=\"n\">transient</span><span class=\"w\">    </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">CompensatingActionRunner</span><span class=\"p\">.</span><span class=\"n\">compensate</span><span class=\"p\">()</span>\n</code></pre></div>\n<h3 id=\"transient-vs-non-transient-classification\">Transient vs Non-Transient Classification</h3>\n<span class=\"paragraph\"><code>DlqConsumer</code> reads the DLQ and applies a simple classifier:</span>\n<table>\n<thead>\n<tr>\n<th>Dead-letter reason</th>\n<th>Classification</th>\n<th>Compensating action</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>MaxDeliveryCountExceeded</code> + <code>4xx</code> status</td>\n<td>Non-transient</td>\n<td>Mark invoice as <code>needs_human_review</code></td>\n</tr>\n<tr>\n<td><code>MaxDeliveryCountExceeded</code> + <code>5xx</code> status</td>\n<td>Transient</td>\n<td>Re-queue, alert on-call</td>\n</tr>\n<tr>\n<td><code>MessageLockLostException</code></td>\n<td>Transient</td>\n<td>Re-queue</td>\n</tr>\n<tr>\n<td><code>schema_validation_failed</code> in properties</td>\n<td>Non-transient</td>\n<td>Reject + notify sender</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"code-pattern\">Code Pattern</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">aegisap.integration.dlq_consumer</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">DlqConsumer</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">aegisap.integration.compensating_action</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">CompensatingActionRunner</span>\n\n<span class=\"n\">runner</span> <span class=\"o\">=</span> <span class=\"n\">CompensatingActionRunner</span><span class=\"p\">()</span>\n\n<span class=\"nd\">@runner</span><span class=\"o\">.</span><span class=\"n\">register</span><span class=\"p\">(</span><span class=\"s2\">&quot;non_transient&quot;</span><span class=\"p\">)</span>\n<span class=\"k\">async</span> <span class=\"k\">def</span><span class=\"w\"> </span><span class=\"nf\">mark_for_review</span><span class=\"p\">(</span><span class=\"n\">message_id</span><span class=\"p\">:</span> <span class=\"nb\">str</span><span class=\"p\">,</span> <span class=\"n\">payload</span><span class=\"p\">:</span> <span class=\"nb\">dict</span><span class=\"p\">)</span> <span class=\"o\">-&gt;</span> <span class=\"nb\">dict</span><span class=\"p\">:</span>\n    <span class=\"c1\"># write a &quot;needs_human_review&quot; event to the audit log</span>\n    <span class=\"k\">return</span> <span class=\"p\">{</span><span class=\"s2\">&quot;action&quot;</span><span class=\"p\">:</span> <span class=\"s2\">&quot;marked_for_review&quot;</span><span class=\"p\">,</span> <span class=\"s2\">&quot;invoice_id&quot;</span><span class=\"p\">:</span> <span class=\"n\">payload</span><span class=\"o\">.</span><span class=\"n\">get</span><span class=\"p\">(</span><span class=\"s2\">&quot;invoice_id&quot;</span><span class=\"p\">)}</span>\n\n<span class=\"n\">consumer</span> <span class=\"o\">=</span> <span class=\"n\">DlqConsumer</span><span class=\"o\">.</span><span class=\"n\">from_env</span><span class=\"p\">()</span>\n<span class=\"n\">report</span> <span class=\"o\">=</span> <span class=\"k\">await</span> <span class=\"n\">consumer</span><span class=\"o\">.</span><span class=\"n\">drain</span><span class=\"p\">(</span><span class=\"n\">compensating_runner</span><span class=\"o\">=</span><span class=\"n\">runner</span><span class=\"p\">)</span>\n<span class=\"c1\"># writes build/day13/dlq_drain_report.json</span>\n</code></pre></div>\n<blockquote>\n<span class=\"paragraph\"><strong>WAF Reliability principle:</strong> Never discard a message silently.  Always either\ncomplete, abandon, dead-letter, or compensate.  The DLQ drain report is\nevidence that all failing messages were handled.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "52b53891eb90a1364e7deabc98dbbd13",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-model-context-protocol-mcp-server\">4. Model Context Protocol (MCP) Server</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "b81f6a150a14e36d52aae396c42d8571",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"what-mcp-does-for-aegisap\">What MCP Does for AegisAP</h3>\n<span class=\"paragraph\">MCP is a lightweight protocol that lets external AI agents (Azure AI Foundry,\nCopilot Studio, third-party agents) call AegisAP tools over HTTP with JWT auth.</span>\n<span class=\"paragraph\">Instead of integrating directly with LangGraph internals, the external agent:</span>\n<ol>\n<li>Calls <code>/capabilities</code> \u2192 discovers available tools + schemas</li>\n<li>Calls <code>/tools/query_invoice_status</code> \u2192 gets structured invoice data</li>\n<li>Calls <code>/tools/list_pending_approvals</code> \u2192 gets approval queue</li>\n<li>Calls <code>/tools/get_vendor_policy</code> \u2192 gets policy rules for a vendor</li>\n<li>Calls <code>/tools/submit_payment_hold</code> \u2192 places a payment hold with actor-group\n   verification, idempotency key, and a registered compensating action</li>\n</ol>\n<span class=\"paragraph\">AegisAP validates a JWT for every request (Entra ID audience check) and forwards\nthe identity via OBO to the LOB adapter.</span>\n<h3 id=\"available-tools\">Available Tools</h3>\n<table>\n<thead>\n<tr>\n<th>Endpoint</th>\n<th>Input schema</th>\n<th>Output schema</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>GET /capabilities</code></td>\n<td>\u2014</td>\n<td><code>McpCapabilities</code></td>\n</tr>\n<tr>\n<td><code>POST /tools/query_invoice_status</code></td>\n<td><code>InvoiceQueryRequest</code></td>\n<td><code>InvoiceQueryResponse</code></td>\n</tr>\n<tr>\n<td><code>POST /tools/list_pending_approvals</code></td>\n<td><code>ListPendingApprovalsRequest</code></td>\n<td>list[dict]</td>\n</tr>\n<tr>\n<td><code>POST /tools/get_vendor_policy</code></td>\n<td><code>VendorPolicyRequest</code></td>\n<td><code>VendorPolicyResponse</code></td>\n</tr>\n<tr>\n<td><code>POST /tools/submit_payment_hold</code></td>\n<td><code>PaymentHoldRequest</code></td>\n<td><code>PaymentHoldResponse</code></td>\n</tr>\n<tr>\n<td><code>GET /health</code></td>\n<td>\u2014</td>\n<td><code>{\"status\": \"ok\"}</code></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"scaffold-walkthrough\">Scaffold Walkthrough</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">aegisap.mcp.server</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">create_mcp_app</span>\n\n<span class=\"n\">app</span> <span class=\"o\">=</span> <span class=\"n\">create_mcp_app</span><span class=\"p\">()</span>  <span class=\"c1\"># returns FastAPI instance</span>\n<span class=\"c1\"># Run: uvicorn aegisap.mcp.server:app --port 8001</span>\n</code></pre></div>\n<span class=\"paragraph\">To <strong>add a new tool</strong>:</span>\n<ol>\n<li>Define input/output Pydantic models in <code>aegisap.mcp.schemas</code></li>\n<li>Add a real implementation method to <code>LobAdapter</code></li>\n<li>Add a <code>@router.post(\"/tools/&lt;your_tool&gt;\")</code> in <code>server.py</code></li>\n<li>Update the <code>McpCapabilities</code> tool list</li>\n<li>Re-run the contract gate \u2014 it validates the <code>/capabilities</code> response</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "3014f81da10f14a0cf41f37e8be65734",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-lab-write-gate-artifacts-for-day-13\">5. Lab \u2014 Write Gate Artifacts for Day 13</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "4d304f8c28b56af00ac6897cd02d886c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_Vxnm_.py&quot;</span>, line <span class=\"m\">2</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">_build</span> <span class=\"o\">=</span> <span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">parents</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">]</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;build&quot;</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;day13&quot;</span>\n<span class=\"w\">             </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "0cb996f763155d727c8f2906374065be",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_DnEU_.py&quot;</span>, line <span class=\"m\">5</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">_build</span> <span class=\"o\">=</span> <span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">parents</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">]</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;build&quot;</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;day13&quot;</span>\n<span class=\"w\">             </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "96086a8944055f4a2a2ad418ba9307d6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5b-lab-mcp-write-path-submit_payment_hold\">5b. Lab \u2014 MCP Write-Path: <code>submit_payment_hold</code></h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "10453d873f8722150893bd1a5188dc7f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"why-a-write-path-matters\">Why a Write-Path Matters</h3>\n<span class=\"paragraph\">Read-only MCP tools (<code>query_invoice_status</code>, <code>get_vendor_policy</code>) carry low risk.\nA <strong>write-path tool</strong> (<code>submit_payment_hold</code>) mutates system state and requires\nthree additional controls:</span>\n<ol>\n<li><strong>Actor group verification</strong> \u2014 the caller's Entra group membership is verified\n   via OBO + Microsoft Graph before the hold is accepted.</li>\n<li><strong>Idempotency key</strong> \u2014 clients generate a UUID; the server rejects duplicate\n   hold requests with HTTP 409 (mapped to <code>already_held</code> status, not an error).</li>\n<li><strong>Compensating action</strong> \u2014 on downstream failure the hold is registered for\n   automatic rollback so the invoice is not stuck in limbo.</li>\n</ol>\n<h3 id=\"request-response-flow\">Request \u2192 Response Flow</h3>\n<div class=\"language-gdscript codehilite\"><pre><span></span><code><span class=\"n\">MCP</span><span class=\"w\"> </span><span class=\"n\">client</span>\n<span class=\"w\">  </span><span class=\"err\">\u2502</span><span class=\"w\">  </span><span class=\"n\">POST</span><span class=\"w\"> </span><span class=\"o\">/</span><span class=\"n\">tools</span><span class=\"o\">/</span><span class=\"n\">submit_payment_hold</span>\n<span class=\"w\">  </span><span class=\"err\">\u2502</span><span class=\"w\">  </span><span class=\"p\">{</span><span class=\"w\"> </span><span class=\"n\">idempotency_key</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">invoice_id</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">vendor_id</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">hold_reason</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"err\">\u2502</span><span class=\"w\">    </span><span class=\"n\">actor_oid</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">actor_group_verified</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"bp\">true</span><span class=\"w\"> </span><span class=\"p\">}</span>\n<span class=\"w\">  </span><span class=\"err\">\u25bc</span>\n<span class=\"n\">MCP</span><span class=\"w\"> </span><span class=\"n\">server</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"n\">server</span><span class=\"o\">.</span><span class=\"n\">py</span><span class=\"p\">)</span>\n<span class=\"w\">  </span><span class=\"err\">\u251c\u2500</span><span class=\"w\"> </span><span class=\"mi\">403</span><span class=\"w\"> </span><span class=\"k\">if</span><span class=\"w\"> </span><span class=\"n\">actor_group_verified</span><span class=\"w\"> </span><span class=\"o\">==</span><span class=\"w\"> </span><span class=\"n\">False</span>\n<span class=\"w\">  </span><span class=\"err\">\u251c\u2500</span><span class=\"w\"> </span><span class=\"n\">stub</span><span class=\"w\"> </span><span class=\"n\">response</span><span class=\"w\"> </span><span class=\"k\">if</span><span class=\"w\"> </span><span class=\"n\">AEGISAP_FUNCTION_APP_URL</span><span class=\"w\"> </span><span class=\"ow\">not</span><span class=\"w\"> </span><span class=\"n\">set</span>\n<span class=\"w\">  </span><span class=\"err\">\u2514\u2500</span><span class=\"w\"> </span><span class=\"n\">FunctionsBoundaryClient</span><span class=\"o\">.</span><span class=\"n\">post_payment_hold</span><span class=\"p\">()</span>\n<span class=\"w\">       </span><span class=\"err\">\u251c\u2500</span><span class=\"w\"> </span><span class=\"mi\">5</span><span class=\"o\">-</span><span class=\"n\">second</span><span class=\"w\"> </span><span class=\"n\">timeout</span>\n<span class=\"w\">       </span><span class=\"err\">\u251c\u2500</span><span class=\"w\"> </span><span class=\"n\">tenacity</span><span class=\"w\"> </span><span class=\"n\">retry</span><span class=\"w\"> </span><span class=\"n\">on</span><span class=\"w\"> </span><span class=\"mi\">429</span><span class=\"o\">/</span><span class=\"mi\">503</span>\n<span class=\"w\">       </span><span class=\"err\">\u251c\u2500</span><span class=\"w\"> </span><span class=\"mi\">409</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">already_held</span><span class=\"w\"> </span><span class=\"p\">(</span><span class=\"n\">idempotent</span><span class=\"p\">)</span>\n<span class=\"w\">       </span><span class=\"err\">\u2514\u2500</span><span class=\"w\"> </span><span class=\"mi\">400</span><span class=\"o\">/</span><span class=\"mi\">403</span><span class=\"o\">/</span><span class=\"mi\">404</span><span class=\"w\"> </span><span class=\"err\">\u2192</span><span class=\"w\"> </span><span class=\"n\">non</span><span class=\"o\">-</span><span class=\"n\">transient</span><span class=\"w\"> </span><span class=\"n\">HTTP</span><span class=\"w\"> </span><span class=\"n\">exception</span>\n</code></pre></div>\n<h3 id=\"holdreason-values\"><code>HoldReason</code> values</h3>\n<table>\n<thead>\n<tr>\n<th>Value</th>\n<th>Meaning</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>vendor_compliance</code></td>\n<td>Vendor has a compliance flag</td>\n</tr>\n<tr>\n<td><code>amount_over_threshold</code></td>\n<td>Invoice exceeds dual-approval threshold</td>\n</tr>\n<tr>\n<td><code>missing_po</code></td>\n<td>No purchase order linked</td>\n</tr>\n<tr>\n<td><code>fraud_signal</code></td>\n<td>Fraud detection alert</td>\n</tr>\n<tr>\n<td><code>manual_review</code></td>\n<td>Operator-initiated hold</td>\n</tr>\n</tbody>\n</table></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "542de12694964bd5a06f959c3a7f3ccf",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_Pvdt_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">_build</span> <span class=\"o\">=</span> <span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">parents</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">]</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;build&quot;</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;day13&quot;</span>\n<span class=\"w\">             </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "9ddeb1728ab0f912825478ac7e369a0e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-scaffold-explorer\">6. Scaffold Explorer</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "6b6033746ee2ba3ec69f433937db9189",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_aLJB_.py&quot;</span>, line <span class=\"m\">2</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">parents</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">]</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;src&quot;</span> <span class=\"o\">/</span>\n<span class=\"w\">    </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "7b270643ef717c0aef147031f8f62c21",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"day-13-summary-checklist\">Day 13 Summary Checklist</h2>\n<ul class=\"task-list\">\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain why AegisAP Worker is not directly exposed to ERP systems</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Name the four integration classes and their responsibilities</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> State when <code>dead_letter()</code> should be called vs <code>abandon()</code></li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Describe what a compensating action is and give one example</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain the MCP tool contract and what <code>gate_mcp_contract_integrity</code> validates</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Confirm <code>build/day13/dlq_drain_report.json</code> and <code>mcp_contract_report.json</code> exist</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Confirm <code>build/day13/write_path_exercise.json</code> exists with <code>all_controls_verified=True</code></li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> State the three write-path controls: actor group check, idempotency key, compensating action</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain how <code>McpAuthMiddleware</code> validates caller identity</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain what your boundary does with an unseen transfer-domain case before any unsafe mutation can occur</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "501db37c0013b04c17e7d9b13a638085",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_86072/__marimo__cell_xXTn_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "e7c63b2319ca2eabb912ef371a58a390",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"fde-learning-contract-day-13-integration-boundaries-async-reliability-and-contract-management\">FDE Learning Contract \u2014 Day 13: Integration Boundaries, Async Reliability, and Contract Management</h2>\n<blockquote>\n<span class=\"paragraph\"><strong>Capstone B day</strong> \u2014 primary deliverables are in the claims intake transfer domain.</span>\n</blockquote>\n<h3 id=\"four-daily-outputs\">Four Daily Outputs</h3>\n<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Output type</th>\n<th>Location</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td>Technical build</td>\n<td><code>LAB_OUTPUT/</code></td>\n</tr>\n<tr>\n<td>2</td>\n<td>Design defense memo</td>\n<td><code>DECISION_MEMOS/</code></td>\n</tr>\n<tr>\n<td>3</td>\n<td>Corporate process artifact</td>\n<td><code>PROCESS_ARTIFACTS/</code></td>\n</tr>\n<tr>\n<td>4</td>\n<td>Oral defense prep notes</td>\n<td><code>ORAL_DEFENSE/</code></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"rubric-weights-100-points-total\">Rubric Weights (100 points total)</h3>\n<table>\n<thead>\n<tr>\n<th>Dimension</th>\n<th>Points</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Boundary Architecture Correctness</td>\n<td>25</td>\n</tr>\n<tr>\n<td>Reliability Design</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Contract Versioning Quality</td>\n<td>20</td>\n</tr>\n<tr>\n<td>External Stakeholder Communication</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Oral Defense</td>\n<td>15</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Pass bar: <strong>80 / 100</strong>   Elite bar: <strong>90 / 100</strong></span>\n<h3 id=\"oral-defense-prompts\">Oral Defense Prompts</h3>\n<ol>\n<li>A partner demands direct access to the orchestrator. Walk through your boundary defense and what you offer instead.</li>\n<li>If a compensating action fails silently, what is the blast radius and what is your detection and recovery path?</li>\n<li>Who approves a breaking change to an external API contract, what is the minimum notice period, and what evidence must accompany the deprecation notice?</li>\n<li>An assessor-only claims case reaches your boundary with unfamiliar but plausible structure. Explain your validation, DLQ, audit, and consumer-communication path without opening the hidden file.</li>\n</ol>\n<h3 id=\"artifact-scaffolds\">Artifact Scaffolds</h3>\n<ul>\n<li><code>docs/curriculum/artifacts/day13/EXTERNAL_CONTRACT_POLICY.md</code></li>\n<li><code>docs/curriculum/artifacts/day13/COMPENSATING_ACTION_CATALOG.md</code></li>\n<li><code>docs/curriculum/artifacts/day13/API_CHANGE_COMMUNICATION_PLAN.md</code></li>\n</ul>\n<span class=\"paragraph\">See <code>docs/curriculum/MENTAL_MODELS.md</code> for mental models reference.\nSee <code>docs/curriculum/ASSESSOR_CALIBRATION.md</code> for scoring anchors.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

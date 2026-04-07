@@ -1,0 +1,808 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "7de421815fea6f0b11d87fc8e00fc29a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "4c9f5b5b6b6ebcee2b74057a5abdcb49",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "aaea8ec658bdc6f1d5e255ab5639594c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-8-cicd-infrastructure-as-code-secure-deployment\">Day 8 \u2014 CI/CD, Infrastructure as Code &amp; Secure Deployment</h1>\n<blockquote>\n<span class=\"paragraph\"><strong>WAF Pillars covered:</strong> Security \u00b7 Operational Excellence \u00b7 Reliability\n<strong>Estimated time:</strong> 2.5 hours\n<strong>Sources:</strong> <code>docs/curriculum/trainee/DAY_00_TRAINEE.md</code> (Bicep, IaC, identity),\n<code>docs/curriculum/trainee/DAY_07_TRAINEE.md</code> (Zero Trust, identity planes),\n<code>docs/curriculum/trainee/DAY_10_TRAINEE.md</code> (OIDC, ACA revisions, acceptance gates)\n<strong>Prerequisites:</strong> Day 7 complete; <code>evals/score_thresholds.yaml</code> and gate artifacts exist.</span>\n</blockquote>\n<hr />\n<h2 id=\"learning-objectives\">Learning Objectives</h2>\n<ol>\n<li>Explain why Infrastructure as Code is mandatory for production AI workloads.</li>\n<li>Read a Bicep template and identify resources, modules, parameters, and role assignments.</li>\n<li>Name AegisAP's four identity planes and specify the minimum RBAC role for each.</li>\n<li>Explain <code>DefaultAzureCredential</code> and why the same code works in dev and prod.</li>\n<li>Describe Key Vault access contracts \u2014 what goes in, what does not, and why.</li>\n<li>Explain GitHub Actions OIDC federation and why it eliminates long-lived credentials.</li>\n<li>Describe the ACA revision model and execute a zero-downtime deployment and rollback.</li>\n<li>Run the six acceptance gates and interpret the release envelope.</li>\n</ol>\n<hr />\n<h2 id=\"where-day-8-sits-in-the-full-arc\">Where Day 8 Sits in the Full Arc</h2>\n<div class=\"language-text codehilite\"><pre><span></span><code>Day 6  \u2500\u2500 Day 7 \u2500\u2500\u25ba[Day 8]\u2500\u2500\u25ba Day 9 \u2500\u2500\u25ba Day 10\nData &amp;     Testing  CI/CD &amp;   Scaling  Production\nML         &amp; Safety IaC       &amp; Cost   Operations\n</code></pre></div>\n<span class=\"paragraph\">Day 8 answers: <strong>\"How do we ship AegisAP to a live Azure environment safely,\nrepeatably, and with zero stored secrets?\"</strong>  The system was proven correct\nin Day 7; now we automate the proof and the deployment.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "e27f04bf93a9a9422227becda8683e2c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_bkHC_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "7a7ead0c3aa8f89b1ba4091a5234bd16",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_lEQa_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "PKri",
+      "code_hash": "50ea1a3ab7c602fe6b372fa2193a3f74",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_PKri_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Xref",
+      "code_hash": "91ad597d9066afe1475d598a46499490",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_Xref_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "1cd3c9437f7d512285d6d2362e2d552c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_SFPL_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "9c8b15916534ecf5f5e1ad36c36205af",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-why-infrastructure-as-code-is-mandatory-for-ai-workloads\">1. Why Infrastructure as Code is Mandatory for AI Workloads</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "3bf8e5d807e629857aef2df4b01d00aa",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">AI workloads have a higher IaC requirement than traditional web services because:</span>\n<ol>\n<li><strong>Reproducibility</strong> \u2014 an AI model's behaviour depends on the exact combination\n   of model deployment name, system prompt, search index schema, and downstream\n   service endpoints. Any undocumented portal change makes the system unreproducible.</li>\n<li><strong>Auditability</strong> \u2014 compliance frameworks (ISO 27001, SOC 2, FCA guidelines for\n   financial services) require evidence that the deployed runtime state matches an\n   approved configuration. An IaC template is the approved configuration.</li>\n<li><strong>Drift recovery</strong> \u2014 without IaC, it is impossible to determine what changed\n   after an incident. With IaC, <code>az deployment group what-if</code> shows the diff\n   between the desired and actual state in under 30 seconds.</li>\n</ol>\n<h3 id=\"the-drift-problem-in-practice\">The drift problem in practice</h3>\n<div class=\"language-teratermmacro codehilite\"><pre><span></span><code><span class=\"nv\">Day</span><span class=\"w\"> </span><span class=\"mi\">1</span><span class=\"w\"> </span>\u2014<span class=\"w\"> </span><span class=\"nv\">Engineer</span><span class=\"w\"> </span><span class=\"nv\">adds</span><span class=\"w\"> </span><span class=\"nv\">a</span><span class=\"w\"> </span><span class=\"nv\">network</span><span class=\"w\"> </span><span class=\"nv\">rule</span><span class=\"w\"> </span><span class=\"nv\">via</span><span class=\"w\"> </span><span class=\"nv\">portal</span><span class=\"w\"> </span><span class=\"k\">for</span><span class=\"w\"> </span><span class=\"nv\">testing</span>.\n<span class=\"nv\">Day</span><span class=\"w\"> </span><span class=\"mi\">5</span><span class=\"w\"> </span>\u2014<span class=\"w\"> </span><span class=\"nv\">Incident</span>.<span class=\"w\"> </span><span class=\"nv\">Network</span><span class=\"w\"> </span><span class=\"nv\">rule</span><span class=\"w\"> </span><span class=\"nv\">is</span><span class=\"w\"> </span><span class=\"nv\">the</span><span class=\"w\"> </span><span class=\"nv\">cause</span>.<span class=\"w\"> </span><span class=\"nv\">No</span><span class=\"w\"> </span><span class=\"nv\">one</span><span class=\"w\"> </span><span class=\"nv\">remembers</span><span class=\"w\"> </span><span class=\"nv\">adding</span><span class=\"w\"> </span><span class=\"nv\">it</span>.\n<span class=\"nv\">Day</span><span class=\"w\"> </span><span class=\"mi\">6</span><span class=\"w\"> </span>\u2014<span class=\"w\"> </span><span class=\"nv\">IaC</span><span class=\"w\"> </span><span class=\"nv\">diff</span><span class=\"w\"> </span><span class=\"nv\">reveals</span><span class=\"w\"> </span><span class=\"nv\">the</span><span class=\"w\"> </span><span class=\"nv\">undeclared</span><span class=\"w\"> </span><span class=\"nv\">rule</span><span class=\"w\"> </span><span class=\"nv\">immediately</span>.\n</code></pre></div>\n<span class=\"paragraph\">Without IaC, step 6 takes days. With IaC, it takes seconds.</span>\n<h3 id=\"aegisaps-two-bicep-entry-points\">AegisAP's two Bicep entry points</h3>\n<table>\n<thead>\n<tr>\n<th>Track</th>\n<th>Entry point</th>\n<th>When to use</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>core</code></td>\n<td><code>infra/core.bicep</code></td>\n<td>Days 0\u20134; local dev; Storage + Search + OpenAI only</td>\n</tr>\n<tr>\n<td><code>full</code></td>\n<td><code>infra/full.bicep</code></td>\n<td>Days 5+; adds PostgreSQL, Key Vault, ACR, ACA, Log Analytics, App Insights</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<span class=\"paragraph\"><strong>Convention:</strong> Never deploy by hand in staging or production.\nEvery resource change goes through <code>az deployment group create</code> or\nthe GitHub Actions pipeline \u2014 no exceptions.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "d4e3cf115906c61dca6b2cad78c90b3f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-bicep-anatomy\">2. Bicep Anatomy</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "757a7a05e932ba9bf357ecd3c5d1e8d2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Bicep is Azure's declarative IaC language. It compiles to ARM JSON and supports\nfull type checking, module reuse, and compile-time validation.</span>\n<h3 id=\"five-core-bicep-concepts\">Five core Bicep concepts</h3>\n<table>\n<thead>\n<tr>\n<th>Concept</th>\n<th>Syntax</th>\n<th>Purpose</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>resource</code></td>\n<td><code>resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = { ... }</code></td>\n<td>Declares a single Azure resource</td>\n</tr>\n<tr>\n<td><code>param</code></td>\n<td><code>param location string = resourceGroup().location</code></td>\n<td>Externally supplied value \u2014 never hardcode secrets here</td>\n</tr>\n<tr>\n<td><code>module</code></td>\n<td><code>module core './core.bicep' = { ... }</code></td>\n<td>Reusable template unit \u2014 like a function</td>\n</tr>\n<tr>\n<td><code>output</code></td>\n<td><code>output keyVaultUri string = kv.properties.vaultUri</code></td>\n<td>Exposes a value to calling templates or CI/CD</td>\n</tr>\n<tr>\n<td><code>existing</code></td>\n<td><code>resource kv 'Microsoft.KeyVault/vaults@...</code> <code>existing = { name: keyVaultName }</code></td>\n<td>References an already-deployed resource without creating it</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"annotated-bicep-aegisap-key-vault-resource\">Annotated Bicep \u2014 AegisAP Key Vault resource</h3>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"c1\">// \u2460 Resource type and API version \u2014 always pin the API version</span>\n<span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">kv</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">KeyVault</span><span class=\"o\">/</span><span class=\"n\">vaults</span><span class=\"mi\">@2023</span><span class=\"mo\">-07-01</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">keyVaultName</span><span class=\"w\">          </span><span class=\"c1\">// \u2461 From param \u2014 never hardcoded</span>\n<span class=\"w\">  </span><span class=\"nl\">location</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">location</span><span class=\"w\">          </span><span class=\"c1\">// \u2461 From param</span>\n<span class=\"w\">  </span><span class=\"nl\">properties</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">    </span><span class=\"nl\">sku</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span><span class=\"w\"> </span><span class=\"n\">family</span><span class=\"o\">:</span><span class=\"w\"> </span><span class=\"sc\">&#39;A&#39;</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">name</span><span class=\"o\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">standard</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"p\">}</span>\n<span class=\"w\">    </span><span class=\"nl\">tenantId</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">subscription</span><span class=\"p\">().</span><span class=\"n\">tenantId</span><span class=\"w\">  </span><span class=\"c1\">// \u2462 Built-in function \u2014 no hardcoded IDs</span>\n\n<span class=\"w\">    </span><span class=\"c1\">// \u2463 RBAC model: enableRbacAuthorization = true</span>\n<span class=\"w\">    </span><span class=\"c1\">//    This disables legacy access policies \u2014 all permissions via RBAC only</span>\n<span class=\"w\">    </span><span class=\"nl\">enableRbacAuthorization</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"nb\">true</span>\n\n<span class=\"w\">    </span><span class=\"c1\">// \u2464 Soft-delete and purge protection: mandatory for production</span>\n<span class=\"w\">    </span><span class=\"nl\">enableSoftDelete</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"nb\">true</span>\n<span class=\"w\">    </span><span class=\"nl\">enablePurgeProtection</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"nb\">true</span>\n\n<span class=\"w\">    </span><span class=\"nl\">publicNetworkAccess</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Enabled</span><span class=\"err\">&#39;</span>\n<span class=\"w\">  </span><span class=\"p\">}</span>\n<span class=\"p\">}</span>\n</code></pre></div>\n<blockquote>\n<span class=\"paragraph\"><strong>Security note:</strong> <code>enableRbacAuthorization: true</code> disables Key Vault's legacy\n\"access policies\" model, which allowed granting permissions to ANY principal\nwithout audit trail. RBAC adds standard Azure role assignment semantics\n(assignment ID, scope, principal, role) that appear in the Activity Log.</span>\n</blockquote>\n<h3 id=\"annotated-bicep-role-assignment\">Annotated Bicep \u2014 Role assignment</h3>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"c1\">// Grant the workload identity &#39;Key Vault Secrets User&#39; (read-only)</span>\n<span class=\"c1\">// Using the built-in role definition ID \u2014 no custom roles needed</span>\n<span class=\"n\">var</span><span class=\"w\"> </span><span class=\"n\">kvSecretsUserRole</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"n\">subscriptionResourceId</span><span class=\"p\">(</span>\n<span class=\"w\">  </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">Authorization</span><span class=\"o\">/</span><span class=\"n\">roleDefinitions</span><span class=\"err\">&#39;</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"err\">&#39;</span><span class=\"mi\">4633458</span><span class=\"n\">b</span><span class=\"mi\">-17</span><span class=\"n\">de</span><span class=\"mi\">-408</span><span class=\"n\">a</span><span class=\"o\">-</span><span class=\"n\">b874</span><span class=\"mo\">-0445</span><span class=\"n\">c86b69e6</span><span class=\"err\">&#39;</span><span class=\"w\">  </span><span class=\"c1\">// Key Vault Secrets User</span>\n<span class=\"p\">)</span>\n\n<span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">kvWorkloadRoleAssignment</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">Authorization</span><span class=\"o\">/</span><span class=\"n\">roleAssignments</span><span class=\"mi\">@2022</span><span class=\"mo\">-04-01</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">scope</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">kv</span><span class=\"w\">          </span><span class=\"c1\">// Scoped to THIS Key Vault only \u2014 not subscription-wide</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">guid</span><span class=\"p\">(</span><span class=\"n\">kv</span><span class=\"p\">.</span><span class=\"kt\">id</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">workloadIdentity</span><span class=\"p\">.</span><span class=\"kt\">id</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"n\">kvSecretsUserRole</span><span class=\"p\">)</span>\n<span class=\"w\">  </span><span class=\"nl\">properties</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">    </span><span class=\"nl\">roleDefinitionId</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">kvSecretsUserRole</span>\n<span class=\"w\">    </span><span class=\"nl\">principalId</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">workloadIdentity</span><span class=\"p\">.</span><span class=\"n\">properties</span><span class=\"p\">.</span><span class=\"n\">principalId</span>\n<span class=\"w\">    </span><span class=\"nl\">principalType</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">ServicePrincipal</span><span class=\"err\">&#39;</span>\n<span class=\"w\">  </span><span class=\"p\">}</span>\n<span class=\"p\">}</span>\n</code></pre></div>\n<h3 id=\"bicep-workflow\">Bicep workflow</h3>\n<div class=\"language-bash codehilite\"><pre><span></span><code><span class=\"c1\"># 1. Validate template (lint + API checks) \u2014 run before every PR</span>\naz<span class=\"w\"> </span>deployment<span class=\"w\"> </span>group<span class=\"w\"> </span>validate<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--resource-group<span class=\"w\"> </span>rg-aegisap-dev<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--template-file<span class=\"w\"> </span>infra/full.bicep<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--parameters<span class=\"w\"> </span>@infra/full.bicepparam\n\n<span class=\"c1\"># 2. Show what would change (no writes)</span>\naz<span class=\"w\"> </span>deployment<span class=\"w\"> </span>group<span class=\"w\"> </span>what-if<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--resource-group<span class=\"w\"> </span>rg-aegisap-dev<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--template-file<span class=\"w\"> </span>infra/full.bicep<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--parameters<span class=\"w\"> </span>@infra/full.bicepparam\n\n<span class=\"c1\"># 3. Deploy</span>\naz<span class=\"w\"> </span>deployment<span class=\"w\"> </span>group<span class=\"w\"> </span>create<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--resource-group<span class=\"w\"> </span>rg-aegisap-dev<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--template-file<span class=\"w\"> </span>infra/full.bicep<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--parameters<span class=\"w\"> </span>@infra/full.bicepparam\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "58baf5cbcb872d3fa035f15526d1d909",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_Hstk_.py&quot;</span>, line <span class=\"m\">59</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">resource_picker</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">dropdown</span><span class=\"p\">(</span>\n<span class=\"w\">                      </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "8f287232d624baede307168704e694e4",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "4ca7baec50db312d7cf0103321006b7a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-aegisaps-four-identity-planes\">3. AegisAP's Four Identity Planes</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "ae91b8bccceb4e02841b774f69b87836",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">AegisAP formalises four separate managed identities \u2014 each with distinct permissions\nand a distinct threat surface.  Using a single identity for everything would give\na compromised container the ability to destroy indexes, rotate secrets, or exfiltrate\nthe knowledge base.</span>\n<table>\n<thead>\n<tr>\n<th>Plane</th>\n<th>Identity name</th>\n<th>Principal type</th>\n<th>Scope</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Runtime API</strong></td>\n<td><code>id-aegisap-workload</code></td>\n<td>User-assigned</td>\n<td>Inference, search queries, PG reads/writes, KV secret reads</td>\n</tr>\n<tr>\n<td><strong>Jobs scaffold</strong></td>\n<td><code>id-aegisap-jobs</code></td>\n<td>User-assigned</td>\n<td>Same as runtime, plus search index management</td>\n</tr>\n<tr>\n<td><strong>Search admin</strong></td>\n<td><code>id-aegisap-search-admin</code></td>\n<td>User-assigned</td>\n<td>Create/delete search indexes only</td>\n</tr>\n<tr>\n<td><strong>Developer / Ops</strong></td>\n<td>Individual Entra accounts + groups</td>\n<td>Human</td>\n<td>Portal read, log query \u2014 NO data writes in production</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"full-rbac-matrix\">Full RBAC matrix</h3>\n<table>\n<thead>\n<tr>\n<th>Resource</th>\n<th>Runtime API</th>\n<th>Jobs</th>\n<th>Search admin</th>\n<th>Dev/Ops</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Azure OpenAI</td>\n<td><code>Cognitive Services OpenAI User</code></td>\n<td><code>Cognitive Services OpenAI User</code></td>\n<td>\u2014</td>\n<td><code>Reader</code></td>\n</tr>\n<tr>\n<td>Azure AI Search</td>\n<td><code>Search Index Data Reader</code></td>\n<td><code>Search Index Data Contributor</code></td>\n<td><code>Search Service Contributor</code></td>\n<td><code>Reader</code></td>\n</tr>\n<tr>\n<td>PostgreSQL</td>\n<td>connect (via Entra group)</td>\n<td>connect (via Entra group)</td>\n<td>\u2014</td>\n<td>\u2014</td>\n</tr>\n<tr>\n<td>Key Vault</td>\n<td><code>Key Vault Secrets User</code></td>\n<td>\u2014</td>\n<td>\u2014</td>\n<td><code>Reader</code></td>\n</tr>\n<tr>\n<td>ACR</td>\n<td><code>AcrPull</code></td>\n<td><code>AcrPull</code></td>\n<td>\u2014</td>\n<td><code>Reader</code></td>\n</tr>\n<tr>\n<td>App Insights</td>\n<td>\u2014</td>\n<td>\u2014</td>\n<td>\u2014</td>\n<td><code>Log Analytics Reader</code></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"in-bicep\">In Bicep</h3>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"c1\">// Three identities declared in full.bicep</span>\n<span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">workloadIdentity</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">ManagedIdentity</span><span class=\"o\">/</span><span class=\"n\">userAssignedIdentities</span><span class=\"mi\">@2023</span><span class=\"mo\">-01</span><span class=\"mi\">-31</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">workloadIdentityName</span><span class=\"w\">        </span><span class=\"c1\">// id-aegisap-workload</span>\n<span class=\"w\">  </span><span class=\"nl\">location</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">location</span>\n<span class=\"p\">}</span>\n\n<span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">jobsIdentity</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">ManagedIdentity</span><span class=\"o\">/</span><span class=\"n\">userAssignedIdentities</span><span class=\"mi\">@2023</span><span class=\"mo\">-01</span><span class=\"mi\">-31</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">jobsIdentityName</span><span class=\"w\">            </span><span class=\"c1\">// id-aegisap-jobs</span>\n<span class=\"w\">  </span><span class=\"nl\">location</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">location</span>\n<span class=\"p\">}</span>\n\n<span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">searchAdminIdentity</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">ManagedIdentity</span><span class=\"o\">/</span><span class=\"n\">userAssignedIdentities</span><span class=\"mi\">@2023</span><span class=\"mo\">-01</span><span class=\"mi\">-31</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">searchAdminIdentityName</span><span class=\"w\">     </span><span class=\"c1\">// id-aegisap-search-admin</span>\n<span class=\"w\">  </span><span class=\"nl\">location</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">location</span>\n<span class=\"p\">}</span>\n</code></pre></div>\n<h3 id=\"blast-radius-principle\">Blast radius principle</h3>\n<span class=\"paragraph\">If <code>id-aegisap-workload</code> is compromised (e.g., through a container breakout):</span>\n<ul>\n<li>It can read Key Vault secrets \u2192 <strong>impact: credentials for external services leak</strong></li>\n<li>It <strong>cannot</strong> modify Key Vault secrets (not <code>Secrets Officer</code>)</li>\n<li>It <strong>cannot</strong> delete or recreate search indexes (not <code>Search Service Contributor</code>)</li>\n<li>It <strong>cannot</strong> push new images to ACR (not <code>AcrPush</code>)</li>\n<li>It <strong>cannot</strong> read other teams' resources (scoped at resource level, not subscription)</li>\n</ul>\n<span class=\"paragraph\">The blast radius is bounded to the services AegisAP actually needs.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "f848a8b430290968b7e20c28ee71191b",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_ROlb_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">plane_picker</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">radio</span><span class=\"p\">(</span>\n<span class=\"w\">                   </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "92b302beb9d07601f3e825723decda2a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "79e1c924db2bc4a7c3a902430a854456",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-defaultazurecredential-one-line-for-dev-and-prod\">4. <code>DefaultAzureCredential</code>: One Line for Dev and Prod</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "67b016b884c37a91f9a5141bfbe4dd39",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><code>DefaultAzureCredential</code> from the <code>azure-identity</code> package tries a chain of\ncredential providers in order. The same line of code works in every environment\nwithout modification.</span>\n<h3 id=\"the-credential-chain\">The credential chain</h3>\n<div class=\"language-gdscript codehilite\"><pre><span></span><code><span class=\"mf\">1.</span><span class=\"w\">  </span><span class=\"n\">EnvironmentCredential</span><span class=\"w\">          </span><span class=\"n\">AZURE_CLIENT_ID</span><span class=\"w\"> </span><span class=\"o\">+</span><span class=\"w\"> </span><span class=\"n\">_SECRET</span><span class=\"w\"> </span><span class=\"o\">+</span><span class=\"w\"> </span><span class=\"n\">_TENANT_ID</span><span class=\"w\"> </span><span class=\"ow\">in</span><span class=\"w\"> </span><span class=\"n\">env</span>\n\n<span class=\"mf\">2.</span><span class=\"w\">  </span><span class=\"n\">WorkloadIdentityCredential</span><span class=\"w\">     </span><span class=\"n\">Kubernetes</span><span class=\"w\"> </span><span class=\"n\">workload</span><span class=\"w\"> </span><span class=\"n\">identity</span><span class=\"w\"> </span><span class=\"n\">federation</span>\n\n<span class=\"mf\">3.</span><span class=\"w\">  </span><span class=\"n\">ManagedIdentityCredential</span><span class=\"w\">  </span><span class=\"err\">\u25c4\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">ACA</span><span class=\"w\"> </span><span class=\"n\">production</span><span class=\"w\"> </span><span class=\"n\">path</span>\n\n<span class=\"mf\">4.</span><span class=\"w\">  </span><span class=\"n\">AzureCliCredential</span><span class=\"w\">         </span><span class=\"err\">\u25c4\u2500\u2500</span><span class=\"w\"> </span><span class=\"n\">Local</span><span class=\"w\"> </span><span class=\"n\">dev</span><span class=\"w\"> </span><span class=\"err\">`</span><span class=\"n\">az</span><span class=\"w\"> </span><span class=\"n\">login</span><span class=\"err\">`</span><span class=\"w\"> </span><span class=\"n\">path</span>\n\n<span class=\"mf\">5.</span><span class=\"w\">  </span><span class=\"n\">AzurePowerShellCredential</span>\n\n<span class=\"mf\">6.</span><span class=\"w\">  </span><span class=\"n\">AzureDeveloperCliCredential</span>\n</code></pre></div>\n<span class=\"paragraph\">In <strong>local development</strong>: step 4 fires \u2014 your <code>az login</code> session provides a token.\nIn <strong>production ACA</strong>: step 3 fires \u2014 the Container App's managed identity provides a token.</span>\n<h3 id=\"usage-across-aegisap-services\">Usage across AegisAP services</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">azure.identity</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">DefaultAzureCredential</span>\n\n<span class=\"n\">credential</span> <span class=\"o\">=</span> <span class=\"n\">DefaultAzureCredential</span><span class=\"p\">()</span>\n\n<span class=\"c1\"># Azure OpenAI</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">openai</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">AzureOpenAI</span>\n<span class=\"n\">client</span> <span class=\"o\">=</span> <span class=\"n\">AzureOpenAI</span><span class=\"p\">(</span>\n    <span class=\"n\">azure_endpoint</span><span class=\"o\">=</span><span class=\"n\">os</span><span class=\"o\">.</span><span class=\"n\">environ</span><span class=\"p\">[</span><span class=\"s2\">&quot;AZURE_OPENAI_ENDPOINT&quot;</span><span class=\"p\">],</span>\n    <span class=\"n\">azure_ad_token_provider</span><span class=\"o\">=</span><span class=\"n\">credential</span><span class=\"o\">.</span><span class=\"n\">get_token</span><span class=\"p\">,</span>\n    <span class=\"n\">api_version</span><span class=\"o\">=</span><span class=\"n\">os</span><span class=\"o\">.</span><span class=\"n\">environ</span><span class=\"p\">[</span><span class=\"s2\">&quot;AZURE_OPENAI_API_VERSION&quot;</span><span class=\"p\">],</span>\n<span class=\"p\">)</span>\n\n<span class=\"c1\"># Azure AI Search</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">azure.search.documents</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">SearchClient</span>\n<span class=\"n\">search</span> <span class=\"o\">=</span> <span class=\"n\">SearchClient</span><span class=\"p\">(</span>\n    <span class=\"n\">endpoint</span><span class=\"o\">=</span><span class=\"n\">os</span><span class=\"o\">.</span><span class=\"n\">environ</span><span class=\"p\">[</span><span class=\"s2\">&quot;AZURE_SEARCH_ENDPOINT&quot;</span><span class=\"p\">],</span>\n    <span class=\"n\">index_name</span><span class=\"o\">=</span><span class=\"n\">os</span><span class=\"o\">.</span><span class=\"n\">environ</span><span class=\"p\">[</span><span class=\"s2\">&quot;AZURE_SEARCH_INDEX_NAME&quot;</span><span class=\"p\">],</span>\n    <span class=\"n\">credential</span><span class=\"o\">=</span><span class=\"n\">credential</span><span class=\"p\">,</span>\n<span class=\"p\">)</span>\n\n<span class=\"c1\"># Key Vault</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">azure.keyvault.secrets</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">SecretClient</span>\n<span class=\"n\">kv</span> <span class=\"o\">=</span> <span class=\"n\">SecretClient</span><span class=\"p\">(</span>\n    <span class=\"n\">vault_url</span><span class=\"o\">=</span><span class=\"n\">os</span><span class=\"o\">.</span><span class=\"n\">environ</span><span class=\"p\">[</span><span class=\"s2\">&quot;AZURE_KEY_VAULT_URI&quot;</span><span class=\"p\">],</span>\n    <span class=\"n\">credential</span><span class=\"o\">=</span><span class=\"n\">credential</span><span class=\"p\">,</span>\n<span class=\"p\">)</span>\n</code></pre></div>\n<h3 id=\"production-tuning\">Production tuning</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">azure.identity</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">DefaultAzureCredential</span>\n\n<span class=\"c1\"># In ACA: exclude sources that cannot fire in a containerised environment</span>\n<span class=\"c1\"># This avoids long credential-chain delays when workload identity is absent</span>\n<span class=\"n\">credential</span> <span class=\"o\">=</span> <span class=\"n\">DefaultAzureCredential</span><span class=\"p\">(</span>\n    <span class=\"n\">exclude_workload_identity_credential</span><span class=\"o\">=</span><span class=\"kc\">True</span><span class=\"p\">,</span>   <span class=\"c1\"># Not using AKS</span>\n    <span class=\"n\">exclude_environment_credential</span><span class=\"o\">=</span><span class=\"kc\">True</span><span class=\"p\">,</span>          <span class=\"c1\"># No AZURE_CLIENT_SECRET in prod</span>\n    <span class=\"n\">exclude_azure_developer_cli_credential</span><span class=\"o\">=</span><span class=\"kc\">True</span><span class=\"p\">,</span>\n    <span class=\"n\">exclude_powershell_credential</span><span class=\"o\">=</span><span class=\"kc\">True</span><span class=\"p\">,</span>\n<span class=\"p\">)</span>\n</code></pre></div>\n<blockquote>\n<span class=\"paragraph\"><strong>Never</strong> use <code>AzureCliCredential</code> directly in production code \u2014 it requires\nthe Azure CLI to be installed and will always fail inside a container without it.</span>\n</blockquote>\n<h3 id=\"testing-credential-resolution\">Testing credential resolution</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">import</span><span class=\"w\"> </span><span class=\"nn\">logging</span>\n<span class=\"n\">logging</span><span class=\"o\">.</span><span class=\"n\">basicConfig</span><span class=\"p\">(</span><span class=\"n\">level</span><span class=\"o\">=</span><span class=\"n\">logging</span><span class=\"o\">.</span><span class=\"n\">DEBUG</span><span class=\"p\">)</span>\n\n<span class=\"c1\"># With DEBUG logging enabled, the SDK logs which credential source fired:</span>\n<span class=\"c1\"># azure.identity INFO: DefaultAzureCredential.get_token succeeded with ManagedIdentityCredential</span>\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "2cc43d2995005109431e9894ad5c037b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-key-vault-access-contracts\">5. Key Vault Access Contracts</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "08851c9b7b35fa01d7166cd1918f8fdb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Key Vault holds <strong>residual secrets</strong> \u2014 credentials for services that do not\nsupport Managed Identity.  It does NOT hold credentials for services that do.</span>\n<h3 id=\"what-goes-in-key-vault\">What goes IN Key Vault</h3>\n<table>\n<thead>\n<tr>\n<th>Secret name</th>\n<th>Value type</th>\n<th>Why</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>langsmith-api-key</code></td>\n<td>LangSmith token</td>\n<td>External SaaS; no Azure Managed Identity support</td>\n</tr>\n<tr>\n<td><code>notification-webhook-token</code></td>\n<td>Third-party webhook</td>\n<td>External; no Azure identity</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"what-does-not-go-in-key-vault\">What does NOT go in Key Vault</h3>\n<table>\n<thead>\n<tr>\n<th>Service</th>\n<th>Why Key Vault is NOT needed</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Azure OpenAI</td>\n<td><code>DefaultAzureCredential</code> + <code>Cognitive Services OpenAI User</code> RBAC</td>\n</tr>\n<tr>\n<td>Azure AI Search</td>\n<td><code>DefaultAzureCredential</code> + <code>Search Index Data Reader</code> RBAC</td>\n</tr>\n<tr>\n<td>PostgreSQL</td>\n<td>Entra authentication \u2014 token from <code>DefaultAzureCredential</code></td>\n</tr>\n<tr>\n<td>Azure Blob Storage</td>\n<td><code>DefaultAzureCredential</code> + <code>Storage Blob Data Reader</code> RBAC</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<span class=\"paragraph\"><strong>Security posture gate rule:</strong> If <code>AZURE_OPENAI_API_KEY</code> appears as an\nenvironment variable in the Container App, the security posture gate <strong>fails\nthe release</strong>. The endpoint only \u2014 never the key.</span>\n</blockquote>\n<h3 id=\"key-vault-access-pattern\">Key Vault access pattern</h3>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">azure.keyvault.secrets</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">SecretClient</span>\n<span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">azure.identity</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">DefaultAzureCredential</span>\n<span class=\"kn\">import</span><span class=\"w\"> </span><span class=\"nn\">os</span>\n\n<span class=\"k\">def</span><span class=\"w\"> </span><span class=\"nf\">get_secret</span><span class=\"p\">(</span><span class=\"n\">name</span><span class=\"p\">:</span> <span class=\"nb\">str</span><span class=\"p\">)</span> <span class=\"o\">-&gt;</span> <span class=\"nb\">str</span><span class=\"p\">:</span>\n<span class=\"w\">    </span><span class=\"sd\">&quot;&quot;&quot;Read a single secret from Key Vault. Never cache the value.&quot;&quot;&quot;</span>\n    <span class=\"n\">client</span> <span class=\"o\">=</span> <span class=\"n\">SecretClient</span><span class=\"p\">(</span>\n        <span class=\"n\">vault_url</span><span class=\"o\">=</span><span class=\"n\">os</span><span class=\"o\">.</span><span class=\"n\">environ</span><span class=\"p\">[</span><span class=\"s2\">&quot;AZURE_KEY_VAULT_URI&quot;</span><span class=\"p\">],</span>\n        <span class=\"n\">credential</span><span class=\"o\">=</span><span class=\"n\">DefaultAzureCredential</span><span class=\"p\">(),</span>\n    <span class=\"p\">)</span>\n    <span class=\"k\">return</span> <span class=\"n\">client</span><span class=\"o\">.</span><span class=\"n\">get_secret</span><span class=\"p\">(</span><span class=\"n\">name</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">value</span>\n</code></pre></div>\n<h3 id=\"best-practices\">Best practices</h3>\n<ul>\n<li>Grant only <code>Key Vault Secrets User</code> (read) to the runtime identity.\n  Never <code>Key Vault Secrets Officer</code> (read + write + delete).</li>\n<li>Enable <strong>soft-delete</strong> (<code>enableSoftDelete: true</code>) and\n  <strong>purge protection</strong> (<code>enablePurgeProtection: true</code>) in Bicep.\n  Without these, a compromised identity can permanently delete secrets.</li>\n<li>Use Key Vault's <strong>rotation policies</strong> for supported secret types.\n  LangSmith API keys: rotate quarterly minimum.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "386ccd6a4a05e73ca3cf67e6841edf31",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_ecfG_.py&quot;</span>, line <span class=\"m\">18</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">item_picker</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">dropdown</span><span class=\"p\">(</span>\n<span class=\"w\">                  </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "ae6d71ba6baf8b709f36d03ccadb7c21",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (MarimoExceptionRaisedError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "b91ccb8d682afc36b5b46601811bf233",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-github-actions-oidc-federation-no-stored-secrets-in-cicd\">6. GitHub Actions OIDC Federation: No Stored Secrets in CI/CD</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "0c2ad7e58c6ac7dbebd14befa0e18bb7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Traditional CI/CD stores a Service Principal client secret as a GitHub Actions\nsecret.  OIDC federation eliminates the secret entirely.</span>\n<h3 id=\"how-oidc-federation-works\">How OIDC federation works</h3>\n<div class=\"language-teratermmacro codehilite\"><pre><span></span><code><span class=\"nv\">GitHub</span><span class=\"w\"> </span><span class=\"nv\">Actions</span><span class=\"w\"> </span><span class=\"nv\">job</span><span class=\"w\"> </span><span class=\"nv\">starts</span>\n<span class=\"w\">       </span>\u2502\n<span class=\"w\">       </span>\u25bc\n<span class=\"nv\">GitHub</span><span class=\"w\"> </span><span class=\"nv\">generates</span><span class=\"w\"> </span><span class=\"nv\">a</span><span class=\"w\"> </span><span class=\"nv\">short</span><span class=\"o\">-</span><span class=\"nv\">lived</span><span class=\"w\"> </span><span class=\"nv\">OIDC</span><span class=\"w\"> </span><span class=\"nv\">token</span><span class=\"w\"> </span><span class=\"ss\">(</span><span class=\"nv\">JWT</span><span class=\"ss\">)</span><span class=\"w\"> </span><span class=\"k\">for</span><span class=\"w\"> </span><span class=\"nv\">THIS</span><span class=\"w\"> </span><span class=\"nv\">specific</span><span class=\"w\"> </span><span class=\"nv\">run</span>\n<span class=\"nv\">Token</span><span class=\"w\"> </span><span class=\"nv\">claims</span>:<span class=\"w\"> </span><span class=\"nv\">repo</span>,<span class=\"w\"> </span><span class=\"nv\">branch</span>,<span class=\"w\"> </span><span class=\"nv\">workflow</span>,<span class=\"w\"> </span><span class=\"nv\">run</span><span class=\"w\"> </span><span class=\"nv\">ID</span><span class=\"w\"> </span>\u2014<span class=\"w\"> </span><span class=\"nv\">all</span><span class=\"w\"> </span><span class=\"nv\">verifiable</span>\n<span class=\"w\">       </span>\u2502\n<span class=\"w\">       </span>\u25bc\n<span class=\"nv\">azure</span><span class=\"o\">/</span><span class=\"nv\">login</span><span class=\"w\"> </span><span class=\"nv\">action</span><span class=\"w\"> </span><span class=\"nv\">presents</span><span class=\"w\"> </span><span class=\"nv\">token</span><span class=\"w\"> </span><span class=\"nv\">to</span><span class=\"w\"> </span><span class=\"nv\">Microsoft</span><span class=\"w\"> </span><span class=\"nv\">Entra</span><span class=\"w\"> </span><span class=\"nv\">ID</span>\n<span class=\"w\">       </span>\u2502\n<span class=\"w\">       </span>\u25bc\n<span class=\"nv\">Entra</span><span class=\"w\"> </span><span class=\"nv\">validates</span>:<span class=\"w\"> </span><span class=\"nv\">correct</span><span class=\"w\"> </span><span class=\"nv\">repo</span>?<span class=\"w\"> </span><span class=\"nv\">correct</span><span class=\"w\"> </span><span class=\"nv\">branch</span>?<span class=\"w\"> </span><span class=\"nv\">correct</span><span class=\"w\"> </span><span class=\"nv\">workflow</span>?\n<span class=\"w\">       </span>\u2502\n<span class=\"w\">       </span>\u25bc\n<span class=\"nv\">Entra</span><span class=\"w\"> </span><span class=\"nv\">issues</span><span class=\"w\"> </span><span class=\"nv\">an</span><span class=\"w\"> </span><span class=\"nv\">access</span><span class=\"w\"> </span><span class=\"nv\">token</span><span class=\"w\"> </span><span class=\"nv\">valid</span><span class=\"w\"> </span><span class=\"k\">for</span><span class=\"w\"> </span><span class=\"nv\">THIS</span><span class=\"w\"> </span><span class=\"nv\">job</span><span class=\"w\"> </span><span class=\"nv\">only</span><span class=\"w\"> </span><span class=\"ss\">(</span><span class=\"o\">~</span><span class=\"mi\">1</span><span class=\"w\"> </span><span class=\"nv\">hour</span><span class=\"ss\">)</span>\n<span class=\"w\">       </span>\u2502\n<span class=\"w\">       </span>\u25bc\n<span class=\"nv\">az</span><span class=\"w\"> </span><span class=\"o\">/</span><span class=\"w\"> </span><span class=\"nv\">Azure</span><span class=\"w\"> </span><span class=\"nv\">SDK</span><span class=\"w\"> </span><span class=\"nv\">calls</span><span class=\"w\"> </span><span class=\"nv\">use</span><span class=\"w\"> </span><span class=\"nv\">the</span><span class=\"w\"> </span><span class=\"nv\">token</span><span class=\"w\"> </span>\u2014<span class=\"w\"> </span><span class=\"nv\">no</span><span class=\"w\"> </span><span class=\"nv\">secret</span><span class=\"w\"> </span><span class=\"nv\">ever</span><span class=\"w\"> </span><span class=\"nv\">stored</span><span class=\"w\"> </span><span class=\"nv\">or</span><span class=\"w\"> </span><span class=\"nv\">transmitted</span>\n</code></pre></div>\n<h3 id=\"comparison\">Comparison</h3>\n<table>\n<thead>\n<tr>\n<th>Property</th>\n<th>Service Principal + secret</th>\n<th>OIDC federation</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Secret stored</td>\n<td>GitHub Secrets</td>\n<td><strong>None</strong></td>\n</tr>\n<tr>\n<td>Token lifetime</td>\n<td>Months (must rotate)</td>\n<td>Minutes (per-job)</td>\n</tr>\n<tr>\n<td>Scope</td>\n<td>Any workflow that knows the secret</td>\n<td>Bound to specific repo + branch + workflow</td>\n</tr>\n<tr>\n<td>Rotation burden</td>\n<td>Manual</td>\n<td><strong>None</strong></td>\n</tr>\n<tr>\n<td>Exfiltration risk</td>\n<td>Secret leaked \u2192 permanent access</td>\n<td>Leaked token expires in minutes</td>\n</tr>\n<tr>\n<td>Audit trail</td>\n<td>Client secret use not tied to a specific run</td>\n<td>Every use has a unique run ID</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"bicep-configuring-the-federated-credential\">Bicep: configuring the federated credential</h3>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"c1\">// The deployment identity is a user-assigned managed identity</span>\n<span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">deployIdentity</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">ManagedIdentity</span><span class=\"o\">/</span><span class=\"n\">userAssignedIdentities</span><span class=\"mi\">@2023</span><span class=\"mo\">-01</span><span class=\"mi\">-31</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"kt\">id</span><span class=\"o\">-</span><span class=\"n\">aegisap</span><span class=\"o\">-</span><span class=\"n\">deploy</span><span class=\"err\">&#39;</span>\n<span class=\"w\">  </span><span class=\"nl\">location</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">location</span>\n<span class=\"p\">}</span>\n\n<span class=\"c1\">// Federated credential bound to EXACTLY this repo + branch + workflow</span>\n<span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">federatedCredential</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">ManagedIdentity</span><span class=\"o\">/</span><span class=\"n\">userAssignedIdentities</span><span class=\"o\">/</span><span class=\"n\">federatedIdentityCredentials</span><span class=\"mi\">@2023</span><span class=\"mo\">-01</span><span class=\"mi\">-31</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">parent</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">deployIdentity</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">github</span><span class=\"o\">-</span><span class=\"n\">deploy</span><span class=\"o\">-</span><span class=\"n\">main</span><span class=\"err\">&#39;</span>\n<span class=\"w\">  </span><span class=\"nl\">properties</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">    </span><span class=\"nl\">audiences</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"err\">&#39;</span><span class=\"n\">api</span><span class=\"o\">:</span><span class=\"c1\">//AzureADTokenExchange&#39;]</span>\n<span class=\"w\">    </span><span class=\"nl\">issuer</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">https</span><span class=\"o\">:</span><span class=\"c1\">//token.issuer.actions.githubusercontent.com&#39;</span>\n<span class=\"w\">    </span><span class=\"c1\">// Subject scopes the credential to a SPECIFIC workflow on a SPECIFIC branch</span>\n<span class=\"w\">    </span><span class=\"c1\">// Never use a wildcard here \u2014 it defeats the purpose</span>\n<span class=\"w\">    </span><span class=\"nl\">subject</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">repo</span><span class=\"o\">:</span><span class=\"n\">your</span><span class=\"o\">-</span><span class=\"n\">org</span><span class=\"o\">/</span><span class=\"n\">agentic</span><span class=\"o\">-</span><span class=\"n\">accounts</span><span class=\"o\">-</span><span class=\"n\">payable</span><span class=\"o\">-</span><span class=\"n\">orchestrator</span><span class=\"o\">:</span><span class=\"n\">ref</span><span class=\"o\">:</span><span class=\"n\">refs</span><span class=\"o\">/</span><span class=\"n\">heads</span><span class=\"o\">/</span><span class=\"n\">main</span><span class=\"err\">&#39;</span>\n<span class=\"w\">  </span><span class=\"p\">}</span>\n<span class=\"p\">}</span>\n</code></pre></div>\n<h3 id=\"github-actions-workflow-snippet\">GitHub Actions workflow snippet</h3>\n<div class=\"language-yaml codehilite\"><pre><span></span><code><span class=\"nt\">jobs</span><span class=\"p\">:</span>\n<span class=\"w\">  </span><span class=\"nt\">deploy</span><span class=\"p\">:</span>\n<span class=\"w\">    </span><span class=\"nt\">runs-on</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">ubuntu-latest</span>\n<span class=\"w\">    </span><span class=\"c1\"># Required for OIDC \u2014 grants the job the right to request the token</span>\n<span class=\"w\">    </span><span class=\"nt\">permissions</span><span class=\"p\">:</span>\n<span class=\"w\">      </span><span class=\"nt\">id-token</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">write</span>\n<span class=\"w\">      </span><span class=\"nt\">contents</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">read</span>\n\n<span class=\"w\">    </span><span class=\"nt\">steps</span><span class=\"p\">:</span>\n\n<span class=\"w\">        </span><span class=\"p p-Indicator\">-</span><span class=\"w\"> </span><span class=\"nt\">uses</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">actions/checkout@v4</span>\n\n<span class=\"w\">        </span><span class=\"p p-Indicator\">-</span><span class=\"w\"> </span><span class=\"nt\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">Azure login (OIDC \u2014 no secrets)</span>\n<span class=\"w\">        </span><span class=\"nt\">uses</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">azure/login@v2</span>\n<span class=\"w\">        </span><span class=\"nt\">with</span><span class=\"p\">:</span>\n<span class=\"w\">          </span><span class=\"nt\">client-id</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">${{ vars.AZURE_CLIENT_ID }}</span><span class=\"w\">      </span><span class=\"c1\"># non-secret var</span>\n<span class=\"w\">          </span><span class=\"nt\">tenant-id</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">${{ vars.AZURE_TENANT_ID }}</span><span class=\"w\">      </span><span class=\"c1\"># non-secret var</span>\n<span class=\"w\">          </span><span class=\"nt\">subscription-id</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">${{ vars.AZURE_SUBSCRIPTION_ID }}</span><span class=\"w\">  </span><span class=\"c1\"># non-secret var</span>\n\n<span class=\"w\">        </span><span class=\"p p-Indicator\">-</span><span class=\"w\"> </span><span class=\"nt\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">Build and push image (SHA tag)</span>\n<span class=\"w\">        </span><span class=\"nt\">run</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p p-Indicator\">|</span>\n<span class=\"w\">          </span><span class=\"no\">az acr build \\</span>\n<span class=\"w\">            </span><span class=\"no\">--registry ${{ vars.ACR_NAME }} \\</span>\n<span class=\"w\">            </span><span class=\"no\">--image aegisap-api:${{ github.sha }} \\</span>\n<span class=\"w\">            </span><span class=\"no\">docker/Dockerfile.api</span>\n\n<span class=\"w\">        </span><span class=\"p p-Indicator\">-</span><span class=\"w\"> </span><span class=\"nt\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">Run acceptance gates before deploy</span>\n<span class=\"w\">        </span><span class=\"nt\">run</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">uv run python scripts/check_all_gates.py --skip-deploy</span>\n\n<span class=\"w\">        </span><span class=\"p p-Indicator\">-</span><span class=\"w\"> </span><span class=\"nt\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"l l-Scalar l-Scalar-Plain\">Deploy to ACA (creates new revision)</span>\n<span class=\"w\">        </span><span class=\"nt\">run</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p p-Indicator\">|</span>\n<span class=\"w\">          </span><span class=\"no\">az containerapp update \\</span>\n<span class=\"w\">            </span><span class=\"no\">--name aegisap-api \\</span>\n<span class=\"w\">            </span><span class=\"no\">--resource-group ${{ vars.RESOURCE_GROUP }} \\</span>\n<span class=\"w\">            </span><span class=\"no\">--image ${{ vars.ACR_NAME }}.azurecr.io/aegisap-api:${{ github.sha }} \\</span>\n<span class=\"w\">            </span><span class=\"no\">--revision-suffix rev-${{ github.sha }}</span>\n</code></pre></div>\n<blockquote>\n<span class=\"paragraph\"><strong>Rule:</strong> Never use <code>latest</code> as an image tag in a deployment. Always use the\nGit SHA. This makes every deployed revision uniquely traceable to a commit.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "65191c25dccf960d894b0310b603c7b5",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'go' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'i' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "5a69f009411b882f8eabb7527724f524",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"7-azure-container-apps-revision-model-zero-downtime-deployment\">7. Azure Container Apps Revision Model: Zero-Downtime Deployment</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "d8094bd25635f7ce9d551a2056add76e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">ACA's <strong>revision model</strong> is the operational unit for safe deployments.\nEvery code or config change creates an immutable <strong>revision</strong> \u2014 a snapshot\nof the container image and configuration at that point in time.</span>\n<h3 id=\"key-concepts\">Key concepts</h3>\n<table>\n<thead>\n<tr>\n<th>Concept</th>\n<th>Description</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Revision</strong></td>\n<td>Immutable snapshot of image + config. The rollback unit.</td>\n</tr>\n<tr>\n<td><strong>Traffic split</strong></td>\n<td>Percentage of requests routed to each active revision.</td>\n</tr>\n<tr>\n<td><strong>Inactive revision</strong></td>\n<td>A revision that exists but receives 0% traffic \u2014 kept for fast rollback.</td>\n</tr>\n<tr>\n<td><strong>SHA-tagged image</strong></td>\n<td><code>aegisap-api:&lt;git-sha&gt;</code> \u2014 never <code>latest</code>. Traceability + unambiguous rollback.</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"deployment-flow-with-gate-checks\">Deployment flow (with gate checks)</h3>\n<div class=\"language-scdoc codehilite\"><pre><span></span><code>1. Push code \u2192 GitHub Actions triggers\n       \u2502\n       \u25bc\n\n2. Build image tagged with git SHA\n   az acr build --image aegisap-api:&lt;sha&gt;\n       \u2502\n       \u25bc\n\n3. Run acceptance gates (--skip-deploy): all 6 must pass\n   python scripts/check_all_gates.py --skip-deploy\n       \u2502\n       \u25bc (all gates pass)\n\n4. Deploy new revision (receives 0% traffic initially)\n   az containerapp update --revision-suffix rev-&lt;sha&gt;\n       \u2502\n       \u25bc\n\n5. Post-deploy ACA health gate: revision must be &#39;Running&#39;\n   gate_aca_health() checks provision_state + HTTP 200\n       \u2502\n       \u25bc (health passes)\n\n6. Shift traffic to new revision\n   az containerapp ingress traffic set --revision-weight &quot;rev-&lt;sha&gt;=100&quot;\n</code></pre></div>\n<h3 id=\"rollback-procedure-2-minutes\">Rollback procedure (&lt; 2 minutes)</h3>\n<div class=\"language-bash codehilite\"><pre><span></span><code><span class=\"c1\"># Step 1: Allow multiple revisions to be active simultaneously</span>\naz<span class=\"w\"> </span>containerapp<span class=\"w\"> </span>revision<span class=\"w\"> </span>set-mode<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--name<span class=\"w\"> </span>aegisap-api<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--resource-group<span class=\"w\"> </span>rg-aegisap-prod<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--mode<span class=\"w\"> </span>multiple\n\n<span class=\"c1\"># Step 2: Shift 100% traffic back to the last known-good revision</span>\n<span class=\"c1\"># No re-deploy \u2014 the revision image is still in ACR and already warm</span>\naz<span class=\"w\"> </span>containerapp<span class=\"w\"> </span>ingress<span class=\"w\"> </span>traffic<span class=\"w\"> </span><span class=\"nb\">set</span><span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--name<span class=\"w\"> </span>aegisap-api<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--resource-group<span class=\"w\"> </span>rg-aegisap-prod<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--revision-weight<span class=\"w\"> </span><span class=\"s2\">&quot;aegisap-api--stable=100&quot;</span>\n</code></pre></div>\n<blockquote>\n<span class=\"paragraph\"><strong>Why this is fast:</strong> The stable revision's container image is already pulled\nand the instances may still be running (inactive = 0% traffic, but not\nnecessarily stopped). Traffic shift is a control-plane operation \u2014 it does not\nrequire a new container start.</span>\n</blockquote>\n<h3 id=\"production-tagging-convention\">Production tagging convention</h3>\n<div class=\"language-bash codehilite\"><pre><span></span><code><span class=\"c1\"># Human-readable revision suffix (also in deploy script)</span>\n<span class=\"nv\">REVISION_SUFFIX</span><span class=\"o\">=</span><span class=\"s2\">&quot;rev-</span><span class=\"k\">$(</span>date<span class=\"w\"> </span>+%Y%m%d<span class=\"k\">)</span><span class=\"s2\">-</span><span class=\"si\">${</span><span class=\"nv\">GITHUB_SHA</span><span class=\"p\">:</span><span class=\"nv\">0</span><span class=\"p\">:</span><span class=\"nv\">7</span><span class=\"si\">}</span><span class=\"s2\">&quot;</span>\n<span class=\"c1\"># e.g. rev-20240326-a1b2c3</span>\n</code></pre></div>\n<span class=\"paragraph\">Keep at least <strong>two previous revisions</strong> inactive so one rollback layer is\nalways available without hitting the revision retention limit.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "33125b2c52b4987d05cb5fcf57361188",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'fig' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'go' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'i' was defined by another cell",
+          "traceback": []
+        },
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'results' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "2b449e09456430d8c526c61b40a42bf1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"8-the-six-acceptance-gates\">8. The Six Acceptance Gates</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "594ea48fab663146a17281f899763f09",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Before any revision can receive production traffic, six machine-checked gates\nmust pass.  A single failure blocks the release.</span>\n<table>\n<thead>\n<tr>\n<th>Gate</th>\n<th>What it checks</th>\n<th>Feeds from</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>security_posture</code></td>\n<td>No forbidden secrets, security contract met</td>\n<td><code>aegisap.security.posture.run_posture_check()</code></td>\n</tr>\n<tr>\n<td><code>eval_regression</code></td>\n<td>No score drop below threshold vs. baseline</td>\n<td><code>build/day8/regression_baseline.json</code></td>\n</tr>\n<tr>\n<td><code>budget</code></td>\n<td>Sample cost ledger within daily ceiling</td>\n<td><code>build/day9/routing_report.json</code></td>\n</tr>\n<tr>\n<td><code>refusal_safety</code></td>\n<td>Malicious-case refusal rate \u2265 threshold</td>\n<td><code>build/day6/golden_thread_day6.json</code></td>\n</tr>\n<tr>\n<td><code>resume_safety</code></td>\n<td>Resume replay has zero duplicate side effects</td>\n<td><code>build/day5/golden_thread_day5_resumed.json</code></td>\n</tr>\n<tr>\n<td><code>aca_health</code></td>\n<td>Target revision is Running + HTTP 200</td>\n<td>Live Azure ACA API</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"what-the-security-posture-gate-blocks\">What the security posture gate blocks</h3>\n<table>\n<thead>\n<tr>\n<th>Forbidden condition</th>\n<th>Why</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>AZURE_OPENAI_API_KEY</code> in env</td>\n<td>Managed Identity must be used; key should not exist</td>\n</tr>\n<tr>\n<td>ACR pull via username/password</td>\n<td>Must use <code>AcrPull</code> RBAC on managed identity</td>\n</tr>\n<tr>\n<td><code>LANGSMITH_API_KEY</code> absent from Key Vault</td>\n<td>Must be a Key Vault secret, not a plain env var</td>\n</tr>\n<tr>\n<td><code>AEGISAP_POSTGRES_DSN</code> contains a password</td>\n<td>Entra auth required; password DSN is forbidden</td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"running-the-gates-locally\">Running the gates locally</h3>\n<div class=\"language-bash codehilite\"><pre><span></span><code><span class=\"c1\"># Run all gates, skip the live ACA check (before deploy step):</span>\nuv<span class=\"w\"> </span>run<span class=\"w\"> </span>python<span class=\"w\"> </span>scripts/check_all_gates.py<span class=\"w\"> </span>--skip-deploy\n\n<span class=\"c1\"># Run all gates including ACA health (after deploy):</span>\nuv<span class=\"w\"> </span>run<span class=\"w\"> </span>python<span class=\"w\"> </span>scripts/check_all_gates.py\n\n<span class=\"c1\"># Write release envelope to a file</span>\nuv<span class=\"w\"> </span>run<span class=\"w\"> </span>python<span class=\"w\"> </span>scripts/check_all_gates.py<span class=\"w\"> </span><span class=\"se\">\\</span>\n<span class=\"w\">  </span>--out<span class=\"w\"> </span>build/day10/release_envelope.json\n</code></pre></div>\n<h3 id=\"release-envelope-structure\">Release envelope structure</h3>\n<div class=\"language-json codehilite\"><pre><span></span><code><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;all_passed&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"kc\">true</span><span class=\"p\">,</span>\n<span class=\"w\">  </span><span class=\"nt\">&quot;gates&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">[</span>\n<span class=\"w\">    </span><span class=\"p\">{</span>\n<span class=\"w\">      </span><span class=\"nt\">&quot;name&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"s2\">&quot;security_posture&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">      </span><span class=\"nt\">&quot;passed&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"kc\">true</span><span class=\"p\">,</span>\n<span class=\"w\">      </span><span class=\"nt\">&quot;detail&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"s2\">&quot;All checks passed.&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">      </span><span class=\"nt\">&quot;evidence&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span><span class=\"w\"> </span><span class=\"nt\">&quot;checks&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"s2\">&quot;no_openai_key&quot;</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"s2\">&quot;no_acr_password&quot;</span><span class=\"p\">,</span><span class=\"w\"> </span><span class=\"err\">...</span><span class=\"p\">]</span><span class=\"w\"> </span><span class=\"p\">}</span>\n<span class=\"w\">    </span><span class=\"p\">},</span>\n<span class=\"w\">    </span><span class=\"p\">{</span>\n<span class=\"w\">      </span><span class=\"nt\">&quot;name&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"s2\">&quot;eval_regression&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">      </span><span class=\"nt\">&quot;passed&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"kc\">true</span><span class=\"p\">,</span>\n<span class=\"w\">      </span><span class=\"nt\">&quot;detail&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"s2\">&quot;No regressions.&quot;</span><span class=\"p\">,</span>\n<span class=\"w\">      </span><span class=\"nt\">&quot;evidence&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span><span class=\"w\"> </span><span class=\"nt\">&quot;regressed&quot;</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">[]</span><span class=\"w\"> </span><span class=\"p\">}</span>\n<span class=\"w\">    </span><span class=\"p\">}</span>\n<span class=\"w\">  </span><span class=\"p\">]</span>\n<span class=\"p\">}</span>\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "b42faa2e18493e72a3a9266dc356ce1f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"live-gate-runner\">Live Gate Runner</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "38892ec08ab9a2cd0fdc55d5493383cb",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'results' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "1d56b042e14d053cdca1566112b7822f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"break-and-diagnose-gate-failure-simulation\">Break and Diagnose: Gate Failure Simulation</h3>\n<span class=\"paragraph\">Check the box below to override the <code>budget</code> gate to a <strong>FAIL</strong> state and observe\nwhat a blocked release looks like. Then answer the three diagnostic questions.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "c451fd2eb3a8a4a1a08ce3de06ab2f8c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_yCnT_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">_bd_toggle</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">checkbox</span><span class=\"p\">(</span>\n<span class=\"w\">                 </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "bf2ce812154c1466a4f09120f66e808d",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "name '_bd_toggle' is not defined",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_wlCL_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"k\">if</span> <span class=\"n\">_bd_toggle</span><span class=\"o\">.</span><span class=\"n\">value</span><span class=\"p\">:</span>\n<span class=\"w\">       </span><span class=\"pm\">^^^^^^^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;_bd_toggle&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "9f32f3c2d130aae9cb4902d041e9fd85",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"exercises\">Exercises</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "40348cdcc1d9d9048097a98ef8357215",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_wAgl_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "rEll",
+      "code_hash": "e471f83cdd6063be318679064839cf99",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_rEll_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "62602298b61be5c761cad312dbce5511",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_dGlV_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "SdmI",
+      "code_hash": "4958c7e9c3b3a8f11ea12fb47fad8920",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_SdmI_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">accordion</span><span class=\"p\">({</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "lgWD",
+      "code_hash": "a06ce94aaf8e4d1438d8ed1d94470e69",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "/tmp/marimo_88485/__marimo__cell_lgWD_.py:5: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  \"recorded_at\": _dt.datetime.utcnow().isoformat() + \"Z\",\n",
+          "mimetype": "text/plain"
+        },
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_lgWD_.py&quot;</span>, line <span class=\"m\">15</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">_baseline_path</span> <span class=\"o\">=</span> <span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">(</span>\n<span class=\"w\">                     </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "yOPj",
+      "code_hash": "d80d305628cfa78295c40c42319f919a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_yOPj_.py&quot;</span>, line <span class=\"m\">5</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">parents</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">]</span> <span class=\"o\">/</span>\n<span class=\"w\">    </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "fwwy",
+      "code_hash": "0e11988b4bd48572a92deba530740570",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"production-reflection\">Production Reflection</h2>\n<ol>\n<li><strong>IaC drift audit:</strong> A security assessment finds that a network rule was added\n   to the PostgreSQL server by a developer three months ago and is not in any Bicep\n   template. The rule allows connections from <code>0.0.0.0/0</code>. What is the immediate\n   containment action, and what process change prevents this in the future?</li>\n<li><strong>OIDC token validation failure:</strong> A GitHub Actions workflow fails at\n   <code>azure/login</code> with <code>AADSTS70021: No matching federated identity record found</code>.\n   The workflow worked yesterday. What are the three most likely causes, and\n   how do you diagnose each?</li>\n<li><strong>Blast radius assessment:</strong> Suppose the Container App running <code>id-aegisap-workload</code>\n   is compromised via a container escape. Map the exact blast radius:\n   what can the attacker read, write, or delete?  What data and services are safe?</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "LJZf",
+      "code_hash": "f258f5fd5f515833e129fa8aaabf4c6d",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_LJZf_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "urSm",
+      "code_hash": "beafce662cc7e921c8f87813e588657a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"day-8-summary-checklist\">Day 8 Summary Checklist</h2>\n<ul class=\"task-list\">\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain why IaC is mandatory for AI workloads (reproducibility, auditability, drift detection)</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Identify <code>resource</code>, <code>param</code>, <code>module</code>, <code>output</code>, and <code>existing</code> in a Bicep template</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Name the three managed identity resources in <code>infra/full.bicep</code> and their Bicep names</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> State the minimum RBAC role for the runtime API identity on each of the 5 core services</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain the <code>DefaultAzureCredential</code> chain \u2014 which step fires in dev and which in prod</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Identify what SHOULD and what SHOULD NOT go in Key Vault (with reasons)</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain OIDC federation: no stored secrets, per-job tokens, subject scoping</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Describe the ACA revision model: create \u2192 gate check \u2192 traffic shift \u2192 rollback</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> List the six acceptance gates and what each one feeds from (prior day artifact or live check)</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> State all four conditions that cause the security posture gate to fail</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Artifacts <code>build/day8/deployment_design.json</code> and <code>build/day8/regression_baseline.json</code> exist</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "jxvo",
+      "code_hash": "c34d5dfd4face91375803549dc29e3f8",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_88485/__marimo__cell_jxvo_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "mWxS",
+      "code_hash": "7582f371c45389c4048704f844903d2c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"fde-learning-contract-day-08-iac-identity-planes-and-secure-release-ownership\">FDE Learning Contract \u2014 Day 08: IaC, Identity Planes, and Secure Release Ownership</h2>\n<h3 id=\"four-daily-outputs\">Four Daily Outputs</h3>\n<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Output type</th>\n<th>Location</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td>Technical build</td>\n<td><code>LAB_OUTPUT/</code></td>\n</tr>\n<tr>\n<td>2</td>\n<td>Design defense memo</td>\n<td><code>DECISION_MEMOS/</code></td>\n</tr>\n<tr>\n<td>3</td>\n<td>Corporate process artifact</td>\n<td><code>PROCESS_ARTIFACTS/</code></td>\n</tr>\n<tr>\n<td>4</td>\n<td>Oral defense prep notes</td>\n<td><code>ORAL_DEFENSE/</code></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"rubric-weights-100-points-total\">Rubric Weights (100 points total)</h3>\n<table>\n<thead>\n<tr>\n<th>Dimension</th>\n<th>Points</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Iac Correctness</td>\n<td>25</td>\n</tr>\n<tr>\n<td>Identity Security Reasoning</td>\n<td>25</td>\n</tr>\n<tr>\n<td>Ownership Clarity</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Review Packet Quality</td>\n<td>15</td>\n</tr>\n<tr>\n<td>Oral Defense</td>\n<td>15</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Pass bar: <strong>80 / 100</strong>   Elite bar: <strong>90 / 100</strong></span>\n<h3 id=\"oral-defense-prompts\">Oral Defense Prompts</h3>\n<ol>\n<li>Which IaC pattern did you choose over an alternative and what is the security consequence of the rejected approach?</li>\n<li>If federated credentials drift and the pipeline loses access at 2am, what is the blast radius and who is the first call?</li>\n<li>Who owns the release machinery in production, and what evidence would a platform team require before granting break-glass access?</li>\n</ol>\n<h3 id=\"artifact-scaffolds\">Artifact Scaffolds</h3>\n<ul>\n<li><code>docs/curriculum/artifacts/day08/RELEASE_OWNERSHIP_MAP.md</code></li>\n<li><code>docs/curriculum/artifacts/day08/SECURITY_REVIEW_PACKET.md</code></li>\n<li><code>docs/curriculum/artifacts/day08/DRIFT_RESPONSE_PLAYBOOK.md</code></li>\n</ul>\n<span class=\"paragraph\">See <code>docs/curriculum/MENTAL_MODELS.md</code> for mental models reference.\nSee <code>docs/curriculum/ASSESSOR_CALIBRATION.md</code> for scoring anchors.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

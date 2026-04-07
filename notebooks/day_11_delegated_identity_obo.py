@@ -47,9 +47,9 @@ def _title(mo):
     By the end of this notebook you will be able to:
 
     1. Explain why `DefaultAzureCredential` is insufficient for delegated approval flows.
-    2. Implement the OAuth 2.0 On-Behalf-Of flow using MSAL `ConfidentialClientApplication`.
+    2. Trace the OAuth 2.0 On-Behalf-Of flow using MSAL `ConfidentialClientApplication` and identify its trust boundaries.
     3. Verify that an OBO token's `oid` claim belongs to the required Entra group.
-    4. Write a Day 11 OBO contract artifact that passes all three sub-gate checks.
+    4. Validate a Day 11 OBO contract artifact that passes all three sub-gate checks.
     5. Describe the authority-confusion threat and the AegisAP defence.
 
     ---
@@ -79,6 +79,105 @@ def _full_day_agenda(mo):
         mo,
         day_label="Day 11 delegated identity and OBO flows",
         core_outcome="prove that approval authority stays attached to the right human actor even when services call services",
+    )
+    return
+
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Extend identity from service authentication to actor-bound delegated approval, and prove the system keeps human authority attached to the right person.',
+        prerequisites=['Day 3 identity-plane framing, Day 7 secret hygiene, and Day 8 workload identity concepts are understood.', 'The notebook can be completed in training mode without live OBO credentials.', 'Live verification requires the relevant Entra and app registration environment variables.'],
+        resources=['`notebooks/day_11_delegated_identity_obo.py`', '`build/day11/` for `obo_simulation_results.json` and `obo_contract.json`', '`scripts/verify_delegated_identity_contract.py` for live follow-up', '`docs/curriculum/artifacts/day11/` for approval authority and threat-model references'],
+        setup_sequence=['Decide whether you are staying in training mode or promoting to live OBO verification.', 'Run the identity-lineage and mastery cells first so the delegated-identity boundary is clear.', 'Treat live environment variables as optional until you want authoritative gate evidence.'],
+        run_steps=['Work through app identity, OBO exchange, actor binding, and contract sections in order.', 'Use the walkthrough artifacts to distinguish teaching previews from gate evidence.', 'Run the contract-writing cell that produces `build/day11/obo_contract.json`.', 'If you have live credentials, follow up with the verification script after the notebook logic is clear.'],
+        output_interpretation=['`build/day11/obo_contract.json` is the key artifact, but `training_artifact: true` means it is still a preview rather than authoritative evidence.', 'Interpret the notebook outputs as proof about who is acting, who is delegated, and how that relationship is validated.', 'A green Day 11 result matters because later write paths assume actor binding already works.'],
+        troubleshooting=['If OBO feels like just another token flow, return to the distinction between service identity and human actor identity.', 'If the contract stays red, check whether you are in expected training mode before debugging environment variables.', 'If live verification is confusing, finish the notebook in preview mode first and treat the script as second-pass validation.'],
+        outside_references=['Long-form reference lives primarily in the notebook narrative for this day.', 'Capstone and later-day dependency context: `docs/curriculum/CAPSTONE_B_TRANSFER.md`', 'Reusable references: `docs/curriculum/artifacts/day11/`'],
+    )
+    return
+
+
+@app.cell
+def _three_surface_linkage(mo):
+    from _shared.lab_guide import render_surface_linkage
+
+    render_surface_linkage(
+        mo,
+        portal_guide="docs/curriculum/portal/DAY_11_PORTAL.md",
+        portal_activity="Inspect the Entra app registration, enterprise application, and approver group in the portal so the delegated-identity boundary is visible before you rely on a token verifier.",
+        notebook_activity="Use the app-identity, OBO exchange, actor-binding, and contract cells to map the Azure object model to the claims and authority checks enforced by the code.",
+        automation_steps=[
+            "`uv run python scripts/verify_delegated_identity_contract.py` turns the same delegated-identity story into an authoritative contract artifact.",
+            "`uv run python -m pytest tests/day11 -q` keeps the OBO boundary checks repeatable after you understand the live identity objects.",
+        ],
+        evidence_checks=[
+            "The Entra objects you inspected should match the identities and authority path described in the notebook.",
+            "`build/day11/obo_contract.json` should confirm the same human-actor binding that you can defend from the portal object model.",
+            "If the token contract contradicts the Entra objects, stop and resolve the identity mismatch before trusting approval flows.",
+        ],
+    )
+    return
+
+
+@app.cell
+def _azure_mastery_guide(mo):
+    from _shared.lab_guide import render_azure_mastery_guide
+
+    render_azure_mastery_guide(
+        mo,
+        focus="Day 11 mastery means you can inspect Entra objects in the portal, drive the delegated-identity verification path from the command line, recognise the smallest possible OBO code shape, and prove that human authority survives the service-to-service hop.",
+        portal_tasks="""
+- Open **Microsoft Entra ID -> App registrations** and inspect the AegisAP backend app so you can see the client ID, exposed API shape, and downstream permission model.
+- Open **Enterprise applications** for the service principal that performs the OBO exchange and confirm the delegated flow is attached to the right application boundary.
+- Open the approver **Group** and verify who actually belongs to the finance-approval authority set.
+- If your tenant permits it, inspect sign-in or audit logs so OBO validation is tied to a real actor story rather than a synthetic token example.
+""",
+        cli_verification="""
+**Inspect the application and group objects that define the delegated path**
+
+```bash
+az ad app show --id "$AZURE_CLIENT_ID"
+az ad group show --group "$AEGISAP_APPROVER_GROUP_ID"
+```
+
+**Promote the notebook token into the CLI verifier if you used the live notebook path**
+
+```bash
+export AZURE_USER_ASSERTION="$AEGISAP_TEST_USER_ASSERTION"
+```
+
+**Run the delegated-identity verifier and write the gate artifact**
+
+```bash
+uv run python scripts/verify_delegated_identity_contract.py
+```
+
+The notebook's live cells use `AEGISAP_TEST_USER_ASSERTION`, while the CLI verifier expects `AZURE_USER_ASSERTION`. Export the same token into both when you move from notebook preview to script validation.
+""",
+        sdk_snippet="""
+The essential code shape is an MSAL-based OBO exchange that preserves the human actor's claims.
+
+```python
+from aegisap.identity.obo import OboTokenProvider
+
+provider = OboTokenProvider.from_env()
+obo = provider.exchange(
+    user_assertion=user_access_token,
+    scopes=["https://graph.microsoft.com/.default"],
+)
+```
+
+The important review point is not the token string itself, but whether the exchanged token still carries the actor identity you are about to trust.
+""",
+        proof_in_azure="""
+- `build/day11/obo_contract.json` has `training_artifact: false`, `obo_app_identity_ok: true`, `obo_exchange_ok: true`, and `actor_binding_ok: true`.
+- The Entra portal objects support the same story the artifact tells: correct app registration, correct service principal, correct approver group.
+- The actor identity in the OBO result is a human approver OID, not the managed identity object ID of the service.
+- Day 11 is only truly green when the Azure object model and the contract artifact agree on who is allowed to approve.
+""",
     )
     return
 
@@ -306,11 +405,11 @@ def _s4_body(mo):
 
 
 # ---------------------------------------------------------------------------
-# Section 5 — Lab: Write the OBO Contract Artifact
+# Section 5 — Lab: Validate the OBO Contract Artifact
 # ---------------------------------------------------------------------------
 @app.cell
 def _s5_header(mo):
-    mo.md("## 5. Lab — Write the OBO Contract Artifact")
+    mo.md("## 5. Lab — Validate the OBO Contract Artifact")
     return
 
 

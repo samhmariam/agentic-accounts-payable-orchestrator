@@ -76,6 +76,111 @@ def _full_day_agenda(mo):
     )
     return
 
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Make private-only network posture real by checking both declared infrastructure intent and live deployed behavior.',
+        prerequisites=['Day 8 deployment and IaC concepts complete.', 'Day 11 identity hardening is understood.', 'Live posture verification requires access from inside the approved network path.'],
+        resources=['`notebooks/day_12_private_networking_constraints.py`', '`infra/` for Bicep definitions', '`build/day12/` for `static_bicep_analysis.json`, `private_network_posture.json`, and related reports', '`scripts/verify_private_network_posture.py` and the static/private-network scripts for live follow-up', '`docs/curriculum/artifacts/day12/` and `docs/curriculum/CAPSTONE_B_TRANSFER.md`'],
+        setup_sequence=['Decide whether you are doing CI-style static analysis only or also running the live staging posture probe.', 'Run the transfer-lens and lineage cells first so the difference between static and live evidence is clear.', 'Treat the notebook as primary; use the probe scripts when you are ready to produce authoritative live evidence.'],
+        run_steps=['Work through network concepts, private endpoint posture, and static-versus-live gate differences in order.', 'Use the notebook tables to understand why both gates exist.', 'Run the cells that produce preview or live versions of the Day 12 artifacts.', 'Finish by checking that the expected build files exist and by noting whether they are training previews or authoritative evidence.'],
+        output_interpretation=['Success means you can interpret `build/day12/static_bicep_analysis.json` and `build/day12/private_network_posture.json` differently and correctly.', 'A live probe from inside the network is required for authoritative `gate_private_network_posture` evidence.', 'If the notebook writes training previews only, that is still valid learning output but not final staging proof.'],
+        troubleshooting=['If the two private-network gates seem redundant, return to the side-by-side comparison table.', 'If live posture stays red, check network location and required environment variables before assuming the probe logic is wrong.', 'If you only have local access today, complete the notebook in preview mode and mark the live probe as a later operational step.'],
+        outside_references=['Capstone transfer and domain shift: `docs/curriculum/CAPSTONE_B_TRANSFER.md`', 'Reusable references: `docs/curriculum/artifacts/day12/`', 'Infrastructure deep dive: `infra/` and the private-network verification scripts'],
+    )
+    return
+
+
+@app.cell
+def _three_surface_linkage(mo):
+    from _shared.lab_guide import render_surface_linkage
+
+    render_surface_linkage(
+        mo,
+        portal_guide="docs/curriculum/portal/DAY_12_PORTAL.md",
+        portal_activity="Inspect public-access flags, private endpoints, DNS zones, and Container Apps networking in Azure so private-only posture is grounded in live resource state before you run policy scripts.",
+        notebook_activity="Use the static-versus-live gate walkthrough and the network evidence sections to explain why intent checks and live posture checks are different kinds of proof.",
+        automation_steps=[
+            "`uv run python scripts/check_private_network_static.py --json` encodes the declared Bicep intent you already compared against Azure.",
+            "`uv run python scripts/verify_private_network_posture.py` tests the live posture from the execution context that matters.",
+            "`uv run python -m pytest tests/day12 -q` preserves the same posture expectations in repeatable regression form.",
+        ],
+        evidence_checks=[
+            "The portal network posture should agree with the notebook explanation of what private-only actually means.",
+            "`build/day12/static_bicep_analysis.json` and `build/day12/private_network_posture.json` should reinforce, not contradict, the Azure state you inspected.",
+            "If Azure shows public exposure while the static gate looks green, treat that mismatch as a serious investigation item.",
+        ],
+    )
+    return
+
+
+@app.cell
+def _azure_mastery_guide(mo):
+    from _shared.lab_guide import render_azure_mastery_guide
+
+    render_azure_mastery_guide(
+        mo,
+        focus="Day 12 mastery means you can inspect private-only posture directly in Azure, run both the static and live verification commands, recognise the minimal probe code, and prove that the deployed data plane is genuinely private rather than merely well-intentioned.",
+        portal_tasks="""
+- Open Azure OpenAI, Azure AI Search, Storage, and PostgreSQL resource blades and confirm **Public network access** is disabled.
+- Inspect **Private endpoint connections** on each service and confirm the connection state is approved.
+- Open **Private DNS zones** and their VNET links so you can see why private hostnames resolve inside the approved network path.
+- Inspect the **Container Apps environment** networking configuration to confirm VNET injection and the absence of an accidental public fallback.
+""",
+        cli_verification="""
+**Run the CI-style static Bicep policy check**
+
+```bash
+uv run python scripts/check_private_network_static.py --json
+```
+
+**Run the live posture probe from inside the approved network path**
+
+```bash
+uv run python scripts/verify_private_network_posture.py
+```
+
+**Inspect the Azure-side private endpoint inventory**
+
+```bash
+az network private-endpoint list \
+  --resource-group "$AZURE_RESOURCE_GROUP" \
+  -o table
+```
+
+**Inspect the Private DNS zones bound to the resource group**
+
+```bash
+az network private-dns zone list \
+  --resource-group "$AZURE_RESOURCE_GROUP" \
+  -o table
+```
+""",
+        sdk_snippet="""
+The shortest useful Day 12 code path is the live network probe itself.
+
+```python
+from aegisap.network.private_endpoint_probe import NetworkPostureProbe
+
+probe = NetworkPostureProbe.from_env()
+result = probe.run()
+probe.write_artifacts(result)
+```
+
+This code proves private DNS resolution and public-endpoint reachability from the same execution context that matters for the gate.
+""",
+        proof_in_azure="""
+- `build/day12/static_bicep_analysis.json` shows `violations: []` for the CI-style intent check.
+- `build/day12/private_network_posture.json` has `training_artifact: false` and `all_passed: true` when you run the live probe from the correct network location.
+- The Azure portal confirms each service has approved private endpoint connections and public network access disabled.
+- A strong Day 12 proof chain combines declared intent, live DNS results, and Azure resource state; none of those alone is sufficient.
+""",
+    )
+    return
+
 
 @app.cell
 def _capstone_b_transfer_lens(mo):
@@ -555,7 +660,7 @@ def _summary(mo):
     ## Day 12 Summary Checklist
 
     - [ ] List the four layers of private networking and state what happens if any one is missing
-    - [ ] Write the Bicep property to disable public endpoint on Azure OpenAI
+    - [ ] Name the Bicep property that disables the public endpoint on Azure OpenAI
     - [ ] Explain the difference between `gate_private_network_static` and `gate_private_network_posture`
     - [ ] State what `static_bicep_analysis.json` contains and how `check_private_network_static.py` produces it
     - [ ] Confirm `build/day12/private_network_posture.json` and `static_bicep_analysis.json` exist

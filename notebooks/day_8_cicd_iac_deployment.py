@@ -80,6 +80,117 @@ def _full_day_agenda(mo):
     )
     return
 
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Convert the designed and tested system into a repeatable deployment model with infrastructure as code, identity, CI/CD, and acceptance gates.',
+        prerequisites=['Day 7 complete.', '`evals/score_thresholds.yaml` and prior gate artifacts are available.', 'A Day 0 provisioned environment is helpful for live paths but not required for every conceptual section.'],
+        resources=['`notebooks/day_8_cicd_iac_deployment.py`', '`infra/` Bicep and deployment files', '`scripts/provision-core.ps1`, `scripts/provision-full.ps1`, and `scripts/check_all_gates.py` for optional live and CLI follow-up', '`build/day8/` for `deployment_design.json` and `regression_baseline.json`', '`docs/curriculum/artifacts/day08/`'],
+        setup_sequence=['Decide whether you are doing notebook-only learning or also validating a live Azure deployment.', 'If live, make sure Day 0 environment state and Azure auth are already working.', 'Run the early lineage and mastery cells so you can see how Day 8 depends on Day 7 evidence.'],
+        run_steps=['Work through Bicep, identity planes, Key Vault, OIDC, ACA revisions, and gate sections in order.', 'Use the interactive resource and gate cells to connect infrastructure choices to release safety.', 'Run the baseline and artifact cells that write `build/day8/regression_baseline.json` and `build/day8/deployment_design.json`.', 'Treat external scripts as optional follow-up validation, not required reading before the notebook makes sense.'],
+        output_interpretation=['Success means you can explain how infrastructure, identity, and gates form one deployment contract.', 'The concrete artifacts are `build/day8/deployment_design.json` and `build/day8/regression_baseline.json`.', 'If the notebook shows some gates yellow, interpret that in light of later-day artifacts that do not exist yet.'],
+        troubleshooting=['If the infra content feels too broad, keep asking how each choice affects deployment safety or release evidence.', 'If a gate looks red, check whether the expected upstream artifact exists before assuming the logic is wrong.', 'If live deployment details feel distracting, stay in notebook mode first and return to the scripts after the model is clear.'],
+        outside_references=['Long-form theory: `docs/curriculum/trainee/DAY_00_TRAINEE.md`, `docs/curriculum/trainee/DAY_07_TRAINEE.md`, `docs/curriculum/trainee/DAY_10_TRAINEE.md`', 'Trainer notes: `docs/curriculum/trainer/DAY_08_TRAINER.md`', 'Infra deep dive: `infra/` and provisioning scripts', 'Reusable references: `docs/curriculum/artifacts/day08/`'],
+    )
+    return
+
+
+@app.cell
+def _three_surface_linkage(mo):
+    from _shared.lab_guide import render_surface_linkage
+
+    render_surface_linkage(
+        mo,
+        portal_guide="docs/curriculum/portal/DAY_08_PORTAL.md",
+        portal_activity="Inspect the live deployment, Container App revisions, IAM assignments, and Key Vault boundaries in Azure before letting Bicep or release scripts describe the platform for you.",
+        notebook_activity="Use the Bicep, identity-plane, Key Vault, OIDC, revision, and gate sections to explain why the portal state is safe or unsafe rather than treating deployment history as self-explanatory.",
+        automation_steps=[
+            "`uv run python scripts/verify_env.py --track full` checks the same environment contract you inspected in the portal.",
+            "`pwsh ./scripts/provision-full.ps1 -SubscriptionId \"$AZURE_SUBSCRIPTION_ID\" -ResourceGroup \"$AZURE_RESOURCE_GROUP\" -Location \"$AZURE_LOCATION\"` recreates the infrastructure story from code.",
+            "`pwsh ./scripts/deploy_container_app.ps1 -EnvironmentName staging` and `uv run python -m pytest tests/day8 -q` formalize the deployment and regression checks after the platform model is already clear.",
+        ],
+        evidence_checks=[
+            "Portal deployment history and revision state should agree with the notebook explanation of what was released and why.",
+            "`build/day8/deployment_design.json` and `build/day8/regression_baseline.json` should encode the same release and identity decisions you observed in Azure.",
+            "Any mismatch between portal state, notebook claims, and automation artifacts is drift that needs explanation before moving on.",
+        ],
+    )
+    return
+
+
+@app.cell
+def _azure_mastery_guide(mo):
+    from _shared.lab_guide import render_azure_mastery_guide
+
+    render_azure_mastery_guide(
+        mo,
+        focus="Day 8 mastery means you can inspect the deployed platform in Azure, reproduce deployment and drift checks from the CLI, recognise the minimal identity-based SDK shape, and show concrete evidence that infra, identity, and runtime configuration line up.",
+        portal_tasks="""
+- Open the **Resource group** and inspect **Deployments** so you can connect the Bicep deployment history to the runtime resources you are about to trust.
+- Open the **Container App** and inspect **Revisions**, **Ingress**, and **Identity** to confirm the latest revision, traffic state, and managed identity attachment.
+- Inspect **Access control (IAM)** on Azure OpenAI, Azure AI Search, Storage, and Key Vault so the runtime identity story is visible in Azure rather than only in code comments.
+- Open **Key Vault** and confirm only residual secrets live there; public endpoints such as `AZURE_OPENAI_ENDPOINT` and `AZURE_SEARCH_ENDPOINT` should remain configuration, not vault secrets.
+""",
+        cli_verification="""
+**Verify the Azure environment before trusting the deployment path**
+
+```bash
+uv run python scripts/verify_env.py --track full
+```
+
+**Provision or update the full platform from code**
+
+```bash
+pwsh ./scripts/provision-full.ps1 \
+  -SubscriptionId "$AZURE_SUBSCRIPTION_ID" \
+  -ResourceGroup "$AZURE_RESOURCE_GROUP" \
+  -Location "$AZURE_LOCATION"
+```
+
+**Deploy the Container App revision from the repo's release script**
+
+```bash
+pwsh ./scripts/deploy_container_app.ps1 -EnvironmentName staging
+```
+
+**Optional drift review from raw Azure CLI**
+
+```bash
+az deployment group what-if \
+  --resource-group "$AZURE_RESOURCE_GROUP" \
+  --template-file infra/full.bicep \
+  --parameters @infra/full.bicepparam \
+  --parameters location="$AZURE_LOCATION"
+```
+""",
+        sdk_snippet="""
+Use an identity-first SDK pattern so the same code works locally and in Azure without stored credentials.
+
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+import os
+
+client = SecretClient(
+    vault_url=os.environ["AZURE_KEY_VAULT_URI"],
+    credential=DefaultAzureCredential(),
+)
+
+resume_secret = client.get_secret("aegisap-resume-token-secret").value
+```
+""",
+        proof_in_azure="""
+- `uv run python scripts/verify_env.py --track full` passes, showing the environment variables and Azure service reachability are real.
+- The portal deployment history, revision state, and identity role assignments agree with the IaC story you are defending.
+- `build/day8/deployment_design.json` and `build/day8/regression_baseline.json` exist and are ready for later gate consumption.
+- A good Day 8 proof chain shows not only that the resources exist, but that they can be reached with `DefaultAzureCredential` and least-privilege RBAC.
+""",
+    )
+    return
+
 
 @app.cell
 def _day8_lineage_map(mo):
@@ -1402,7 +1513,7 @@ be able to deploy — it needs read-only access.
 
 **Task:**
 
-1. Write the Bicep `federatedIdentityCredentials` for the `main` → production
+1. Sketch the Bicep `federatedIdentityCredentials` for the `main` → production
    deployment, the `staging` → staging deployment, and a DENY for the security
    scan workflow (hint: simply don't create a credential for it).
 2. What `subject` value would you use for each?
@@ -1581,7 +1692,7 @@ The current deployment shifts 100% immediately after gate checks.
 
 **Task:**
 
-1. Write the `az containerapp ingress traffic set` commands for:
+1. Identify the `az containerapp ingress traffic set` commands for:
    - Initial canary: 10% new revision, 90% stable
    - Full shift: 100% new revision
    - Emergency rollback: 100% back to stable

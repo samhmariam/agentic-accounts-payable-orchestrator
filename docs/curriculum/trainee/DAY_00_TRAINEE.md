@@ -2,7 +2,7 @@
 
 > **WAF Pillars:** Security Â· Operational Excellence  
 > **Time to read:** 25 min  
-> **Lab notebook:** `notebooks/day0_azure_bootstrap.py`
+> **Primary entrypoint:** [docs/curriculum/portal/DAY_00_PORTAL.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/DAY_00_PORTAL.md), then [DAY_00_AZURE_BOOTSTRAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md), then `scripts/provision-*.ps1` and `scripts/verify_env.py`
 
 ---
 
@@ -14,7 +14,7 @@ By the end of Day 0 you will be able to:
 2. Describe the Azure identity model: Managed Identity vs. API keys vs. Service Principals.
 3. Enumerate the Azure services that make up AegisAP's runtime and state why each exists.
 4. Read a Bicep template and identify resources, parameters, and role assignments.
-5. Verify a deployed environment with `verify_env.py` without touching the Azure portal.
+5. Inspect the Day 0 Azure estate in the portal first, then verify the deployed environment repeatably with `verify_env.py`.
 
 ---
 
@@ -86,8 +86,10 @@ the chain. In production, `ManagedIdentityCredential` takes over automatically â
 
 ### Azure best practice
 - Assign the **minimum required RBAC role** to each identity.
-  - The API Container App needs `Cognitive Services OpenAI User` on the OpenAI
-    account, never `Cognitive Services OpenAI Contributor`.
+  - The API Container App needs `Cognitive Services OpenAI User` on the Foundry
+    resource when it only uses the OpenAI-compatible inference path.
+  - Developer or evaluation identities that need broader Foundry capabilities
+    use `Cognitive Services User` instead of an OpenAI-only role.
   - Use `AcrPull` for the user-assigned identity that pulls container images from
     Azure Container Registry.
 - Prefer **system-assigned identities** for single-purpose workloads; use
@@ -100,7 +102,7 @@ the chain. In production, `ManagedIdentityCredential` takes over automatically â
 
 | Service | Role in AegisAP | Key Config |
 |---|---|---|
-| **Azure OpenAI Service** | LLM extraction and planning | Model deployment names in env vars; no raw API keys in code |
+| **Microsoft Foundry resource** | Foundry-first model host; current repo uses the OpenAI-compatible inference path for extraction and planning | System-assigned identity enabled, `allowProjectManagement = true`, OpenAI-compatible deployment names in env vars |
 | **Azure AI Search** | Evidence retrieval for Day 3+ | Managed Identity access; semantic search tier |
 | **Azure Database for PostgreSQL â€” Flexible Server** | Durable workflow state (Day 5+) | Requires Entra auth, not password auth |
 | **Azure Container Apps (ACA)** | Hosts the API and worker | Revision-based deployments, Dapr optional |
@@ -169,10 +171,10 @@ This model underpins Day 10's deployment gate â€” but it starts here.
 
 ## Check Your Understanding
 
-Answer these **before** opening the notebook:
+Answer these **before** starting the lab:
 
-1. Why is it unsafe to store an Azure OpenAI API key as a plain environment variable in a deployed Container App?
-2. What RBAC role does AegisAP's Container App need to call Azure OpenAI, and why not a broader role?
+1. Why is it unsafe to store a model API key as a plain environment variable in a deployed Container App?
+2. What RBAC role does AegisAP's Container App need to call the current OpenAI-compatible inference path on Foundry, and why not a broader role?
 3. In which order does `DefaultAzureCredential` try credential sources, and which source applies in production?
 4. What is the difference between a `core` and a `full` environment track in AegisAP?
 5. What is a Bicep `module`, and why is it preferable to one large Bicep file?
@@ -182,13 +184,13 @@ Answer these **before** opening the notebook:
 ## Lab Readiness
 
 - **Lab duration:** 2 hours
-- **Required inputs:** provisioned `core` or `full` track, Azure CLI login, and `notebooks/day0_azure_bootstrap.py`
-- **Expected artifact:** `build/day0/env_report.json`
+- **Required inputs:** provisioned `core` or `full` track, Azure CLI login, and [DAY_00_AZURE_BOOTSTRAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md)
+- **Expected artifact:** `.day0/core.json` or `.day0/full.json`
 
 ### Pass Criteria
 
-- The environment report shows `gate_passed = true` for the selected track.
-- You can name the production credential source and the narrowest role needed for Azure OpenAI.
+- `uv run python scripts/verify_env.py --track core` or `--track full` exits successfully for the selected track.
+- You can name the production credential source and the narrowest role needed for the current OpenAI-compatible inference path on Foundry.
 - You can state the exact recovery command you would run if one probe failed.
 
 ### Common Failure Signals
@@ -201,7 +203,7 @@ Answer these **before** opening the notebook:
 
 1. Which `DefaultAzureCredential` source should fire in production?
 2. Why is a scoped RBAC assignment safer than broad contributor access for the runtime identity?
-3. What exact command would you run first if `build/day0/env_report.json` showed a failed probe?
+3. What exact command would you run first if `uv run python scripts/verify_env.py --track core` showed a failed probe?
 
 ### Remediation Task
 
@@ -210,7 +212,7 @@ Re-establish the environment contract with:
 ```bash
 source ./scripts/setup-env.sh core
 uv run python scripts/verify_env.py --track core --env
-marimo edit notebooks/day0_azure_bootstrap.py
+uv run python scripts/verify_env.py --track core
 ```
 
 Then explain which probe failed and which Azure dependency it represents.

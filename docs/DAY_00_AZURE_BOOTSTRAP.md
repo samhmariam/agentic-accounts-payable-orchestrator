@@ -3,9 +3,14 @@
 Day 0 establishes the Azure substrate that every later lab assumes. The default
 goal is a keyless developer experience built on `DefaultAzureCredential`.
 
+Start with the Day 0 portal guide in
+[docs/curriculum/portal/DAY_00_PORTAL.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/DAY_00_PORTAL.md)
+so the learner touches the Azure control plane before the repo abstracts it.
+Then return here for the repeatable, declarative path.
+
 ## Tracks
 
-- `core`: Azure OpenAI, Azure AI Search, Blob Storage
+- `core`: Microsoft Foundry, Azure AI Search, Blob Storage
 - `full`: core services plus Azure Database for PostgreSQL, Key Vault,
   Application Insights, ACR, Container Apps environment, and managed identity
 
@@ -68,19 +73,31 @@ or
 uv run python scripts/verify_env.py --track full
 ```
 
+## Three-Surface Linkage
+
+Use Day 0 as one explicit chain:
+
+1. `Portal first`: complete the manual Day 0 walkthrough in [DAY_00_PORTAL.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/DAY_00_PORTAL.md) so the control plane is visible and named.
+2. `Middle surface second`: use this bootstrap doc to interpret what those Azure objects mean, which roles matter, and how the repo models them declaratively.
+3. `Automation third`: run `scripts/provision-core.ps1` or `scripts/provision-full.ps1`, then `scripts/setup-env.sh`, then `scripts/verify_env.py`.
+4. `Evidence last`: compare the live portal estate, `.day0/core.json` or `.day0/full.json`, and the verification output. They should all describe the same Foundry-first environment.
+
 ## Roles to Expect
 
-- Runtime app identity: `Cognitive Services OpenAI User`,
+- Developer bootstrap identity: `Cognitive Services User` on the Foundry
+  resource, `Search Service Contributor`, `Search Index Data Contributor`,
+  `Storage Blob Data Contributor`
+- Runtime app identity: `Cognitive Services OpenAI User` on the Foundry
+  resource for the current OpenAI-compatible inference path,
   `Search Index Data Reader`, `Storage Blob Data Reader`, `Key Vault Secrets User`
 - Pull or secret-reference identity: `AcrPull`, `Key Vault Secrets User`
 - Search admin identity scaffold: `Search Service Contributor`,
   `Search Index Data Contributor`
-- Developer principal: bootstrap contributor roles for Day 0 setup and index seeding
 
 ## Troubleshooting
 
-- If Azure OpenAI returns `DeploymentNotFound`, confirm the deployment name in
-  the `.bicepparam` file and rerun provisioning.
+- If Foundry inference returns `DeploymentNotFound`, confirm the OpenAI-compatible
+  deployment name in the `.bicepparam` file and rerun provisioning.
 - If Search returns `403`, confirm the search data-plane roles were assigned on
   the service resource.
 - If PostgreSQL verification fails, confirm Microsoft Entra admin setup and the
@@ -90,7 +107,9 @@ uv run python scripts/verify_env.py --track full
 
 After Day 0 succeeds, the learner should have:
 
-- a reachable Azure OpenAI chat deployment
+- a reachable Foundry resource with managed identity and project management enabled
+- a reachable OpenAI-compatible chat deployment on that Foundry resource
+- the Foundry endpoint plus the OpenAI-compatible endpoint exported into `.day0/*.json`
 - a reachable Azure AI Search service and index
 - a reachable Blob container
 - on the full track, a reachable Azure PostgreSQL database for Day 5

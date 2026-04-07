@@ -91,34 +91,52 @@ $outputs = $deployment.properties.outputs
 
 if (-not $SkipRoleAssignments) {
     Write-Host "Applying full-track RBAC role assignments..." -ForegroundColor Cyan
-    az deployment group create `
-      --resource-group $ResourceGroup `
-      --template-file $RoleAssignmentsTemplateFile `
-      --parameters openAiName=(Get-OutputValue -Outputs $outputs -Name "openAiName") `
-      --parameters searchName=(Get-OutputValue -Outputs $outputs -Name "searchName") `
-      --parameters storageAccountName=(Get-OutputValue -Outputs $outputs -Name "storageAccountName") `
-      --parameters keyVaultName=$((Get-OutputValue -Outputs $outputs -Name "keyVaultUri").Split("//")[1].Split(".")[0]) `
-      --parameters acrName=(Get-OutputValue -Outputs $outputs -Name "acrName") `
-      --parameters developerPrincipalId=$DeveloperPrincipalId `
-      --parameters developerPrincipalType=$DeveloperPrincipalType `
-      --parameters pullIdentityPrincipalId=(Get-OutputValue -Outputs $outputs -Name "workloadIdentityPrincipalId") `
-      --parameters jobsIdentityPrincipalId=(Get-OutputValue -Outputs $outputs -Name "jobsIdentityPrincipalId") `
-      --parameters searchAdminIdentityPrincipalId=(Get-OutputValue -Outputs $outputs -Name "searchAdminIdentityPrincipalId") `
-      --parameters cognitiveServicesOpenAiUserRoleDefinitionId=$(Get-RoleDefinitionId "Cognitive Services OpenAI User") `
-      --parameters searchIndexDataReaderRoleDefinitionId=$(Get-RoleDefinitionId "Search Index Data Reader") `
-      --parameters searchIndexDataContributorRoleDefinitionId=$(Get-RoleDefinitionId "Search Index Data Contributor") `
-      --parameters searchServiceContributorRoleDefinitionId=$(Get-RoleDefinitionId "Search Service Contributor") `
-      --parameters storageBlobDataReaderRoleDefinitionId=$(Get-RoleDefinitionId "Storage Blob Data Reader") `
-      --parameters storageBlobDataContributorRoleDefinitionId=$(Get-RoleDefinitionId "Storage Blob Data Contributor") `
-      --parameters keyVaultUserRoleId=$(Get-RoleDefinitionId "Key Vault Secrets User") `
-      --parameters acrPullRoleDefinitionId=$(Get-RoleDefinitionId "AcrPull") `
-      --only-show-errors `
-      -o none
+    $openAiName = Get-OutputValue -Outputs $outputs -Name "openAiName"
+    $searchName = Get-OutputValue -Outputs $outputs -Name "searchName"
+    $storageAccountName = Get-OutputValue -Outputs $outputs -Name "storageAccountName"
+    $keyVaultName = (Get-OutputValue -Outputs $outputs -Name "keyVaultUri").Split("//")[1].Split(".")[0]
+    $acrName = Get-OutputValue -Outputs $outputs -Name "acrName"
+    $workloadIdentityPrincipalId = Get-OutputValue -Outputs $outputs -Name "workloadIdentityPrincipalId"
+    $jobsIdentityPrincipalId = Get-OutputValue -Outputs $outputs -Name "jobsIdentityPrincipalId"
+    $searchAdminIdentityPrincipalId = Get-OutputValue -Outputs $outputs -Name "searchAdminIdentityPrincipalId"
+    $cognitiveServicesOpenAiUserRoleDefinitionId = Get-RoleDefinitionId "Cognitive Services OpenAI User"
+    $searchIndexDataReaderRoleDefinitionId = Get-RoleDefinitionId "Search Index Data Reader"
+    $searchIndexDataContributorRoleDefinitionId = Get-RoleDefinitionId "Search Index Data Contributor"
+    $searchServiceContributorRoleDefinitionId = Get-RoleDefinitionId "Search Service Contributor"
+    $storageBlobDataReaderRoleDefinitionId = Get-RoleDefinitionId "Storage Blob Data Reader"
+    $storageBlobDataContributorRoleDefinitionId = Get-RoleDefinitionId "Storage Blob Data Contributor"
+    $keyVaultUserRoleId = Get-RoleDefinitionId "Key Vault Secrets User"
+    $acrPullRoleDefinitionId = Get-RoleDefinitionId "AcrPull"
+
+    Invoke-AzText -Arguments @(
+        "deployment", "group", "create",
+        "--resource-group", $ResourceGroup,
+        "--template-file", $RoleAssignmentsTemplateFile,
+        "--parameters", "openAiName=$openAiName",
+        "--parameters", "searchName=$searchName",
+        "--parameters", "storageAccountName=$storageAccountName",
+        "--parameters", "keyVaultName=$keyVaultName",
+        "--parameters", "acrName=$acrName",
+        "--parameters", "developerPrincipalId=$DeveloperPrincipalId",
+        "--parameters", "developerPrincipalType=$DeveloperPrincipalType",
+        "--parameters", "pullIdentityPrincipalId=$workloadIdentityPrincipalId",
+        "--parameters", "jobsIdentityPrincipalId=$jobsIdentityPrincipalId",
+        "--parameters", "searchAdminIdentityPrincipalId=$searchAdminIdentityPrincipalId",
+        "--parameters", "cognitiveServicesOpenAiUserRoleDefinitionId=$cognitiveServicesOpenAiUserRoleDefinitionId",
+        "--parameters", "searchIndexDataReaderRoleDefinitionId=$searchIndexDataReaderRoleDefinitionId",
+        "--parameters", "searchIndexDataContributorRoleDefinitionId=$searchIndexDataContributorRoleDefinitionId",
+        "--parameters", "searchServiceContributorRoleDefinitionId=$searchServiceContributorRoleDefinitionId",
+        "--parameters", "storageBlobDataReaderRoleDefinitionId=$storageBlobDataReaderRoleDefinitionId",
+        "--parameters", "storageBlobDataContributorRoleDefinitionId=$storageBlobDataContributorRoleDefinitionId",
+        "--parameters", "keyVaultUserRoleId=$keyVaultUserRoleId",
+        "--parameters", "acrPullRoleDefinitionId=$acrPullRoleDefinitionId",
+        "-o", "none"
+    ) | Out-Null
 }
 
-Ensure-OpenAiDeployment `
+Ensure-FoundryChatDeployment `
     -ResourceGroup $ResourceGroup `
-    -OpenAiName (Get-OutputValue -Outputs $outputs -Name "openAiName") `
+    -FoundryName (Get-OutputValue -Outputs $outputs -Name "foundryName") `
     -DeploymentName (Get-OutputValue -Outputs $outputs -Name "openAiChatDeploymentName") `
     -ModelName (Get-OutputValue -Outputs $outputs -Name "openAiChatModelName") `
     -ModelVersion (Get-OutputValue -Outputs $outputs -Name "openAiChatModelVersion") `
@@ -141,6 +159,8 @@ $environment = [ordered]@{
     AZURE_SUBSCRIPTION_ID = $SubscriptionId
     AZURE_RESOURCE_GROUP = $ResourceGroup
     AZURE_LOCATION = $Location
+    AZURE_FOUNDRY_ENDPOINT = Get-OutputValue -Outputs $outputs -Name "foundryEndpoint"
+    AZURE_FOUNDRY_RESOURCE_NAME = Get-OutputValue -Outputs $outputs -Name "foundryName"
     AZURE_OPENAI_ENDPOINT = Get-OutputValue -Outputs $outputs -Name "openAiEndpoint"
     AZURE_OPENAI_API_VERSION = Get-OutputValue -Outputs $outputs -Name "openAiApiVersion"
     AZURE_OPENAI_CHAT_DEPLOYMENT = Get-OutputValue -Outputs $outputs -Name "openAiChatDeploymentName"
@@ -158,6 +178,7 @@ $environment = [ordered]@{
 }
 
 $resources = [ordered]@{
+    foundryName = Get-OutputValue -Outputs $outputs -Name "foundryName"
     acrName = Get-OutputValue -Outputs $outputs -Name "acrName"
     acrLoginServer = Get-OutputValue -Outputs $outputs -Name "acrLoginServer"
     openAiName = Get-OutputValue -Outputs $outputs -Name "openAiName"
@@ -188,7 +209,7 @@ Write-Day0State `
     -Resources $resources
 
 Write-Host ""
-Write-Host "Full Day 0 provisioning complete." -ForegroundColor Green
+Write-Host "Full Day 0 provisioning complete with a Foundry-first baseline." -ForegroundColor Green
 Write-Host "State file: $OutputsFile"
 Write-Host "Next: . ./scripts/setup-env.ps1 -Track full"
 Write-Host "Then: python scripts/verify_env.py --track full"

@@ -1,21 +1,18 @@
-// infra/modules/adf.bicep
-// Azure Data Factory — stub for Day 6 (landing / curated / processed zone pipeline).
-// Uses system-assigned Managed Identity; no connection strings.
+targetScope = 'resourceGroup'
+
+// Compatibility shim. Prefer infra/data/adf.bicep.
 
 param adfName string
 param location string
 
-resource dataFactory 'Microsoft.DataFactory/factories@2018-06-01' = {
-  name: adfName
-  location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    publicNetworkAccess: 'Enabled'
+module impl '../data/adf.bicep' = {
+  name: '${deployment().name}-impl'
+  params: {
+    adfName: adfName
+    location: location
   }
 }
 
-output adfId string = dataFactory.id
-output adfName string = dataFactory.name
-output adfPrincipalId string = dataFactory.identity.principalId
+output adfId string = impl.outputs.adfId
+output adfName string = impl.outputs.adfName
+output adfPrincipalId string = impl.outputs.adfPrincipalId

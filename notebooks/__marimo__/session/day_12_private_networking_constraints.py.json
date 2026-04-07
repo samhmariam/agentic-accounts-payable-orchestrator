@@ -1,0 +1,391 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "7ce2e3ca805076a815bf3f947b669ab4",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "4c9f5b5b6b6ebcee2b74057a5abdcb49",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'Path' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "03b9df920fcd6e9b320ff828ae401ed7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-12-private-networking-constraints\">Day 12 \u2014 Private Networking Constraints</h1>\n<blockquote>\n<span class=\"paragraph\"><strong>WAF Pillars covered:</strong> Security \u00b7 Reliability \u00b7 Operational Excellence\n<strong>Estimated time:</strong> 3 hours\n<strong>Prerequisites:</strong> Day 8 ACA deployment, Day 11 identity hardening\n<strong>New gates:</strong> <code>gate_private_network_static</code> (CI PR gate) + <code>gate_private_network_posture</code> (staging gate)</span>\n</blockquote>\n<hr />\n<h2 id=\"learning-objectives\">Learning Objectives</h2>\n<ol>\n<li>Explain VNET injection for Azure Container Apps and why it protects the data plane.</li>\n<li>Configure Private Endpoints for Azure OpenAI, Azure AI Search, and Azure Storage.</li>\n<li>Link a Private DNS zone to a VNET so that service hostnames resolve to RFC-1918 IPs.</li>\n<li>Set <code>publicNetworkAccess=Disabled</code> on all AI services via Bicep.</li>\n<li>Run the <code>NetworkPostureProbe</code> and interpret its two output artifacts.</li>\n<li>Explain the difference between the static CI gate and the live staging gate.</li>\n</ol>\n<hr />\n<h2 id=\"where-day-12-sits-in-the-full-arc\">Where Day 12 Sits in the Full Arc</h2>\n<div class=\"language-text codehilite\"><pre><span></span><code>Day 11 \u2500\u2500\u25ba[Day 12]\u2500\u2500\u25ba Day 13 \u2500\u2500\u25ba Day 14\nOBO        NETWORKING  Integration  Elite Ops\n</code></pre></div>\n<span class=\"paragraph\">Day 12 is the NFR from Day 2 made real: \"All AI services must have\n<code>publicNetworkAccess=Disabled</code> + Private Endpoint.\" Two gates enforce this:\na static CI gate that runs without Azure access, and a live staging gate.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "7d6e0f90ae2b0536e9a48d36fa36b468",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_bkHC_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "d029fc9625aa85c0088412d642b867de",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_lEQa_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "PKri",
+      "code_hash": "b3795def806383545aefa0950868c782",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_PKri_.py&quot;</span>, line <span class=\"m\">4</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Xref",
+      "code_hash": "d0624c6424afc1cbc49f4fd40beae4b7",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_Xref_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "76bb7877a46115f3b68a988349b655dc",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_SFPL_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "a5894a8e7bbb636506ac9fb2dde605c9",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_BYtC_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "c3c980090ae58fbbf85263e2962fcbfb",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_RGSE_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "a77ed1df54c414c1ddd2fa0dc3462363",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-private-networking-architecture-for-aegisap\">1. Private Networking Architecture for AegisAP</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "98e6d5f3c7bac396873e6885a7345d59",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"the-problem\">The Problem</h3>\n<span class=\"paragraph\">By default, every Azure AI service (OpenAI, AI Search, Storage, PostgreSQL)\nhas a <strong>public endpoint</strong> reachable from the internet with the right key or token.\nIn a regulated enterprise environment, this is unacceptable because:</span>\n<ul>\n<li>Any internet-facing endpoint is an attack surface regardless of authentication</li>\n<li>Data never leaving the Microsoft network is a compliance requirement (e.g., FCA, ISO 27001)</li>\n<li>A misconfigured RBAC role on a public endpoint is a full data-plane breach</li>\n</ul>\n<h3 id=\"the-solution-three-layers\">The Solution: Three Layers</h3>\n<div class=\"language-text codehilite\"><pre><span></span><code>\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  Azure VNet (10.0.0.0/16)                                   \u2502\n\u2502                                                             \u2502\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510   \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510    \u2502\n\u2502  \u2502  Container Apps Env     \u2502   \u2502  Private Endpoints   \u2502    \u2502\n\u2502  \u2502  (VNET-injected)        \u2502\u2500\u2500\u25ba\u2502  \u2022 OpenAI PE         \u2502    \u2502\n\u2502  \u2502                         \u2502   \u2502  \u2022 AI Search PE      \u2502    \u2502\n\u2502  \u2502  AegisAP Orchestrator   \u2502   \u2502  \u2022 Storage PE        \u2502    \u2502\n\u2502  \u2502  AegisAP Worker         \u2502   \u2502  \u2022 PostgreSQL PE     \u2502    \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518   \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518    \u2502\n\u2502                                            \u2502                \u2502\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25bc\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510   \u2502\n\u2502  \u2502  Private DNS Zones                                   \u2502   \u2502\n\u2502  \u2502  openai.azure.com \u2192 10.0.1.x                        \u2502   \u2502\n\u2502  \u2502  search.windows.net \u2192 10.0.2.x                      \u2502   \u2502\n\u2502  \u2502  blob.core.windows.net \u2192 10.0.3.x                   \u2502   \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518   \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n        \u25b2 internet can NOT reach any AI service\n</code></pre></div>\n<table>\n<thead>\n<tr>\n<th>Layer</th>\n<th>What it does</th>\n<th>Bicep resource</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>VNET injection</td>\n<td>ACA environment runs inside the VNet</td>\n<td><code>Microsoft.App/managedEnvironments</code> with <code>vnetConfiguration</code></td>\n</tr>\n<tr>\n<td>Private Endpoint</td>\n<td>AI service gets a private NIC in the VNet subnet</td>\n<td><code>Microsoft.Network/privateEndpoints</code></td>\n</tr>\n<tr>\n<td>Private DNS</td>\n<td>Service hostname resolves to private IP</td>\n<td><code>Microsoft.Network/privateDnsZones</code></td>\n</tr>\n<tr>\n<td><code>publicNetworkAccess=Disabled</code></td>\n<td>Refuses all requests via public endpoint</td>\n<td>Resource property per AI service</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">All four layers are required.  Missing any one creates a bypass.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "b297ce9ea45323014afa0221fc4dfb2b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-bicep-patterns-for-private-networking\">2. Bicep Patterns for Private Networking</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "39b22dbf6a0bc06a66dae6c3a6f0cb7d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"key-bicep-snippets-see-infranetwork-for-full-modules\">Key Bicep snippets (see <code>infra/network/</code> for full modules)</h3>\n<span class=\"paragraph\"><strong>Disable public endpoint on Azure OpenAI:</strong>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">openAI</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">CognitiveServices</span><span class=\"o\">/</span><span class=\"n\">accounts</span><span class=\"mi\">@2023</span><span class=\"mo\">-05-01</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">openAIName</span>\n<span class=\"w\">  </span><span class=\"nl\">location</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">location</span>\n<span class=\"w\">  </span><span class=\"nl\">sku</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span><span class=\"w\"> </span><span class=\"n\">name</span><span class=\"o\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">S0</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"p\">}</span>\n<span class=\"w\">  </span><span class=\"nl\">kind</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">OpenAI</span><span class=\"err\">&#39;</span>\n<span class=\"w\">  </span><span class=\"nl\">properties</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">    </span><span class=\"nl\">publicNetworkAccess</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Disabled</span><span class=\"err\">&#39;</span><span class=\"w\">       </span><span class=\"c1\">// \u2190 required</span>\n<span class=\"w\">    </span><span class=\"nl\">networkAcls</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">      </span><span class=\"nl\">defaultAction</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Deny</span><span class=\"err\">&#39;</span>\n<span class=\"w\">      </span><span class=\"nl\">ipRules</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">[]</span>\n<span class=\"w\">      </span><span class=\"nl\">virtualNetworkRules</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">[]</span>\n<span class=\"w\">    </span><span class=\"p\">}</span>\n<span class=\"w\">  </span><span class=\"p\">}</span>\n<span class=\"p\">}</span>\n</code></pre></div></span>\n<span class=\"paragraph\"><strong>Private Endpoint for Azure OpenAI:</strong>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">openAIPrivateEndpoint</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">Network</span><span class=\"o\">/</span><span class=\"n\">privateEndpoints</span><span class=\"mi\">@2023</span><span class=\"mo\">-04-01</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">$</span><span class=\"p\">{</span><span class=\"n\">openAIName</span><span class=\"p\">}</span><span class=\"o\">-</span><span class=\"n\">pe</span><span class=\"err\">&#39;</span>\n<span class=\"w\">  </span><span class=\"nl\">location</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">location</span>\n<span class=\"w\">  </span><span class=\"nl\">properties</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">    </span><span class=\"nl\">subnet</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span><span class=\"w\"> </span><span class=\"kt\">id</span><span class=\"o\">:</span><span class=\"w\"> </span><span class=\"n\">privateEndpointSubnetId</span><span class=\"w\"> </span><span class=\"p\">}</span>\n<span class=\"w\">    </span><span class=\"nl\">privateLinkServiceConnections</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">[{</span>\n<span class=\"w\">      </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">$</span><span class=\"p\">{</span><span class=\"n\">openAIName</span><span class=\"p\">}</span><span class=\"o\">-</span><span class=\"n\">plsc</span><span class=\"err\">&#39;</span>\n<span class=\"w\">      </span><span class=\"nl\">properties</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">        </span><span class=\"nl\">privateLinkServiceId</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">openAI</span><span class=\"p\">.</span><span class=\"kt\">id</span>\n<span class=\"w\">        </span><span class=\"nl\">groupIds</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">[</span><span class=\"err\">&#39;</span><span class=\"n\">account</span><span class=\"err\">&#39;</span><span class=\"p\">]</span>\n<span class=\"w\">      </span><span class=\"p\">}</span>\n<span class=\"w\">    </span><span class=\"p\">}]</span>\n<span class=\"w\">  </span><span class=\"p\">}</span>\n<span class=\"p\">}</span>\n</code></pre></div></span>\n<span class=\"paragraph\"><strong>Private DNS Zone link (must be linked to the VNet):</strong>\n<div class=\"language-objective-c codehilite\"><pre><span></span><code><span class=\"n\">resource</span><span class=\"w\"> </span><span class=\"n\">dnsZoneLink</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">Microsoft</span><span class=\"p\">.</span><span class=\"n\">Network</span><span class=\"o\">/</span><span class=\"n\">privateDnsZones</span><span class=\"o\">/</span><span class=\"n\">virtualNetworkLinks</span><span class=\"mi\">@2020</span><span class=\"mo\">-06-01</span><span class=\"err\">&#39;</span><span class=\"w\"> </span><span class=\"o\">=</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">  </span><span class=\"nl\">parent</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"n\">openAIDnsZone</span>\n<span class=\"w\">  </span><span class=\"nl\">name</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">$</span><span class=\"p\">{</span><span class=\"n\">vnetName</span><span class=\"p\">}</span><span class=\"o\">-</span><span class=\"n\">link</span><span class=\"err\">&#39;</span>\n<span class=\"w\">  </span><span class=\"nl\">location</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"err\">&#39;</span><span class=\"n\">global</span><span class=\"err\">&#39;</span>\n<span class=\"w\">  </span><span class=\"nl\">properties</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span>\n<span class=\"w\">    </span><span class=\"nl\">virtualNetwork</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"p\">{</span><span class=\"w\"> </span><span class=\"kt\">id</span><span class=\"o\">:</span><span class=\"w\"> </span><span class=\"n\">vnet</span><span class=\"p\">.</span><span class=\"kt\">id</span><span class=\"w\"> </span><span class=\"p\">}</span>\n<span class=\"w\">    </span><span class=\"nl\">registrationEnabled</span><span class=\"p\">:</span><span class=\"w\"> </span><span class=\"nb\">false</span>\n<span class=\"w\">  </span><span class=\"p\">}</span>\n<span class=\"p\">}</span>\n</code></pre></div></span>\n<blockquote>\n<span class=\"paragraph\"><strong>Common gotcha:</strong> Creating a Private Endpoint but forgetting to link the DNS zone\nmeans the hostname still resolves to a public IP in most environments.  The probe\nwill catch this: <code>dns_private=False</code> with <code>dns_ip=&lt;public-ip&gt;</code>.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "a8acd2e7540d3eb842a255078afcd85f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-network-posture-probe-aegisapnetworkprivate_endpoint_probe\">3. Network Posture Probe \u2014 <code>aegisap.network.private_endpoint_probe</code></h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "7d3b1550c4550e4179afe5a3c01abf14",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">The <code>NetworkPostureProbe</code> performs two checks per service:</span>\n<ol>\n<li><strong>DNS check</strong> \u2014 resolves the hostname and confirms the IP is RFC-1918 private.</li>\n<li><strong>Public reachability check</strong> \u2014 attempts a TLS connection to port 443.\n   Expects failure (timeout or refused); success means public endpoint is still open.</li>\n</ol>\n<div class=\"language-python codehilite\"><pre><span></span><code><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">aegisap.network.private_endpoint_probe</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">NetworkPostureProbe</span>\n\n<span class=\"n\">probe</span> <span class=\"o\">=</span> <span class=\"n\">NetworkPostureProbe</span><span class=\"o\">.</span><span class=\"n\">from_env</span><span class=\"p\">()</span>  <span class=\"c1\"># uses AEGISAP_AI_HOSTNAMES env var</span>\n<span class=\"n\">result</span> <span class=\"o\">=</span> <span class=\"n\">probe</span><span class=\"o\">.</span><span class=\"n\">run</span><span class=\"p\">()</span>\n<span class=\"n\">probe</span><span class=\"o\">.</span><span class=\"n\">write_artifacts</span><span class=\"p\">(</span><span class=\"n\">result</span><span class=\"p\">)</span>\n<span class=\"c1\"># writes:</span>\n<span class=\"c1\">#   build/day12/private_network_posture.json  (always)</span>\n</code></pre></div>\n<h3 id=\"two-gate-artifacts\">Two Gate Artifacts</h3>\n<table>\n<thead>\n<tr>\n<th>Artifact</th>\n<th>Gate</th>\n<th>When written</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>build/day12/static_bicep_analysis.json</code></td>\n<td><code>gate_private_network_static</code></td>\n<td>CI \u2014 produced by <code>scripts/check_private_network_static.py</code>, which compiles every Bicep file in <code>infra/</code> to ARM JSON and checks <code>publicNetworkAccess == \"Disabled\"</code> on every AI-tier resource; contains <code>written_by: \"check_private_network_static\"</code></td>\n</tr>\n<tr>\n<td><code>build/day12/private_network_posture.json</code></td>\n<td><code>gate_private_network_posture</code></td>\n<td>Staging \u2014 live VNet probe (DNS resolution + public reachability); always written, even on partial failure</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">The split design means:</span>\n<ul>\n<li><strong>CI (PR gate):</strong> <code>gate_private_network_static</code> verifies <code>static_bicep_analysis.json</code>\n  exists, that <code>written_by == \"check_private_network_static\"</code> (provenance check), and\n  that <code>violations == []</code> \u2014 no Azure access required in the CI runner.</li>\n<li><strong>Staging gate:</strong> reads the full posture report \u2014 requires a live probe run against the\n  staging environment from a machine inside the VNet.</li>\n</ul>\n<span class=\"paragraph\">Canonical live command:</span>\n<div class=\"language-bash codehilite\"><pre><span></span><code>uv<span class=\"w\"> </span>run<span class=\"w\"> </span>python<span class=\"w\"> </span>scripts/verify_private_network_posture.py\n</code></pre></div></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "0eb91c42ab9fdb06fd8a67505a3302ee",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-lab-run-the-network-posture-probe\">4. Lab \u2014 Run the Network Posture Probe</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "daf12dd858b7c195aee356fb6d9dabf1",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_qnkX_.py&quot;</span>, line <span class=\"m\">3</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">_build</span> <span class=\"o\">=</span> <span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">parents</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">]</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;build&quot;</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;day12&quot;</span>\n<span class=\"w\">             </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "380b4a5ad4eda882c5add93709af2bc9",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `Path` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_TqIu_.py&quot;</span>, line <span class=\"m\">2</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">_build</span> <span class=\"o\">=</span> <span class=\"n\">Path</span><span class=\"p\">(</span><span class=\"vm\">__file__</span><span class=\"p\">)</span><span class=\"o\">.</span><span class=\"n\">resolve</span><span class=\"p\">()</span><span class=\"o\">.</span><span class=\"n\">parents</span><span class=\"p\">[</span><span class=\"mi\">1</span><span class=\"p\">]</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;build&quot;</span> <span class=\"o\">/</span> <span class=\"s2\">&quot;day12&quot;</span>\n<span class=\"w\">             </span><span class=\"pm\">^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;Path&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "c4915bdaf3f32765fb48fec5f7892eff",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-zero-trust-checklist-for-vnet-injected-aca\">5. Zero-Trust Checklist for VNET-Injected ACA</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "d1afc03984350c62ef9f3e1e722e4b46",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"production-hardening-checklist\">Production Hardening Checklist</h3>\n<ul class=\"task-list\">\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Container App Environment has <code>vnetConfiguration.infrastructureSubnetId</code> set</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> <code>publicNetworkAccess=Disabled</code> on: Azure OpenAI, Azure AI Search, Azure Storage, Azure PostgreSQL</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Private Endpoints created for each AI service in the PE subnet</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Private DNS zones created and linked to the VNet for each service FQDN</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> No NSG rule allows inbound from <code>Internet</code> to PE subnet</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Azure Firewall or NVA egress policy blocks all non-Microsoft outbound traffic</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Container App managed environment has <code>internal: true</code> (no public IP)</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> APIM fronts external requests; backend is internal ACA only</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> <code>gate_private_network_static</code> passes in CI (static JSON check)</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> <code>gate_private_network_posture</code> passes in staging (live probe from inside VNet)</li>\n</ul>\n<h3 id=\"egress-control\">Egress Control</h3>\n<span class=\"paragraph\">Even with VNET injection, containers can still make outbound internet calls unless\negress is controlled.  Use Azure Firewall application rules to allow-list:</span>\n<ul>\n<li><code>login.microsoftonline.com</code> (Entra token endpoint)</li>\n<li><code>graph.microsoft.com</code> (Graph API for actor verification)</li>\n<li><code>api.cognitive.microsoft.com</code> (Cognitive Services)</li>\n<li>Block everything else.</li>\n</ul>\n<blockquote>\n<span class=\"paragraph\"><strong>Exam question:</strong> \"How does AegisAP prevent a malicious prompt from exfiltrating\ndata to an attacker's server?\"\nAnswer: Combined threat \u2014 content safety pre-filter (Day 7) + network egress control\n(Day 12) + policy overlay action allow-list (Day 4). All three must be present.</span>\n</blockquote></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "78a4b8803b54d87eca02a5f3d2ca085d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"day-12-summary-checklist\">Day 12 Summary Checklist</h2>\n<ul class=\"task-list\">\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> List the four layers of private networking and state what happens if any one is missing</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Name the Bicep property that disables the public endpoint on Azure OpenAI</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Explain the difference between <code>gate_private_network_static</code> and <code>gate_private_network_posture</code></li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> State what <code>static_bicep_analysis.json</code> contains and how <code>check_private_network_static.py</code> produces it</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Confirm <code>build/day12/private_network_posture.json</code> and <code>static_bicep_analysis.json</code> exist</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Describe how DNS resolution is used to verify a private endpoint is correctly configured</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled/> Defend how you would handle an unseen transfer-domain dependency without introducing a public fallback</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "dbe16bb1f3defdc469d99687e3e82155",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "Name `mo` is not defined. It was expected to be defined in ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_85949/__marimo__cell_ecfG_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">callout</span><span class=\"p\">(</span>\n<span class=\"w\">    </span><span class=\"pm\">^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;mo&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "59cb3b2214c61b5c87d959ca47507c34",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><hr />\n<h2 id=\"fde-learning-contract-day-12-private-networking-egress-control-and-security-dependency-management\">FDE Learning Contract \u2014 Day 12: Private Networking, Egress Control, and Security Dependency Management</h2>\n<blockquote>\n<span class=\"paragraph\"><strong>Zero-tolerance day</strong> \u2014 a hard-fail on any zero-tolerance condition sets the day score to 0.\n<strong>Capstone B day</strong> \u2014 primary deliverables are in the claims intake transfer domain.</span>\n</blockquote>\n<h3 id=\"four-daily-outputs\">Four Daily Outputs</h3>\n<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Output type</th>\n<th>Location</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td>Technical build</td>\n<td><code>LAB_OUTPUT/</code></td>\n</tr>\n<tr>\n<td>2</td>\n<td>Design defense memo</td>\n<td><code>DECISION_MEMOS/</code></td>\n</tr>\n<tr>\n<td>3</td>\n<td>Corporate process artifact</td>\n<td><code>PROCESS_ARTIFACTS/</code></td>\n</tr>\n<tr>\n<td>4</td>\n<td>Oral defense prep notes</td>\n<td><code>ORAL_DEFENSE/</code></td>\n</tr>\n</tbody>\n</table>\n<h3 id=\"rubric-weights-100-points-total\">Rubric Weights (100 points total)</h3>\n<table>\n<thead>\n<tr>\n<th>Dimension</th>\n<th>Points</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Network Posture Design</td>\n<td>30</td>\n</tr>\n<tr>\n<td>Static Vs Live Proof Understanding</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Dependency Management Realism</td>\n<td>20</td>\n</tr>\n<tr>\n<td>Security Exception Handling</td>\n<td>15</td>\n</tr>\n<tr>\n<td>Oral Defense</td>\n<td>15</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">Pass bar: <strong>80 / 100</strong>   Elite bar: <strong>90 / 100</strong></span>\n<h3 id=\"oral-defense-prompts\">Oral Defense Prompts</h3>\n<ol>\n<li>Which network dependency has the longest lead time and what is your plan if it is not resolved before production cutover?</li>\n<li>You temporarily enable a public endpoint in dev. Walk through every compensating control, the expiry date, and who holds the removal obligation.</li>\n<li>Who approves a security exception in your enterprise, what evidence is mandatory in the request, and what happens at expiry if no renewal is filed?</li>\n<li>An assessor introduces an unseen claims-intake dependency during cutover pressure. Explain why your design still refuses a public shortcut and which Day 12 artifacts prove that decision.</li>\n</ol>\n<h3 id=\"artifact-scaffolds\">Artifact Scaffolds</h3>\n<ul>\n<li><code>docs/curriculum/artifacts/day12/NETWORK_DEPENDENCY_REGISTER.md</code></li>\n<li><code>docs/curriculum/artifacts/day12/SECURITY_EXCEPTION_REQUEST.md</code></li>\n<li><code>docs/curriculum/artifacts/day12/EGRESS_CONTROL_POLICY.md</code></li>\n</ul>\n<span class=\"paragraph\">See <code>docs/curriculum/MENTAL_MODELS.md</code> for mental models reference.\nSee <code>docs/curriculum/ASSESSOR_CALIBRATION.md</code> for scoring anchors.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

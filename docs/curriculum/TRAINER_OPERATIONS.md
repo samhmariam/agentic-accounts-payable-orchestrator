@@ -27,11 +27,13 @@ The exact artifact filenames for each day are the authoritative source in
 `docs/curriculum/CURRICULUM_MANIFEST.yaml` under `artifact_files`.
 
 1. Pre-brief: review the day's manifest entry, expected artifact filenames,
-   checkpoint status, and any open remediation notes from the prior day.
-   Run the facilitator day-start checklist before learners enter the lab block.
-2. Theory block: deliver the theory segment before learners open notebooks.
-   Introduce the three oral defense prompts for the day so learners can build
-   toward them during the lab.
+   checkpoint status, portal guide, and any open remediation notes from the
+   prior day. Run the facilitator day-start checklist before learners enter
+   the lab block.
+2. Theory block: start with the portal-first walkthrough for the day, then
+   deliver the theory segment before learners open notebooks. Introduce the
+   three oral defense prompts for the day so learners can build toward them
+   during the lab.
 3. Lab block: keep the room moving toward all four outputs (technical build,
    decision memo, corporate process artifact, oral defense prep). Notebook
    completion alone is not the goal.
@@ -105,6 +107,7 @@ graduation tier thresholds.
 ## Required Delivery Tools
 
 - [README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/README.md)
+- [portal/README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/README.md)
 - [TRAINEE_PREFLIGHT_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md)
 - [FACILITATOR_DAY_START_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md)
 - [CURRICULUM_MANIFEST.yaml](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml)

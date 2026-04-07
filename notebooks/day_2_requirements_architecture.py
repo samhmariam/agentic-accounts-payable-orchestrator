@@ -76,6 +76,23 @@ def _full_day_agenda(mo):
     )
     return
 
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Turn a vague AI idea into a scoped architecture with named boundaries, ownership, and measurable non-functional requirements before the implementation days begin.',
+        prerequisites=['Day 1 concepts understood.', 'No Azure deployment is required; this is a design and architecture day.'],
+        resources=['`notebooks/day_2_requirements_architecture.py`', '`docs/curriculum/artifacts/day02/` templates: ADR, NFR register, stakeholder map, and RACI', 'Later-day dependency: Day 3 and beyond will read the decisions you make here even if this notebook does not emit a `build/` artifact.'],
+        setup_sequence=['Review Day 1 notes so you can distinguish business goals from technical implementation.', 'Open the Day 2 artifact templates in `docs/curriculum/artifacts/day02/` only as reference material.', 'Run the early cells that establish the architecture lineage and discovery framing.'],
+        run_steps=['Complete the FDE discovery and scoping sections in notebook order.', 'Use the interactive NFR, stakeholder, and ADR exercises to test your choices.', 'Translate your final decisions into the reusable templates under `docs/curriculum/artifacts/day02/`.', 'Treat the notebook as the place to decide and the artifact templates as the place to persist those decisions.'],
+        output_interpretation=['Day 2 is primarily a decision-making notebook rather than a generated-build notebook.', 'The expected outputs are a defensible scope, a clear architecture blueprint, and updated Day 2 artifact templates.', 'A strong Day 2 result is visible later when Day 3-14 choices feel constrained rather than arbitrary.'],
+        troubleshooting=['If the day feels abstract, keep asking which later gate or operating decision this section will influence.', 'If you are unsure what to persist, mirror the notebook conclusions into `docs/curriculum/artifacts/day02/`.', 'If you start solutioning too early, return to scope, ownership, and non-functional requirements first.'],
+        outside_references=['Long-form theory and foundations: `docs/curriculum/trainee/DAY_00_TRAINEE.md`, `docs/curriculum/trainer/DAY_00_TRAINER.md`', 'Reusable Day 2 templates: `docs/curriculum/artifacts/day02/`'],
+    )
+    return
+
 
 @app.cell
 def _day2_lineage_map(mo):
@@ -689,7 +706,7 @@ def _adr_examples(mo):
     return (adr_selector,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _adr_content(adr_selector, mo):
     adrs = {
         "ADR-001: LangGraph for workflow orchestration": """

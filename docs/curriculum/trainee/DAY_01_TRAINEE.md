@@ -100,7 +100,7 @@ form." The LLM does **not**:
 
 ### Azure best practice
 - Deploy one model per **named deployment** (e.g., `gpt-4o-intake`).
-- Pin the deployment name in the environment variable (`AZURE_OPENAI_DEPLOYMENT`),
+- Pin the deployment name in the environment variable (`AZURE_OPENAI_CHAT_DEPLOYMENT`),
   not in source code, so you can swap model versions via config without a code change.
 - Set `temperature=0` for extraction — you want deterministic, not creative.
 
@@ -194,7 +194,7 @@ rather than prompt variability.
 ## Lab Readiness
 
 - **Lab duration:** 2.5 hours
-- **Required inputs:** `build/day0/env_report.json`, golden-thread fixture package, and `notebooks/day1_intake_canonicalization.py`
+- **Required inputs:** `.day0/core.json` or `.day0/full.json`, golden-thread fixture package, and `scripts/run_day1_intake.py`
 - **Expected artifact:** `build/day1/golden_thread_day1.json`
 
 ### Pass Criteria
@@ -221,7 +221,6 @@ Re-run the deterministic intake path with:
 
 ```bash
 uv run python scripts/run_day1_intake.py --mode fixture
-marimo edit notebooks/day1_intake_canonicalization.py
 ```
 
 Then inspect `build/day1/golden_thread_day1.json` and explain why the result is

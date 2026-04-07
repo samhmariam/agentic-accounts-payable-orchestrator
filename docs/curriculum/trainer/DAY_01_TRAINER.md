@@ -2,7 +2,7 @@
 
 > **Session duration:** 2.5–3 hours (40 min theory + 2 h lab)  
 > **WAF Pillars:** Security · Reliability  
-> **Prerequisite:** Day 0 complete; Azure OpenAI deployment responding
+> **Prerequisite:** Day 0 complete; Foundry OpenAI-compatible deployment responding
 
 ---
 
@@ -20,7 +20,7 @@ By the end of Day 1, every learner should be able to:
 
 - [ ] Day 0 complete: `verify_env.py --track core` exits 0
 - [ ] `fixtures/golden_thread/package.json` and `candidate.json` present
-- [ ] Azure OpenAI deployment name matches `AZURE_OPENAI_DEPLOYMENT` in `.env`
+- [ ] OpenAI-compatible deployment name matches `AZURE_OPENAI_CHAT_DEPLOYMENT` in the loaded Day 0 state
 - [ ] Run `scripts/run_day1_intake.py --mode fixture` yourself before the session
       to confirm `build/day1/golden_thread_day1.json` is generated correctly
 

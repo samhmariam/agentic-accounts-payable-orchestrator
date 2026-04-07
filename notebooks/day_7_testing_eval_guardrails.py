@@ -46,7 +46,7 @@ def _title(mo):
     1. Explain why LLM-based systems require evaluation suites, not just unit tests.
     2. Define AegisAP's core evaluation dimensions and the rationale for each threshold.
     3. Identify per-slice regressions that aggregate metrics conceal.
-    4. Implement the control-plane vs. data-plane separation as the primary guardrail.
+    4. Defend the control-plane vs. data-plane separation as the primary guardrail.
     5. Apply the full prompt injection taxonomy and describe each defence layer.
     6. Configure Azure AI Content Safety PromptShield in the AegisAP intake flow.
     7. Write PII redaction that meets the system boundary responsibility requirement.
@@ -77,6 +77,23 @@ def _full_day_agenda(mo):
         mo,
         day_label="Day 7 testing, evals, and guardrails",
         core_outcome="defend why slice-level evidence and refusal behavior are release criteria rather than nice-to-have metrics",
+    )
+    return
+
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Show how AegisAP proves safety and quality with evals, refusal behavior, and prompt-injection defenses rather than with unit tests alone.',
+        prerequisites=['Day 6 data authority complete.', 'Existing data pipeline and eval context available.', 'Local repo includes evaluation fixtures and malicious cases.'],
+        resources=['`notebooks/day_7_testing_eval_guardrails.py`', '`evals/` inputs and thresholds referenced in the notebook', '`docs/curriculum/artifacts/day07/` for governance and refusal catalogs', '`build/day7/` for the evaluation artifact'],
+        setup_sequence=['Run the bootstrap cells and make sure local eval fixtures are present.', 'Keep Day 6 authority boundaries in mind because Day 7 guardrails enforce them.', 'Use the notebook as the primary path; shell commands are supporting evidence, not the main learning flow.'],
+        run_steps=['Read the eval philosophy and guardrail sections before the exercises.', 'Use the attack and refusal examples to understand why control-plane separation matters.', 'Run the cells that build the evaluation and failure-investigation outputs.', 'Finish by writing `build/day7/eval_report.json` and checking the notebook checklist.'],
+        output_interpretation=['The key completion signal is `build/day7/eval_report.json` with `gate_passed = true`.', 'Intermediate outputs should help you interpret failing dimensions, slice regressions, and refusal reasons.', 'The goal is not only that tests pass but that you can explain why the system should refuse unsafe input.'],
+        troubleshooting=['If eval metrics feel abstract, trace one failure from raw case to score to gating consequence.', 'If guardrails feel repetitive, group them into control plane, data plane, and output constraints.', 'If the artifact is missing, rerun the final Day 7 artifact cell after the eval sections complete.'],
+        outside_references=['Long-form theory: `docs/curriculum/trainee/DAY_06_TRAINEE.md`, `docs/curriculum/trainee/DAY_07_TRAINEE.md`, `docs/curriculum/trainee/DAY_08_TRAINEE.md`', 'Trainer notes: `docs/curriculum/trainer/DAY_07_TRAINER.md`', 'Reusable references: `docs/curriculum/artifacts/day07/`'],
     )
     return
 
@@ -1295,8 +1312,8 @@ US invoices include:
 
 **Task:**
 
-1. Write the three new regex patterns to redact these values.
-2. Write a Python test for each pattern (pytest style).
+1. Sketch the three new regex patterns to redact these values.
+2. Sketch a Python test for each pattern (pytest style).
 3. Identify one case where your regex might produce a false positive
    (redacts something that isn't actually PII) and describe how to mitigate it.
             """),

@@ -45,8 +45,19 @@ TRAINER_REQUIRED_HEADINGS = (
     "### Time-box Guidance",
 )
 
+PORTAL_REQUIRED_HEADINGS = (
+    "## Portal-First Outcome",
+    "## Portal Mode",
+    "## Azure Portal Path",
+    "## What To Capture",
+    "## Handoff To Notebook",
+    "## Handoff To Automation",
+)
+
 REQUIRED_DOCS = (
     "docs/curriculum/README.md",
+    "docs/curriculum/DELIVERY_MAP.md",
+    "docs/curriculum/portal/README.md",
     "docs/curriculum/TRAINER_OPERATIONS.md",
     "docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md",
     "docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md",
@@ -68,6 +79,8 @@ REQUIRED_DOCS = (
 
 STRICT_VALIDATION_DOCS = (
     "docs/curriculum/README.md",
+    "docs/curriculum/DELIVERY_MAP.md",
+    "docs/curriculum/portal/README.md",
     "docs/curriculum/TRAINER_OPERATIONS.md",
     "docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md",
     "docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md",
@@ -84,6 +97,8 @@ STRICT_VALIDATION_DOCS = (
 )
 
 README_REQUIRED_SNIPPETS = (
+    "DELIVERY_MAP.md",
+    "portal/README.md",
     "TRAINEE_PREFLIGHT_CHECKLIST.md",
     "FACILITATOR_DAY_START_CHECKLIST.md",
     "## Mandatory Checkpoints",
@@ -97,6 +112,7 @@ README_REQUIRED_SNIPPETS = (
 
 TRAINER_OPS_REQUIRED_SNIPPETS = (
     "FACILITATOR_DAY_START_CHECKLIST.md",
+    "portal/README.md",
     "TRAINEE_PREFLIGHT_CHECKLIST.md",
     "Daily Operating Rhythm",
     "Learner Status Model",
@@ -112,6 +128,7 @@ PREFLIGHT_REQUIRED_SNIPPETS = (
 FACILITATOR_REQUIRED_SNIPPETS = (
     "uv run python scripts/validate_curriculum.py",
     "CURRICULUM_MANIFEST.yaml",
+    "docs/curriculum/portal/",
     "Day 8",
     "Day 11",
     "Day 12",
@@ -155,6 +172,29 @@ CORE_TEMPLATE_REQUIREMENTS = (
     "docs/curriculum/artifacts/day11/OBO_THREAT_MODEL.md",
 )
 
+THREE_SURFACE_PORTAL_DOCS = (
+    "docs/curriculum/portal/DAY_00_PORTAL.md",
+    "docs/curriculum/portal/DAY_01_PORTAL.md",
+    "docs/curriculum/portal/DAY_03_PORTAL.md",
+    "docs/curriculum/portal/DAY_08_PORTAL.md",
+    "docs/curriculum/portal/DAY_10_PORTAL.md",
+    "docs/curriculum/portal/DAY_11_PORTAL.md",
+    "docs/curriculum/portal/DAY_12_PORTAL.md",
+    "docs/curriculum/portal/DAY_13_PORTAL.md",
+    "docs/curriculum/portal/DAY_14_PORTAL.md",
+)
+
+THREE_SURFACE_NOTEBOOKS = (
+    "notebooks/day_1_agentic_fundamentals.py",
+    "notebooks/day_3_azure_ai_services.py",
+    "notebooks/day_8_cicd_iac_deployment.py",
+    "notebooks/day_10_production_operations.py",
+    "notebooks/day_11_delegated_identity_obo.py",
+    "notebooks/day_12_private_networking_constraints.py",
+    "notebooks/day_13_integration_boundary_and_mcp.py",
+    "notebooks/day_14_breaking_changes_elite_ops.py",
+)
+
 
 def main() -> int:
     errors: list[str] = []
@@ -168,10 +208,17 @@ def main() -> int:
 
     trainee_docs = sorted((ROOT / "docs" / "curriculum" / "trainee").glob("*.md"))
     trainer_docs = sorted((ROOT / "docs" / "curriculum" / "trainer").glob("*.md"))
+    portal_docs = sorted((ROOT / "docs" / "curriculum" / "portal").glob("DAY_*_PORTAL.md"))
     if len(trainee_docs) < 11:
         errors.append("Expected trainee pre-read docs for Days 00-10.")
     if len(trainer_docs) < 11:
         errors.append("Expected trainer facilitation docs for Days 00-10.")
+    expected_portal_docs = [f"DAY_{i:02d}_PORTAL.md" for i in range(0, 15)]
+    actual_portal_docs = [path.name for path in portal_docs]
+    if actual_portal_docs != expected_portal_docs:
+        errors.append(
+            "Expected portal guides for Days 00-14 in docs/curriculum/portal/."
+        )
 
     for path in trainee_docs:
         _expect_headings(
@@ -186,6 +233,33 @@ def main() -> int:
             path,
             TRAINER_REQUIRED_HEADINGS,
             "Trainer day doc is missing required facilitation section",
+        )
+    for path in portal_docs:
+        _expect_headings(
+            errors,
+            path,
+            PORTAL_REQUIRED_HEADINGS,
+            "Portal day doc is missing the required portal-first structure",
+        )
+    for rel_path in THREE_SURFACE_PORTAL_DOCS:
+        _expect_headings(
+            errors,
+            ROOT / rel_path,
+            ("## Three-Surface Linkage",),
+            "Critical portal guide is missing the explicit portal-notebook-automation linkage",
+        )
+    _expect_headings(
+        errors,
+        ROOT / "docs" / "DAY_00_AZURE_BOOTSTRAP.md",
+        ("## Three-Surface Linkage",),
+        "Day 0 bootstrap doc is missing the explicit portal-to-automation linkage",
+    )
+    for rel_path in THREE_SURFACE_NOTEBOOKS:
+        _expect_snippets(
+            errors,
+            ROOT / rel_path,
+            ("render_surface_linkage(",),
+            "Critical day notebook is missing the explicit three-surface linkage block",
         )
 
     _expect_snippets(

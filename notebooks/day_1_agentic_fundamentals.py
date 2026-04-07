@@ -77,6 +77,46 @@ def _full_day_agenda(mo):
 
 
 @app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Build the mental model for what an agentic system is, why AegisAP is a good example, and why Azure identity, service choice, and governance matter before any implementation work. Inspect the Day 1 intake boundary directly so the core package -> candidate -> canonical transformation is visible, not hidden behind a wrapper script.',
+        prerequisites=['None beyond a working local repo checkout.', 'This notebook runs locally on synthetic examples; no Azure subscription is required.'],
+        resources=['`notebooks/day_1_agentic_fundamentals.py`', '`src/aegisap/day_01/` for the real intake boundary code', '`docs/curriculum/trainee/DAY_00_TRAINEE.md` and `docs/curriculum/trainee/DAY_01_TRAINEE.md`', '`docs/curriculum/artifacts/day01/` templates for post-notebook reflection', '`build/day1/` for the generated threat-model artifact'],
+        setup_sequence=['Open the notebook from a clean repo checkout.', 'Run the bootstrap and title cells first so shared imports resolve.', 'Keep the Day 1 artifact templates nearby only as reference, not as required reading before you start.'],
+        run_steps=['Work top-to-bottom through the mental model, the direct Day 1 intake-boundary walkthrough, the Azure service map, and the WAF/CAF sections.', 'Inspect the real fixture package, `ExtractedInvoiceCandidate`, `CanonicalInvoice`, and a seeded rejection before moving on to the broader platform framing.', 'Use the diagrams and comparison tables to explain ideas in your own words before moving on.', 'Run the artifact cell that writes `build/day1/threat_model_day1.json`.', 'Finish with the checklist and the Day 1 artifact links.'],
+        output_interpretation=['Most Day 1 outputs are explanatory: diagrams, comparisons, and business framing.', 'The critical technical completion signal is that you can explain exactly how the Day 1 trust boundary accepts or rejects data without hiding behind `scripts/run_day1_intake.py`.', 'The concrete file output is `build/day1/threat_model_day1.json`.', 'No live cloud resource should be created on Day 1.'],
+        troubleshooting=['If imports fail, rerun the first bootstrap cell so `src/` and `notebooks/` are on `sys.path`.', 'If the artifact is missing, rerun the Day 1 artifact cell and confirm the repo is writable.', 'If you feel pulled into infra deep dives, stay in the notebook first and use external docs only after the local mental model is clear.'],
+        outside_references=['Long-form theory: `docs/curriculum/trainee/DAY_00_TRAINEE.md`, `docs/curriculum/trainee/DAY_01_TRAINEE.md`', 'Trainer framing: `docs/curriculum/trainer/DAY_00_TRAINER.md`, `docs/curriculum/trainer/DAY_01_TRAINER.md`', 'Reusable reference artifacts: `docs/curriculum/artifacts/day01/`'],
+    )
+    return
+
+
+@app.cell
+def _three_surface_linkage(mo):
+    from _shared.lab_guide import render_surface_linkage
+
+    render_surface_linkage(
+        mo,
+        portal_guide="docs/curriculum/portal/DAY_01_PORTAL.md",
+        portal_activity="Inspect the Day 0 resource group and Foundry deployment, then use AI Foundry playground against the Day 1 invoice text so you can see raw extraction output before deterministic validation.",
+        notebook_activity="Use the Direct Day 1 Boundary Walkthrough and the optional portal-candidate bridge below to compare raw package input, model output, rejection behavior, and the `CanonicalInvoice` that is allowed to cross the boundary.",
+        automation_steps=[
+            "`uv run python scripts/run_day1_intake.py --mode fixture` rebuilds the same trust-boundary flow with the training candidate.",
+            "`uv run python scripts/run_day1_intake.py --mode live` swaps in live extraction but keeps the same canonicalization and rejection rules.",
+        ],
+        evidence_checks=[
+            "Your Foundry playground candidate should line up with the candidate shape in the notebook.",
+            "The notebook should show the same accept-or-reject boundary that the script later automates.",
+            "`build/day1/golden_thread_day1.json` should tell the same story as the portal candidate and the notebook walkthrough.",
+        ],
+    )
+    return
+
+
+@app.cell
 def _section_1_header(mo):
     mo.md("""
     ## 1. What Makes a System 'Agentic'?
@@ -521,10 +561,10 @@ def _section_3_body(mo):
     Raw invoice (PDF / email / OCR text)
             │
             ▼
-    Day 4 ──[ Azure OpenAI Extractor ]──► InvoiceCandidate
+    Day 1 ──[ Azure OpenAI Extractor ]──► InvoiceCandidate
             │                              (probabilistic)
             ▼
-    Day 4 ──[ Python Normaliser + Validator ]──► CanonicalInvoice
+    Day 1 ──[ Python Normaliser + Validator ]──► CanonicalInvoice
             │                                    (typed, immutable)
             ▼
     Day 5 ──[ LangGraph Workflow ]──► routing decision
@@ -555,6 +595,243 @@ def _section_3_body(mo):
     | **12** | Private Networking Constraints | Private endpoints, egress restrictions, network-aware design |
     | **13** | Integration Boundaries & MCP | Tool contracts, protocol boundaries, enterprise integrations |
     | **14** | Breaking Changes & Elite Ops | Controlled change, traceability, operating the agent estate at scale |
+    """)
+    return
+
+
+@app.cell
+def _day1_boundary_header(mo):
+    mo.md("""
+    ### Direct Day 1 Boundary Walkthrough
+    """)
+    return
+
+
+@app.cell
+def _day1_boundary_context(mo):
+    mo.callout(
+        mo.md(
+            """
+    The Day 1 intake boundary is too important to leave hidden behind a convenience script.
+
+    `scripts/run_day1_intake.py` is only a thin wrapper:
+
+    ```text
+    run_day1_intake.py
+      -> run_day1_fixture(...) or run_day1_live(...)
+      -> canonicalize_with_candidate(...) or run_day_01_intake(...)
+      -> extract_candidate(...)    # live path only
+      -> to_canonical_invoice(...)
+      -> CanonicalInvoice or IntakeReject
+    ```
+
+    The live and fixture paths differ only in **how the candidate is obtained**.
+    The trust boundary itself is the same in both cases:
+
+    - raw invoice package is still untrusted
+    - `ExtractedInvoiceCandidate` is still untrusted model output
+    - only `CanonicalInvoice` is allowed to cross the boundary
+    - any failure becomes an explicit Day 1 rejection
+            """
+        ),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _day1_portal_candidate_input(mo):
+    portal_candidate_input = mo.ui.text_area(
+        label="Optional: paste the JSON candidate you extracted manually in AI Foundry playground",
+        placeholder='{"supplier_name_text": "Acme Office Supplies", "invoice_number_text": "INV-3001"}',
+        rows=12,
+    )
+    _panel = mo.vstack(
+        [
+            mo.callout(
+                mo.md(
+                    """
+    **Portal -> notebook bridge**
+
+    If you manually ran extraction in AI Foundry playground, paste the returned JSON here.
+    The notebook will push that candidate through the same Day 1 trust boundary used by
+    the repo code so you can compare:
+
+    - raw Azure model output
+    - deterministic canonicalization and validation
+    - the script wrapper that automates the same path later
+                    """
+                ),
+                kind="info",
+            ),
+            portal_candidate_input,
+        ]
+    )
+    _panel
+    return (portal_candidate_input,)
+
+
+@app.cell
+def _day1_portal_candidate_result(json, portal_candidate_input):
+    from pathlib import Path as _Path
+
+    from aegisap.day_01.models import ExtractedInvoiceCandidate as _ExtractedInvoiceCandidate
+    from aegisap.day_01.service import IntakeReject as _IntakeReject
+    from aegisap.day_01.service import canonicalize_with_candidate as _canonicalize_with_candidate
+    from aegisap.training.labs import load_invoice_package as _load_invoice_package
+
+    portal_candidate_preview = None
+    portal_canonical_preview = None
+    portal_candidate_error = None
+
+    _raw = portal_candidate_input.value.strip()
+    if not _raw:
+        return (
+            portal_candidate_preview,
+            portal_canonical_preview,
+            portal_candidate_error,
+        )
+
+    _repo_root = _Path(__file__).resolve().parents[1]
+    _package_path = _repo_root / "fixtures" / "golden_thread" / "package.json"
+    _package = _load_invoice_package(_package_path)
+
+    try:
+        _portal_payload = json.loads(_raw)
+        _portal_candidate = _ExtractedInvoiceCandidate.model_validate(_portal_payload)
+        _portal_canonical = _canonicalize_with_candidate(_package, _portal_candidate)
+        portal_candidate_preview = _portal_candidate.model_dump(mode="json")
+        portal_canonical_preview = _portal_canonical.model_dump(mode="json")
+    except json.JSONDecodeError as exc:
+        portal_candidate_error = f"Portal candidate is not valid JSON: {exc}"
+    except ValueError as exc:
+        portal_candidate_error = f"Portal candidate failed validation: {exc}"
+    except _IntakeReject as exc:
+        portal_candidate_preview = _portal_payload if "_portal_payload" in locals() else None
+        portal_candidate_error = f"Portal candidate was rejected at the Day 1 intake boundary: {exc}"
+    return (
+        portal_candidate_preview,
+        portal_canonical_preview,
+        portal_candidate_error,
+    )
+
+
+@app.cell
+def _day1_portal_candidate_surface(
+    json,
+    mo,
+    portal_candidate_error,
+    portal_candidate_preview,
+    portal_canonical_preview,
+):
+    if portal_candidate_preview is None and portal_candidate_error is None:
+        return
+
+    if portal_candidate_error is not None:
+        mo.callout(
+            mo.md(
+                f"""
+**Portal candidate result**
+
+```text
+{portal_candidate_error}
+```
+                """
+            ),
+            kind="warn",
+        )
+        return
+
+    mo.accordion(
+        {
+            "Portal candidate after manual Foundry extraction": mo.md(
+                f"```json\n{json.dumps(portal_candidate_preview, indent=2)}\n```"
+            ),
+            "Canonical invoice produced from that portal candidate": mo.md(
+                f"```json\n{json.dumps(portal_canonical_preview, indent=2)}\n```"
+            ),
+        }
+    )
+    return
+
+
+@app.cell
+def _day1_boundary_surface(
+    candidate_preview,
+    canonical_preview,
+    json,
+    mo,
+    package_preview,
+):
+    mo.vstack(
+        [
+            mo.md(
+                """
+    **Inspect the same transformation the script wraps**
+
+    Read these three objects in order:
+    1. raw package input
+    2. extracted candidate
+    3. canonical invoice that is allowed to cross the boundary
+                """
+            ),
+            mo.accordion(
+                {
+                    "1. InvoicePackageInput (raw, still untrusted)": mo.md(
+                        f"```json\n{json.dumps(package_preview, indent=2)}\n```"
+                    ),
+                    "2. ExtractedInvoiceCandidate (model output, still untrusted)": mo.md(
+                        f"```json\n{json.dumps(candidate_preview, indent=2)}\n```"
+                    ),
+                    "3. CanonicalInvoice (typed object that may cross the boundary)": mo.md(
+                        f"```json\n{json.dumps(canonical_preview, indent=2)}\n```"
+                    ),
+                }
+            ),
+        ]
+    )
+    return
+
+
+@app.cell
+def _day1_boundary_rejection_demo(json, mo, tampered_error, tampered_payload):
+    mo.callout(
+        mo.md(
+            f"""
+    **Seeded rejection demo**
+
+    The candidate below was tampered after extraction by replacing the PO reference
+    with a value that does not exist in the source package:
+
+    ```json
+    {json.dumps({'po_reference_text': tampered_payload['po_reference_text']}, indent=2)}
+    ```
+
+    Day 1 rejects it with:
+
+    ```text
+    {tampered_error}
+    ```
+
+    This is the trust boundary doing its job. The system does not accept a value
+    just because a model or a developer supplied it; the value still has to be
+    evidenced, normalized, and validated before it can become a `CanonicalInvoice`.
+            """
+        ),
+        kind="warn",
+    )
+    return
+
+
+@app.cell
+def _day1_boundary_takeaways(mo):
+    mo.md("""
+    **What to remember**
+
+    - `scripts/run_day1_intake.py` is for reproducibility, not first-pass understanding.
+    - The fixture path is still valuable because it exposes the exact trust boundary without model variability.
+    - The live path only swaps in `extract_candidate(...)`; it does not change the canonicalization or rejection rules.
+    - If you cannot explain why the tampered candidate was rejected, Day 1 is not complete yet.
     """)
     return
 
@@ -623,7 +900,7 @@ def _service_table(mo):
 
     | Service | Role in AegisAP | First appears | Accessed via |
     |---|---|---|---|
-    | **Azure OpenAI Service** | LLM extraction, planning, policy review | Day 4 | `DefaultAzureCredential` + RBAC |
+    | **Azure OpenAI Service** | LLM extraction on Day 1; planning and policy review later | Day 1 | `DefaultAzureCredential` + RBAC |
     | **Azure AI Search** | Vendor policy & compliance rule retrieval (RAG) | Day 3 | `DefaultAzureCredential` + RBAC |
     | **Azure Database for PostgreSQL** | Durable workflow state, checkpoints, audit log | Day 5 | Entra authentication |
     | **Azure Container Apps (ACA)** | API and worker hosting, revision-based deploys | Day 8 | Managed Identity pull from ACR |
@@ -959,10 +1236,11 @@ def _src_layout(mo):
     | Path | What's in it |
     |---|---|
     | `src/aegisap/` | All production Python source |
-    | `src/aegisap/intake/` | Day 4 extraction + canonicalization |
-    | `src/aegisap/workflow/` | Day 5 LangGraph orchestration |
-    | `src/aegisap/retrieval/` | Day 3 RAG and search agents |
-    | `src/aegisap/planning/` | Day 4 planner + policy overlay |
+    | `src/aegisap/day_01/` | Day 1 extraction, normalization, and intake-boundary code |
+    | `src/aegisap/day2/` | Day 2 workflow state and deterministic routing |
+    | `src/aegisap/day3/` | Day 3 retrieval, authority ranking, and typed handoffs |
+    | `src/aegisap/day4/` | Day 4 planner, policy overlay, and execution flow |
+    | `src/aegisap/day5/` | Day 5 durable workflow state and pause/resume helpers |
     | `src/aegisap/security/` | Day 7 credentials + PII redaction |
     | `src/aegisap/deploy/` | Day 10 acceptance gates |
     | `infra/` | Bicep IaC templates (Days 0/8) |

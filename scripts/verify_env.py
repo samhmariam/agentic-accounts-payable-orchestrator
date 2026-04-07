@@ -29,6 +29,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from aegisap.security import credentials
+from aegisap.common.openai_compat import build_chat_completion_kwargs
 from aegisap.security.config import load_security_config
 from aegisap.security.policy import validate_security_posture
 
@@ -37,6 +38,8 @@ CORE_REQUIRED_ENV_VARS = [
     "AZURE_SUBSCRIPTION_ID",
     "AZURE_RESOURCE_GROUP",
     "AZURE_LOCATION",
+    "AZURE_FOUNDRY_ENDPOINT",
+    "AZURE_FOUNDRY_RESOURCE_NAME",
     "AZURE_OPENAI_ENDPOINT",
     "AZURE_OPENAI_API_VERSION",
     "AZURE_OPENAI_CHAT_DEPLOYMENT",
@@ -64,7 +67,7 @@ PASS = "PASS"
 FAIL = "FAIL"
 
 POSTGRES_SCOPE = "https://ossrdbms-aad.database.windows.net/.default"
-OPENAI_SCOPE = "https://cognitiveservices.azure.com/.default"
+FOUNDRY_INFERENCE_SCOPE = "https://ai.azure.com/.default"
 
 
 def result(name: str, status: str, detail: str) -> dict[str, str]:
@@ -152,29 +155,43 @@ def build_credential() -> Any:
         )
 
 
-def check_openai(credential: Any) -> dict[str, str]:
+def check_foundry_inference(credential: Any) -> dict[str, str]:
     deployment = os.environ["AZURE_OPENAI_CHAT_DEPLOYMENT"]
+    foundry_name = os.environ["AZURE_FOUNDRY_RESOURCE_NAME"]
     try:
         from azure.identity import get_bearer_token_provider
         from openai import AzureOpenAI
 
-        token_provider = get_bearer_token_provider(credential, OPENAI_SCOPE)
+        token_provider = get_bearer_token_provider(credential, FOUNDRY_INFERENCE_SCOPE)
         client = AzureOpenAI(
             azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
             azure_ad_token_provider=token_provider,
             api_version=os.environ["AZURE_OPENAI_API_VERSION"],
         )
         client.chat.completions.create(
-            model=deployment,
-            messages=[{"role": "user", "content": "Reply with OK"}],
-            max_tokens=1,
+            **build_chat_completion_kwargs(
+                model=deployment,
+                messages=[{"role": "user", "content": "Reply with OK"}],
+                max_tokens=16,
+            )
         )
-        return result("azure_openai", PASS, f"deployment '{deployment}' reachable with DefaultAzureCredential")
+        return result(
+            "foundry_inference",
+            PASS,
+            (
+                f"resource '{foundry_name}' and deployment '{deployment}' "
+                "reachable through the OpenAI-compatible endpoint with DefaultAzureCredential"
+            ),
+        )
     except Exception as exc:  # pragma: no cover - SDK exceptions vary
         message = str(exc)
         if "DeploymentNotFound" in message or "404" in message:
-            message += " | Check the OpenAI chat deployment name and confirm scripts/provision-core.ps1 or scripts/provision-full.ps1 created it."
-        return result("azure_openai", FAIL, message)
+            message += (
+                " | Check the OpenAI-compatible chat deployment name and confirm "
+                "scripts/provision-core.ps1 or scripts/provision-full.ps1 created it "
+                "on the Foundry resource."
+            )
+        return result("foundry_inference", FAIL, message)
 
 
 def check_search(credential: Any) -> dict[str, str]:
@@ -412,7 +429,7 @@ def main() -> int:
 
     credential = build_credential()
 
-    results.append(check_openai(credential))
+    results.append(check_foundry_inference(credential))
     results.append(check_search(credential))
     results.append(check_storage(credential))
 

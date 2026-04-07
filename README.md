@@ -11,7 +11,7 @@ operational readiness.
 
 | Day | Objective | New Architectural Layer | Azure Services | Command | Artifact | Exit Check |
 | --- | --- | --- | --- | --- | --- | --- |
-| Day 0 | Bootstrap a keyless Azure substrate | Provisioning + RBAC | Azure OpenAI, Azure AI Search, Blob Storage, optional PostgreSQL, Key Vault, App Insights, Container Apps | `uv run python scripts/verify_env.py --track core` or `--track full` | `.day0/core.json` or `.day0/full.json` | Azure services reachable with `DefaultAzureCredential` |
+| Day 0 | Bootstrap a keyless Azure substrate | Provisioning + RBAC | Microsoft Foundry, Azure AI Search, Blob Storage, optional PostgreSQL, Key Vault, App Insights, Container Apps | `uv run python scripts/verify_env.py --track core` or `--track full` | `.day0/core.json` or `.day0/full.json` | Foundry inference plus Azure services reachable with `DefaultAzureCredential` |
 | Day 1 | Canonicalize invoice intake | Tool-grounded extraction | Azure OpenAI | `uv run python scripts/run_day1_intake.py --mode fixture` or `--mode live` | `build/day1/golden_thread_day1.json` | Canonical invoice emitted or rejected deterministically |
 | Day 2 | Route a trusted invoice through explicit state | Stateful control flow | Azure OpenAI substrate from Day 0 | `uv run python scripts/run_day2_workflow.py --day1-artifact build/day1/golden_thread_day1.json --known-vendor` | `build/day2/golden_thread_day2.json` | Workflow state records route, evidence, and recommendations |
 | Day 3 | Retrieve evidence and rank authority | Multi-agent retrieval with live enterprise search | Azure AI Search, Blob Storage | `uv run python scripts/run_day3_case.py --retrieval-mode azure_search_live` | `build/day3/golden_thread_day3.json` | Live Search evidence is surfaced and authority-ranked correctly |
@@ -32,19 +32,20 @@ operational readiness.
 1. Read [Training Journey](/workspaces/agentic-accounts-payable-orchestrator/docs/TRAINING_JOURNEY.md).
 2. Provision Azure with [Day 0 Azure Bootstrap](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md).
 3. Run the golden-thread lab for each day in order.
-4. Use the notebooks for walkthroughs and the scripts for repeatable execution.
+4. Use [Curriculum Delivery Map](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) as the single navigation layer for notebook, doc, script, and artifact selection.
+5. Use the notebooks for walkthroughs and the scripts for repeatable execution.
 
 ## Day Guides
 
 - [Day 0 Azure Bootstrap](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md)
 - [Day 1 Intake and Canonicalization](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_01.md)
 - [Day 2 Stateful Workflow](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_02.md)
-- [Day 3 Retrieval and Authority](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_03_MULTI_AGENT_RETRIEVAL.md)
-- [Day 4 Explicit Planning](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_04_EXPLICIT_PLANNING.md)
+- [Day 3 Azure AI Services and Framework Choice](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_03_FRAMEWORK_SELECTION_AND_CHOICE.md)
+- [Day 4 Execution Flow and Policy Overlay](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_04_EXECUTION_FLOW.md)
 - [Day 5 Durable State and Resumption](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_05_DURABLE_STATE_AND_RESUMPTION.md)
 - [Day 6 Reflection and Graceful Refusal](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_06_REFLECTION_AND_GRACEFUL_REFUSAL.md)
-- [Day 7 Security, Identity, and Auditability](/workspaces/agentic-accounts-payable-orchestrator/docs/day7/DAY_07_SECURITY_IDENTITY_AUDITABILITY.md)
-- [Day 8 Observability and Reliability Engineering](/workspaces/agentic-accounts-payable-orchestrator/docs/day8/DAY_08_OBSERVABILITY_AND_RELIABILITY.md)
+- [Day 7 Eval Guardrails and Slice Governance](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_07_EVAL_GUARDRAILS_SLICE_GOVERNANCE.md)
+- [Day 8 IaC, Identity, and Release Ownership](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_08_IAC_IDENTITY_RELEASE_OWNERSHIP.md)
 - [Day 9 Cost, Speed, Routing, Caching, and Optimisation](/workspaces/agentic-accounts-payable-orchestrator/docs/day9/DAY_09_COST_SPEED_ROUTING_CACHING_AND_OPTIMISATION.md)
 - [Day 10 Deployment and Acceptance Gating](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_10_DEPLOYMENT_AND_ACCEPTANCE.md)
 - [Day 11 Delegated Identity](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_11_DELEGATED_IDENTITY.md)
@@ -54,11 +55,20 @@ operational readiness.
 
 ## Notebooks
 
-- `notebooks/day1_intake_and_canonicalization.ipynb`
-- `notebooks/day2_stateful_workflow_orchestration.ipynb`
-- `notebooks/day3_multi_agent_retrieval_and_authority.ipynb`
-- `notebooks/day4_explicit_planning_and_controlled_execution.ipynb`
-- `notebooks/day5_durable_state_and_resumption.ipynb`
+- `notebooks/day_1_agentic_fundamentals.py`
+- `notebooks/day_2_requirements_architecture.py`
+- `notebooks/day_3_azure_ai_services.py`
+- `notebooks/day_4_single_agent_loops.py`
+- `notebooks/day_5_multi_agent_orchestration.py`
+- `notebooks/day_6_data_ml_integration.py`
+- `notebooks/day_7_testing_eval_guardrails.py`
+- `notebooks/day_8_cicd_iac_deployment.py`
+- `notebooks/day_9_scaling_monitoring_cost.py`
+- `notebooks/day_10_production_operations.py`
+- `notebooks/day_11_delegated_identity_obo.py`
+- `notebooks/day_12_private_networking_constraints.py`
+- `notebooks/day_13_integration_boundary_and_mcp.py`
+- `notebooks/day_14_breaking_changes_elite_ops.py`
 
 ## Day 0 in 10 Minutes
 

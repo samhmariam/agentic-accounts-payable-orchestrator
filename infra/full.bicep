@@ -27,25 +27,25 @@ param postgresDatabaseName string = 'aegisap'
 @description('Key Vault name')
 param keyVaultName string
 
-@description('Azure OpenAI account name')
+@description('Microsoft Foundry resource name')
 param openAiName string
 
-@description('Azure OpenAI data-plane API version exported into the local environment')
+@description('OpenAI-compatible API version exported into the local environment')
 param openAiApiVersion string = '2024-08-01-preview'
 
-@description('Azure OpenAI chat deployment name exported into the local environment')
+@description('OpenAI-compatible chat deployment name exported into the local environment')
 param openAiChatDeploymentName string
 
-@description('Optional Azure OpenAI chat model name for automatic deployment creation')
+@description('Optional OpenAI-compatible chat model name for automatic deployment creation')
 param openAiChatModelName string = ''
 
-@description('Optional Azure OpenAI chat model version for automatic deployment creation')
+@description('Optional OpenAI-compatible chat model version for automatic deployment creation')
 param openAiChatModelVersion string = ''
 
-@description('Optional Azure OpenAI deployment SKU name')
+@description('Optional chat deployment SKU name')
 param openAiChatSkuName string = 'Standard'
 
-@description('Optional Azure OpenAI deployment capacity')
+@description('Optional chat deployment capacity')
 param openAiChatCapacity int = 0
 
 @description('Log Analytics workspace name')
@@ -81,172 +81,90 @@ param jobsIdentityName string = 'id-aegisap-jobs'
 @description('User-assigned managed identity name scaffolded for Search indexing and schema administration')
 param searchAdminIdentityName string = 'id-aegisap-search-admin'
 
-resource st 'Microsoft.Storage/storageAccounts@2025-06-01' = {
-  name: storageAccountName
-  location: location
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    allowBlobPublicAccess: false
-    allowSharedKeyAccess: false
-    defaultToOAuthAuthentication: true
-    minimumTlsVersion: 'TLS1_2'
-    supportsHttpsTrafficOnly: true
-  }
-}
-
-resource stBlob 'Microsoft.Storage/storageAccounts/blobServices@2025-06-01' = {
-  parent: st
-  name: 'default'
-}
-
-resource stContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2025-06-01' = {
-  parent: stBlob
-  name: storageContainerName
-  properties: {
-    publicAccess: 'None'
-  }
-}
-
-resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
-  name: acrName
-  location: location
-  sku: {
-    name: 'Basic'
-  }
-  properties: {
-    adminUserEnabled: false
-  }
-}
-
-resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
-  name: logAnalyticsName
-  location: location
-  properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-    retentionInDays: 30
-  }
-}
-
-resource appi 'Microsoft.Insights/components@2020-02-02' = {
-  name: appInsightsName
-  location: location
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    WorkspaceResourceId: law.id
-  }
-}
-
-resource workloadIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: workloadIdentityName
-  location: location
-}
-
-resource jobsIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: jobsIdentityName
-  location: location
-}
-
-resource searchAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: searchAdminIdentityName
-  location: location
-}
-
-resource cae 'Microsoft.App/managedEnvironments@2024-03-01' = {
-  name: containerAppsEnvName
-  location: location
-  properties: {
-    appLogsConfiguration: {
-      destination: 'log-analytics'
-      logAnalyticsConfiguration: {
-        customerId: law.properties.customerId
-        sharedKey: law.listKeys().primarySharedKey
-      }
-    }
-  }
-}
-
-resource srch 'Microsoft.Search/searchServices@2025-05-01' = {
-  name: searchName
-  location: location
-  sku: {
-    name: 'basic'
-  }
-  properties: {
-    disableLocalAuth: true
-    hostingMode: 'Default'
-    partitionCount: 1
-    publicNetworkAccess: 'enabled'
-    replicaCount: 1
-  }
-}
-
-resource pg 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
-  name: postgresServerName
-  location: location
-  sku: {
-    name: 'Standard_B1ms'
-    tier: 'Burstable'
-  }
-  properties: {
-    authConfig: {
-      activeDirectoryAuth: 'Enabled'
-      passwordAuth: 'Disabled'
-      tenantId: subscription().tenantId
-    }
-    network: {
-      publicNetworkAccess: 'Enabled'
-    }
-    storage: {
-      storageSizeGB: 128
-    }
-    version: '16'
-  }
-}
-
-resource pgAdmin 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2024-08-01' = {
-  parent: pg
-  name: postgresEntraAdminObjectId
-  properties: {
-    principalName: postgresEntraAdminName
-    principalType: postgresEntraAdminType
-    tenantId: subscription().tenantId
-  }
-}
-
-resource pgDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2024-08-01' = {
-  parent: pg
-  name: postgresDatabaseName
-  properties: {
-    charset: 'UTF8'
-    collation: 'en_US.utf8'
-  }
-}
-
-resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
-  name: keyVaultName
-  location: location
-  properties: {
-    enableRbacAuthorization: true
-    publicNetworkAccess: 'Enabled'
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
-    tenantId: subscription().tenantId
-  }
-}
-
-module keyVaultDiagnostics './modules/diagnostic_settings.bicep' = {
-  name: 'keyVaultDiagnostics'
+module core './core.bicep' = {
+  name: '${deployment().name}-core'
   params: {
-    keyVaultName: kv.name
-    logAnalyticsWorkspaceName: law.name
+    location: location
+    storageAccountName: storageAccountName
+    storageContainerName: storageContainerName
+    searchName: searchName
+    searchIndexName: searchIndexName
+    openAiName: openAiName
+    openAiApiVersion: openAiApiVersion
+    openAiChatDeploymentName: openAiChatDeploymentName
+    openAiChatModelName: openAiChatModelName
+    openAiChatModelVersion: openAiChatModelVersion
+    openAiChatSkuName: openAiChatSkuName
+    openAiChatCapacity: openAiChatCapacity
+  }
+}
+
+module acr './foundations/container_registry.bicep' = {
+  name: '${deployment().name}-acr'
+  params: {
+    location: location
+    acrName: acrName
+  }
+}
+
+module observability './foundations/observability.bicep' = {
+  name: '${deployment().name}-observability'
+  params: {
+    location: location
+    logAnalyticsName: logAnalyticsName
+    appInsightsName: appInsightsName
+  }
+}
+
+module identities './foundations/managed_identities.bicep' = {
+  name: '${deployment().name}-identities'
+  params: {
+    location: location
+    workloadIdentityName: workloadIdentityName
+    jobsIdentityName: jobsIdentityName
+    searchAdminIdentityName: searchAdminIdentityName
+  }
+}
+
+module containerAppsEnv './foundations/aca_environment.bicep' = {
+  name: '${deployment().name}-cae'
+  dependsOn: [observability]
+  params: {
+    location: location
+    containerAppsEnvName: containerAppsEnvName
+    logAnalyticsWorkspaceName: logAnalyticsName
+  }
+}
+
+module postgres './foundations/postgres_server.bicep' = {
+  name: '${deployment().name}-postgres'
+  params: {
+    location: location
+    postgresServerName: postgresServerName
+    postgresDatabaseName: postgresDatabaseName
+    postgresEntraAdminObjectId: postgresEntraAdminObjectId
+    postgresEntraAdminName: postgresEntraAdminName
+    postgresEntraAdminType: postgresEntraAdminType
+  }
+}
+
+module keyVault './foundations/key_vault.bicep' = {
+  name: '${deployment().name}-keyvault'
+  params: {
+    location: location
+    keyVaultName: keyVaultName
+  }
+}
+
+module keyVaultDiagnostics './foundations/diagnostic_settings.bicep' = {
+  name: 'keyVaultDiagnostics'
+  dependsOn: [
+    keyVault
+    observability
+  ]
+  params: {
+    keyVaultName: keyVaultName
+    logAnalyticsWorkspaceName: logAnalyticsName
   }
 }
 
@@ -254,63 +172,52 @@ module day8Alerts './monitoring/alerts/alerts.bicep' = {
   name: 'day8Alerts'
   params: {
     location: location
-    logAnalyticsWorkspaceId: law.id
+    logAnalyticsWorkspaceId: observability.outputs.logAnalyticsWorkspaceId
   }
 }
 
-resource aoai 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
-  name: openAiName
-  location: location
-  kind: 'OpenAI'
-  sku: {
-    name: 'S0'
-  }
-  properties: {
-    customSubDomainName: openAiName
-    disableLocalAuth: true
-    publicNetworkAccess: 'Enabled'
-  }
-}
-
-output acrId string = acr.id
-output acrLoginServer string = acr.properties.loginServer
-output acrName string = acr.name
-output appInsightsConnectionString string = appi.properties.ConnectionString
-output containerAppsEnvironmentId string = cae.id
-output containerAppsEnvironmentName string = cae.name
-output keyVaultId string = kv.id
-output keyVaultUri string = kv.properties.vaultUri
+output acrId string = acr.outputs.acrId
+output acrLoginServer string = acr.outputs.acrLoginServer
+output acrName string = acr.outputs.acrName
+output appInsightsConnectionString string = observability.outputs.appInsightsConnectionString
+output containerAppsEnvironmentId string = containerAppsEnv.outputs.containerAppsEnvironmentId
+output containerAppsEnvironmentName string = containerAppsEnv.outputs.containerAppsEnvironmentName
+output keyVaultId string = keyVault.outputs.keyVaultId
+output keyVaultUri string = keyVault.outputs.keyVaultUri
 output location string = location
-output openAiApiVersion string = openAiApiVersion
-output openAiChatCapacity int = openAiChatCapacity
-output openAiChatDeploymentName string = openAiChatDeploymentName
-output openAiChatModelName string = openAiChatModelName
-output openAiChatModelVersion string = openAiChatModelVersion
-output openAiChatSkuName string = openAiChatSkuName
-output openAiEndpoint string = 'https://${openAiName}.openai.azure.com/'
-output openAiId string = aoai.id
-output openAiName string = aoai.name
-output postgresDatabaseName string = pgDb.name
-output postgresHost string = pg.properties.fullyQualifiedDomainName
-output postgresServerId string = pg.id
-output postgresServerName string = pg.name
-output postgresUser string = postgresEntraAdminName
-output searchEndpoint string = srch.properties.endpoint
-output searchIndexName string = searchIndexName
-output searchName string = srch.name
-output searchServiceId string = srch.id
-output storageAccountId string = st.id
-output storageAccountName string = st.name
-output storageAccountUrl string = st.properties.primaryEndpoints.blob
-output storageContainerName string = stContainer.name
-output jobsIdentityClientId string = jobsIdentity.properties.clientId
-output jobsIdentityPrincipalId string = jobsIdentity.properties.principalId
-output jobsIdentityResourceId string = jobsIdentity.id
-output searchAdminIdentityClientId string = searchAdminIdentity.properties.clientId
-output searchAdminIdentityPrincipalId string = searchAdminIdentity.properties.principalId
-output searchAdminIdentityResourceId string = searchAdminIdentity.id
-output workloadIdentityClientId string = workloadIdentity.properties.clientId
-output workloadIdentityPrincipalId string = workloadIdentity.properties.principalId
-output workloadIdentityResourceId string = workloadIdentity.id
+output foundryEndpoint string = core.outputs.foundryEndpoint
+output foundryId string = core.outputs.foundryId
+output foundryName string = core.outputs.foundryName
+output openAiApiVersion string = core.outputs.openAiApiVersion
+output openAiChatCapacity int = core.outputs.openAiChatCapacity
+output openAiChatDeploymentName string = core.outputs.openAiChatDeploymentName
+output openAiChatModelName string = core.outputs.openAiChatModelName
+output openAiChatModelVersion string = core.outputs.openAiChatModelVersion
+output openAiChatSkuName string = core.outputs.openAiChatSkuName
+output openAiEndpoint string = core.outputs.openAiEndpoint
+output openAiId string = core.outputs.openAiId
+output openAiName string = core.outputs.openAiName
+output postgresDatabaseName string = postgres.outputs.postgresDatabaseName
+output postgresHost string = postgres.outputs.postgresHost
+output postgresServerId string = postgres.outputs.postgresServerId
+output postgresServerName string = postgres.outputs.postgresServerName
+output postgresUser string = postgres.outputs.postgresUser
+output searchEndpoint string = core.outputs.searchEndpoint
+output searchIndexName string = core.outputs.searchIndexName
+output searchName string = core.outputs.searchName
+output searchServiceId string = core.outputs.searchServiceId
+output storageAccountId string = core.outputs.storageAccountId
+output storageAccountName string = core.outputs.storageAccountName
+output storageAccountUrl string = core.outputs.storageAccountUrl
+output storageContainerName string = core.outputs.storageContainerName
+output jobsIdentityClientId string = identities.outputs.jobsIdentityClientId
+output jobsIdentityPrincipalId string = identities.outputs.jobsIdentityPrincipalId
+output jobsIdentityResourceId string = identities.outputs.jobsIdentityResourceId
+output searchAdminIdentityClientId string = identities.outputs.searchAdminIdentityClientId
+output searchAdminIdentityPrincipalId string = identities.outputs.searchAdminIdentityPrincipalId
+output searchAdminIdentityResourceId string = identities.outputs.searchAdminIdentityResourceId
+output workloadIdentityClientId string = identities.outputs.workloadIdentityClientId
+output workloadIdentityPrincipalId string = identities.outputs.workloadIdentityPrincipalId
+output workloadIdentityResourceId string = identities.outputs.workloadIdentityResourceId
 output keyVaultDiagnosticsId string = keyVaultDiagnostics.outputs.diagnosticSettingId
 output day8AlertsDeployment string = day8Alerts.name

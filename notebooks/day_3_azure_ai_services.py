@@ -35,7 +35,7 @@ def _title(mo):
     > **WAF Pillars covered:** Performance Efficiency · Reliability
     > **Estimated time:** 2.5 hours
     > **Primary source:** `docs/curriculum/trainee/DAY_03_TRAINEE.md`
-    > **Canonical run path:** `scripts/run_day3_case.py`
+    > **CLI rebuild path after notebook review:** `scripts/run_day3_case.py`
     > **Expected artifact:** `build/day3/golden_thread_day3.json`
     > **Prerequisite:** Day 2 artifact strongly preferred. Fixture fallback is valid for practice, not for lineage-complete mastery.
 
@@ -95,7 +95,7 @@ def _lab_contract(mo):
     resulting run should be treated as a fallback rehearsal rather than a
     lineage-complete progression through the curriculum.
 
-    Canonical command:
+    Rebuild command after the notebook walkthrough:
 
     ```bash
     uv run python scripts/run_day3_case.py --retrieval-mode fixture
@@ -103,6 +103,208 @@ def _lab_contract(mo):
     """
         ),
         kind="info",
+    )
+    return
+
+
+@app.cell
+def _setup_header(mo):
+    mo.md("""
+    ## Before You Start
+    """)
+    return
+
+
+@app.cell
+def _setup_body(mo):
+    mo.vstack(
+        [
+            mo.callout(
+                mo.md(
+                    """
+            **What Day 3 is actually doing**
+
+            This notebook is about the **retrieval and authority boundary**, not about provisioning an entire
+            application stack from scratch. In practice:
+
+            - Day 0 usually provisions the shared Azure resources in `infra/core.bicep` or `infra/full.bicep`
+            - Day 3 adds a **dedicated search index and Day 3 document ingestion** only if you choose the live Azure path
+            - The local `fixture` and `pgvector_fixture` modes do **not** require you to create Azure resources
+            - `scripts/run_day3_case.py` is a reproducibility wrapper around the same retrieval and authority logic you should inspect in this notebook first
+            """
+                ),
+                kind="info",
+            ),
+            mo.callout(
+                mo.md(
+                    """
+            **Agent-era working mode**
+
+            - Focus on the boundary between retrieval relevance and business authority
+            - Treat the Python snippets in this notebook as reference patterns to review, not long blocks to transcribe
+            - If an agent drafts retrieval code, your job is to verify the auth pattern, the source-authority policy, and the artifact evidence it produces
+            - Use the workflow output and citations to judge correctness, not whether the code "looks smart"
+            """
+                ),
+                kind="warn",
+            ),
+            mo.md(
+                """
+            ### Resource and Folder Map
+
+            | Item | Why it matters on Day 3 | Where it lives | Create now? |
+            |---|---|---|---|
+            | Azure AI Search service | Needed only for `azure_search_live` retrieval | `infra/core.bicep` or `infra/full.bicep` | Usually already provisioned in Day 0 |
+            | Blob Storage account + container | Optional staging path for uploading Day 3 docs before indexing | `infra/core.bicep` or `infra/full.bicep` | Only if you want blob-backed ingestion |
+            | Day 3 search index | Dedicated index for Day 3 unstructured evidence | Created by `scripts/ensure_day3_search_index.py` | Yes, but only for `azure_search_live` |
+            | Unstructured Day 3 documents | Markdown evidence used for retrieval | `data/day3/unstructured/` | Already in the repo |
+            | Structured vendor and PO records | System-of-record data used in authority checks | `data/day3/structured/` | Already in the repo |
+            | Day 2 input artifact | Preferred upstream workflow input | `build/day2/golden_thread_day2.json` | Produced earlier by Day 2 |
+            | Day 3 fallback input | Safe local practice input when Day 2 is missing | `fixtures/golden_thread/day3_invoice.json` | Already in the repo |
+            | Day 3 workflow code | Retrieval, ranking, typed handoffs, evaluation | `src/aegisap/day3/` | Already in the repo |
+            | Day 3 generated artifact | Output handed to Day 4 | `build/day3/golden_thread_day3.json` | Created when you run the workflow |
+
+            ### Recommended Setup Sequence
+
+            1. Start with `fixture` mode if your goal is understanding the workflow and authority ranking.
+            2. Use `pgvector_fixture` if you want a local stand-in for a vector-backed retriever without Azure dependencies.
+            3. Use `azure_search_live` only after the Azure Search service already exists and the Day 3 index has been prepared.
+
+            ### Live Azure Search Path
+
+            If you choose `azure_search_live`, the minimum Day 3 setup is:
+
+            ```bash
+            uv run python scripts/ensure_day3_search_index.py \
+              --endpoint "$AZURE_SEARCH_ENDPOINT" \
+              --index-name "$AZURE_SEARCH_DAY3_INDEX"
+
+            uv run python scripts/ingest_day3_search_docs.py \
+              --endpoint "$AZURE_SEARCH_ENDPOINT" \
+              --index-name "$AZURE_SEARCH_DAY3_INDEX"
+
+            uv run python scripts/verify_day3_live_retrieval.py \
+              --endpoint "$AZURE_SEARCH_ENDPOINT" \
+              --index-name "$AZURE_SEARCH_DAY3_INDEX"
+            ```
+
+            Optional blob-backed staging uses:
+
+            - `scripts/upload_day3_fixtures_to_blob.py`
+            - `AZURE_STORAGE_ACCOUNT_URL`
+            - `AZURE_STORAGE_CONTAINER`
+
+            If your notebook infrastructure outputs the container name as `AZURE_STORAGE_CONTAINER_NAME`,
+            map that value into `AZURE_STORAGE_CONTAINER` before running the Day 3 blob helper scripts.
+
+            ### Where to look if something feels "missing"
+
+            - `infra/`: Azure resources and environment outputs
+            - `scripts/`: setup and verification commands for Day 3
+            - `data/day3/`: the evidence corpus used by retrieval and authority checks
+            - `src/aegisap/day3/`: the actual workflow logic
+            - `docs/DAY_03_MULTI_AGENT_RETRIEVAL.md`: the command-oriented Day 3 live setup note
+            """
+            ),
+        ]
+    )
+    return
+
+
+@app.cell
+def _three_surface_linkage(mo):
+    from _shared.lab_guide import render_surface_linkage
+
+    render_surface_linkage(
+        mo,
+        portal_guide="docs/curriculum/portal/DAY_03_PORTAL.md",
+        portal_activity="Open Azure AI Search in the portal, inspect or prepare the Day 3 index, and confirm the IAM split between query-only access and indexing authority before you trust retrieval output.",
+        notebook_activity="Use the setup map, Azure Mastery Loop, retrieval walkthrough, and authority-ranking sections to compare raw search relevance with the local authority policy that ultimately decides what evidence is trustworthy.",
+        automation_steps=[
+            "`uv run python scripts/ensure_day3_search_index.py --endpoint \"$AZURE_SEARCH_ENDPOINT\" --index-name \"$AZURE_SEARCH_DAY3_INDEX\"` recreates the index you first inspected manually.",
+            "`uv run python scripts/ingest_day3_search_docs.py --endpoint \"$AZURE_SEARCH_ENDPOINT\" --index-name \"$AZURE_SEARCH_DAY3_INDEX\"` automates the evidence load after you already understand the schema.",
+            "`uv run python scripts/run_day3_case.py --retrieval-mode azure_search_live` then proves the notebook and portal story against the canonical workflow path.",
+        ],
+        evidence_checks=[
+            "The portal index schema, semantic settings, and IAM model should match the assumptions made in the notebook retrieval logic.",
+            "`build/day3/golden_thread_day3.json` should cite evidence that actually exists in the live or fixture retrieval surface you inspected.",
+            "If stale or lower-authority content outranks the system of record, stop and reconcile the portal state, notebook reasoning, and automation output.",
+        ],
+    )
+    return
+
+
+@app.cell
+def _azure_mastery_guide(mo):
+    from _shared.lab_guide import render_azure_mastery_guide
+
+    render_azure_mastery_guide(
+        mo,
+        focus="Day 3 Azure fluency means you can inspect the Day 3 search index in Azure AI Search, prepare it from the CLI, recognise the keyless `SearchClient` shape in code, and explain why retrieval relevance still needs local authority checks.",
+        portal_tasks="""
+    - Open the Azure AI Search service behind `AZURE_SEARCH_ENDPOINT`, then inspect **Indexes** and confirm `AZURE_SEARCH_DAY3_INDEX` exists.
+    - In the index schema, look for Day 3 fields such as `authority_tier`, `vendor_id`, `bank_account_last4`, and the semantic configuration if you enabled semantic ranking.
+    - Use **Search explorer** to query `Acme bank change 4421` and confirm the stale onboarding email appears as context, not as the final business truth.
+    - Open **Access control (IAM)** and verify the calling identity has `Search Index Data Reader` for query-only access; use contributor roles only for indexing or bootstrap paths.
+    - If you use blob-backed ingestion, inspect the storage container and confirm the `day3/unstructured/` content is present before indexing.
+    """,
+        cli_verification="""
+    **Bootstrap the Day 3 index and ingest the evidence corpus**
+
+    ```bash
+    uv run python scripts/ensure_day3_search_index.py \
+      --endpoint "$AZURE_SEARCH_ENDPOINT" \
+      --index-name "$AZURE_SEARCH_DAY3_INDEX"
+
+    uv run python scripts/ingest_day3_search_docs.py \
+      --endpoint "$AZURE_SEARCH_ENDPOINT" \
+      --index-name "$AZURE_SEARCH_DAY3_INDEX"
+    ```
+
+    **Verify the live retrieval path and then run the canonical Day 3 case**
+
+    ```bash
+    uv run python scripts/verify_day3_live_retrieval.py \
+      --endpoint "$AZURE_SEARCH_ENDPOINT" \
+      --index-name "$AZURE_SEARCH_DAY3_INDEX"
+
+    uv run python scripts/run_day3_case.py --retrieval-mode azure_search_live
+    ```
+
+    **Optional blob-backed ingestion path**
+
+    ```bash
+    uv run python scripts/ingest_day3_search_docs.py \
+      --source blob \
+      --endpoint "$AZURE_SEARCH_ENDPOINT" \
+      --index-name "$AZURE_SEARCH_DAY3_INDEX" \
+      --account-url "$AZURE_STORAGE_ACCOUNT_URL" \
+      --container-name "$AZURE_STORAGE_CONTAINER"
+    ```
+    """,
+        sdk_snippet="""
+    Use the SDK to recognise the keyless query boundary. The app authenticates with `DefaultAzureCredential`; Azure AI Search returns candidates, not business truth.
+
+    ```python
+    from azure.identity import DefaultAzureCredential
+    from azure.search.documents import SearchClient
+    import os
+
+    client = SearchClient(
+    endpoint=os.environ["AZURE_SEARCH_ENDPOINT"],
+    index_name=os.environ["AZURE_SEARCH_DAY3_INDEX"],
+    credential=DefaultAzureCredential(),
+    )
+
+    hits = list(client.search("Acme bank change 4421", top=3))
+    ```
+    """,
+        proof_in_azure="""
+    - `uv run python scripts/verify_day3_live_retrieval.py` prints a `PASS` result against the live Day 3 index.
+    - Search Explorer returns Day 3 documents and the index document count is non-zero.
+    - `build/day3/golden_thread_day3.json` exists and the decision still cites the vendor master record as authoritative while preserving the stale email as lower-authority history.
+    - Fixture and `pgvector_fixture` runs are valid learning paths, but only `azure_search_live` proves the Azure Search surface works end to end.
+    """,
     )
     return
 
@@ -117,15 +319,15 @@ def _load_inputs(Path, json, mo):
 
     invoice_data = None
     invoice_source = ""
-    payload = None
+    _day2_payload = None
 
     if day2_path.exists():
-        payload = json.loads(day2_path.read_text(encoding="utf-8"))
-        workflow_state = payload.get("workflow_state", payload)
-        canonical_invoice = workflow_state.get("invoice", {})
+        _day2_payload = json.loads(day2_path.read_text(encoding="utf-8"))
+        _workflow_state = _day2_payload.get("workflow_state", _day2_payload)
+        _canonical_invoice = _workflow_state.get("invoice", {})
         vendor_rows = json.loads(vendor_master_path.read_text(encoding="utf-8"))
 
-        supplier_name = canonical_invoice.get("supplier_name") or workflow_state.get("vendor", {}).get(
+        supplier_name = _canonical_invoice.get("supplier_name") or _workflow_state.get("vendor", {}).get(
             "vendor_name"
         )
         vendor_row = next(
@@ -137,16 +339,16 @@ def _load_inputs(Path, json, mo):
             {},
         )
 
-        invoice_number = canonical_invoice.get("invoice_number") or workflow_state.get("invoice_id") or "INV-UNKNOWN"
+        invoice_number = _canonical_invoice.get("invoice_number") or _workflow_state.get("invoice_id") or "INV-UNKNOWN"
         invoice_data = {
             "case_id": f"case_{str(invoice_number).lower().replace('-', '_')}",
             "invoice_id": invoice_number,
-            "invoice_date": canonical_invoice.get("invoice_date"),
+            "invoice_date": _canonical_invoice.get("invoice_date"),
             "vendor_id": vendor_row.get("vendor_id") or "VEND-UNKNOWN",
             "vendor_name": supplier_name or "Unknown Vendor",
-            "po_number": canonical_invoice.get("po_reference") or "PO-9001",
-            "amount": float(canonical_invoice.get("gross_amount") or 0.0),
-            "currency": canonical_invoice.get("currency") or "GBP",
+            "po_number": _canonical_invoice.get("po_reference") or "PO-9001",
+            "amount": float(_canonical_invoice.get("gross_amount") or 0.0),
+            "currency": _canonical_invoice.get("currency") or "GBP",
             "bank_account_last4": vendor_row.get("bank_account_last4") or "",
         }
         invoice_source = "Loaded from `build/day2/golden_thread_day2.json`."
@@ -194,7 +396,7 @@ def _load_inputs(Path, json, mo):
             ),
         ]
     )
-    return invoice_data, payload
+    return (invoice_data,)
 
 
 @app.cell
@@ -460,7 +662,7 @@ def _authority_sim_output(
     policy_score,
     stale_email_score,
 ):
-    from aegisap.day3.export import evidence_to_table
+    from aegisap.day3.export import evidence_to_table as _evidence_to_table
     from aegisap.day3.retrieval.authority_policy import load_authority_policy
     from aegisap.day3.retrieval.azure_ai_search_adapter import evidence_item_from_markdown
     from aegisap.day3.retrieval.interfaces import parse_front_matter_markdown
@@ -503,16 +705,16 @@ def _authority_sim_output(
         recency_mode="mutable_fact",
     )
 
-    rows = evidence_to_table(ranked)
-    winner = rows[0]
+    _ranked_rows = _evidence_to_table(ranked)
+    _winner = _ranked_rows[0]
 
     mo.vstack(
         [
-            mo.ui.table(rows, selection=None),
+            mo.ui.table(_ranked_rows, selection=None),
             mo.callout(
                 mo.md(
                     f"""
-                **Top-ranked evidence:** `{winner["evidence_id"]}`
+                **Top-ranked evidence:** `{_winner["evidence_id"]}`
 
                 This is the behavior Day 3 is designed to enforce: even when the stale email
                 retrieves strongly, the current authoritative vendor record should still win.
@@ -542,6 +744,43 @@ def _workflow_mode(mo):
     )
     retrieval_mode
     return (retrieval_mode,)
+
+
+@app.cell
+def _workflow_mode_help(mo, retrieval_mode):
+    _messages = {
+        "fixture": (
+            "This mode is fully local. It uses the Day 3 files already checked into the repo, "
+            "so you do not need to create Azure resources before running the workflow."
+        ),
+        "pgvector_fixture": (
+            "This mode is also local-only. It acts like a pgvector-style retriever for training purposes "
+            "without requiring Azure AI Search or PostgreSQL provisioning."
+        ),
+        "azure_search_live": (
+            "This mode calls your live Azure AI Search service. Before running it, make sure "
+            "`AZURE_SEARCH_ENDPOINT` and `AZURE_SEARCH_DAY3_INDEX` are set, then prepare and verify "
+            "the Day 3 index with the helper scripts in `scripts/`."
+        ),
+    }
+    _kinds = {
+        "fixture": "info",
+        "pgvector_fixture": "info",
+        "azure_search_live": "warn",
+    }
+    _live_commands = """
+    ```bash
+    uv run python scripts/ensure_day3_search_index.py --endpoint "$AZURE_SEARCH_ENDPOINT" --index-name "$AZURE_SEARCH_DAY3_INDEX"
+    uv run python scripts/ingest_day3_search_docs.py --endpoint "$AZURE_SEARCH_ENDPOINT" --index-name "$AZURE_SEARCH_DAY3_INDEX"
+    uv run python scripts/verify_day3_live_retrieval.py --endpoint "$AZURE_SEARCH_ENDPOINT" --index-name "$AZURE_SEARCH_DAY3_INDEX"
+    ```
+    """
+    _selected_mode = retrieval_mode.value
+    _body = _messages[_selected_mode]
+    if _selected_mode == "azure_search_live":
+        _body = f"{_body}\n\n{_live_commands}"
+    mo.callout(mo.md(_body), kind=_kinds[_selected_mode])
+    return
 
 
 @app.cell
@@ -577,14 +816,14 @@ def _workflow_run(invoice_data, mo, retrieval_mode, time):
             kind="danger",
         )
     else:
-        decision = payload["workflow_state"]["agent_findings"]["decision"]
+        _decision = payload["workflow_state"]["agent_findings"]["decision"]
         mo.vstack(
             [
                 mo.hstack(
                     [
                         mo.stat(label="Latency", value=f"{elapsed_ms} ms"),
-                        mo.stat(label="Recommendation", value=decision["recommendation"]),
-                        mo.stat(label="Next step", value=decision["next_step"]),
+                        mo.stat(label="Recommendation", value=_decision["recommendation"]),
+                        mo.stat(label="Next step", value=_decision["next_step"]),
                     ]
                 ),
                 mo.callout(
@@ -600,20 +839,20 @@ def _workflow_run(invoice_data, mo, retrieval_mode, time):
 
 @app.cell
 def _evidence_view(mo, payload):
-    from aegisap.day3.export import evidence_to_table
+    from aegisap.day3.export import evidence_to_table as _evidence_to_table
 
     mo.stop(payload is None, mo.md("No workflow payload to display."))
 
-    all_items = []
-    retrieval_context = payload["workflow_state"]["retrieval_context"]
+    _all_items = []
+    _retrieval_context = payload["workflow_state"]["retrieval_context"]
     for bucket_name in ("vendor", "policy", "po"):
-        all_items.extend(retrieval_context.get(bucket_name, []))
+        _all_items.extend(_retrieval_context.get(bucket_name, []))
 
-    rows = evidence_to_table(all_items)
+    _evidence_rows = _evidence_to_table(_all_items)
     mo.vstack(
         [
             mo.md("### Ranked Evidence"),
-            mo.ui.table(rows, selection=None),
+            mo.ui.table(_evidence_rows, selection=None),
         ]
     )
     return
@@ -623,13 +862,13 @@ def _evidence_view(mo, payload):
 def _findings_view(mo, payload):
     mo.stop(payload is None, mo.md("No workflow payload to display."))
 
-    workflow_state = payload["workflow_state"]
+    _workflow_state = payload["workflow_state"]
     mo.vstack(
         [
             mo.md("### Typed Specialist Findings"),
-            mo.tree(workflow_state["agent_findings"]),
+            mo.tree(_workflow_state["agent_findings"]),
             mo.md("### Evaluation Scores"),
-            mo.tree(workflow_state["eval_scores"]),
+            mo.tree(_workflow_state["eval_scores"]),
         ]
     )
     return
@@ -647,9 +886,9 @@ def _handoff_header(mo):
 def _handoff_body(mo, payload):
     mo.stop(payload is None, mo.md("Run the workflow first to inspect handoff evidence."))
 
-    decision = payload["workflow_state"]["agent_findings"]["decision"]
-    evidence_ids = decision.get("evidence_ids", [])
-    notes = decision.get("policy_notes", [])
+    _decision = payload["workflow_state"]["agent_findings"]["decision"]
+    evidence_ids = _decision.get("evidence_ids", [])
+    notes = _decision.get("policy_notes", [])
 
     mo.callout(
         mo.md(
@@ -754,8 +993,8 @@ def _exercise_2(mo):
                 [
                     mo.md(
                         """
-                **Task:** Write the least-privilege Python code to query Azure AI Search for Day 3.
-                Include the correct auth pattern and the RBAC role required.
+                **Task:** Review the least-privilege Python pattern for querying Azure AI Search on Day 3.
+                Identify the correct auth pattern and the RBAC role required.
                 """
                     ),
                     mo.accordion(

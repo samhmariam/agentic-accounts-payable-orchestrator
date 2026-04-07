@@ -79,34 +79,115 @@ def _full_day_agenda(mo):
     )
     return
 
-
-# ---------------------------------------------------------------------------
-# Lab overview
-# ---------------------------------------------------------------------------
 @app.cell
-def _lab_overview(mo):
-    from _shared.lab_guide import render_lab_overview
-    render_lab_overview(
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
         mo,
-        prerequisites=[
-            "Days 1–9 notebooks run to completion",
-            "build/day5/golden_thread_day5_resumed.json present",
-            "build/day6/golden_thread_day6.json present",
-            "build/day8/regression_baseline.json present",
-            "build/day9/routing_report.json present",
-            "evals/malicious_cases.jsonl present",
+        purpose='Decide whether AegisAP is safe to promote by turning earlier artifacts into acceptance-gate evidence and operator-facing release materials.',
+        prerequisites=['Days 1-9 complete.', '`build/day5/golden_thread_day5_resumed.json`, `build/day6/golden_thread_day6.json`, `build/day8/regression_baseline.json`, and `build/day9/routing_report.json` are present.', '`evals/malicious_cases.jsonl` is present.'],
+        resources=['`notebooks/day_10_production_operations.py`', '`build/day10/` for `release_envelope.json`, `checkpoint_gate_extension.json`, and `design_defense.json`', '`scripts/check_all_gates.py` for CLI follow-up', '`docs/curriculum/artifacts/day10/` for CAB and executive outputs'],
+        setup_sequence=['Verify the upstream artifacts exist before assuming Day 10 cells will pass.', 'Run the early lineage and evidence-map cells so you can see which prior day feeds which gate.', 'Keep the notebook as the primary place to understand the release decision; use the CLI gate runner only as follow-up validation.'],
+        run_steps=['Work through the six gate explanations and the release-evidence sections in order.', 'Use the notebook tables to map each gate to its upstream artifact and operator meaning.', 'Run the artifact-writing cells that produce `build/day10/release_envelope.json` and `build/day10/design_defense.json`.', 'Finish with the Day 10 checklist and artifact pack references.'],
+        output_interpretation=['The main completion signal is `build/day10/release_envelope.json` plus the checkpoint extension artifact.', 'Interpret outputs as release evidence, not just test results: each gate answers a production question.', 'A good Day 10 result tells you whether to halt, release, or escalate, and why.'],
+        troubleshooting=['If a gate fails, first check whether its upstream artifact exists and is current.', 'If the release envelope looks incomplete, rerun the artifact cell after the earlier gate-summary cells have executed.', 'If you feel lost in gate names, stay with the release-evidence map before using the CLI runner.'],
+        outside_references=['Long-form theory: `docs/curriculum/trainee/DAY_10_TRAINEE.md`', 'Trainer notes: `docs/curriculum/trainer/DAY_10_TRAINER.md`', 'Reusable references: `docs/curriculum/artifacts/day10/`'],
+    )
+    return
+
+
+@app.cell
+def _three_surface_linkage(mo):
+    from _shared.lab_guide import render_surface_linkage
+
+    render_surface_linkage(
+        mo,
+        portal_guide="docs/curriculum/portal/DAY_10_PORTAL.md",
+        portal_activity="Inspect the live Container App revision, traffic state, ingress, and health signals in Azure before you trust the release envelope or gate runner.",
+        notebook_activity="Use the gate explanations, release-evidence map, release-authority framing, and envelope sections to interpret what the Azure release state actually means operationally.",
+        automation_steps=[
+            "`uv run python scripts/check_all_gates.py --out build/day10/release_envelope.json` formalizes the release decision after you have already inspected the live runtime.",
+            "`uv run python -m pytest tests/day10 tests/api/test_app.py -q` adds regression proof for the same release judgment.",
         ],
-        required_inputs=["All prior build/ artifacts"],
-        required_env_vars=["DAILY_BUDGET_USD (optional, default 5.0)"],
-        expected_artifact="build/day10/release_envelope.json",
-        pass_criteria=[
-            "All six acceptance gates produce a GateResult object",
-            "release_envelope.json written with all_passed key",
-            "checkpoint_gate_extension.json written",
+        evidence_checks=[
+            "The portal revision and traffic picture should match the release story told in the notebook.",
+            "`build/day10/release_envelope.json` should encode the same go, hold, or rollback judgment you would make from Azure evidence.",
+            "If the gate artifact and the live Azure state disagree, treat the disagreement as a blocker rather than trusting the generated report.",
         ],
-        implementation_exercise=(
-            "Exercise 4: Design the rollback runbook and WAF gap analysis."
-        ),
+    )
+    return
+
+
+@app.cell
+def _azure_mastery_guide(mo):
+    from _shared.lab_guide import render_azure_mastery_guide
+
+    render_azure_mastery_guide(
+        mo,
+        focus="Day 10 mastery means you can inspect release state in Azure Container Apps, verify the gate decision from the command line, recognise the minimal code path for health and traffic control, and prove that a green release envelope matches the live runtime.",
+        portal_tasks="""
+- Open the **Container App** and inspect **Revisions** so you can see which revision is live, which ones are inactive, and whether the traffic picture matches the release story.
+- Inspect **Ingress** and the app URL so you can connect gate outputs to the actual revision receiving traffic.
+- Open **Application Insights** or the linked monitoring surface and confirm the candidate revision is healthy before treating the release envelope as trustworthy.
+- If a release is halted or rolled back, use the portal to confirm the rollback is a real traffic change, not just a local note in the notebook.
+""",
+        cli_verification="""
+**Inspect the Container App from Azure CLI**
+
+```bash
+export AZURE_CONTAINER_APP_NAME=ca-aegisap-staging
+
+az containerapp show \
+  --name "$AZURE_CONTAINER_APP_NAME" \
+  --resource-group "$AZURE_RESOURCE_GROUP" \
+  --query "{latestRevision:properties.latestRevisionName,provisioningState:properties.provisioningState,fqdn:properties.configuration.ingress.fqdn}"
+```
+
+**List revisions and compare them to the release decision**
+
+```bash
+az containerapp revision list \
+  --name "$AZURE_CONTAINER_APP_NAME" \
+  --resource-group "$AZURE_RESOURCE_GROUP" \
+  -o table
+```
+
+**Run the shared gate runner and write the release envelope**
+
+```bash
+uv run python scripts/check_all_gates.py \
+  --out build/day10/release_envelope.json
+```
+
+**Rollback traffic to a known-good revision if needed**
+
+```bash
+az containerapp ingress traffic set \
+  --name "$AZURE_CONTAINER_APP_NAME" \
+  --resource-group "$AZURE_RESOURCE_GROUP" \
+  --revision-weight "<stable-revision>=100"
+```
+""",
+        sdk_snippet="""
+The repo's `AcaClient` shows the minimum code needed to inspect health or automate traffic changes without storing credentials.
+
+```python
+from aegisap.deploy.aca_client import AcaClient
+
+client = AcaClient.from_env()
+health = client.health_check()
+
+if health.is_ready:
+    print(health.latest_revision, health.status_code)
+```
+""",
+        proof_in_azure="""
+- `build/day10/release_envelope.json` exists and the gate statuses line up with the upstream artifacts you expect.
+- The active revision and traffic split shown in Azure match the promote, halt, or rollback decision you are defending.
+- The health endpoint and monitoring view agree that the live revision is actually healthy.
+- Real production readiness means the envelope, the portal state, and the operator narrative all tell the same story.
+""",
     )
     return
 
@@ -974,7 +1055,7 @@ A hotfix will take 4 hours to develop and test. Leadership has approved an immed
 
 **Questions:**
 
-1. Write the exact `az containerapp` commands to execute the rollback (assume the stable
+1. Identify the exact `az containerapp` commands to execute the rollback (assume the stable
    revision suffix is `aegisap-api--rev-2024-stable`).
 2. Which acceptance gate should have caught this before promotion? What would you change
    about the gate or the eval suite to prevent recurrence?

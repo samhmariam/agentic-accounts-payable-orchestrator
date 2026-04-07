@@ -77,7 +77,7 @@ def _day0_chat_deployment_name() -> str:
 def build_default_routing_policy() -> RoutingPolicy:
     config = load_security_config()
     fallback_chat_deployment = _day0_chat_deployment_name()
-    light = config.light_model_deployment or fallback_chat_deployment or "gpt-4.1-mini"
+    light = config.light_model_deployment or fallback_chat_deployment or "gpt-5-nano"
     strong = config.strong_model_deployment or fallback_chat_deployment or "gpt-4.1"
     return RoutingPolicy(
         light_model_deployment=light,

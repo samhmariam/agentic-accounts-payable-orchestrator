@@ -15,25 +15,25 @@ param searchName string
 @description('Starter search index name for Day 0')
 param searchIndexName string = 'documents'
 
-@description('Azure OpenAI account name')
+@description('Microsoft Foundry resource name')
 param openAiName string
 
-@description('Azure OpenAI data-plane API version exported into the local environment')
+@description('OpenAI-compatible API version exported into the local environment')
 param openAiApiVersion string = '2024-08-01-preview'
 
-@description('Azure OpenAI chat deployment name exported into the local environment')
+@description('OpenAI-compatible chat deployment name exported into the local environment')
 param openAiChatDeploymentName string
 
-@description('Optional Azure OpenAI chat model name for automatic deployment creation')
+@description('Optional OpenAI-compatible chat model name for automatic deployment creation')
 param openAiChatModelName string = ''
 
-@description('Optional Azure OpenAI chat model version for automatic deployment creation')
+@description('Optional OpenAI-compatible chat model version for automatic deployment creation')
 param openAiChatModelVersion string = ''
 
-@description('Optional Azure OpenAI deployment SKU name')
+@description('Optional chat deployment SKU name')
 param openAiChatSkuName string = 'Standard'
 
-@description('Optional Azure OpenAI deployment capacity')
+@description('Optional chat deployment capacity')
 param openAiChatCapacity int = 0
 
 module core './core.bicep' = {
@@ -55,6 +55,9 @@ module core './core.bicep' = {
 }
 
 output location string = core.outputs.location
+output foundryEndpoint string = core.outputs.foundryEndpoint
+output foundryId string = core.outputs.foundryId
+output foundryName string = core.outputs.foundryName
 output openAiApiVersion string = core.outputs.openAiApiVersion
 output openAiChatCapacity int = core.outputs.openAiChatCapacity
 output openAiChatDeploymentName string = core.outputs.openAiChatDeploymentName

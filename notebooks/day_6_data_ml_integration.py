@@ -76,6 +76,23 @@ def _full_day_agenda(mo):
     )
     return
 
+@app.cell
+def _notebook_guide(mo):
+    from _shared.lab_guide import render_notebook_learning_context
+
+    render_notebook_learning_context(
+        mo,
+        purpose='Connect the workflow to governed data and ML systems while preserving source-of-truth boundaries.',
+        prerequisites=['Day 5 orchestration concepts complete.', 'Understand the earlier authority model from Days 2-5.', 'No live Azure data services are required to follow the notebook.'],
+        resources=['`notebooks/day_6_data_ml_integration.py`', '`docs/curriculum/artifacts/day06/` for data authority and conflict handling', '`build/day6/` for the audit artifact', 'Conceptual references to ADF, Cosmos DB, Redis, PostgreSQL checkpoints, and MLflow'],
+        setup_sequence=['Run the notebook locally and keep Day 5 state and durability in mind.', 'Treat each storage tier as a responsibility boundary, not just a technology choice.', 'Open the Day 6 artifact references only when you want the reusable template view.'],
+        run_steps=['Work through the data authority pyramid before the specific service sections.', 'Use the schema evolution and MLflow sections to understand how governance extends past raw storage.', 'Run the artifact-writing cell that produces `build/day6/data_integration_audit.json`.', 'Finish with the checklist so the authority tiers are clear before Day 7.'],
+        output_interpretation=['The main completion signal is `build/day6/data_integration_audit.json` with `gate_passed = true`.', 'Interpret the notebook outputs as evidence about who may write where, not just which service is faster.', 'A good Day 6 result makes Day 7 guardrails feel enforceable because the data boundaries are already explicit.'],
+        troubleshooting=['If the services start blurring together, return to the authority pyramid and ask which tier owns truth.', 'If MLflow feels separate from the rest of the day, treat it as governed evidence about model behaviour rather than a standalone tool.', 'If the artifact is missing, rerun the final Day 6 artifact cell.'],
+        outside_references=['Long-form theory: `docs/curriculum/trainee/DAY_06_TRAINEE.md` plus the Day 2 and Day 3 trainee readings already cited in the notebook', 'Trainer notes: `docs/curriculum/trainer/DAY_06_TRAINER.md`', 'Reusable references: `docs/curriculum/artifacts/day06/`'],
+    )
+    return
+
 
 # ---------------------------------------------------------------------------
 # Section 1 – Data Authority Pyramid
@@ -671,7 +688,7 @@ When `payment_hold = true`, ALL invoices from that vendor should be rejected unt
 
 **Task:**
 1. What does the new Cosmos DB document look like?
-2. Write the code change required in AegisAP's vendor lookup function.
+2. Sketch the code change required in AegisAP's vendor lookup function.
 3. What backfill pipeline do you need to run for existing vendors?
 4. Which team must approve this change before it reaches production and why?
             """),

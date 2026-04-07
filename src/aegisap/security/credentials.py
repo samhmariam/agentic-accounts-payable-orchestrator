@@ -9,7 +9,9 @@ from typing import Any
 from aegisap.security.config import load_security_config
 from aegisap.security.policy import validate_security_posture
 
-OPENAI_SCOPE = "https://cognitiveservices.azure.com/.default"
+# Foundry uses the ai.azure.com audience even when clients call the
+# OpenAI-compatible endpoint on *.openai.azure.com.
+FOUNDRY_INFERENCE_SCOPE = "https://ai.azure.com/.default"
 
 
 def _day0_state_candidates() -> list[Path]:
@@ -75,7 +77,7 @@ def get_openai_client():
     from azure.identity import get_bearer_token_provider
     from openai import AzureOpenAI
 
-    token_provider = get_bearer_token_provider(get_token_credential(), OPENAI_SCOPE)
+    token_provider = get_bearer_token_provider(get_token_credential(), FOUNDRY_INFERENCE_SCOPE)
     return AzureOpenAI(
         azure_endpoint=_required_env("AZURE_OPENAI_ENDPOINT"),
         azure_ad_token_provider=token_provider,

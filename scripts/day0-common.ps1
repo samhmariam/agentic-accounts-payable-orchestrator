@@ -66,14 +66,63 @@ function Convert-AzOutputToText {
     return (($lines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join [Environment]::NewLine).Trim()
 }
 
+function Invoke-AzCommand {
+    param(
+        [string[]]$Arguments
+    )
+
+    $stdoutFile = [IO.Path]::GetTempFileName()
+    $stderrFile = [IO.Path]::GetTempFileName()
+
+    try {
+        & az @Arguments --only-show-errors 1> $stdoutFile 2> $stderrFile
+        $exitCode = $LASTEXITCODE
+
+        $stdout = if (Test-Path -LiteralPath $stdoutFile) {
+            [IO.File]::ReadAllText($stdoutFile).Trim()
+        }
+        else {
+            ""
+        }
+
+        $stderr = if (Test-Path -LiteralPath $stderrFile) {
+            [IO.File]::ReadAllText($stderrFile).Trim()
+        }
+        else {
+            ""
+        }
+
+        return [PSCustomObject]@{
+            ExitCode = $exitCode
+            StdOut = $stdout
+            StdErr = $stderr
+        }
+    }
+    finally {
+        Remove-Item -LiteralPath $stdoutFile, $stderrFile -ErrorAction SilentlyContinue
+    }
+}
+
 function Invoke-AzText {
     param(
         [string[]]$Arguments
     )
 
-    $output = & az @Arguments --only-show-errors 2>&1
-    $text = Convert-AzOutputToText -Output $output
-    if ($LASTEXITCODE -ne 0) {
+    $result = Invoke-AzCommand -Arguments $Arguments
+    $text = if (-not [string]::IsNullOrWhiteSpace($result.StdOut)) {
+        $result.StdOut
+    }
+    elseif (-not [string]::IsNullOrWhiteSpace($result.StdErr)) {
+        $result.StdErr
+    }
+    else {
+        ""
+    }
+
+    if ($result.ExitCode -ne 0) {
+        if ([string]::IsNullOrWhiteSpace($text)) {
+            $text = "Azure CLI command failed with exit code $($result.ExitCode)."
+        }
         throw $text
     }
 
@@ -213,10 +262,10 @@ function Resolve-PythonCommand {
     throw "Python is required to bootstrap the Search index. Use the dev container or install Python 3.12 and the repo dependencies first."
 }
 
-function Ensure-OpenAiDeployment {
+function Ensure-FoundryChatDeployment {
     param(
         [string]$ResourceGroup,
-        [string]$OpenAiName,
+        [string]$FoundryName,
         [string]$DeploymentName,
         [string]$ModelName,
         [string]$ModelVersion,
@@ -224,27 +273,34 @@ function Ensure-OpenAiDeployment {
         [int]$Capacity
     )
 
-    $DeploymentName = Get-RequiredValue -Value $DeploymentName -Name "OpenAI chat deployment name"
+    $DeploymentName = Get-RequiredValue -Value $DeploymentName -Name "Foundry OpenAI-compatible chat deployment name"
 
-    $showOutput = & az cognitiveservices account deployment show `
-        --resource-group $ResourceGroup `
-        --name $OpenAiName `
-        --deployment-name $DeploymentName `
-        --only-show-errors `
-        -o json 2>&1
+    $showResult = Invoke-AzCommand -Arguments @(
+        "cognitiveservices", "account", "deployment", "show",
+        "--resource-group", $ResourceGroup,
+        "--name", $FoundryName,
+        "--deployment-name", $DeploymentName,
+        "-o", "json"
+    )
 
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "OpenAI deployment already present: $DeploymentName" -ForegroundColor DarkGray
+    if ($showResult.ExitCode -eq 0) {
+        Write-Host "Foundry chat deployment already present: $DeploymentName" -ForegroundColor DarkGray
         return
     }
 
-    $message = Convert-AzOutputToText -Output $showOutput
+    $message = if (-not [string]::IsNullOrWhiteSpace($showResult.StdErr)) {
+        $showResult.StdErr
+    }
+    else {
+        $showResult.StdOut
+    }
+
     if ($message -notmatch "not found|could not be found|cannot be found|DeploymentNotFound") {
         throw $message
     }
 
     if ([string]::IsNullOrWhiteSpace($ModelName) -or [string]::IsNullOrWhiteSpace($ModelVersion)) {
-        throw "OpenAI deployment '$DeploymentName' does not exist. Fill openAiChatModelName and openAiChatModelVersion in the parameter file or create the deployment manually."
+        throw "Foundry chat deployment '$DeploymentName' does not exist. Fill openAiChatModelName and openAiChatModelVersion in the parameter file or create the deployment manually."
     }
 
     if ($Capacity -le 0) {
@@ -253,11 +309,11 @@ function Ensure-OpenAiDeployment {
 
     $SkuName = if ([string]::IsNullOrWhiteSpace($SkuName)) { "Standard" } else { $SkuName }
 
-    Write-Host "Creating OpenAI deployment: $DeploymentName ($ModelName $ModelVersion)" -ForegroundColor Cyan
+    Write-Host "Creating Foundry OpenAI-compatible deployment: $DeploymentName ($ModelName $ModelVersion)" -ForegroundColor Cyan
     Invoke-AzJson -Arguments @(
         "cognitiveservices", "account", "deployment", "create",
         "--resource-group", $ResourceGroup,
-        "--name", $OpenAiName,
+        "--name", $FoundryName,
         "--deployment-name", $DeploymentName,
         "--model-format", "OpenAI",
         "--model-name", $ModelName,

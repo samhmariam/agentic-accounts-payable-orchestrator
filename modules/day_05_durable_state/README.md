@@ -33,6 +33,18 @@ If stale resume tokens are accepted, duplicate or misrouted side effects can hit
 - `uv run python -m pytest tests/day5/integration/test_resume_service.py tests/day5/integration/test_idempotent_recommendation_resume.py -q && uv run aegisap-lab artifact rebuild --day 05`
 - `uv run aegisap-lab audit-production --day 05 --strict`
 
+## Native Tooling Gate
+
+- Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+- Save raw proof to `build/day5/native_operator_evidence.json` before you patch production code.
+- Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
+
+## KQL Evidence
+
+Save `build/day5/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation.
+
 ## Chaos Gate
 
 - Failure signal: The durable workflow stalls or resumes unsafely after interruption, risking duplicate state transitions.
@@ -52,6 +64,8 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day05`
 - Verification Command: `uv run python -m pytest tests/day5/integration/test_resume_service.py tests/day5/integration/test_idempotent_recommendation_resume.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 05`
+- Native Evidence Artifact: `build/day5/native_operator_evidence.json`
+- KQL Evidence Artifact: `build/day5/kql_evidence.json`
 
 ## Automated Drill
 

@@ -63,8 +63,8 @@ PHASE1_GATE_MODES = {
 }
 
 INFRA_SURFACE_TYPES = {"infrastructure", "ci_cd"}
-KQL_EVIDENCE_DAYS = tuple(f"{day:02d}" for day in range(8, 15))
-RAW_SDK_NOTEBOOK_BAN_DAYS = tuple(f"{day:02d}" for day in range(7, 15))
+KQL_EVIDENCE_DAYS = tuple(f"{day:02d}" for day in range(5, 15))
+RAW_SDK_NOTEBOOK_BAN_DAYS = tuple(f"{day:02d}" for day in range(5, 15))
 
 
 def resolve_repo_root(repo_root: str | Path | None = None) -> Path:

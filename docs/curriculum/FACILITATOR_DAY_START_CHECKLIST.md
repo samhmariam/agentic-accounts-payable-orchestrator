@@ -30,6 +30,7 @@ az account show
 - `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`
 - the primary day doc
 - `docs/curriculum/TRAINER_OPERATIONS.md`
+- `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 - the prior day's handoff notes
 
 If you are teaching Day 0, also open `docs/curriculum/portal/DAY_00_PORTAL.md`.
@@ -53,7 +54,19 @@ Say these five things out loud before the lab begins:
 4. Which oral-defense prompts matter most today.
 5. Whether authoritative Azure evidence is expected today or preview mode is acceptable.
 
+## Native Tooling Audit Rule
+
+- From Day 05 onward, native operator evidence and KQL evidence are blocking daily outputs.
+- During investigation and evidence capture, learners may not use `aegisap-lab` helper commands or canned verification wrappers to discover the answer.
+- After both evidence files are complete, wrappers may be used again only for artifact rebuild, mastery, and reset flows.
+- Facilitators may randomly require a learner to clear recent terminal-history context, rerun one saved raw command or KQL query live, and explain the interpretation before mastery is accepted.
+
 ## High-Risk Day Add-Ons
+
+### Day 5-11
+
+- Confirm the room knows the Day 05 native-tooling policy is now in force: raw proof first, wrappers later.
+- Confirm learners know every Day 05-11 submission needs both `native_operator_evidence.json` and `kql_evidence.json`.
 
 ### Day 8
 
@@ -69,7 +82,7 @@ Say these five things out loud before the lab begins:
 
 - Confirm the difference between static proof and live posture proof is stated before learners run cells.
 - Confirm the room knows that public fallback is not an acceptable production shortcut.
-- Confirm learners know the native-tool gate bans helper CLI commands and requires `build/day12/native_operator_evidence.json`.
+- Confirm learners know the native-tool gate bans helper CLI commands, requires `build/day12/native_operator_evidence.json`, and includes a live rerun.
 
 ### Day 13
 
@@ -84,7 +97,7 @@ Say these five things out loud before the lab begins:
 
 ### Day 9
 
-- Confirm learners know Day 9 native evidence is advisory but must be replay-ready for the Day 10 CAB board.
+- Confirm learners know Day 9 native evidence is blocking and must be replay-ready for the Day 10 CAB board.
 - Confirm the room knows that raw KQL and raw Azure commands are expected during the native-tool section.
 
 ## First 15 Minutes Of The Session

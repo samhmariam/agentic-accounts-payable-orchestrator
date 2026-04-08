@@ -37,6 +37,14 @@ If runtime identity stays over-privileged, a single deployment drift can become 
 - `uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests/day8/test_security_and_context.py tests/day8/test_observability_contract.py -q && uv run aegisap-lab artifact rebuild --day 08`
 - `uv run aegisap-lab audit-production --day 08 --strict`
 
+## Native Tooling Gate
+
+- Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+- Save raw proof to `build/day8/native_operator_evidence.json` before you patch production code.
+- Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
+
 ## KQL Evidence
 
 Save `build/day8/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
@@ -61,6 +69,8 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day08`
 - Verification Command: `uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests/day8/test_security_and_context.py tests/day8/test_observability_contract.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 08`
+- Native Evidence Artifact: `build/day8/native_operator_evidence.json`
+- KQL Evidence Artifact: `build/day8/kql_evidence.json`
 
 ## Automated Drill
 

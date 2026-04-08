@@ -1,0 +1,116 @@
+{
+  "review_input": {
+    "case_id": "CASE-DAY6-SCHEMA-DRIFT",
+    "thread_id": "thread-day6-schema-drift",
+    "candidate_recommendation": {
+      "status": "recommendation_ready",
+      "requested_action": "route_to_controller_approval"
+    },
+    "reviewer_response": {
+      "schema_version": "day6-review-v2",
+      "decision": "approved_to_proceed",
+      "summary": "The reviewer output dropped required fields during an edge-case retry."
+    },
+    "evidence_ledger": [
+      {
+        "evidence_id": "case_summary:schema-drift",
+        "source_type": "case_summary",
+        "source_ref": "fixture.schema-drift",
+        "trust_tier": "derived",
+        "timestamp": "2026-04-08T00:00:00Z",
+        "extract": "A controller-routed invoice now carries an incomplete reviewer payload in the trace evidence.",
+        "payload_hash": "hash-schema-drift-summary",
+        "derived_claim_ids": [
+          "claim_invoice_identity",
+          "claim_threshold_route"
+        ]
+      },
+      {
+        "evidence_id": "task:reviewer_payload",
+        "source_type": "tool_artifact",
+        "source_ref": "reviewer_payload_preview",
+        "trust_tier": "derived",
+        "timestamp": "2026-04-08T00:00:00Z",
+        "extract": "Reviewer payload missing confidence and reason_codes after a degraded structured-output turn.",
+        "payload_hash": "hash-schema-drift-tool",
+        "derived_claim_ids": [
+          "claim_threshold_route"
+        ]
+      }
+    ],
+    "claim_ledger": [
+      {
+        "claim_id": "claim_invoice_identity",
+        "claim_type": "invoice_identity_verified",
+        "summary": "Invoice identity has been verified.",
+        "supporting_evidence_ids": [
+          "case_summary:schema-drift"
+        ],
+        "conflicting_evidence_ids": [],
+        "requires_authority": false,
+        "metadata": {}
+      },
+      {
+        "claim_id": "claim_threshold_route",
+        "claim_type": "threshold_approval_check",
+        "summary": "A valid controller approval route exists for this case.",
+        "supporting_evidence_ids": [
+          "task:reviewer_payload"
+        ],
+        "conflicting_evidence_ids": [],
+        "requires_authority": true,
+        "metadata": {
+          "approval_path_defined": true,
+          "required_approvals": [
+            "controller"
+          ]
+        }
+      }
+    ],
+    "policy_context": {
+      "policy_version": "policy_pack_v6",
+      "accepted_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "mandatory_checks": [
+        "invoice_identity_verified",
+        "approval_route_defined",
+        "action_within_system_authority",
+        "reviewer_schema_contract"
+      ],
+      "policy_references": [
+        {
+          "policy_id": "POL-SCHEMA-005",
+          "title": "Structured reviewer output must be complete before progression",
+          "description": "Malformed or incomplete reviewer payloads must escalate instead of being coerced."
+        }
+      ],
+      "control_plane_rules": [
+        "Do not auto-coerce malformed reviewer payloads into a production decision."
+      ]
+    },
+    "authority_context": {
+      "required_approvals": [
+        "controller"
+      ],
+      "registered_approval_channels": [
+        "erp_approval_record",
+        "controller_queue"
+      ],
+      "allowed_actions": [
+        "route_to_controller_approval",
+        "request_manual_review"
+      ],
+      "prohibited_actions": [
+        "execute_payment"
+      ]
+    },
+    "injection_flags": [],
+    "missing_requirements": [],
+    "conflict_flags": [],
+    "review_metadata": {
+      "fixture": "malformed_reviewer_output_case"
+    }
+  }
+}

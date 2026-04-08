@@ -25,6 +25,15 @@ def build_reflection_review(
             "Automated progression is unsafe because the case attempts to bypass policy "
             "or relies on missing authority."
         )
+    elif any(
+        check.status == "fail" and check.reason_code == "STRUCTURED_OUTPUT_DEGRADED"
+        for check in evidence_assessment.mandatory_checks
+    ):
+        recommended_outcome = "needs_human_review"
+        rationale = (
+            "The reviewer output no longer satisfies the structured contract, so automation "
+            "must escalate instead of coercing or guessing the missing fields."
+        )
     elif evidence_assessment.sufficiency == "conflicting":
         recommended_outcome = "needs_human_review"
         rationale = "Contradictory evidence must be resolved by a human reviewer."
@@ -47,4 +56,3 @@ def build_reflection_review(
         recommended_outcome=recommended_outcome,
         rationale=rationale,
     )
-

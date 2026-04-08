@@ -499,6 +499,13 @@ days:
     review_mode: standard
     required_review_roles:
     - facilitator
+  native_operator_evidence:
+    artifact_path: build/day5/native_operator_evidence.json
+    mode: blocking
+    review_stage: day05_closeout
+    live_demo_required: false
+    minimum_commands: 1
+    minimum_queries: 1
   customer_context: An approver reopened a paused invoice after a partial outage.
     The customer wants the workflow resumed without duplicate approvals, duplicate
     recommendations, or policy drift.
@@ -586,6 +593,10 @@ days:
   scaffold_level: reduced
   cost_of_failure: If stale resume tokens are accepted, duplicate or misrouted side
     effects can hit downstream finance systems and create expensive manual cleanup.
+  kql_evidence:
+    artifact_path: build/day5/kql_evidence.json
+    minimum_queries: 1
+    review_stage: day05_closeout
 - id: '06'
   title: Data Authority, Review Boundaries, and Conflict Refusal
   notebook_file: notebooks/day_6_data_ml_integration.py
@@ -631,9 +642,17 @@ days:
   review_contract:
     evaluator_profile: wave2-day06-review-boundary
     human_required: true
+  native_operator_evidence:
+    artifact_path: build/day6/native_operator_evidence.json
+    mode: blocking
+    review_stage: day06_closeout
+    live_demo_required: false
+    minimum_commands: 1
+    minimum_queries: 1
   customer_context: A reviewer found a conflict between ERP data and the extracted
-    invoice narrative. The customer expects the system to refuse unsafe blending and
-    document who owns the discrepancy.
+    invoice narrative, and the review model now returns schema-incomplete output on
+    edge cases. The customer expects the system to refuse or escalate unsafe blending
+    instead of normalising through the malformed response.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
@@ -699,10 +718,10 @@ days:
     - no_public_endpoints
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: The review path accepts conflicting authority instead of refusing
-      and escalating the dispute.
-    diagnostic_surface: Review notebook evidence, authority-boundary code, and refusal
-      instrumentation.
+    failure_signal: The review path accepts conflicting authority or schema-degraded
+      reviewer output instead of refusing or escalating the dispute.
+    diagnostic_surface: Review notebook evidence, malformed reviewer payload traces,
+      authority-boundary code, and refusal instrumentation.
     expected_recovery_artifact: build/day6/golden_thread_day6.json
     time_box_minutes: 25
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
@@ -724,6 +743,10 @@ days:
   scaffold_level: reduced
   cost_of_failure: If hostile review evidence is normalized incorrectly, unsafe approval
     claims can leak through the control boundary and poison later decisions.
+  kql_evidence:
+    artifact_path: build/day6/kql_evidence.json
+    minimum_queries: 1
+    review_stage: day06_closeout
 - id: '07'
   title: Evaluation, Guardrails, Structured Refusal, and Slice Governance
   notebook_file: notebooks/day_7_testing_eval_guardrails.py
@@ -779,6 +802,13 @@ days:
     review_mode: standard
     required_review_roles:
     - facilitator
+  native_operator_evidence:
+    artifact_path: build/day7/native_operator_evidence.json
+    mode: blocking
+    review_stage: day07_closeout
+    live_demo_required: false
+    minimum_commands: 1
+    minimum_queries: 1
   customer_context: The customer risk team wants evidence that prompt injection and
     PII leakage are rejected before anything lands in logs or audit evidence.
   persistent_constraints:
@@ -902,9 +932,30 @@ days:
       artifact.
     drift_layers:
     - application
+  - id: drill_12_shadow_reviewer_payload
+    default: false
+    mode: artifact
+    source_file: evals/failure_drills/drill_12_shadow_reviewer_payload.json
+    name: Shadow Drift - Reviewer Payload Fallback Leak
+    description: Rebuilds the Day 7 guardrail artifacts, then injects a downstream
+      redaction failure where a degraded review payload is leaking through a fallback
+      audit summary.
+    expected_signal: Guardrail evidence shows raw review payload fragments surfacing
+      in audit output even though the primary refusal path still looks online.
+    mutation: day07_shadow_reviewer_payload
+    shadow_origin_day: '06'
+    secondary_failure_signal: A fallback audit summary now carries raw review-payload
+      fragments tied to the same correlation trail.
+    drift_layers:
+    - application
+    - ci_cd
   scaffold_level: starter_only
   cost_of_failure: If sensitive content leaks into audit material, the customer faces
     privacy escalation, frozen releases, and possible regulator notification.
+  kql_evidence:
+    artifact_path: build/day7/kql_evidence.json
+    minimum_queries: 1
+    review_stage: day07_closeout
 - id: 08
   title: IaC, Identity Planes, and Secure Release Ownership
   notebook_file: notebooks/day_8_cicd_iac_deployment.py
@@ -953,6 +1004,13 @@ days:
   review_contract:
     evaluator_profile: wave3-day08-identity-drift
     human_required: true
+  native_operator_evidence:
+    artifact_path: build/day8/native_operator_evidence.json
+    mode: blocking
+    review_stage: day08_closeout
+    live_demo_required: false
+    minimum_commands: 1
+    minimum_queries: 1
   customer_context: A rogue admin changed runtime permissions and the customer now
     suspects the search tier is over-privileged. You must restore least privilege
     without violating the no-public-endpoints rule inherited from Day 4.
@@ -1065,6 +1123,23 @@ days:
     - identity
     - iac
     - ci_cd
+  - id: drill_13_shadow_resume_identity_fallback
+    default: false
+    mode: artifact
+    source_file: evals/failure_drills/drill_13_shadow_resume_identity_fallback.json
+    name: Shadow Drift - Break-Glass Identity Fallback
+    description: Rebuilds the Day 8 evidence bundle, then injects a downstream release
+      symptom where a resumed workflow path is forcing an unapproved identity fallback.
+    expected_signal: Identity evidence shows an unexpected privileged fallback path
+      appearing in release traces even though the primary deployment still starts.
+    mutation: day08_shadow_resume_identity_fallback
+    shadow_origin_day: '05'
+    secondary_failure_signal: Release traces now show a break-glass credential fallback
+      tied to the same workflow correlation chain.
+    drift_layers:
+    - identity
+    - iac
+    - ci_cd
   scaffold_level: starter_only
   cost_of_failure: If runtime identity stays over-privileged, a single deployment
     drift can become cross-service data access and immediate CAB rejection.
@@ -1125,10 +1200,10 @@ days:
     - facilitator
   native_operator_evidence:
     artifact_path: build/day9/native_operator_evidence.json
-    mode: advisory
+    mode: blocking
     review_stage: day10_cab_board
     live_demo_required: false
-    minimum_commands: 1
+    minimum_commands: 2
     minimum_queries: 1
   customer_context: A finance sponsor is alarmed by rising token spend and wants a
     defensible routing and cache policy that respects the same infrastructure and
@@ -1248,6 +1323,23 @@ days:
     drift_layers:
     - application
     - ci_cd
+  - id: drill_14_shadow_resume_cost_surge
+    default: false
+    mode: artifact
+    source_file: evals/failure_drills/drill_14_shadow_resume_cost_surge.json
+    name: Shadow Drift - Replay Cost Surge
+    description: Rebuilds the Day 9 routing report, then injects a downstream cost
+      spike caused by replay traffic re-entering the expensive path.
+    expected_signal: Routing telemetry shows a budget surge and duplicate high-cost
+      work on one correlation trail even though the router rules still look syntactically
+      valid.
+    mutation: day09_shadow_resume_cost_surge
+    shadow_origin_day: '05'
+    secondary_failure_signal: The same correlation trail is now generating duplicate
+      high-tier spend and cache misses.
+    drift_layers:
+    - application
+    - ci_cd
   scaffold_level: starter_only
   cost_of_failure: If routing and cost telemetry drift silently, runaway spend and
     untraceable failures can continue until finance or operations halts rollout.
@@ -1316,6 +1408,13 @@ days:
     requires_kql_replay: true
     requires_revert_proof: true
     peer_checklist_file: docs/curriculum/checklists/day10_peer_red_team.md
+  native_operator_evidence:
+    artifact_path: build/day10/native_operator_evidence.json
+    mode: blocking
+    review_stage: day10_cab_board
+    live_demo_required: false
+    minimum_commands: 2
+    minimum_queries: 1
   customer_context: The customer CAB will not approve rollout without a release packet
     that proves security posture, ownership, rollback readiness, and cost governance
     survived the repair.
@@ -1441,12 +1540,29 @@ days:
     drift_layers:
     - iac
     - ci_cd
+  - id: drill_15_shadow_evidence_chain_gap
+    default: false
+    mode: artifact
+    source_file: evals/failure_drills/drill_15_shadow_evidence_chain_gap.json
+    name: Shadow Drift - Upstream Evidence Chain Gap
+    description: Rebuilds the Day 10 release envelope, then injects a downstream
+      board-packet failure where prerequisite operator proof is incomplete for a
+      dependent control.
+    expected_signal: CAB evidence aggregation reports a missing upstream proof chain
+      even though the local release gates still appear close to green.
+    mutation: day10_shadow_evidence_chain_gap
+    shadow_origin_day: '08'
+    secondary_failure_signal: The release packet now shows an incomplete prerequisite
+      operator proof chain for one dependent control.
+    drift_layers:
+    - ci_cd
+    - iac
   scaffold_level: starter_only
   cost_of_failure: If release evidence goes false-green, the CAB can approve a broken
     deployment and force an emergency rollback under executive scrutiny.
   kql_evidence:
     artifact_path: build/day10/kql_evidence.json
-    minimum_queries: 2
+    minimum_queries: 1
     review_stage: day10_cab_board
 - id: '11'
   title: Delegated Identity, OBO, and Authority Confusion Defense
@@ -1500,6 +1616,13 @@ days:
   review_contract:
     evaluator_profile: wave4-day11-actor-binding
     human_required: true
+  native_operator_evidence:
+    artifact_path: build/day11/native_operator_evidence.json
+    mode: blocking
+    review_stage: day11_closeout
+    live_demo_required: false
+    minimum_commands: 2
+    minimum_queries: 1
   customer_context: The security team caught an approval path that may be acting as
     the app instead of the user. You must repair the actor binding without regressing
     release or network controls.
@@ -1646,6 +1769,22 @@ days:
     drift_layers:
     - identity
     - ci_cd
+  - id: drill_16_shadow_dependency_forbidden
+    default: false
+    mode: artifact
+    source_file: evals/failure_drills/drill_16_shadow_dependency_forbidden.json
+    name: Shadow Drift - Downstream Dependency Forbidden
+    description: Rebuilds the Day 11 contract bundle, then injects a downstream 403
+      symptom where actor claims vanish before a dependent operation completes.
+    expected_signal: Actor-bound operations now fail with a downstream forbidden response
+      on the same correlation trail even though the app identity still looks healthy.
+    mutation: day11_shadow_dependency_forbidden
+    shadow_origin_day: '10'
+    secondary_failure_signal: A dependent operation now returns forbidden because the
+      actor claims disappear before the boundary call completes.
+    drift_layers:
+    - identity
+    - ci_cd
   scaffold_level: starter_only
   cost_of_failure: If actor binding fails, the system can accept the wrong human as
     an approver and invalidate the authority model for production changes.
@@ -1716,7 +1855,7 @@ days:
     review_stage: day12_closeout
     live_demo_required: true
     minimum_commands: 2
-    minimum_queries: 0
+    minimum_queries: 1
   customer_context: The customer CISO escalated a DNS drift concern. You must prove
     that the VNet, private endpoints, and DNS links keep the agent invisible to the
     public internet.
@@ -1869,6 +2008,22 @@ days:
     drift_layers:
     - networking
     - iac
+  - id: drill_17_shadow_egress_detour
+    default: false
+    mode: artifact
+    source_file: evals/failure_drills/drill_17_shadow_egress_detour.json
+    name: Shadow Drift - Unapproved Egress Detour
+    description: Rebuilds the Day 12 posture evidence, then injects a downstream reachability
+      symptom where one dependency now exits through an unapproved route.
+    expected_signal: Network posture evidence shows one dependency taking an unexpected
+      route even though the private endpoints still exist.
+    mutation: day12_shadow_egress_detour
+    shadow_origin_day: '11'
+    secondary_failure_signal: One dependency now detours through an unapproved route
+      on the same incident correlation trail.
+    drift_layers:
+    - networking
+    - iac
   scaffold_level: starter_only
   cost_of_failure: If public access returns, regulated data escapes the private boundary
     and security approval is revoked immediately.
@@ -1926,6 +2081,13 @@ days:
   review_contract:
     evaluator_profile: wave4-day13-boundary-contract
     human_required: true
+  native_operator_evidence:
+    artifact_path: build/day13/native_operator_evidence.json
+    mode: blocking
+    review_stage: day13_closeout
+    live_demo_required: false
+    minimum_commands: 2
+    minimum_queries: 1
   customer_context: A line-of-business integration is dropping events at the boundary.
     The customer expects the MCP surface and DLQ path to recover without breaking
     inherited identity or network controls.
@@ -2086,6 +2248,24 @@ days:
     mutation: day13_mcp_contract_break
     drift_layers:
     - application
+    - ci_cd
+  - id: drill_18_shadow_actor_claim_loss
+    default: false
+    mode: artifact
+    source_file: evals/failure_drills/drill_18_shadow_actor_claim_loss.json
+    name: Shadow Drift - Partner 403 At Boundary
+    description: Rebuilds the Day 13 boundary evidence, then injects a downstream
+      forbidden response where partner traffic reaches the boundary without the expected
+      actor context.
+    expected_signal: Boundary telemetry shows partner requests failing with forbidden
+      on the same correlation trail while the contract shape still looks present.
+    mutation: day13_shadow_actor_claim_loss
+    shadow_origin_day: '11'
+    secondary_failure_signal: Partner-bound traffic now reaches the boundary without
+      the expected actor context and is rejected downstream.
+    drift_layers:
+    - application
+    - identity
     - ci_cd
   scaffold_level: starter_only
   cost_of_failure: If the integration contract drifts, partner systems fail unpredictably
@@ -2356,12 +2536,28 @@ days:
     drift_layers:
     - iac
     - ci_cd
+  - id: drill_19_shadow_compensation_backlog
+    default: false
+    mode: artifact
+    source_file: evals/failure_drills/drill_19_shadow_compensation_backlog.json
+    name: Shadow Drift - Compensation Replay Trace Gap
+    description: Rebuilds the Day 14 trace evidence, then injects a downstream trace
+      gap caused by replay traffic arriving without complete compensation markers.
+    expected_signal: Executive incident evidence now shows one replay path without
+      complete trace continuity even though the primary rollback path still exists.
+    mutation: day14_shadow_compensation_backlog
+    shadow_origin_day: '13'
+    secondary_failure_signal: One replay path now arrives without complete compensation
+      markers or trace continuity.
+    drift_layers:
+    - application
+    - ci_cd
   scaffold_level: starter_only
   cost_of_failure: If elite-ops gates stay false-green during an incident, executives
     lose trustworthy go/no-go evidence exactly when recovery decisions matter most.
   kql_evidence:
     artifact_path: build/day14/kql_evidence.json
-    minimum_queries: 2
+    minimum_queries: 1
     review_stage: capstone_cab_board
 customer_profile:
   name: Northwind Treasury Services

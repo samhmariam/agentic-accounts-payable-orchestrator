@@ -127,7 +127,21 @@ def test_day4_declares_stakeholder_inject(days: list[dict]) -> None:
     assert day["stakeholder_inject"]["required_artifacts"]
 
 
-@pytest.mark.parametrize("day_id,mode", [("09", "advisory"), ("12", "blocking"), ("14", "blocking")])
+@pytest.mark.parametrize(
+    "day_id,mode",
+    [
+        ("05", "blocking"),
+        ("06", "blocking"),
+        ("07", "blocking"),
+        ("08", "blocking"),
+        ("09", "blocking"),
+        ("10", "blocking"),
+        ("11", "blocking"),
+        ("12", "blocking"),
+        ("13", "blocking"),
+        ("14", "blocking"),
+    ],
+)
 def test_native_operator_evidence_contract_declared(day_id: str, mode: str, days: list[dict]) -> None:
     day = next(item for item in days if item["id"] == day_id)
     contract = day.get("native_operator_evidence")
@@ -152,6 +166,18 @@ def test_day7_default_drill_targets_authority_drift(days: list[dict]) -> None:
         "src/aegisap/day3/policies/source_authority_rules.yaml",
         "src/aegisap/day3/retrieval/authority_policy.py",
     ]
+
+
+def test_days_07_to_14_declare_one_shadow_drift_alternate(days: list[dict]) -> None:
+    for day_id in [f"{i:02d}" for i in range(7, 15)]:
+        day = next(item for item in days if item["id"] == day_id)
+        shadow_drills = [
+            drill for drill in day["automation_drills"] if drill.get("shadow_origin_day")
+        ]
+        assert len(shadow_drills) == 1, f"Day {day_id} expected exactly one shadow drift drill"
+        shadow = shadow_drills[0]
+        assert shadow["default"] is False
+        assert shadow["secondary_failure_signal"]
 
 
 def test_day10_and_day14_use_cab_board_review_mode(days: list[dict]) -> None:

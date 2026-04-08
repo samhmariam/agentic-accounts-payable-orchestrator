@@ -39,9 +39,18 @@ If release evidence goes false-green, the CAB can approve a broken deployment an
 - `uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py -q && uv run aegisap-lab artifact rebuild --day 10`
 - `uv run aegisap-lab audit-production --day 10 --strict`
 
+## Native Tooling Gate
+
+- Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+- Save raw proof to `build/day10/native_operator_evidence.json` before you patch production code.
+- Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
+- Day 10 evidence is CAB-facing and must include at least two literal native commands plus one raw KQL query.
+
 ## KQL Evidence
 
-Save `build/day10/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day10/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live. The CAB packet now statically validates the full Days 05-09 native and KQL evidence chain before board readiness is accepted.
 
 ## Chaos Gate
 
@@ -60,6 +69,7 @@ Save `build/day10/kql_evidence.json` before you patch production code. Capture a
 - Review mode: `cab_board`
 - Required review roles: `cab_chair`, `client_ciso_or_infra_lead`
 - The board may replay `build/day9/native_operator_evidence.json` live before approving the release packet
+- CAB approval is blocked if Days 05-09 native or KQL evidence is missing, structurally weak, or inconsistent with the release packet
 
 ## Day X File Manifest
 
@@ -74,6 +84,8 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day10`
 - Verification Command: `uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 10`
+- Native Evidence Artifact: `build/day10/native_operator_evidence.json`
+- KQL Evidence Artifact: `build/day10/kql_evidence.json`
 
 ## Automated Drill
 

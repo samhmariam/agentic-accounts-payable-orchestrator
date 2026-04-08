@@ -46,9 +46,12 @@ uv run aegisap-lab incident start --day 14
 
 ## Native Tooling Gate
 
+- Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 - Save native proof to `build/day14/native_operator_evidence.json`
 - Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
+- Day 14 evidence must include at least two literal native commands plus one raw KQL query.
 - The capstone CAB chair may randomly select one saved proof and require a live rerun
 - Peer checklist file: `docs/curriculum/checklists/day14_peer_red_team.md`
 - Revert Proof: `docs/curriculum/artifacts/day14/REVERT_PROOF.md`

@@ -80,18 +80,22 @@ You are ready to begin the live cohort if all of the following are true:
 - You know which shell you will use for the full cohort
 - You know how to capture terminal output if you need help
 
-## Late-Stage Readiness By Day 8
+## Native Tooling Readiness By Day 5
 
-By the time the cohort reaches Day 8, you should also be ready for:
+By the time the cohort reaches Day 5, you should also be ready for:
 
 - `full` track environment loading with `scripts/setup-env.sh` or `scripts/setup-env.ps1`
 - Azure resource access for deployment, identity, and later verification steps
 - Running live verification scripts where the facilitator expects authoritative evidence
 - Producing raw `az`, DNS, Git, and KQL proofs without relying on helper commands
 
-Native Azure and Git fluency is assessed by Week 2. Days 9, 12, and 14 require
-saved native operator evidence and live replay on request.
-Days 8-14 also require saved KQL evidence, and every submission should run
+See `docs/curriculum/NATIVE_TOOLING_POLICY.md` for the governing rules.
+
+Native Azure and Git fluency is assessed by Week 2.
+Native Azure and Git fluency is assessed from Day 5 onward. Days 05-14 require
+saved native operator evidence and saved KQL evidence, and Days 12 and 14
+require live replay on request.
+Every submission should run
 `uv run aegisap-lab rubric-check --day XX` before review prep so your declared
 weak spots are visible in the PR.
 

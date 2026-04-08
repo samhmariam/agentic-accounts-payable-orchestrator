@@ -215,6 +215,15 @@ def _validate_native_operator_evidence(
     )
 
 
+def validate_native_operator_evidence_artifact(
+    *,
+    day_id: str,
+    contract: dict[str, Any],
+    repo_root: Path,
+) -> GateResult:
+    return _validate_native_operator_evidence(day_id=day_id, contract=contract, repo_root=repo_root)
+
+
 def _validate_kql_evidence(
     *,
     day_id: str,
@@ -284,6 +293,15 @@ def _validate_kql_evidence(
         command=f"validate {rel_path}",
         detail=f"KQL evidence validated from `{rel_path}`.",
     )
+
+
+def validate_kql_evidence_artifact(
+    *,
+    day_id: str,
+    contract: dict[str, Any],
+    repo_root: Path,
+) -> GateResult:
+    return _validate_kql_evidence(day_id=day_id, contract=contract, repo_root=repo_root)
 
 
 def _day0_gates(track: str) -> list[dict[str, str]]:

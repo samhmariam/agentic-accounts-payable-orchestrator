@@ -40,10 +40,13 @@ If routing and cost telemetry drift silently, runaway spend and untraceable fail
 
 ## Native Tooling Gate
 
+- Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 - Save native proof to `build/day9/native_operator_evidence.json`
 - Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned step-by-step answer keys
-- Day 9 native evidence is advisory, but it is replayed during the Day 10 CAB review
+- Day 9 native evidence is blocking and must include at least two literal native commands plus one raw KQL query
+- Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
+- The Day 10 CAB board may replay one saved Day 9 proof live
 
 ## KQL Evidence
 

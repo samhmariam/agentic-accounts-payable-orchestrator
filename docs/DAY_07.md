@@ -37,6 +37,18 @@ uv run aegisap-lab incident start --day 07
 - `uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/synthetic_cases_drift.jsonl --malicious-cases build/day7/malicious_cases_drift.jsonl --thresholds evals/score_thresholds.yaml --output build/day7/prompt_drift_report.json --enforce-thresholds`
 - `uv run aegisap-lab audit-production --day 07 --strict`
 
+## Native Tooling Gate
+
+- Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+- Save raw proof to `build/day7/native_operator_evidence.json` before you patch production code.
+- Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
+
+## KQL Evidence
+
+Save `build/day7/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. Shadow-drift drills must still be diagnosed from current-day telemetry and evidence only.
+
 ## Verification Commands
 
 ```bash

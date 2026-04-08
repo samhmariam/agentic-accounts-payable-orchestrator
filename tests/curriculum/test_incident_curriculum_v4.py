@@ -193,10 +193,12 @@ def test_wave4_notebooks_use_incident_scaffold_and_markdown_only_patch_boundary(
         assert "What is the blast radius if my code fails?" in text
         assert "How will I know it failed in production?" in text
         assert "cohort/<" in text
-        if day_id >= "08":
+        if day_id >= "05":
             assert "## KQL Evidence" in text
             assert f"build/day{int(day_id)}/kql_evidence.json" in text
-        if day_id >= "07":
+            assert "## Native Tooling Gate" in text
+            assert f"build/day{int(day_id)}/native_operator_evidence.json" in text
+        if day_id >= "05":
             assert "Do not use the shared lab wrapper helpers in this phase." in text
 
 

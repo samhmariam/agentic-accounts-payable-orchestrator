@@ -140,6 +140,9 @@ def _kql_evidence(mo):
         - purpose
         - observed excerpt
         - operator interpretation
+
+        The Day 10 CAB board also statically validates the full Days 05-09 native
+        and KQL evidence chain before it accepts the release packet.
         """
     )
     return
@@ -229,6 +232,39 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _native_tooling_gate(mo):
+    mo.md(
+        """
+        ## Native Tooling Gate
+
+        Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+
+        Save your raw operator proof in `build/day10/native_operator_evidence.json`.
+
+        Allowed tools during this gate:
+
+        - Azure Portal
+        - `az`
+        - `az rest`
+        - raw KQL
+        - `git`
+        - `curl`
+        - `nslookup` or `Resolve-DnsName`
+
+        Tools banned during this gate:
+
+        - `aegisap-lab`
+        - helper verification wrappers
+        - canned answer keys
+
+        Wrappers stay banned until both raw evidence files are complete. After that,
+        they may be used only for artifact rebuild, mastery, or reset flows.
+        """
+    )
+    return
+
+
+@app.cell
 def _chaos_gate(mo):
     mo.md(
         """
@@ -287,7 +323,7 @@ def _pr_defense(mo):
 
         Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
 
-        The Day 10 CAB board will also replay the Day 9 native operator evidence if finance or infra challenges your routing proof.
+        The Day 10 CAB board will also replay the Day 9 native operator evidence if finance or infra challenges your routing proof, and it now blocks on missing or weak Days 05-09 native and KQL evidence.
         """
     )
     return

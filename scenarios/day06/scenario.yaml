@@ -1,5 +1,5 @@
 day: "06"
-title: "Prompt Injection Detector Lost Evidence Normalization"
+title: "Prompt Injection Detector Lost Evidence Normalization And Reviewer Schema Integrity"
 phase: "phase_2_agentic_state"
 baseline_track: "core"
 baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track core --scenario day06"

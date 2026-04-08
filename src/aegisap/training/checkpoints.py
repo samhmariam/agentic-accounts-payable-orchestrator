@@ -7,6 +7,12 @@ from typing import Any
 
 from aegisap.common.paths import repo_root
 from aegisap.deploy.gates import GateResult, build_release_envelope
+from aegisap.lab.curriculum import get_day, load_manifest
+from aegisap.lab.mastery import (
+    PASS as MASTERY_PASS,
+    validate_kql_evidence_artifact,
+    validate_native_operator_evidence_artifact,
+)
 from aegisap.day4.planning.policy_overlay import derive_policy_overlay
 from aegisap.observability.context import make_workflow_observability_context
 from aegisap.observability.tracing import root_span_attributes
@@ -128,13 +134,86 @@ def gate_checkpoint_extension_contract() -> GateResult:
     )
 
 
+def gate_day10_operator_evidence_chain(
+    *,
+    required_days: list[str] | None = None,
+) -> GateResult:
+    root = repo_root(__file__)
+    manifest = load_manifest(root)
+    days = required_days or [f"{day:02d}" for day in range(5, 10)]
+    problems: list[str] = []
+    validation_results: list[dict[str, Any]] = []
+
+    for day_id in days:
+        day_entry = get_day(manifest, day_id)
+        native_contract = day_entry.get("native_operator_evidence")
+        kql_contract = day_entry.get("kql_evidence")
+        if native_contract is None or kql_contract is None:
+            missing_parts = []
+            if native_contract is None:
+                missing_parts.append("native_operator_evidence")
+            if kql_contract is None:
+                missing_parts.append("kql_evidence")
+            problems.append(f"day {day_id} missing manifest contract(s): {', '.join(missing_parts)}")
+            continue
+
+        native_result = validate_native_operator_evidence_artifact(
+            day_id=day_id,
+            contract=native_contract,
+            repo_root=root,
+        )
+        kql_result = validate_kql_evidence_artifact(
+            day_id=day_id,
+            contract=kql_contract,
+            repo_root=root,
+        )
+        validation_results.extend(
+            [
+                {
+                    "day": day_id,
+                    "gate_id": native_result.gate_id,
+                    "status": native_result.status,
+                    "detail": native_result.detail,
+                },
+                {
+                    "day": day_id,
+                    "gate_id": kql_result.gate_id,
+                    "status": kql_result.status,
+                    "detail": kql_result.detail,
+                },
+            ]
+        )
+        if native_result.status != MASTERY_PASS:
+            problems.append(f"day {day_id} native proof: {native_result.detail}")
+        if kql_result.status != MASTERY_PASS:
+            problems.append(f"day {day_id} KQL proof: {kql_result.detail}")
+
+    passed = not problems
+    detail = (
+        "Days 05-09 native and KQL evidence chains are structurally valid for CAB review."
+        if passed
+        else " ; ".join(problems)
+    )
+    return GateResult(
+        name="operator_evidence_chain",
+        passed=passed,
+        detail=detail,
+        evidence={
+            "required_days": days,
+            "validation_results": validation_results,
+        },
+    )
+
+
 def run_day10_gate_extension_checkpoint(
     *,
     base_results: list[GateResult],
     artifact_name: str = "checkpoint_gate_extension",
 ) -> tuple[Path, dict[str, Any], Path, dict[str, Any]]:
     extra_gate = gate_checkpoint_extension_contract()
-    release_envelope = build_release_envelope(base_results)
+    operator_evidence_gate = gate_day10_operator_evidence_chain()
+    release_results = [*base_results, operator_evidence_gate]
+    release_envelope = build_release_envelope(release_results)
     release_path = build_root("day10") / "release_envelope.json"
     write_json_artifact(release_path, release_envelope)
 
@@ -148,8 +227,14 @@ def run_day10_gate_extension_checkpoint(
             "detail": extra_gate.detail,
             "evidence": extra_gate.evidence,
         },
+        "upstream_evidence_gate": {
+            "name": operator_evidence_gate.name,
+            "passed": operator_evidence_gate.passed,
+            "detail": operator_evidence_gate.detail,
+            "evidence": operator_evidence_gate.evidence,
+        },
         "base_release_all_passed": release_envelope["all_passed"],
-        "base_gates": [result.name for result in base_results],
+        "base_gates": [result.name for result in release_results],
         "release_envelope_path": str(release_path),
         "ready_for_capstone_review": release_envelope["all_passed"] and extra_gate.passed,
     }

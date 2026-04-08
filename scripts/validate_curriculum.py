@@ -72,6 +72,7 @@ PORTAL_REQUIRED_HEADINGS = (
 REQUIRED_DOCS = (
     "docs/curriculum/README.md",
     "docs/curriculum/DELIVERY_MAP.md",
+    "docs/curriculum/NATIVE_TOOLING_POLICY.md",
     "docs/curriculum/portal/README.md",
     "docs/curriculum/TRAINER_OPERATIONS.md",
     "docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md",
@@ -101,6 +102,7 @@ REQUIRED_DOCS = (
 
 STRICT_VALIDATION_DOCS = (
     "docs/curriculum/README.md",
+    "docs/curriculum/NATIVE_TOOLING_POLICY.md",
     "docs/curriculum/DELIVERY_MAP.md",
     "docs/curriculum/portal/README.md",
     "docs/curriculum/TRAINER_OPERATIONS.md",
@@ -120,6 +122,7 @@ STRICT_VALIDATION_DOCS = (
 
 README_REQUIRED_SNIPPETS = (
     "DELIVERY_MAP.md",
+    "NATIVE_TOOLING_POLICY.md",
     "portal/README.md",
     "TRAINEE_PREFLIGHT_CHECKLIST.md",
     "FACILITATOR_DAY_START_CHECKLIST.md",
@@ -135,6 +138,7 @@ README_REQUIRED_SNIPPETS = (
 
 TRAINER_OPS_REQUIRED_SNIPPETS = (
     "FACILITATOR_DAY_START_CHECKLIST.md",
+    "NATIVE_TOOLING_POLICY.md",
     "portal/README.md",
     "TRAINEE_PREFLIGHT_CHECKLIST.md",
     "FDE_DEBUGGING_FRAMEWORK.md",
@@ -153,11 +157,13 @@ PREFLIGHT_REQUIRED_SNIPPETS = (
     "scripts/setup-env.sh",
     "This is not a tutorial",
     "Native Azure and Git fluency is assessed by Week 2",
+    "NATIVE_TOOLING_POLICY.md",
 )
 
 FACILITATOR_REQUIRED_SNIPPETS = (
     "uv run python scripts/validate_curriculum.py",
     "CURRICULUM_MANIFEST.yaml",
+    "NATIVE_TOOLING_POLICY.md",
     "FDE_DEBUGGING_FRAMEWORK.md",
     "docs/curriculum/portal/DAY_00_PORTAL.md",
     "uv run aegisap-lab incident start --day",
@@ -205,10 +211,52 @@ RAW_SDK_BAN_SNIPPET = (
 )
 
 NATIVE_OPERATOR_EVIDENCE_DAYS = {
-    "09": {
-        "mode": "advisory",
-        "review_stage": "day10_cab_board",
+    "05": {
+        "mode": "blocking",
+        "review_stage": "day05_closeout",
         "minimum_commands": 1,
+        "minimum_queries": 1,
+        "live_demo_required": False,
+    },
+    "06": {
+        "mode": "blocking",
+        "review_stage": "day06_closeout",
+        "minimum_commands": 1,
+        "minimum_queries": 1,
+        "live_demo_required": False,
+    },
+    "07": {
+        "mode": "blocking",
+        "review_stage": "day07_closeout",
+        "minimum_commands": 1,
+        "minimum_queries": 1,
+        "live_demo_required": False,
+    },
+    "08": {
+        "mode": "blocking",
+        "review_stage": "day08_closeout",
+        "minimum_commands": 1,
+        "minimum_queries": 1,
+        "live_demo_required": False,
+    },
+    "09": {
+        "mode": "blocking",
+        "review_stage": "day10_cab_board",
+        "minimum_commands": 2,
+        "minimum_queries": 1,
+        "live_demo_required": False,
+    },
+    "10": {
+        "mode": "blocking",
+        "review_stage": "day10_cab_board",
+        "minimum_commands": 2,
+        "minimum_queries": 1,
+        "live_demo_required": False,
+    },
+    "11": {
+        "mode": "blocking",
+        "review_stage": "day11_closeout",
+        "minimum_commands": 2,
         "minimum_queries": 1,
         "live_demo_required": False,
     },
@@ -216,8 +264,15 @@ NATIVE_OPERATOR_EVIDENCE_DAYS = {
         "mode": "blocking",
         "review_stage": "day12_closeout",
         "minimum_commands": 2,
-        "minimum_queries": 0,
+        "minimum_queries": 1,
         "live_demo_required": True,
+    },
+    "13": {
+        "mode": "blocking",
+        "review_stage": "day13_closeout",
+        "minimum_commands": 2,
+        "minimum_queries": 1,
+        "live_demo_required": False,
     },
     "14": {
         "mode": "blocking",
@@ -948,6 +1003,12 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     ("## Native Tooling Gate", "native_operator_evidence.json", "banned"),
                     "Module README is missing the native-tooling gate contract",
                 )
+                _expect_snippets(
+                    errors,
+                    module_path,
+                    ("NATIVE_TOOLING_POLICY.md",),
+                    "Module README is missing the shared native-tooling policy link",
+                )
             if day_id_str == "04":
                 _expect_snippets(
                     errors,
@@ -993,6 +1054,12 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     primary_doc_path,
                     ("## Native Tooling Gate", "native_operator_evidence.json"),
                     "Primary day doc is missing the native-tooling gate contract",
+                )
+                _expect_snippets(
+                    errors,
+                    primary_doc_path,
+                    ("NATIVE_TOOLING_POLICY.md",),
+                    "Primary day doc is missing the shared native-tooling policy link",
                 )
             if day_id_str in KQL_EVIDENCE_DAYS:
                 _expect_snippets(

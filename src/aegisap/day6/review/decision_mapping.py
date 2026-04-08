@@ -182,6 +182,11 @@ def _message_for_signal(signal: str) -> str:
 
 
 def _message_for_check(check_id: str, reason_code: str) -> str:
+    if reason_code == "STRUCTURED_OUTPUT_DEGRADED":
+        return (
+            f"Mandatory check '{check_id}' found malformed or schema-incomplete reviewer output, "
+            "so the case must escalate instead of auto-coercing the payload."
+        )
     if reason_code == "CONTRADICTORY_EVIDENCE":
         return f"Mandatory check '{check_id}' found contradictory evidence that blocks automated progression."
     if reason_code == "MISSING_AUTHORITY":
@@ -203,4 +208,3 @@ def _dedupe_citations(citations: list[EvidenceCitation]) -> list[EvidenceCitatio
     for citation in citations:
         unique[citation.evidence_id] = citation
     return list(unique.values())
-

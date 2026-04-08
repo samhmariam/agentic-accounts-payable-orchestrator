@@ -122,3 +122,14 @@ def test_day6_lab_writes_review_outcome() -> None:
     assert artifact_path.exists()
     assert payload["review_outcome"]["outcome"] == "not_authorised_to_continue"
     assert review_outcome.citations
+
+
+def test_day6_lab_escalates_schema_degradation_without_auto_coercion() -> None:
+    artifact_path, payload, review_outcome = run_day6_review_artifact_from_input(
+        review_input=load_day6_review_input("fixtures/day06/malformed_reviewer_output_case.json"),
+        artifact_name="test_day6_schema_drift_lab",
+    )
+
+    assert artifact_path.exists()
+    assert payload["review_outcome"]["outcome"] == "needs_human_review"
+    assert any(reason.code == "STRUCTURED_OUTPUT_DEGRADED" for reason in review_outcome.reasons)

@@ -264,6 +264,8 @@ def _native_tooling_gate(mo):
         """
         ## Native Tooling Gate
 
+        Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+
         Save your raw operator proof in `build/day9/native_operator_evidence.json`.
 
         Allowed tools during this gate:
@@ -282,7 +284,11 @@ def _native_tooling_gate(mo):
         - helper verification wrappers
         - canned step-by-step answer keys
 
-        Day 9 native evidence is advisory, but it must be replay-ready for the Day 10 CAB review.
+        Wrappers stay banned until both raw evidence files are complete. After that,
+        they may be used only for artifact rebuild, mastery, or reset flows.
+
+        Day 9 native evidence is blocking, must include two native commands plus one
+        raw KQL query, and must be replay-ready for the Day 10 CAB review.
         """
     )
     return

@@ -234,6 +234,39 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _native_tooling_gate(mo):
+    mo.md(
+        """
+        ## Native Tooling Gate
+
+        Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+
+        Save your raw operator proof in `build/day11/native_operator_evidence.json`.
+
+        Allowed tools during this gate:
+
+        - Azure Portal
+        - `az`
+        - `az rest`
+        - raw KQL
+        - `git`
+        - `curl`
+        - `nslookup` or `Resolve-DnsName`
+
+        Tools banned during this gate:
+
+        - `aegisap-lab`
+        - helper verification wrappers
+        - canned answer keys
+
+        Wrappers stay banned until both raw evidence files are complete. After that,
+        they may be used only for artifact rebuild, mastery, or reset flows.
+        """
+    )
+    return
+
+
+@app.cell
 def _chaos_gate(mo):
     mo.md(
         """

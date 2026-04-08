@@ -16,6 +16,7 @@ ReasonCode = Literal[
     "INSUFFICIENT_EVIDENCE",
     "MISSING_AUTHORITY",
     "CONTRADICTORY_EVIDENCE",
+    "STRUCTURED_OUTPUT_DEGRADED",
     "PROMPT_INJECTION_ATTEMPT",
     "POLICY_CONFLICT",
     "OUT_OF_SCOPE_ACTION",
@@ -177,6 +178,7 @@ class Day6ReviewInput(BaseModel):
     thread_id: str
     candidate_recommendation: dict[str, Any] | None = None
     escalation_package: dict[str, Any] | None = None
+    reviewer_response: dict[str, Any] | None = None
     evidence_ledger: list[EvidenceLedgerItem]
     claim_ledger: list[ClaimLedgerItem] = Field(default_factory=list)
     policy_context: PolicyContext
@@ -185,4 +187,3 @@ class Day6ReviewInput(BaseModel):
     missing_requirements: list[str] = Field(default_factory=list)
     conflict_flags: list[str] = Field(default_factory=list)
     review_metadata: dict[str, Any] = Field(default_factory=dict)
-

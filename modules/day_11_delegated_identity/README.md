@@ -40,6 +40,15 @@ If actor binding fails, the system can accept the wrong human as an approver and
 - `uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q && uv run aegisap-lab artifact rebuild --day 11`
 - `uv run aegisap-lab audit-production --day 11 --strict`
 
+## Native Tooling Gate
+
+- Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+- Save raw proof to `build/day11/native_operator_evidence.json` before you patch production code.
+- Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
+- Day 11 evidence must include at least two literal native commands plus one raw KQL query.
+
 ## KQL Evidence
 
 Save `build/day11/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
@@ -64,6 +73,8 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day11`
 - Verification Command: `uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 11`
+- Native Evidence Artifact: `build/day11/native_operator_evidence.json`
+- KQL Evidence Artifact: `build/day11/kql_evidence.json`
 
 ## Automated Drill
 

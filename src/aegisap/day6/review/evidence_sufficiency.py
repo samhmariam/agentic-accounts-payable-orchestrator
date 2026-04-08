@@ -23,6 +23,7 @@ def evaluate_evidence_sufficiency(
         _approval_route_check(review_input),
         _tax_support_check(review_input),
         _action_scope_check(review_input),
+        _reviewer_schema_check(review_input),
     ]
 
     if injection_detected:
@@ -258,6 +259,66 @@ def _action_scope_check(review_input: Day6ReviewInput) -> MandatoryCheckResult:
     )
 
 
+def _reviewer_schema_check(review_input: Day6ReviewInput) -> MandatoryCheckResult:
+    payload = review_input.reviewer_response
+    if payload is None:
+        return MandatoryCheckResult(
+            check_id="reviewer_schema_contract",
+            status="not_applicable",
+            reason_code="none",
+            evidence_ids=[],
+            missing_evidence=[],
+            policy_ids=["POL-SCHEMA-005"],
+        )
+
+    missing_fields: list[str] = []
+    for field in ("schema_version", "decision", "confidence", "reason_codes", "summary"):
+        value = payload.get(field)
+        if isinstance(value, str):
+            if not value.strip():
+                missing_fields.append(field)
+        elif value is None:
+            missing_fields.append(field)
+
+    decision = payload.get("decision")
+    if decision not in {
+        "approved_to_proceed",
+        "needs_human_review",
+        "not_authorised_to_continue",
+    }:
+        missing_fields.append("decision")
+
+    confidence = payload.get("confidence")
+    if not isinstance(confidence, (int, float)) or not 0 <= float(confidence) <= 1:
+        missing_fields.append("confidence")
+
+    reason_codes = payload.get("reason_codes")
+    if not isinstance(reason_codes, list) or not reason_codes or not all(str(item).strip() for item in reason_codes):
+        missing_fields.append("reason_codes")
+
+    if missing_fields:
+        return MandatoryCheckResult(
+            check_id="reviewer_schema_contract",
+            status="fail",
+            reason_code="STRUCTURED_OUTPUT_DEGRADED",
+            evidence_ids=_evidence_ids_by_source_type(
+                review_input,
+                {"case_summary", "tool_artifact", "email", "retrieval_note"},
+            ),
+            missing_evidence=list(dict.fromkeys(missing_fields)),
+            policy_ids=["POL-SCHEMA-005"],
+        )
+
+    return MandatoryCheckResult(
+        check_id="reviewer_schema_contract",
+        status="pass",
+        reason_code="none",
+        evidence_ids=_evidence_ids_by_source_type(review_input, {"tool_artifact", "case_summary"}),
+        missing_evidence=[],
+        policy_ids=["POL-SCHEMA-005"],
+    )
+
+
 def _claim_has_value(review_input: Day6ReviewInput, claim_type: str, field: str, expected: object) -> bool:
     claim = next((item for item in review_input.claim_ledger if item.claim_type == claim_type), None)
     if claim is None:
@@ -283,4 +344,3 @@ def _collect_conflict_evidence(review_input: Day6ReviewInput) -> list[str]:
     for claim in review_input.claim_ledger:
         evidence_ids.extend(claim.conflicting_evidence_ids)
     return list(dict.fromkeys(evidence_ids))
-

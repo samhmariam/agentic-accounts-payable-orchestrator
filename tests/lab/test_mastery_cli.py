@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import subprocess
 
+import pytest
+
 from aegisap.lab import mastery
 
 
@@ -232,7 +234,7 @@ def _write_kql_evidence(
     path.write_text(json.dumps(payload), encoding="utf-8")
 
 
-def test_run_mastery_day9_native_evidence_is_advisory(monkeypatch, tmp_path) -> None:
+def test_run_mastery_day9_native_evidence_is_blocking(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(
         mastery,
         "load_manifest",
@@ -240,7 +242,7 @@ def test_run_mastery_day9_native_evidence_is_advisory(monkeypatch, tmp_path) -> 
             "days": [
                 {
                     "id": "09",
-                    "title": "Native advisory day",
+                    "title": "Native blocking day",
                     "mastery_gates": [
                         {
                             "id": "day09_repo_evidence",
@@ -253,10 +255,10 @@ def test_run_mastery_day9_native_evidence_is_advisory(monkeypatch, tmp_path) -> 
                     ],
                     "native_operator_evidence": {
                         "artifact_path": "build/day9/native_operator_evidence.json",
-                        "mode": "advisory",
+                        "mode": "blocking",
                         "review_stage": "day10_cab_board",
                         "live_demo_required": False,
-                        "minimum_commands": 1,
+                        "minimum_commands": 2,
                         "minimum_queries": 1,
                     },
                 }
@@ -271,7 +273,7 @@ def test_run_mastery_day9_native_evidence_is_advisory(monkeypatch, tmp_path) -> 
 
     payload = mastery.run_mastery(day="09", repo_root=tmp_path)
 
-    assert payload["overall_ok"] is True
+    assert payload["overall_ok"] is False
     assert payload["results"][-1]["status"] == mastery.FAIL
 
 
@@ -283,7 +285,7 @@ def test_run_mastery_day9_native_evidence_passes_when_structurally_valid(monkeyp
             "days": [
                 {
                     "id": "09",
-                    "title": "Native advisory day",
+                    "title": "Native blocking day",
                     "mastery_gates": [
                         {
                             "id": "day09_repo_evidence",
@@ -296,10 +298,10 @@ def test_run_mastery_day9_native_evidence_passes_when_structurally_valid(monkeyp
                     ],
                     "native_operator_evidence": {
                         "artifact_path": "build/day9/native_operator_evidence.json",
-                        "mode": "advisory",
+                        "mode": "blocking",
                         "review_stage": "day10_cab_board",
                         "live_demo_required": False,
-                        "minimum_commands": 1,
+                        "minimum_commands": 2,
                         "minimum_queries": 1,
                     },
                 }
@@ -316,7 +318,7 @@ def test_run_mastery_day9_native_evidence_passes_when_structurally_valid(monkeyp
         day="09",
         passed=False,
         review_stage="day10_cab_board",
-        minimum_commands=1,
+        minimum_commands=2,
         minimum_queries=1,
         required=False,
     )
@@ -352,7 +354,7 @@ def test_run_mastery_blocking_native_evidence_requires_live_demo_pass(monkeypatc
                         "review_stage": "day12_closeout",
                         "live_demo_required": True,
                         "minimum_commands": 2,
-                        "minimum_queries": 0,
+                        "minimum_queries": 1,
                     },
                 }
             ]
@@ -369,7 +371,7 @@ def test_run_mastery_blocking_native_evidence_requires_live_demo_pass(monkeypatc
         passed=False,
         review_stage="day12_closeout",
         minimum_commands=2,
-        minimum_queries=0,
+        minimum_queries=1,
         required=True,
     )
 
@@ -379,7 +381,7 @@ def test_run_mastery_blocking_native_evidence_requires_live_demo_pass(monkeypatc
     assert payload["results"][-1]["status"] == mastery.FAIL
 
 
-def test_run_mastery_requires_kql_evidence_for_day8_plus(monkeypatch, tmp_path) -> None:
+def test_run_mastery_requires_kql_evidence_for_day5_plus(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(
         mastery,
         "load_manifest",
@@ -461,4 +463,147 @@ def test_run_mastery_accepts_valid_kql_evidence(monkeypatch, tmp_path) -> None:
 
     assert payload["overall_ok"] is True
     assert payload["results"][-1]["gate_id"] == "day10_kql_evidence"
+    assert payload["results"][-1]["status"] == mastery.PASS
+
+
+@pytest.mark.parametrize(
+    ("day_id", "review_stage"),
+    [
+        ("05", "day05_closeout"),
+        ("06", "day06_closeout"),
+        ("07", "day07_closeout"),
+    ],
+)
+def test_run_mastery_days_05_to_07_require_native_and_kql_evidence(
+    monkeypatch,
+    tmp_path,
+    day_id: str,
+    review_stage: str,
+) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": day_id,
+                    "title": f"Day {day_id} evidence day",
+                    "persistent_constraints": [],
+                    "mastery_gates": [
+                        {
+                            "id": f"day{day_id}_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["fail_closed_decisions"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "native_operator_evidence": {
+                        "artifact_path": f"build/day{int(day_id)}/native_operator_evidence.json",
+                        "mode": "blocking",
+                        "review_stage": review_stage,
+                        "live_demo_required": False,
+                        "minimum_commands": 1,
+                        "minimum_queries": 1,
+                    },
+                    "kql_evidence": {
+                        "artifact_path": f"build/day{int(day_id)}/kql_evidence.json",
+                        "minimum_queries": 1,
+                        "review_stage": review_stage,
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+
+    payload = mastery.run_mastery(day=day_id, repo_root=tmp_path)
+
+    assert payload["overall_ok"] is False
+    assert payload["results"][-2]["gate_id"] == f"day{day_id}_native_operator_evidence"
+    assert payload["results"][-2]["status"] == mastery.FAIL
+    assert payload["results"][-1]["gate_id"] == f"day{day_id}_kql_evidence"
+    assert payload["results"][-1]["status"] == mastery.FAIL
+
+
+@pytest.mark.parametrize(
+    ("day_id", "review_stage"),
+    [
+        ("05", "day05_closeout"),
+        ("06", "day06_closeout"),
+        ("07", "day07_closeout"),
+    ],
+)
+def test_run_mastery_days_05_to_07_accept_valid_native_and_kql_evidence(
+    monkeypatch,
+    tmp_path,
+    day_id: str,
+    review_stage: str,
+) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": day_id,
+                    "title": f"Day {day_id} evidence day",
+                    "persistent_constraints": [],
+                    "mastery_gates": [
+                        {
+                            "id": f"day{day_id}_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["fail_closed_decisions"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "native_operator_evidence": {
+                        "artifact_path": f"build/day{int(day_id)}/native_operator_evidence.json",
+                        "mode": "blocking",
+                        "review_stage": review_stage,
+                        "live_demo_required": False,
+                        "minimum_commands": 1,
+                        "minimum_queries": 1,
+                    },
+                    "kql_evidence": {
+                        "artifact_path": f"build/day{int(day_id)}/kql_evidence.json",
+                        "minimum_queries": 1,
+                        "review_stage": review_stage,
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+    day_num = str(int(day_id))
+    _write_native_operator_evidence(
+        tmp_path / "build" / f"day{day_num}" / "native_operator_evidence.json",
+        day=day_id,
+        passed=False,
+        review_stage=review_stage,
+        minimum_commands=1,
+        minimum_queries=1,
+        required=False,
+    )
+    _write_kql_evidence(
+        tmp_path / "build" / f"day{day_num}" / "kql_evidence.json",
+        day=day_id,
+        minimum_queries=1,
+    )
+
+    payload = mastery.run_mastery(day=day_id, repo_root=tmp_path)
+
+    assert payload["overall_ok"] is True
+    assert payload["results"][-2]["status"] == mastery.PASS
     assert payload["results"][-1]["status"] == mastery.PASS

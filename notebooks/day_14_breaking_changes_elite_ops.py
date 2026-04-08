@@ -235,6 +235,8 @@ def _native_tooling_gate(mo):
         """
         ## Native Tooling Gate
 
+        Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+
         Save your raw canary, rollback, and correlation proof in `build/day14/native_operator_evidence.json`.
 
         Allowed tools during this gate:
@@ -252,6 +254,9 @@ def _native_tooling_gate(mo):
         - `aegisap-lab`
         - helper verification wrappers
         - canned answer keys
+
+        Wrappers stay banned until both raw evidence files are complete. After that,
+        they may be used only for artifact rebuild, mastery, or reset flows.
 
         The capstone CAB chair may randomly select one saved proof and require a live rerun before final approval.
         """

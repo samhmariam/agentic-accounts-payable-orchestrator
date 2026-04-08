@@ -257,6 +257,8 @@ def _native_tooling_gate(mo):
         """
         ## Native Tooling Gate
 
+        Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+
         Save your raw private-network proof in `build/day12/native_operator_evidence.json`.
 
         Allowed tools during this gate:
@@ -274,6 +276,9 @@ def _native_tooling_gate(mo):
         - `aegisap-lab`
         - helper verification wrappers
         - canned answer keys
+
+        Wrappers stay banned until both raw evidence files are complete. After that,
+        they may be used only for artifact rebuild, mastery, or reset flows.
 
         Day 12 does not pass until the facilitator selects one saved proof and you rerun it live on screen.
         """

@@ -110,8 +110,12 @@ Days 1-14 express that contract through the notebook scaffold:
 - `Codification Bridge`
 - `Production Patch`
 - `Verification`
-- `Native Tooling Gate` on Days 9, 12, and 14
+- `KQL Evidence` on Days 05-14
+- `Native Tooling Gate` on Days 05-14
 - `PR Defense`
+
+Native-tool expectations are governed globally by
+`docs/curriculum/NATIVE_TOOLING_POLICY.md`.
 
 Day 0 remains the only trainer-doc and trainee-doc exception.
 

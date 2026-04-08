@@ -17,7 +17,7 @@ Use the Phase 2 drill CLI instead of ad-hoc manual breakage.
 
 ## When To Run It
 
-- Preferred window: Day 8 onward, with the default drill for that day unless a facilitator intentionally selects an alternate drill id.
+- Preferred window: Day 7 onward, with the default drill for that day unless a facilitator intentionally selects an alternate drill id.
 - Run one drill per learner or pair.
 - Do not reveal the root cause in advance.
 - Reset the drill before the next learner starts.
@@ -31,12 +31,17 @@ Use the Phase 2 drill CLI instead of ad-hoc manual breakage.
 - Day 13 defaults to DLQ overflow, with MCP contract break as an alternate.
 - Day 14 defaults to rollback failure, with canary regression, data residency violation, and correlation gap as alternates.
 
-For Days 9, 12, and 14, pair the drill with the native-tool gate. The learner
-must save raw operator proof to `native_operator_evidence.json` and be ready to
-rerun one saved proof live without helper CLI commands.
-For Days 8-14, the learner must also save `kql_evidence.json` before patching
+For Days 05-14, pair the drill with the native-tool gate described in
+`docs/curriculum/NATIVE_TOOLING_POLICY.md`. The learner must save raw operator
+proof to `native_operator_evidence.json` before patching and may not use
+`aegisap-lab` helper commands or canned verification wrappers to discover the
+answer during evidence capture.
+For Days 05-14, the learner must also save `kql_evidence.json` before patching
 so the facilitator or CAB reviewer can replay the exact Log Analytics query
 that proved the failure surface.
+Facilitators may randomly require a learner to clear recent terminal-history
+context, rerun one saved raw command or KQL query live, and explain the
+interpretation before the drill result is accepted.
 
 ## Scoring Priority
 

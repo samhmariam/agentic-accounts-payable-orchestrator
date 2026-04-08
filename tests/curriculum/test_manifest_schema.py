@@ -68,11 +68,14 @@ def test_day4_stakeholder_inject_declared() -> None:
     assert "docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md" in inject["required_artifacts"]
 
 
-def test_native_operator_evidence_contracts_exist_on_days_9_12_14() -> None:
+def test_native_operator_evidence_contracts_exist_on_days_05_to_14() -> None:
     manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
     days = {day["id"]: day for day in manifest["days"]}
 
-    assert days["09"]["native_operator_evidence"]["mode"] == "advisory"
+    for day_id in [f"{i:02d}" for i in range(5, 15)]:
+        assert days[day_id]["native_operator_evidence"]["mode"] == "blocking"
+        assert days[day_id]["native_operator_evidence"]["artifact_path"] == f"build/day{int(day_id)}/native_operator_evidence.json"
+
     assert days["09"]["native_operator_evidence"]["review_stage"] == "day10_cab_board"
     assert days["12"]["native_operator_evidence"]["mode"] == "blocking"
     assert days["12"]["native_operator_evidence"]["live_demo_required"] is True
@@ -80,11 +83,11 @@ def test_native_operator_evidence_contracts_exist_on_days_9_12_14() -> None:
     assert days["14"]["native_operator_evidence"]["review_stage"] == "capstone_cab_board"
 
 
-def test_kql_evidence_contracts_exist_on_days_8_to_14() -> None:
+def test_kql_evidence_contracts_exist_on_days_5_to_14() -> None:
     manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
     days = {day["id"]: day for day in manifest["days"]}
 
-    for day_id in [f"{i:02d}" for i in range(8, 15)]:
+    for day_id in [f"{i:02d}" for i in range(5, 15)]:
         contract = days[day_id]["kql_evidence"]
         assert contract["artifact_path"] == f"build/day{int(day_id)}/kql_evidence.json"
         assert contract["minimum_queries"] >= 1

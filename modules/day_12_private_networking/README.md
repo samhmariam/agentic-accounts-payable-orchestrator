@@ -43,9 +43,12 @@ If public access returns, regulated data escapes the private boundary and securi
 
 ## Native Tooling Gate
 
+- Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 - Save native proof to `build/day12/native_operator_evidence.json`
 - Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
+- Day 12 evidence must include at least two literal native commands plus one raw KQL query.
 - Day 12 does not pass until the facilitator makes the learner rerun one saved proof live
 
 ## KQL Evidence

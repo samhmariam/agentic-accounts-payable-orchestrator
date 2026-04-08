@@ -207,6 +207,74 @@ def _apply_day07_prompt_authority_drift(repo_root: Path) -> list[str]:
     return mutated
 
 
+def _apply_day07_shadow_reviewer_payload(repo_root: Path) -> list[str]:
+    path = repo_root / "build" / "day7" / "eval_report.json"
+
+    def updater(payload: dict[str, Any]) -> dict[str, Any]:
+        payload["gate_passed"] = False
+        payload["shadow_alert"] = {
+            "correlation_id": "trace-shadow-706",
+            "symptom": "Fallback audit summaries are now carrying raw reviewer payload fragments.",
+            "secondary_failure_signal": (
+                "The same correlation trail shows a degraded structured response before the leak appears."
+            ),
+        }
+        payload["note"] = "phase2_drill_injected"
+        return payload
+
+    return [_mutate_json(path, updater)]
+
+
+def _apply_day08_shadow_resume_identity_fallback(repo_root: Path) -> list[str]:
+    path = repo_root / "build" / "day8" / "deployment_design.json"
+
+    def updater(payload: dict[str, Any]) -> dict[str, Any]:
+        release_contract = payload.setdefault("release_contract", {})
+        release_contract["break_glass_credential_fallback"] = True
+        payload["shadow_alert"] = {
+            "correlation_id": "trace-shadow-805",
+            "symptom": "Release traces now show a privileged fallback credential path during one replayed flow.",
+            "secondary_failure_signal": "The fallback appears only on one correlation chain after the normal identity path retries.",
+        }
+        payload["note"] = "phase2_drill_injected"
+        return payload
+
+    return [_mutate_json(path, updater)]
+
+
+def _apply_day09_shadow_resume_cost_surge(repo_root: Path) -> list[str]:
+    path = repo_root / "build" / "day9" / "routing_report.json"
+
+    def updater(payload: dict[str, Any]) -> dict[str, Any]:
+        ledger = list(payload.get("sample_ledger", []))
+        ledger.append(
+            {
+                "task_class": "reflection",
+                "model_deployment": "gpt-4.1",
+                "deployment_tier": "strong",
+                "prompt_tokens": 1410,
+                "completion_tokens": 390,
+                "total_tokens": 1800,
+                "cache_hit": False,
+                "estimated_cost": 0.00592,
+                "correlation_id": "trace-shadow-905",
+            }
+        )
+        payload["sample_ledger"] = ledger
+        budget_status = payload.setdefault("budget_status", {})
+        budget_status["within_budget"] = False
+        budget_status["projected_daily_usd"] = 6.47
+        budget_status["headroom_usd"] = -1.47
+        payload["shadow_alert"] = {
+            "correlation_id": "trace-shadow-905",
+            "symptom": "One replay path is now re-entering the expensive tier and missing the cache.",
+        }
+        payload["note"] = "phase2_drill_injected"
+        return payload
+
+    return [_mutate_json(path, updater)]
+
+
 def _apply_day13_dlq_overflow(repo_root: Path) -> list[str]:
     dlq_path = repo_root / "build" / "day13" / "dlq_drain_report.json"
     webhook_path = repo_root / "build" / "day13" / "webhook_reliability_report.json"
@@ -250,6 +318,91 @@ def _apply_day13_mcp_contract_break(repo_root: Path) -> list[str]:
         return payload
 
     return [_mutate_json(contract_path, updater)]
+
+
+def _apply_day10_shadow_evidence_chain_gap(repo_root: Path) -> list[str]:
+    path = repo_root / "build" / "day10" / "release_envelope.json"
+
+    def updater(payload: dict[str, Any]) -> dict[str, Any]:
+        gates = list(payload.get("gates", []))
+        gates.append(
+            {
+                "name": "operator_evidence_chain",
+                "passed": False,
+                "detail": "Prerequisite operator proof is incomplete for one dependent control.",
+                "evidence": {"correlation_id": "trace-shadow-1008"},
+            }
+        )
+        payload["gates"] = gates
+        payload["all_passed"] = False
+        payload["note"] = "phase2_drill_injected"
+        return payload
+
+    return [_mutate_json(path, updater)]
+
+
+def _apply_day11_shadow_dependency_forbidden(repo_root: Path) -> list[str]:
+    path = repo_root / "build" / "day11" / "obo_contract.json"
+
+    def updater(payload: dict[str, Any]) -> dict[str, Any]:
+        payload["actor_binding_ok"] = False
+        payload["gate_passed"] = False
+        payload["actor_binding_check"] = {
+            "passed": False,
+            "detail": (
+                "Dependent operations now return forbidden because actor claims vanish before the boundary call completes."
+            ),
+        }
+        payload["shadow_alert"] = {
+            "correlation_id": "trace-shadow-1110",
+            "symptom": "A downstream forbidden response appears only on the same correlation trail.",
+        }
+        payload["note"] = "phase2_drill_injected"
+        return payload
+
+    return [_mutate_json(path, updater)]
+
+
+def _apply_day12_shadow_egress_detour(repo_root: Path) -> list[str]:
+    path = repo_root / "build" / "day12" / "private_network_posture.json"
+
+    def updater(payload: dict[str, Any]) -> dict[str, Any]:
+        payload["all_passed"] = False
+        services = list(payload.get("services", []))
+        if services:
+            services[0]["public_reachable"] = True
+            services[0]["passed"] = False
+            services[0]["detail"] = (
+                "A dependent call now detours through an unapproved route even though the private endpoint still exists."
+            )
+        payload["services"] = services
+        payload["shadow_alert"] = {
+            "correlation_id": "trace-shadow-1211",
+            "symptom": "One dependency now takes an unexpected route on the same incident trail.",
+        }
+        payload["note"] = "phase2_drill_injected"
+        return payload
+
+    return [_mutate_json(path, updater)]
+
+
+def _apply_day13_shadow_actor_claim_loss(repo_root: Path) -> list[str]:
+    path = repo_root / "build" / "day13" / "mcp_contract_report.json"
+
+    def updater(payload: dict[str, Any]) -> dict[str, Any]:
+        payload["passed"] = False
+        payload["contract_valid"] = False
+        payload["errors"] = [
+            "Partner-bound traffic now reaches the boundary without the expected actor context and is rejected downstream."
+        ]
+        payload["shadow_alert"] = {
+            "correlation_id": "trace-shadow-1311",
+            "symptom": "A forbidden response now appears on the same boundary correlation trail.",
+        }
+        payload["note"] = "phase2_drill_injected"
+        return payload
+
+    return [_mutate_json(path, updater)]
 
 
 def _apply_day14_canary_regression(repo_root: Path) -> list[str]:
@@ -329,18 +482,48 @@ def _apply_day14_rollback_failure(repo_root: Path) -> list[str]:
     ]
 
 
+def _apply_day14_shadow_compensation_backlog(repo_root: Path) -> list[str]:
+    path = repo_root / "build" / "day14" / "trace_correlation_report.json"
+
+    def updater(payload: dict[str, Any]) -> dict[str, Any]:
+        payload["correlated"] = 3
+        payload["uncorrelated"] = 1
+        payload["passed"] = False
+        payload["dual_sink_ok"] = False
+        payload["dual_sink_satisfied"] = False
+        payload["details"] = [
+            "One replay path now arrives without complete compensation markers or trace continuity."
+        ]
+        payload["shadow_alert"] = {
+            "correlation_id": "trace-shadow-1413",
+            "symptom": "Executive evidence now shows a replay path missing continuity on the same incident trail.",
+        }
+        payload["note"] = "phase2_drill_injected"
+        return payload
+
+    return [_mutate_json(path, updater)]
+
+
 _ARTIFACT_MUTATORS: dict[str, Callable[[Path], list[str]]] = {
     "day07_prompt_authority_drift": _apply_day07_prompt_authority_drift,
+    "day07_shadow_reviewer_payload": _apply_day07_shadow_reviewer_payload,
+    "day08_shadow_resume_identity_fallback": _apply_day08_shadow_resume_identity_fallback,
+    "day09_shadow_resume_cost_surge": _apply_day09_shadow_resume_cost_surge,
+    "day10_shadow_evidence_chain_gap": _apply_day10_shadow_evidence_chain_gap,
     "day11_iam_drift": _apply_day11_iam_drift,
     "day11_obo_scope_mismatch": _apply_day11_obo_scope_mismatch,
+    "day11_shadow_dependency_forbidden": _apply_day11_shadow_dependency_forbidden,
     "day12_dns_misconfiguration": _apply_day12_dns_misconfiguration,
     "day12_public_endpoint_reenabled": _apply_day12_public_endpoint_reenabled,
+    "day12_shadow_egress_detour": _apply_day12_shadow_egress_detour,
     "day13_dlq_overflow": _apply_day13_dlq_overflow,
     "day13_mcp_contract_break": _apply_day13_mcp_contract_break,
+    "day13_shadow_actor_claim_loss": _apply_day13_shadow_actor_claim_loss,
     "day14_canary_regression": _apply_day14_canary_regression,
     "day14_data_residency_violation": _apply_day14_data_residency,
     "day14_correlation_gap": _apply_day14_correlation_gap,
     "day14_rollback_failure": _apply_day14_rollback_failure,
+    "day14_shadow_compensation_backlog": _apply_day14_shadow_compensation_backlog,
 }
 
 
@@ -372,6 +555,8 @@ def list_drills(
                     "source_file": drill.get("source_file"),
                     "expected_signal": drill["expected_signal"],
                     "repair_targets": drill.get("repair_targets", []),
+                    "shadow_origin_day": drill.get("shadow_origin_day"),
+                    "secondary_failure_signal": drill.get("secondary_failure_signal"),
                     "active": bool(active and active.get("drill_id") == drill["id"]),
                 }
             )
@@ -414,6 +599,8 @@ def inject_drill(
         "mode": drill["mode"],
         "expected_signal": drill["expected_signal"],
         "repair_targets": drill.get("repair_targets", []),
+        "shadow_origin_day": drill.get("shadow_origin_day"),
+        "secondary_failure_signal": drill.get("secondary_failure_signal"),
         "source_metadata": metadata,
         "mutated_files": mutated_files,
         "constraint_lineage": lineage,

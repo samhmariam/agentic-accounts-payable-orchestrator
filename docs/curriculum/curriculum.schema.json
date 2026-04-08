@@ -508,6 +508,14 @@
           "type": "string",
           "minLength": 1
         },
+        "shadow_origin_day": {
+          "type": "string",
+          "pattern": "^[0-9]{2}$"
+        },
+        "secondary_failure_signal": {
+          "type": "string",
+          "minLength": 1
+        },
         "source_file": {
           "type": "string",
           "minLength": 1

@@ -58,10 +58,17 @@ def test_missing_po_exception_maps_to_human_review() -> None:
     assert any(reason.code == "INSUFFICIENT_EVIDENCE" for reason in result.reasons)
 
 
+def test_malformed_reviewer_output_escalates_instead_of_auto_coercing() -> None:
+    result = run_day6_review(_load_fixture("malformed_reviewer_output_case"))
+
+    assert result.outcome == "needs_human_review"
+    assert any(reason.code == "STRUCTURED_OUTPUT_DEGRADED" for reason in result.reasons)
+    assert result.authorisation_check.present is True
+
+
 def test_terminal_refusal_schema_requires_high_severity_reason_and_citation() -> None:
     result = run_day6_review(_load_fixture("prompt_injection_email_case"))
 
     revalidated = ReviewOutcome.model_validate(result.model_dump(mode="json"))
 
     assert revalidated.outcome == "not_authorised_to_continue"
-

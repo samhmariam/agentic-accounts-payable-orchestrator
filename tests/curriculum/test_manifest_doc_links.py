@@ -142,10 +142,24 @@ def test_day04_docs_reference_pushback_artifacts() -> None:
 @pytest.mark.parametrize(
     "rel_path",
     [
+        "docs/DAY_05.md",
+        "modules/day_05_durable_state/README.md",
+        "docs/DAY_06.md",
+        "modules/day_06_data_authority/README.md",
+        "docs/DAY_07.md",
+        "modules/day_07_eval_guardrails/README.md",
+        "docs/DAY_08.md",
+        "modules/day_08_iac_identity/README.md",
         "docs/DAY_09.md",
         "modules/day_09_observability_cost/README.md",
+        "docs/DAY_10.md",
+        "modules/day_10_production_acceptance/README.md",
+        "docs/DAY_11.md",
+        "modules/day_11_delegated_identity/README.md",
         "docs/DAY_12.md",
         "modules/day_12_private_networking/README.md",
+        "docs/DAY_13.md",
+        "modules/day_13_integration_boundary/README.md",
         "docs/DAY_14.md",
         "modules/day_14_elite_ops/README.md",
     ],
@@ -154,11 +168,18 @@ def test_native_tooling_gate_docs_exist(rel_path: str) -> None:
     content = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
     assert "## Native Tooling Gate" in content
     assert "native_operator_evidence.json" in content
+    assert "NATIVE_TOOLING_POLICY.md" in content
 
 
 @pytest.mark.parametrize(
     "rel_path,day_id",
     [
+        ("docs/DAY_05.md", "05"),
+        ("modules/day_05_durable_state/README.md", "05"),
+        ("docs/DAY_06.md", "06"),
+        ("modules/day_06_data_authority/README.md", "06"),
+        ("docs/DAY_07.md", "07"),
+        ("modules/day_07_eval_guardrails/README.md", "07"),
         ("docs/DAY_08.md", "08"),
         ("modules/day_08_iac_identity/README.md", "08"),
         ("docs/DAY_09.md", "09"),

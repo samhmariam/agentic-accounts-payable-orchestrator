@@ -12,6 +12,7 @@ INCIDENT_SECTIONS = (
     "## Incident",
     "## Portal Investigation",
     "## Lab Repair",
+    "## Codification Bridge",
     "## Production Patch",
     "## Verification",
     "## PR Defense",
@@ -117,6 +118,8 @@ def test_manifest_wave4_days_include_incident_contract_fields() -> None:
         assert day["injection_command"] == f"uv run aegisap-lab incident start --day {day_id}"
         assert day["revert_state"] == f".aegisap-lab/state/day{day_id}.json"
         assert day["verification_commands"]
+        assert day["portal_to_script_mapping"]["bridge_file"]
+        assert day["portal_to_script_mapping"]["production_targets"]
         assert day["review_contract"]["human_required"] is True
 
 
@@ -178,6 +181,7 @@ def test_wave4_notebooks_use_incident_scaffold_and_markdown_only_patch_boundary(
             assert section in text, f"Notebook {day_id} is missing {section}"
         assert "markdown-only" in text
         assert "Do not edit repo files from this notebook" in text
+        assert "### Export to Production" in text
 
 
 def test_wave4_notebooks_do_not_reference_retired_learner_entry_surfaces() -> None:

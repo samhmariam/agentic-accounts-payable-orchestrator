@@ -42,10 +42,10 @@ not oral-defense points alone. See full matrix below and in the manifest.
 
 | Band | Points | Observable behavior |
 |---|---|---|
-| Full | 28–35 | Artifact complete, all gate conditions met, explains why each field is correct |
-| Strong | 21–27 | Minor gaps in one sub-criterion; artifact is structurally sound |
-| Developing | 14–20 | Missing a contract detail, schema rule, or gate condition; outcome reached but fragile |
-| At risk | 7–13 | Material errors; would fail a production review without intervention |
+| Full | 28–35 | Artifact complete, all gate conditions met, explains why each field is correct, and maps the observed portal state to the exact durable code or IaC change |
+| Strong | 21–27 | Minor gaps in one sub-criterion; artifact is structurally sound and the production target is mostly clear |
+| Developing | 14–20 | Missing a contract detail, schema rule, or gate condition; outcome reached but fragile, or the learner can explain the portal but names the wrong permanent code change |
+| At risk | 7–13 | Material errors; would fail a production review without intervention, or the learner relies on manual portal repair with no durable codification path |
 | Insufficient | 0–6 | Artifact absent or so incomplete it cannot be assessed |
 
 ### Trade-off Reasoning (max 20)
@@ -62,10 +62,10 @@ not oral-defense points alone. See full matrix below and in the manifest.
 
 | Band | Points | Observable behavior |
 |---|---|---|
-| Full | 13–15 | Correct approver chain, change classification, and evidence requirements named without prompting |
-| Strong | 10–12 | Approver chain mostly correct; one governance step missing or mis-classified |
-| Developing | 6–9 | Identifies the right team but cannot name the process or required evidence |
-| At risk | 3–5 | Treats governance as optional or an obstacle |
+| Full | 13–15 | Correct approver chain, change classification, evidence requirements, and codification path named without prompting |
+| Strong | 10–12 | Approver chain mostly correct; one governance or codification step missing or mis-classified |
+| Developing | 6–9 | Identifies the right team but cannot name the process, required evidence, or exact durable change |
+| At risk | 3–5 | Treats governance as optional or an obstacle, or cannot move from portal observation to automation |
 | Insufficient | 0–2 | No process awareness demonstrated |
 
 ### Artifact Quality (max 15)
@@ -89,6 +89,17 @@ not oral-defense points alone. See full matrix below and in the manifest.
 | Insufficient | 0–2 | Cannot engage with the question |
 
 See `docs/curriculum/ASSESSOR_CALIBRATION.md` for calibration anchors.
+
+## Translation Requirement
+
+Explaining the portal is not enough. A passing learner must be able to say:
+
+- which Azure or runtime state proved the failure
+- which notebook proof reproduced the fix safely
+- which exact file or IaC module made the change permanent
+
+If the learner can inspect the portal but cannot codify the fix, score
+`Technical Correctness` and `Process Fluency` down accordingly.
 
 ## Zero-Tolerance Conditions
 

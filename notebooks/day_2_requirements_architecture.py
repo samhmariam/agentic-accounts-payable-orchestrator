@@ -227,6 +227,24 @@ def _retry_preview(RetryPolicy, execute_with_retry, failures_before_success, ide
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the portal metrics and notebook controls as one chain.
+
+        - Portal state: Azure metrics prove the `429` pressure is real and the planning path is under stress.
+        - Notebook proof: the backpressure and retry previews show whether the safe fix belongs to queueing, retry policy, or both.
+        - Permanent repo change: `src/aegisap/observability/retry_policy.py` and `src/aegisap/resilience/backpressure.py`.
+
+        Rosetta Stone: `notebooks/bridges/day02_resilience_controls.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -245,6 +263,12 @@ def _production_patch(mo):
 
         - `docs/curriculum/artifacts/day02/NFR_REGISTER.md`
         - `docs/curriculum/artifacts/day02/ADR_001_SCOPE_AND_BOUNDARIES.md`
+
+        ### Export to Production
+
+        - Which telemetry signal proved quota pressure versus an auth problem?
+        - Which exact rule belongs in `src/aegisap/observability/retry_policy.py` and which belongs in `src/aegisap/resilience/backpressure.py`?
+        - What verification proves the protected path no longer fails open?
 
         Your code change is the repair. The Day 2 artifacts are the explanation that survives review.
         """

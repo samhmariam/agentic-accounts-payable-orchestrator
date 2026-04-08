@@ -107,6 +107,24 @@ def _lab_preview(json, mo):
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the war-room evidence and notebook gate logic as one executive-control path.
+
+        - Portal state: canary, rollback, or second-sink evidence disagrees with the Day 14 gate.
+        - Notebook proof: the gate preview shows the false-green condition for private-network deployments.
+        - Permanent repo change: `src/aegisap/deploy/gates_v2.py`, `src/aegisap/traceability/correlation.py` or `scripts/verify_trace_correlation.py`, and, if needed, `scripts/run_chaos_capstone.py`.
+
+        Rosetta Stone: `notebooks/bridges/day14_elite_operations.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -127,6 +145,12 @@ def _production_patch(mo):
         - `docs/curriculum/artifacts/day14/INCIDENT_COMMAND_PLAYBOOK.md`
         - `docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md`
         - `docs/curriculum/artifacts/day14/ELITE_READINESS_SCORECARD.md`
+
+        ### Export to Production
+
+        - Which operator signal contradicted the gate?
+        - Which file permanently blocks the false-green elite-ops decision?
+        - Which verification proves the chaos and executive artifacts still tell the same story?
         """
     )
     return

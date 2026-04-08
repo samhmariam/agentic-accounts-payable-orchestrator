@@ -130,6 +130,24 @@ def _overlay_preview(
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the trace evidence and notebook prototype as one fail-closed contract.
+
+        - Portal state: the risky invoice facts and final routing outcome disagree.
+        - Notebook proof: the overlay preview shows whether the break lives in risk derivation, recommendation gating, or both.
+        - Permanent repo change: `src/aegisap/day4/planning/policy_overlay.py` and `src/aegisap/day4/recommendation/recommendation_gate.py`.
+
+        Rosetta Stone: `notebooks/bridges/day04_fail_closed_planning.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -148,6 +166,12 @@ def _production_patch(mo):
 
         - `docs/curriculum/artifacts/day04/ACTION_RISK_REGISTER.md`
         - `docs/curriculum/artifacts/day04/POLICY_PRECEDENCE.md`
+
+        ### Export to Production
+
+        - Which exact risk combination stopped failing closed?
+        - Which file enforces the durable fix: `policy_overlay.py`, `recommendation_gate.py`, or both?
+        - Which test and rebuilt artifact prove manual escalation is mandatory again?
         """
     )
     return

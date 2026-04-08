@@ -132,6 +132,24 @@ def _routing_preview(check_budget, evaluate_cache_policy, json, mo, route_task):
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the routing telemetry and notebook previews as the same control decision.
+
+        - Portal state: risky work is staying on the wrong deployment tier.
+        - Notebook proof: the routing, cache, and budget preview shows whether routing, cache policy, or budget framing drifted.
+        - Permanent repo change: `src/aegisap/routing/routing_policy.py`, `src/aegisap/cache/cache_policy.py`, and, if needed, `src/aegisap/cost/budget_gate.py`.
+
+        Rosetta Stone: `notebooks/bridges/day09_routing_cost.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -152,6 +170,12 @@ def _production_patch(mo):
         - `docs/curriculum/artifacts/day09/CAPABILITY_ALLOCATION_MEMO.md`
         - `docs/curriculum/artifacts/day09/COST_GOVERNANCE_POLICY.md`
         - `docs/curriculum/artifacts/day09/PTU_PAYG_DECISION_NOTE.md`
+
+        ### Export to Production
+
+        - Which telemetry signal proved the wrong tier choice?
+        - Which policy file makes the safety escalation durable?
+        - Which verification proves risky work no longer rides the cheap tier?
         """
     )
     return

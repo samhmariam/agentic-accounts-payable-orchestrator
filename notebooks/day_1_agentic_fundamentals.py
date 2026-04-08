@@ -195,6 +195,24 @@ def _fixture_walkthrough(
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the portal and notebook as evidence, not as the fix.
+
+        - Portal state: the extractor and endpoint health are fine, but the locale-formatted amount crossing the deterministic boundary is not handled safely.
+        - Notebook proof: `parse_money(...)` and the fixture walkthrough prove whether the break lives in normalization or the reject path.
+        - Permanent repo change: `src/aegisap/day_01/normalizers.py` and, if needed, `src/aegisap/day_01/service.py`.
+
+        Rosetta Stone: `notebooks/bridges/day01_trust_boundary.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -209,6 +227,12 @@ def _production_patch(mo):
 
         - `src/aegisap/day_01/normalizers.py`
         - `src/aegisap/day_01/service.py` if the rejection path or exception handling needs adjustment
+
+        ### Export to Production
+
+        - Which exact amount literal caused the failure?
+        - What exact normalization or rejection rule must change in `src/aegisap/day_01/normalizers.py` or `src/aegisap/day_01/service.py`?
+        - Which test and rebuilt artifact prove the change is permanent?
 
         After the code change, run the terminal verification commands below. Do not proceed
         until the tests are green.

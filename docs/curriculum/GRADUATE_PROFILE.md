@@ -7,6 +7,7 @@ bounded agentic-system tasks.
 
 - add or modify a bounded policy rule safely
 - debug a failing gate from artifact and release evidence
+- translate a portal or telemetry finding into a permanent code or IaC change
 - explain the runtime identity model and least-privilege posture
 - instrument a bounded observability addition without exposing secrets or PII
 - defend a cost-routing or safety tradeoff with evidence

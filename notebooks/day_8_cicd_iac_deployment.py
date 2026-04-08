@@ -126,6 +126,24 @@ def _contract_check(Path, mo, repo_root):
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the Azure IAM view and the notebook snippet as one least-privilege contract.
+
+        - Portal state: the runtime principal is over-privileged or the identity wiring no longer matches the expected release boundary.
+        - Notebook proof: the assignment preview and contract check show the runtime must stay reader-only.
+        - Permanent repo change: `infra/modules/role_assignments.bicep`, `infra/foundations/search_service.bicep`, and, if needed, `infra/modules/container_app.bicep`.
+
+        Rosetta Stone: `notebooks/bridges/day08_identity_iac.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -146,6 +164,12 @@ def _production_patch(mo):
         - `docs/curriculum/artifacts/day08/SECURITY_REVIEW_PACKET.md`
         - `docs/curriculum/artifacts/day08/DRIFT_RESPONSE_PLAYBOOK.md`
         - `docs/curriculum/artifacts/day08/RELEASE_OWNERSHIP_MAP.md`
+
+        ### Export to Production
+
+        - Which principal and role were wrong in the portal?
+        - Which Bicep resource or property makes the least-privilege fix permanent?
+        - Which verification and rebuilt artifact prove runtime access is back inside the contract?
         """
     )
     return

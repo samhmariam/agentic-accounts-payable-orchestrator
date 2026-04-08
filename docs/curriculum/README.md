@@ -34,6 +34,7 @@ Program-level operating guides live alongside the day materials:
 - [TRAINER_OPERATIONS.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINER_OPERATIONS.md)
 - [TRAINEE_PREFLIGHT_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md)
 - [FACILITATOR_DAY_START_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md)
+- [FDE_DEBUGGING_FRAMEWORK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md)
 - [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md)
 - [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md)
 - [PILOT_MEASUREMENT_PLAN.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/PILOT_MEASUREMENT_PLAN.md)
@@ -88,10 +89,11 @@ as the launch-readiness checklist rather than relying on memory.
 
 ## Delivery Contract
 
-Every day should leave the learner with four concrete outputs:
+Every day should leave the learner with five concrete outputs:
 
 - A hostile starting state or explicit bootstrap contract
 - A notebook-guided repair path that makes the failure mode legible
+- A codification bridge that names the exact permanent repo change
 - A terminal verification path that proves the real repo patch works
 - An artifact and defense packet that proves the learner can explain the design choice, not just run the code
 
@@ -104,11 +106,28 @@ Days 1-14 express that contract through the notebook scaffold:
 - `Incident`
 - `Portal Investigation`
 - `Lab Repair`
+- `Codification Bridge`
 - `Production Patch`
 - `Verification`
 - `PR Defense`
 
 Day 0 remains the only trainer-doc and trainee-doc exception.
+
+## FDE Translation Cycle
+
+The delivery sequence is strict:
+
+1. Incident: the system is broken.
+2. Portal Investigation: locate the broken state in Azure or operator evidence.
+3. Lab Repair: reproduce and prove the fix interactively.
+4. Codification Bridge: map the observed state to the exact repo files that must change.
+5. Production Patch: make the durable code or IaC change.
+6. Verification: prove tests, artifacts, and cloud state agree.
+7. PR Defense: explain the blast radius, tradeoff, and authority chain.
+
+The bridge notes live in `notebooks/bridges/README.md`. When Azure access is
+available, use `uv run aegisap-lab audit-production` after the repair to prove
+the cloud state now matches the code.
 
 ---
 

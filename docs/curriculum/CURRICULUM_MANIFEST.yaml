@@ -11,6 +11,10 @@
 #   legacy_doc_files: reserved for explicit compatibility exceptions; incident-delivery days should leave this empty
 #   rubric_weights  : five dimensions summing exactly to 100
 #   artifact_files  : all trainee-produced artifact paths under docs/curriculum/artifacts/
+#   portal_to_script_mapping:
+#     portal_surface    : exact Azure or runtime surface the learner must inspect first
+#     bridge_file       : repo-root-relative Rosetta Stone that maps portal state to durable code
+#     production_targets: repo files where the permanent repair must land
 #   oral_defense_prompts: exactly 3 per day (universal + day-specific framing)
 #   zero_tolerance  : conditions that hard-fail the day regardless of total score;
 #                     applies to assessed artifacts and technical decisions, not oral-defense points alone
@@ -61,6 +65,12 @@ days:
       - docs/curriculum/artifacts/day01/AGENT_FIT_MEMO.md
       - docs/curriculum/artifacts/day01/NO_AGENT_MEMO.md
       - docs/curriculum/artifacts/day01/FDE_MENTAL_MODELS.md
+    portal_to_script_mapping:
+      portal_surface: "Foundry or Azure OpenAI extraction payload and runtime endpoint health"
+      bridge_file: notebooks/bridges/day01_trust_boundary.md
+      production_targets:
+        - src/aegisap/day_01/normalizers.py
+        - src/aegisap/day_01/service.py
     oral_defense_prompts:
       - "What alternative automation approach did you reject for this pain point, and why does the agent design win on this dimension?"
       - "What is the blast radius if the agent acts on a misclassified invoice? Name the downstream systems and approvers affected."
@@ -96,6 +106,12 @@ days:
       - docs/curriculum/artifacts/day02/RACI_MATRIX.md
       - docs/curriculum/artifacts/day02/NFR_REGISTER.md
       - docs/curriculum/artifacts/day02/ADR_001_SCOPE_AND_BOUNDARIES.md
+    portal_to_script_mapping:
+      portal_surface: "Azure OpenAI deployment metrics, retry telemetry, and queue pressure evidence"
+      bridge_file: notebooks/bridges/day02_resilience_controls.md
+      production_targets:
+        - src/aegisap/observability/retry_policy.py
+        - src/aegisap/resilience/backpressure.py
     oral_defense_prompts:
       - "Which NFR did you classify as zero-tolerance and why can it not be tuned post-launch without a full change-board review?"
       - "If the security stakeholder and the process owner disagree on latency vs control, whose position wins and through what governance mechanism?"
@@ -130,6 +146,13 @@ days:
       - docs/curriculum/artifacts/day03/FRAMEWORK_DECISION_MATRIX.md
       - docs/curriculum/artifacts/day03/MODEL_ROUTING_POLICY_V1.yaml
       - docs/curriculum/artifacts/day03/RAG_BOUNDARY_DECISION.md
+    portal_to_script_mapping:
+      portal_surface: "Azure AI Search index evidence and source-of-truth mismatch"
+      bridge_file: notebooks/bridges/day03_retrieval_authority.md
+      production_targets:
+        - src/aegisap/day3/policies/source_authority_rules.yaml
+        - src/aegisap/day3/retrieval/ranker.py
+        - src/aegisap/day3/retrieval/authority_policy.py
     oral_defense_prompts:
       - "You chose one framework and rejected three. Explain the single strongest argument for each rejected alternative and why that argument was still insufficient."
       - "If your framework choice turns out to be wrong at Day 10 scale, what is the migration blast radius in terms of state contracts and tool interfaces?"
@@ -164,6 +187,12 @@ days:
       - docs/curriculum/artifacts/day04/ACTION_RISK_REGISTER.md
       - docs/curriculum/artifacts/day04/POLICY_PRECEDENCE.md
       - docs/curriculum/artifacts/day04/FAIL_CLOSED_TEST_CASES.json
+    portal_to_script_mapping:
+      portal_surface: "Execution trace risk flags, invoice facts, and final routing outcome"
+      bridge_file: notebooks/bridges/day04_fail_closed_planning.md
+      production_targets:
+        - src/aegisap/day4/planning/policy_overlay.py
+        - src/aegisap/day4/recommendation/recommendation_gate.py
     oral_defense_prompts:
       - "Which action in your risk register did you classify as irreversible and what deterministic policy prevents the model from triggering it?"
       - "If the policy overlay fails open instead of closed, what is the blast radius across financial controls and who absorbs the liability?"
@@ -198,6 +227,12 @@ days:
       - docs/curriculum/artifacts/day05/HUMAN_APPROVAL_CONTRACT.md
       - docs/curriculum/artifacts/day05/PAUSE_RESUME_GOVERNANCE.md
       - docs/curriculum/artifacts/day05/ESCALATION_TREE.md
+    portal_to_script_mapping:
+      portal_surface: "Approval-task state, checkpoint records, and failed-resume evidence"
+      bridge_file: notebooks/bridges/day05_durable_state.md
+      production_targets:
+        - src/aegisap/day5/workflow/resume_service.py
+        - src/aegisap/day5/workflow/checkpoint_manager.py
     oral_defense_prompts:
       - "Which HITL failure mode did you consider but choose not to handle in the contract, and why is that an acceptable omission?"
       - "If the system resumes from a checkpoint after an approver's decision has been overtaken by events, what state fields are now stale and what is the blast radius?"
@@ -232,6 +267,12 @@ days:
       - docs/curriculum/artifacts/day06/DATA_AUTHORITY_CHART.md
       - docs/curriculum/artifacts/day06/CHANGE_CLASSIFICATION_MATRIX.md
       - docs/curriculum/artifacts/day06/SOURCE_OF_TRUTH_CONFLICT_RUNBOOK.md
+    portal_to_script_mapping:
+      portal_surface: "Stored review evidence, claim ledger, and authority context"
+      bridge_file: notebooks/bridges/day06_review_boundary.md
+      production_targets:
+        - src/aegisap/day6/review/prompt_injection.py
+        - src/aegisap/day6/review/authority_boundary.py
     oral_defense_prompts:
       - "Which data source did you demote in the authority hierarchy, and what scenario would cause a conflict between it and the authoritative source?"
       - "If you classify a threshold change as a policy change rather than a model change, what approval path changes and what is the blast radius of the wrong classification?"
@@ -266,6 +307,13 @@ days:
       - docs/curriculum/artifacts/day07/EVAL_GOVERNANCE_POLICY.md
       - docs/curriculum/artifacts/day07/SLICE_REGRESSION_DECISION_LOG.md
       - docs/curriculum/artifacts/day07/REFUSAL_REASON_CODE_CATALOG.md
+    portal_to_script_mapping:
+      portal_surface: "Application Insights or Log Analytics refusal evidence containing leaked identifiers"
+      bridge_file: notebooks/bridges/day07_guardrail_redaction.md
+      production_targets:
+        - src/aegisap/security/redaction.py
+        - src/aegisap/audit/events.py
+        - src/aegisap/audit/writer.py
     oral_defense_prompts:
       - "The aggregate eval score improved but one critical slice regressed. Walk through your decision to block or release and name the approver chain."
       - "If your refusal schema is incomplete for one action class, what is the blast radius in terms of audit evidence gaps and regulatory exposure?"
@@ -304,6 +352,13 @@ days:
       - docs/curriculum/artifacts/day08/RELEASE_OWNERSHIP_MAP.md
       - docs/curriculum/artifacts/day08/SECURITY_REVIEW_PACKET.md
       - docs/curriculum/artifacts/day08/DRIFT_RESPONSE_PLAYBOOK.md
+    portal_to_script_mapping:
+      portal_surface: "Azure AI Search IAM, Container App managed identity, and release-role drift"
+      bridge_file: notebooks/bridges/day08_identity_iac.md
+      production_targets:
+        - infra/modules/role_assignments.bicep
+        - infra/foundations/search_service.bicep
+        - infra/modules/container_app.bicep
     oral_defense_prompts:
       - "Which IaC pattern did you choose over an alternative and what is the security consequence of the rejected approach?"
       - "If federated credentials drift and the pipeline loses access at 2am, what is the blast radius and who is the first call?"
@@ -338,6 +393,13 @@ days:
       - docs/curriculum/artifacts/day09/CAPABILITY_ALLOCATION_MEMO.md
       - docs/curriculum/artifacts/day09/COST_GOVERNANCE_POLICY.md
       - docs/curriculum/artifacts/day09/PTU_PAYG_DECISION_NOTE.md
+    portal_to_script_mapping:
+      portal_surface: "Application Insights routing telemetry, deployment-tier selection, and cost signals"
+      bridge_file: notebooks/bridges/day09_routing_cost.md
+      production_targets:
+        - src/aegisap/routing/routing_policy.py
+        - src/aegisap/cache/cache_policy.py
+        - src/aegisap/cost/budget_gate.py
     oral_defense_prompts:
       - "Which capability did you route to the mini model and what is the quality degradation risk if that routing decision is wrong?"
       - "Finance demands a 30% cost cut. Walk through which lever you would pull first and what zero-tolerance controls you would not touch."
@@ -372,6 +434,13 @@ days:
       - docs/curriculum/artifacts/day10/CAB_PACKET.md
       - docs/curriculum/artifacts/day10/EXECUTIVE_RELEASE_BRIEF.md
       - docs/curriculum/artifacts/day10/GATE_EXCEPTION_POLICY.md
+    portal_to_script_mapping:
+      portal_surface: "Candidate revision health, gate evidence, and false-green release summaries"
+      bridge_file: notebooks/bridges/day10_release_evidence.md
+      production_targets:
+        - src/aegisap/deploy/gates.py
+        - scripts/check_all_gates.py
+        - src/aegisap/training/checkpoints.py
     oral_defense_prompts:
       - "Walk through one gate in your CAB packet that almost failed and explain what evidence tipped the decision."
       - "A late executive wants to override one gate for business urgency. What is your response and what is the blast radius if you comply?"
@@ -410,6 +479,13 @@ days:
       - docs/curriculum/artifacts/day11/APPROVAL_AUTHORITY_MODEL.md
       - docs/curriculum/artifacts/day11/OBO_THREAT_MODEL.md
       - docs/curriculum/artifacts/day11/IDENTITY_EXCEPTION_REQUEST_RESPONSE.md
+    portal_to_script_mapping:
+      portal_surface: "Entra app registrations, approver-group membership, and delegated-identity evidence"
+      bridge_file: notebooks/bridges/day11_delegated_identity.md
+      production_targets:
+        - src/aegisap/identity/actor_verifier.py
+        - src/aegisap/identity/obo.py
+        - scripts/verify_delegated_identity_contract.py
     oral_defense_prompts:
       - "Walk through the authority confusion attack path you modelled and explain exactly which control in the OBO flow breaks the chain."
       - "A team asks to skip OBO for integration speed. What is the blast radius of granting that exception, and what compensating controls would you require?"
@@ -448,6 +524,14 @@ days:
       - docs/curriculum/artifacts/day12/NETWORK_DEPENDENCY_REGISTER.md
       - docs/curriculum/artifacts/day12/SECURITY_EXCEPTION_REQUEST.md
       - docs/curriculum/artifacts/day12/EGRESS_CONTROL_POLICY.md
+    portal_to_script_mapping:
+      portal_surface: "Private endpoint, DNS, Network Watcher, and public-network posture evidence"
+      bridge_file: notebooks/bridges/day12_private_networking.md
+      production_targets:
+        - src/aegisap/network/bicep_policy_checker.py
+        - src/aegisap/network/private_endpoint_probe.py
+        - scripts/check_private_network_static.py
+        - scripts/verify_private_network_posture.py
     oral_defense_prompts:
       - "Which network dependency has the longest lead time and what is your plan if it is not resolved before production cutover?"
       - "You temporarily enable a public endpoint in dev. Walk through every compensating control, the expiry date, and who holds the removal obligation."
@@ -486,6 +570,14 @@ days:
       - docs/curriculum/artifacts/day13/EXTERNAL_CONTRACT_POLICY.md
       - docs/curriculum/artifacts/day13/COMPENSATING_ACTION_CATALOG.md
       - docs/curriculum/artifacts/day13/API_CHANGE_COMMUNICATION_PLAN.md
+    portal_to_script_mapping:
+      portal_surface: "Hosted MCP contract, partner-visible capabilities, and async reliability evidence"
+      bridge_file: notebooks/bridges/day13_integration_boundary.md
+      production_targets:
+        - src/aegisap/mcp/server.py
+        - src/aegisap/mcp/schemas.py
+        - src/aegisap/integration/dlq_consumer.py
+        - src/aegisap/integration/compensating_action.py
     oral_defense_prompts:
       - "A partner demands direct access to the orchestrator. Walk through your boundary defense and what you offer instead."
       - "If a compensating action fails silently, what is the blast radius and what is your detection and recovery path?"
@@ -520,6 +612,14 @@ days:
       - docs/curriculum/artifacts/day14/INCIDENT_COMMAND_PLAYBOOK.md
       - docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md
       - docs/curriculum/artifacts/day14/ELITE_READINESS_SCORECARD.md
+    portal_to_script_mapping:
+      portal_surface: "Canary health, rollback markers, and dual-sink trace evidence"
+      bridge_file: notebooks/bridges/day14_elite_operations.md
+      production_targets:
+        - src/aegisap/deploy/gates_v2.py
+        - src/aegisap/traceability/correlation.py
+        - scripts/verify_trace_correlation.py
+        - scripts/run_chaos_capstone.py
     oral_defense_prompts:
       - "During the war-game, three failures arrive simultaneously. Walk through your triage order, the mental model driving each decision, and the first action you would not take."
       - "You recommend a partial-service continuation. What is the blast radius of that choice, which gates are you explicitly bypassing, and who must countersign?"

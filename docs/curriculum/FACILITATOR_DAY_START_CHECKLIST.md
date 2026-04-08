@@ -27,6 +27,7 @@ az account show
 5. Open these side by side:
 - `docs/curriculum/CURRICULUM_MANIFEST.yaml`
 - the day notebook
+- `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`
 - the primary day doc
 - `docs/curriculum/TRAINER_OPERATIONS.md`
 - the prior day's handoff notes
@@ -39,6 +40,7 @@ If you are teaching Day 0, also open `docs/curriculum/portal/DAY_00_PORTAL.md`.
 - Which upstream artifacts are still missing?
 - Which learners are not safe to advance without catch-up?
 - Which live Azure steps today can fall back to preview mode, and which cannot?
+- Is `uv run aegisap-lab audit-production` expected today or only the local verification path?
 
 ## Day-Start Script For Facilitators
 
@@ -81,6 +83,7 @@ Say these five things out loud before the lab begins:
 
 - Check that learners can open the repo and activate the right shell.
 - Check that learners know Day 0 starts in the portal, while Days 1-14 start with `uv run aegisap-lab incident start --day XX`.
+- Check that learners know the notebook now includes a `Codification Bridge` step before the repo patch.
 - Confirm who already ran the trainee preflight and who did not.
 - Identify the first artifact or prerequisite that could stall the room.
 - State the fallback path before the first live command is run.

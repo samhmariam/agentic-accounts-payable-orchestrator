@@ -62,6 +62,7 @@ REQUIRED_DOCS = (
     "docs/curriculum/TRAINER_OPERATIONS.md",
     "docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md",
     "docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md",
+    "docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md",
     "docs/curriculum/ASSESSMENT_RUBRIC.md",
     "docs/curriculum/GRADUATION_RUBRIC.md",
     "docs/curriculum/ASSESSOR_CALIBRATION.md",
@@ -102,6 +103,7 @@ README_REQUIRED_SNIPPETS = (
     "portal/README.md",
     "TRAINEE_PREFLIGHT_CHECKLIST.md",
     "FACILITATOR_DAY_START_CHECKLIST.md",
+    "FDE_DEBUGGING_FRAMEWORK.md",
     "## Mandatory Checkpoints",
     "build/day4/checkpoint_policy_overlay.json",
     "build/day8/checkpoint_trace_extension.json",
@@ -115,6 +117,7 @@ TRAINER_OPS_REQUIRED_SNIPPETS = (
     "FACILITATOR_DAY_START_CHECKLIST.md",
     "portal/README.md",
     "TRAINEE_PREFLIGHT_CHECKLIST.md",
+    "FDE_DEBUGGING_FRAMEWORK.md",
     "Daily Operating Rhythm",
     "Learner Status Model",
 )
@@ -129,8 +132,10 @@ PREFLIGHT_REQUIRED_SNIPPETS = (
 FACILITATOR_REQUIRED_SNIPPETS = (
     "uv run python scripts/validate_curriculum.py",
     "CURRICULUM_MANIFEST.yaml",
+    "FDE_DEBUGGING_FRAMEWORK.md",
     "docs/curriculum/portal/DAY_00_PORTAL.md",
     "uv run aegisap-lab incident start --day",
+    "audit-production",
     "Day 8",
     "Day 11",
     "Day 12",
@@ -142,6 +147,7 @@ INCIDENT_NOTEBOOK_SECTIONS = (
     "## Incident",
     "## Portal Investigation",
     "## Lab Repair",
+    "## Codification Bridge",
     "## Production Patch",
     "## Verification",
     "## PR Defense",
@@ -257,6 +263,8 @@ THREE_SURFACE_NOTEBOOKS = (
     "notebooks/day_14_breaking_changes_elite_ops.py",
 )
 
+BRIDGE_README = "notebooks/bridges/README.md"
+
 
 def main() -> int:
     errors: list[str] = []
@@ -267,6 +275,8 @@ def main() -> int:
         path = ROOT / rel_path
         if not path.exists():
             errors.append(f"Missing required curriculum file: {rel_path}")
+    if not (ROOT / BRIDGE_README).exists():
+        errors.append(f"Missing required curriculum file: {BRIDGE_README}")
 
     trainee_docs = sorted((ROOT / "docs" / "curriculum" / "trainee").glob("*.md"))
     trainer_docs = sorted((ROOT / "docs" / "curriculum" / "trainer").glob("*.md"))
@@ -449,12 +459,12 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 errors,
                 notebook_path,
                 INCIDENT_NOTEBOOK_SECTIONS,
-                f"Day {day_id} notebook is missing the incident-driven six-section scaffold",
+                f"Day {day_id} notebook is missing the incident-driven translation scaffold",
             )
             _expect_snippets(
                 errors,
                 notebook_path,
-                ("markdown-only", "Do not edit repo files from this notebook"),
+                ("markdown-only", "Do not edit repo files from this notebook", "### Export to Production"),
                 f"Day {day_id} notebook is missing the markdown-only production patch boundary",
             )
             _expect_absent_snippets(
@@ -467,6 +477,28 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
 
         if not day.get("phase"):
             errors.append(f"Manifest day {day['id']} must declare a phase.")
+        mapping = day.get("portal_to_script_mapping", {})
+        if not mapping:
+            errors.append(f"Manifest day {day['id']} must declare portal_to_script_mapping.")
+        else:
+            if not mapping.get("portal_surface"):
+                errors.append(f"Manifest day {day['id']} portal_to_script_mapping must declare portal_surface.")
+            bridge_rel = mapping.get("bridge_file", "")
+            if not bridge_rel:
+                errors.append(f"Manifest day {day['id']} portal_to_script_mapping must declare bridge_file.")
+            elif not (ROOT / bridge_rel).exists():
+                errors.append(
+                    f"Manifest day {day['id']} portal_to_script_mapping bridge missing: {bridge_rel}"
+                )
+            targets = mapping.get("production_targets", [])
+            if not targets:
+                errors.append(f"Manifest day {day['id']} portal_to_script_mapping must declare production_targets.")
+            else:
+                for target in targets:
+                    if not (ROOT / target).exists():
+                        errors.append(
+                            f"Manifest day {day['id']} portal_to_script_mapping target missing: {target}"
+                        )
         if not day.get("injection_command"):
             errors.append(f"Manifest day {day['id']} must declare an injection_command.")
         if not day.get("revert_state"):

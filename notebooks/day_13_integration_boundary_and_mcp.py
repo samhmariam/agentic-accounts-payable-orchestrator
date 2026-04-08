@@ -108,6 +108,24 @@ def _lab_preview(McpCapabilities, json, mo):
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the hosted contract view and notebook capability preview as one boundary statement.
+
+        - Portal state: the published MCP contract no longer matches the intended governed write path.
+        - Notebook proof: the capability preview shows which contract element should exist.
+        - Permanent repo change: `src/aegisap/mcp/server.py`, `src/aegisap/mcp/schemas.py`, and, if needed, the DLQ or compensating-action code.
+
+        Rosetta Stone: `notebooks/bridges/day13_integration_boundary.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -128,6 +146,12 @@ def _production_patch(mo):
         - `docs/curriculum/artifacts/day13/EXTERNAL_CONTRACT_POLICY.md`
         - `docs/curriculum/artifacts/day13/COMPENSATING_ACTION_CATALOG.md`
         - `docs/curriculum/artifacts/day13/API_CHANGE_COMMUNICATION_PLAN.md`
+
+        ### Export to Production
+
+        - Which capability was missing for partners?
+        - Which file republishes the durable boundary contract?
+        - Which verification proves the contract and reliability artifacts agree again?
         """
     )
     return

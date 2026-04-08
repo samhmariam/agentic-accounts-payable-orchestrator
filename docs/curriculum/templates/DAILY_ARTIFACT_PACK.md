@@ -35,6 +35,7 @@ by the lab exercise. File formats vary by day (`.py`, `.bicep`, `.json`, `.md`).
 
 **Common failures:**
 - Notebook screenshots instead of actual code files
+- Portal screenshots with no named production file or IaC target
 - Renaming files to avoid overwriting previous day's work
 
 ---

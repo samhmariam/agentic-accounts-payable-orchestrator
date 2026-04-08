@@ -110,6 +110,24 @@ def _release_preview(GateResult, build_release_envelope, json, mo):
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the live release state and notebook envelope preview as one go or no-go contract.
+
+        - Portal state: the candidate revision or upstream gate is unhealthy even though the envelope looks releasable.
+        - Notebook proof: the release-envelope preview shows the false-green aggregation path.
+        - Permanent repo change: `src/aegisap/deploy/gates.py`, `scripts/check_all_gates.py`, and, if needed, `src/aegisap/training/checkpoints.py`.
+
+        Rosetta Stone: `notebooks/bridges/day10_release_evidence.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -130,6 +148,12 @@ def _production_patch(mo):
         - `docs/curriculum/artifacts/day10/CAB_PACKET.md`
         - `docs/curriculum/artifacts/day10/EXECUTIVE_RELEASE_BRIEF.md`
         - `docs/curriculum/artifacts/day10/GATE_EXCEPTION_POLICY.md`
+
+        ### Export to Production
+
+        - Which exact gate combination produced the false-green result?
+        - Which file now enforces the durable non-green release outcome?
+        - Which verification proves failed-gate evidence survives into the rebuilt envelope?
         """
     )
     return

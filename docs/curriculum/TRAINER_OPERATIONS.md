@@ -33,8 +33,10 @@ The exact artifact filenames for each day are the authoritative source in
 2. Theory block: for Day 0, start with the portal-first bootstrap walkthrough.
    For Days 1-14, start with the incident, then use the notebook's portal
    investigation section to anchor the Azure evidence before learners patch the
-   repo. Introduce the three oral defense prompts for the day so learners can
-   build toward them during the lab.
+   repo. Force the learner through the codification bridge before they open the
+   editor: what exact state did the portal show, what exact notebook proof
+   reproduced it, and what exact file must change? Introduce the three oral
+   defense prompts for the day so learners can build toward them during the lab.
 3. Lab block: keep the room moving toward all four outputs (technical build,
    decision memo, corporate process artifact, oral defense prep). Notebook
    completion alone is not the goal.
@@ -111,6 +113,7 @@ graduation tier thresholds.
 - [portal/README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/README.md)
 - [TRAINEE_PREFLIGHT_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md)
 - [FACILITATOR_DAY_START_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md)
+- [FDE_DEBUGGING_FRAMEWORK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md)
 - [CURRICULUM_MANIFEST.yaml](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml)
 - [ASSESSMENT_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/ASSESSMENT_RUBRIC.md)
 - [GRADUATION_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/GRADUATION_RUBRIC.md)
@@ -124,4 +127,4 @@ graduation tier thresholds.
 - [templates/DAILY_SCORECARD.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/DAILY_SCORECARD.md)
 
 Use `portal/README.md` and `DAY_00_PORTAL.md` only for the bootstrap exception.
-For Days 1-14, the live delivery path is `incident start -> notebook -> repo patch -> verification`.
+For Days 1-14, the live delivery path is `incident start -> portal investigation -> notebook proof -> codification bridge -> repo patch -> verification`.

@@ -151,6 +151,24 @@ def _audit_preview(build_audit_event, json, mo, evidence):
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the leaked telemetry and notebook previews as one guardrail failure.
+
+        - Portal state: traces or logs still expose raw identifiers.
+        - Notebook proof: the redaction preview and audit-event preview show whether the leak is in masking, audit shaping, or both.
+        - Permanent repo change: `src/aegisap/security/redaction.py`, `src/aegisap/audit/events.py`, and, if needed, `src/aegisap/audit/writer.py`.
+
+        Rosetta Stone: `notebooks/bridges/day07_guardrail_redaction.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -171,6 +189,12 @@ def _production_patch(mo):
         - `docs/curriculum/artifacts/day07/EVAL_GOVERNANCE_POLICY.md`
         - `docs/curriculum/artifacts/day07/REFUSAL_REASON_CODE_CATALOG.md`
         - `docs/curriculum/artifacts/day07/SLICE_REGRESSION_DECISION_LOG.md`
+
+        ### Export to Production
+
+        - Which exact field or token leaked in the live evidence?
+        - Which file permanently removes the leak before audit persistence?
+        - Which verification proves operator context survives without exposing raw identifiers?
         """
     )
     return

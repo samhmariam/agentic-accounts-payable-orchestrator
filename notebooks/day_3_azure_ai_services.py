@@ -180,6 +180,24 @@ def _workflow_preview(json, mo, repo_root, run_day3_workflow):
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the search portal view and the notebook ranking output as the same problem statement.
+
+        - Portal state: Azure AI Search still contains both the stale email and the authoritative vendor record.
+        - Notebook proof: the ranking preview and workflow preview show which authority rule drifted.
+        - Permanent repo change: `src/aegisap/day3/policies/source_authority_rules.yaml`, `src/aegisap/day3/retrieval/ranker.py`, and, if needed, `src/aegisap/day3/retrieval/authority_policy.py`.
+
+        Rosetta Stone: `notebooks/bridges/day03_retrieval_authority.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -199,6 +217,12 @@ def _production_patch(mo):
 
         - `docs/curriculum/artifacts/day03/RAG_BOUNDARY_DECISION.md`
         - `docs/curriculum/artifacts/day03/FRAMEWORK_DECISION_MATRIX.md`
+
+        ### Export to Production
+
+        - Which portal document was wrongly winning?
+        - Which authority rule or score adjustment must change in `source_authority_rules.yaml` or `ranker.py`?
+        - Which verification proves authoritative evidence still wins without deleting history?
         """
     )
     return

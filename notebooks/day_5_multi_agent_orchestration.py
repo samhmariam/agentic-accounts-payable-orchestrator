@@ -124,6 +124,24 @@ def _binding_preview(ResumeTokenCodec, ResumeTokenPayload, approval_checkpoint, 
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the task record, token payload, and notebook comparison as one invariant.
+
+        - Portal state: approval-task state and checkpoint state no longer agree.
+        - Notebook proof: the resume-token prototype shows whether stale material is being accepted.
+        - Permanent repo change: `src/aegisap/day5/workflow/resume_service.py` and, if needed, `src/aegisap/day5/workflow/checkpoint_manager.py`.
+
+        Rosetta Stone: `notebooks/bridges/day05_durable_state.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -142,6 +160,12 @@ def _production_patch(mo):
 
         - `docs/curriculum/artifacts/day05/HUMAN_APPROVAL_CONTRACT.md`
         - `docs/curriculum/artifacts/day05/PAUSE_RESUME_GOVERNANCE.md`
+
+        ### Export to Production
+
+        - Which identifier proved the checkpoint-binding mismatch?
+        - Which invariant must become permanent in `resume_service.py` or `checkpoint_manager.py`?
+        - What verification proves stale resume material is rejected before side effects run?
         """
     )
     return

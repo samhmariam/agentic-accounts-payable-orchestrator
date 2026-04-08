@@ -115,6 +115,24 @@ def _lab_preview(json, mo):
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the Entra evidence and notebook actor-binding preview as one authority contract.
+
+        - Portal state: the required approver group and the acting user are no longer being bound together safely.
+        - Notebook proof: the actor-binding preview shows whether the runtime is trusting payload identity instead of group-backed evidence.
+        - Permanent repo change: `src/aegisap/identity/actor_verifier.py`, `src/aegisap/identity/obo.py`, and, if needed, `scripts/verify_delegated_identity_contract.py`.
+
+        Rosetta Stone: `notebooks/bridges/day11_delegated_identity.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -135,6 +153,12 @@ def _production_patch(mo):
         - `docs/curriculum/artifacts/day11/APPROVAL_AUTHORITY_MODEL.md`
         - `docs/curriculum/artifacts/day11/OBO_THREAT_MODEL.md`
         - `docs/curriculum/artifacts/day11/IDENTITY_EXCEPTION_REQUEST_RESPONSE.md`
+
+        ### Export to Production
+
+        - Which group or actor identifier proved the authority confusion?
+        - Which file permanently blocks payload-only approval?
+        - Which verification proves the delegated path is safe again?
         """
     )
     return

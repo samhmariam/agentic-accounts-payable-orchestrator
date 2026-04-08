@@ -89,6 +89,15 @@ def test_total_artifact_count(days: list[dict]) -> None:
     assert total == 43, f"Expected 43 artifact files across all days, got {total}"
 
 
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
+                                 yaml.safe_load(MANIFEST_PATH.open())["days"]])
+def test_portal_to_script_mapping_declared(day: dict) -> None:
+    mapping = day.get("portal_to_script_mapping", {})
+    assert mapping.get("portal_surface"), f"Day {day['id']} missing portal_surface"
+    assert mapping.get("bridge_file"), f"Day {day['id']} missing bridge_file"
+    assert mapping.get("production_targets"), f"Day {day['id']} missing production_targets"
+
+
 # ---------------------------------------------------------------------------
 # Oral defense prompts
 # ---------------------------------------------------------------------------

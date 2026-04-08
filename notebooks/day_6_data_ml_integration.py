@@ -140,6 +140,24 @@ def _detector_preview(
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the stored evidence and notebook detector as the same review-boundary contract.
+
+        - Portal state: the evidence ledger contains override language or unsafe approval claims.
+        - Notebook proof: the detector preview and authority boundary preview show whether normalization, authority mapping, or both drifted.
+        - Permanent repo change: `src/aegisap/day6/review/prompt_injection.py` and, if needed, `src/aegisap/day6/review/authority_boundary.py`.
+
+        Rosetta Stone: `notebooks/bridges/day06_review_boundary.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -158,6 +176,12 @@ def _production_patch(mo):
 
         - `docs/curriculum/artifacts/day06/SOURCE_OF_TRUTH_CONFLICT_RUNBOOK.md`
         - `docs/curriculum/artifacts/day06/DATA_AUTHORITY_CHART.md`
+
+        ### Export to Production
+
+        - Which evidence phrase or authority field proved the boundary breach?
+        - Which file makes the repaired detector or trust decision permanent?
+        - Which verification proves the case now terminates safely at the review boundary?
         """
     )
     return

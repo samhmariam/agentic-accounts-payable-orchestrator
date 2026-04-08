@@ -31,6 +31,14 @@ def _build_parser() -> argparse.ArgumentParser:
     rebuild = artifact_subparsers.add_parser("rebuild", help="Rebuild a day artifact from the fixed reference path.")
     rebuild.add_argument("--day", required=True, help="Two-digit day number, for example 01.")
 
+    audit = subparsers.add_parser("audit-production", help="Audit live Azure posture and write a production-readiness artifact.")
+    audit.add_argument("--out", default=None, help="Optional output path for the audit artifact JSON.")
+    audit.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail if the audit runs in preview mode or any live check fails.",
+    )
+
     return parser
 
 
@@ -66,6 +74,20 @@ def main() -> int:
             from .artifacts import rebuild_day_artifact
 
             _print_payload(rebuild_day_artifact(day=args.day))
+            return 0
+        if args.command == "audit-production":
+            from .audit import FAIL, SKIP, run_production_audit
+
+            payload = run_production_audit(repo_root=args.repo_root, out_path=args.out)
+            _print_payload(payload)
+            checks = payload.get("checks", [])
+            if any(check.get("status") == FAIL for check in checks):
+                return 1
+            if args.strict and (
+                not payload.get("authoritative_evidence")
+                or any(check.get("status") == SKIP for check in checks)
+            ):
+                return 1
             return 0
     except IncidentError as exc:
         print(str(exc))

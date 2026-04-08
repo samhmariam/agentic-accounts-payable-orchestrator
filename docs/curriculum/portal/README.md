@@ -28,7 +28,8 @@ uv run aegisap-lab incident start --day XX
 ```
 
 The learner still inspects Azure surfaces, but the exact portal investigation
-now lives inside the day notebook under `Portal Investigation`.
+now lives inside the day notebook under `Portal Investigation`, followed by the
+`Codification Bridge` step that maps Azure state to permanent code.
 
 ## Evidence Rule
 

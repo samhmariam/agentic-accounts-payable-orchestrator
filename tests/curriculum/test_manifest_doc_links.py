@@ -6,6 +6,7 @@ For every day in CURRICULUM_MANIFEST.yaml, verifies that:
   - primary_doc_file exists on disk
   - legacy_doc_files are empty for incident-delivery days
   - every artifact_files path exists on disk
+  - every portal_to_script_mapping bridge file exists on disk
   - every capstone_b-flagged day doc contains the capstone section marker
 
 Does not import from src/aegisap — pure curriculum validation.
@@ -82,6 +83,28 @@ def test_artifact_files_exist(day: dict) -> None:
             missing.append(rel_path)
     assert not missing, (
         f"Day {day['id']} artifact files missing:\n"
+        + "\n".join(f"  {p}" for p in missing)
+    )
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS])
+def test_bridge_file_exists(day: dict) -> None:
+    mapping = day["portal_to_script_mapping"]
+    path = REPO_ROOT / mapping["bridge_file"]
+    assert path.exists(), (
+        f"Day {day['id']} bridge_file not found: {mapping['bridge_file']}"
+    )
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS])
+def test_bridge_targets_exist(day: dict) -> None:
+    mapping = day["portal_to_script_mapping"]
+    missing = []
+    for rel_path in mapping["production_targets"]:
+        if not (REPO_ROOT / rel_path).exists():
+            missing.append(rel_path)
+    assert not missing, (
+        f"Day {day['id']} production_targets missing:\n"
         + "\n".join(f"  {p}" for p in missing)
     )
 

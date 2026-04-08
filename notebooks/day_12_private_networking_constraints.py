@@ -130,6 +130,24 @@ def _lab_preview(BicepPolicyChecker, json, mo):
 
 
 @app.cell
+def _codification_bridge(mo):
+    mo.md(
+        """
+        ## Codification Bridge
+
+        Treat the network portal evidence and notebook checker output as one private-only contract.
+
+        - Portal state: private endpoint, DNS, or public-network posture evidence disagrees with the gate package.
+        - Notebook proof: the static policy checker preview shows whether the bug lives in property inspection or live posture proof.
+        - Permanent repo change: `src/aegisap/network/bicep_policy_checker.py`, `src/aegisap/network/private_endpoint_probe.py`, and, if needed, the Day 12 verification scripts.
+
+        Rosetta Stone: `notebooks/bridges/day12_private_networking.md`
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -150,6 +168,12 @@ def _production_patch(mo):
         - `docs/curriculum/artifacts/day12/NETWORK_DEPENDENCY_REGISTER.md`
         - `docs/curriculum/artifacts/day12/SECURITY_EXCEPTION_REQUEST.md`
         - `docs/curriculum/artifacts/day12/EGRESS_CONTROL_POLICY.md`
+
+        ### Export to Production
+
+        - Which portal or Network Watcher signal proved the drift?
+        - Which checker or probe file makes the private-only rule permanent?
+        - Which verification proves static and live posture agree again?
         """
     )
     return

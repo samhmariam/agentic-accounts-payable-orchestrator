@@ -112,6 +112,10 @@ def _lab_preview(json, mo):
 def _codification_bridge(mo):
     mo.md(
         """
+        ## Why This Fails In Prod
+
+        List three specific ways this notebook logic fails in an Azure Container App. You must reference at least one Azure limit (memory, timeout, or ephemeral storage) and one concurrency issue.
+
         ## Codification Bridge
 
         Treat the war-room evidence and notebook gate logic as one executive-control path.
@@ -166,8 +170,9 @@ def _production_patch(mo):
 def _verification(repo_root, mo):
     cto_path = repo_root / "build" / "day14" / "cto_trace_report.json"
     drill_path = repo_root / "build" / "day14" / "breaking_changes_drills.json"
+    native_path = repo_root / "build" / "day14" / "native_operator_evidence.json"
     notes = []
-    for path in (drill_path, cto_path):
+    for path in (drill_path, cto_path, native_path):
         if path.exists():
             notes.append(f"Current artifact present: `{path.relative_to(repo_root)}`")
         else:
@@ -185,6 +190,36 @@ def _verification(repo_root, mo):
         ```
 
         {'\n\n'.join(notes)}
+        """
+    )
+    return
+
+
+@app.cell
+def _native_tooling_gate(mo):
+    mo.md(
+        """
+        ## Native Tooling Gate
+
+        Save your raw canary, rollback, and correlation proof in `build/day14/native_operator_evidence.json`.
+
+        Allowed tools during this gate:
+
+        - Azure Portal
+        - `az`
+        - `az rest`
+        - raw KQL
+        - `git`
+        - `curl`
+        - `nslookup` or `Resolve-DnsName`
+
+        Tools banned during this gate:
+
+        - `aegisap-lab`
+        - helper verification wrappers
+        - canned answer keys
+
+        The capstone CAB chair may randomly select one saved proof and require a live rerun before final approval.
         """
     )
     return

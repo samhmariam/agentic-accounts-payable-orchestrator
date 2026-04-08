@@ -8,6 +8,9 @@ environment triage.
 Confirm that your local environment, Azure access, and repo checkout are ready
 for the notebook-led 14-day curriculum.
 
+This is not a tutorial. You are expected to work from broken states, telemetry,
+and incomplete operator evidence rather than step-by-step answers.
+
 ## One Week Before Cohort Start
 
 - Confirm you can access the training repository and pull the current branch.
@@ -84,6 +87,10 @@ By the time the cohort reaches Day 8, you should also be ready for:
 - `full` track environment loading with `scripts/setup-env.sh` or `scripts/setup-env.ps1`
 - Azure resource access for deployment, identity, and later verification steps
 - Running live verification scripts where the facilitator expects authoritative evidence
+- Producing raw `az`, DNS, Git, and KQL proofs without relying on helper commands
+
+Native Azure and Git fluency is assessed by Week 2. Days 9, 12, and 14 require
+saved native operator evidence and live replay on request.
 
 ## If You Get Blocked
 

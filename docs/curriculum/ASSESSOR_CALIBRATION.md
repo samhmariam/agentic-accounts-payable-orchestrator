@@ -115,3 +115,20 @@ or external auditor find this explanation sufficient?*
 5. **Capstone B scoring.** For Day 12–14 defenses, the transfer domain
    (customer onboarding) is the primary scoring domain, not accounts payable.
    A trainee who answers only in AP terms scores as Developing on dimensions 2–5.
+
+6. **Rubber-stamping peer review.** A peer who asks weak questions or accepts
+   claims without evidence is underperforming as a reviewer. Record
+   `peer_reviewer_challenge_quality` explicitly; weak challenge quality blocks
+   Top Talent until reviewer remediation is complete.
+
+## Peer Reviewer Accountability
+
+For Day 10 and capstone `cab_board` sessions, the facilitator also scores the
+peer reviewers.
+
+- `peer_reviewer_challenge_quality = 5`: reviewer asks probing role-appropriate questions, requests concrete evidence, and tests the native proof live when needed
+- `peer_reviewer_challenge_quality = 3`: reviewer is credible but misses one major evidence gap
+- `peer_reviewer_challenge_quality = 1`: reviewer rubber-stamps, avoids skepticism, or never asks for evidence
+
+Scores below `3` require remediation and block `Top Talent` even if the learner's
+own technical defense is strong.

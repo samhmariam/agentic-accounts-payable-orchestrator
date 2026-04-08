@@ -1,0 +1,9 @@
+{
+  "id": "drill_11_prompt_authority_drift",
+  "name": "Probabilistic Prompt Authority Drift",
+  "failure_mode": "The system still runs, but authority weighting drifts so stale or lower-priority evidence quietly outranks approved bank-change records on risky invoice slices.",
+  "detection": "Day 7 eval thresholds fail even though the app remains online. The prompt drift report shows authority-policy regressions on the probabilistic drift slice.",
+  "remediation": "1. Inspect build/day7/synthetic_cases_drift.jsonl. 2. Patch the durable authority policy in src/aegisap/day3/. 3. Re-run the enforced eval suite until build/day7/prompt_drift_report.json passes thresholds.",
+  "gate": "prompt_drift_report",
+  "severity": "critical"
+}

@@ -28,6 +28,12 @@ The customer CISO banned public exposure for production-bound AI services and wa
 - `uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py -q && uv run aegisap-lab artifact rebuild --day 04`
 - `uv run aegisap-lab audit-production --day 04 --strict`
 
+## Stakeholder Inject
+
+- Executive sponsor request: bypass the HITL pause and auto-issue payments.
+- Required internal artifact: `adr/ADR-002_irreversible_actions_and_hitl.md`
+- Required sponsor-facing artifact: `docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md`
+
 ## Chaos Gate
 
 - Failure signal: Execution traces show a risky recommendation escaping the policy overlay while public exposure constraints stay in force.
@@ -44,6 +50,8 @@ Do not edit code in this module folder.
 - Rosetta Stone Bridge: `notebooks/bridges/day04_fail_closed_planning.md`
 - Production Target: `src/aegisap/day4/planning/policy_overlay.py`
 - Production Target: `src/aegisap/day4/recommendation/recommendation_gate.py`
+- Decision Record: `adr/ADR-002_irreversible_actions_and_hitl.md`
+- Sponsor Response: `docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md`
 - Scenario Pack: `scenarios/day04`
 - Verification Command: `uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 04`

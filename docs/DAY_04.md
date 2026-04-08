@@ -29,6 +29,12 @@ uv run aegisap-lab incident start --day 04
 - `uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py -q && uv run aegisap-lab artifact rebuild --day 04`
 - `uv run aegisap-lab audit-production --day 04 --strict`
 
+## Stakeholder Inject
+
+- Executive sponsor request: bypass the HITL pause and auto-issue payments.
+- Required internal artifact: `adr/ADR-002_irreversible_actions_and_hitl.md`
+- Required sponsor-facing artifact: `docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md`
+
 ## Verification Commands
 
 ```bash
@@ -43,6 +49,8 @@ uv run aegisap-lab artifact rebuild --day 04
 - `notebooks/bridges/day04_fail_closed_planning.md`
 - `src/aegisap/day4/planning/policy_overlay.py`
 - `src/aegisap/day4/recommendation/recommendation_gate.py`
+- `adr/ADR-002_irreversible_actions_and_hitl.md`
+- `docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md`
 - `scenarios/day04`
 
 ## Automated Drill

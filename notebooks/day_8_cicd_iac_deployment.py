@@ -131,6 +131,10 @@ def _contract_check(Path, mo, repo_root):
 def _codification_bridge(mo):
     mo.md(
         """
+        ## Why This Fails In Prod
+
+        List three specific ways this notebook logic fails in an Azure Container App. You must reference at least one Azure limit (memory, timeout, or ephemeral storage) and one concurrency issue.
+
         ## Codification Bridge
 
         Treat the Azure IAM view and the notebook snippet as one least-privilege contract.

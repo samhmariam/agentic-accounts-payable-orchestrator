@@ -12,6 +12,7 @@ INCIDENT_SECTIONS = (
     "## Incident",
     "## Portal Investigation",
     "## Lab Repair",
+    "## Why This Fails In Prod",
     "## Codification Bridge",
     "## Production Patch",
     "## Verification",
@@ -183,6 +184,7 @@ def test_wave4_notebooks_use_incident_scaffold_and_markdown_only_patch_boundary(
             assert section in text, f"Notebook {day_id} is missing {section}"
         assert "markdown-only" in text
         assert "Do not edit repo files from this notebook" in text
+        assert "List three specific ways this notebook logic fails in an Azure Container App." in text
         assert "STOP. Close this notebook." in text
         assert "### Export to Production" in text
         assert "What trade-off did I make today to satisfy the customer constraint?" in text

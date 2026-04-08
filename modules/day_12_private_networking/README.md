@@ -37,6 +37,13 @@ The customer CISO escalated a DNS drift concern. You must prove that the VNet, p
 - `uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q && uv run aegisap-lab artifact rebuild --day 12`
 - `uv run aegisap-lab audit-production --day 12 --strict`
 
+## Native Tooling Gate
+
+- Save native proof to `build/day12/native_operator_evidence.json`
+- Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Day 12 does not pass until the facilitator makes the learner rerun one saved proof live
+
 ## Chaos Gate
 
 - Failure signal: Private endpoint DNS or routing drift makes a production-bound service resolve publicly or appear publicly reachable.
@@ -58,6 +65,7 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day12`
 - Verification Command: `uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 12`
+- Native Evidence Artifact: `build/day12/native_operator_evidence.json`
 
 ## Automated Drill
 

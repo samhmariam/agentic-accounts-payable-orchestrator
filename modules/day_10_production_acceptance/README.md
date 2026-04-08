@@ -42,6 +42,12 @@ The customer CAB will not approve rollout without a release packet that proves s
 - Expected recovery artifact: `build/day10/release_envelope.json`
 - Time box: 30 minutes
 
+## CAB Review Mode
+
+- Review mode: `cab_board`
+- Required review roles: `cab_chair`, `client_ciso_or_infra_lead`
+- The board may replay `build/day9/native_operator_evidence.json` live before approving the release packet
+
 ## Day X File Manifest
 
 Do not edit code in this module folder.

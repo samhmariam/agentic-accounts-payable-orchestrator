@@ -30,6 +30,7 @@ uv run aegisap-lab incident start --day 07
 ## Mastery Gate
 
 - `uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q && uv run aegisap-lab artifact rebuild --day 07`
+- `uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/synthetic_cases_drift.jsonl --malicious-cases build/day7/malicious_cases_drift.jsonl --thresholds evals/score_thresholds.yaml --output build/day7/prompt_drift_report.json --enforce-thresholds`
 - `uv run aegisap-lab audit-production --day 07 --strict`
 
 ## Verification Commands
@@ -37,6 +38,7 @@ uv run aegisap-lab incident start --day 07
 ```bash
 uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q
 uv run aegisap-lab artifact rebuild --day 07
+uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/synthetic_cases_drift.jsonl --malicious-cases build/day7/malicious_cases_drift.jsonl --thresholds evals/score_thresholds.yaml --output build/day7/prompt_drift_report.json --enforce-thresholds
 ```
 
 ## Key Files
@@ -47,6 +49,8 @@ uv run aegisap-lab artifact rebuild --day 07
 - `src/aegisap/security/redaction.py`
 - `src/aegisap/audit/events.py`
 - `src/aegisap/audit/writer.py`
+- `src/aegisap/day3/policies/source_authority_rules.yaml`
+- `src/aegisap/day3/retrieval/authority_policy.py`
 - `scenarios/day07`
 
 ## Automated Drill

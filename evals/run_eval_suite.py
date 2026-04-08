@@ -10,8 +10,15 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+for candidate in (REPO_ROOT, REPO_ROOT / "src"):
+    text = str(candidate)
+    if text not in sys.path:
+        sys.path.insert(0, text)
+
 from evals.common import load_jsonl, load_thresholds
 
+from aegisap.day3.graph import run_day3_workflow
 from aegisap.day6.graph.review_gate import run_day6_review
 from aegisap.day6.state.models import Day6ReviewInput
 from aegisap.training.fixtures import day6_fixture_path
@@ -78,6 +85,9 @@ def run_synthetic_suite(path: Path, *, base_url: str | None, planner_mode: str) 
 
 
 def _run_synthetic_case(case: dict[str, Any], *, base_url: str | None, planner_mode: str) -> dict[str, Any]:
+    if case.get("eval_mode") == "day3_authority":
+        return _run_day3_authority_case(case)
+
     case_facts = load_case_facts(case["case_facts_path"])
     if base_url:
         response = _request(
@@ -124,6 +134,39 @@ def _run_synthetic_case(case: dict[str, Any], *, base_url: str | None, planner_m
         "workflow_cost_estimate": workflow_cost,
         "decision": day6_review,
         "correlation": correlation,
+    }
+
+
+def _run_day3_authority_case(case: dict[str, Any]) -> dict[str, Any]:
+    invoice = case["invoice"]
+    state = run_day3_workflow(invoice, retrieval_mode=case.get("retrieval_mode", "fixture"))
+    vendor_bucket = state.retrieval_context.get("vendor", [])
+    actual_primary_source_type = vendor_bucket[0].source_type if vendor_bucket else "missing"
+    expected_primary_source_type = case.get("expected_primary_source_type", "missing")
+    actual_outcome = state.agent_findings["decision"].recommendation
+    expected_outcome = case["expected_outcome"]
+    passed = (
+        actual_outcome == expected_outcome
+        and actual_primary_source_type == expected_primary_source_type
+    )
+    return {
+        "case_name": case["case_name"],
+        "slice": case["slice"],
+        "cost_class": case["cost_class"],
+        "expected_outcome": expected_outcome,
+        "actual_outcome": actual_outcome,
+        "expected_primary_source_type": expected_primary_source_type,
+        "actual_primary_source_type": actual_primary_source_type,
+        "passed": passed,
+        "workflow_cost_estimate": 0.0,
+        "decision": {
+            "recommendation": actual_outcome,
+            "eval_scores": state.eval_scores,
+        },
+        "correlation": {
+            "workflow_id": state.workflow_id,
+            "authority_policy_check": True,
+        },
     }
 
 

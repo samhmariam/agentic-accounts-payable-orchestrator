@@ -106,9 +106,11 @@ Days 1-14 express that contract through the notebook scaffold:
 - `Incident`
 - `Portal Investigation`
 - `Lab Repair`
+- `Why This Fails In Prod`
 - `Codification Bridge`
 - `Production Patch`
 - `Verification`
+- `Native Tooling Gate` on Days 9, 12, and 14
 - `PR Defense`
 
 Day 0 remains the only trainer-doc and trainee-doc exception.

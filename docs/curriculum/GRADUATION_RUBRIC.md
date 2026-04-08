@@ -53,6 +53,8 @@ reviews, and produce governance artifacts a real enterprise would accept.
 - Makes correct go/no-go decisions under pressure using gate evidence, not instinct —
   demonstrated in Day 14 war-game or equivalent incident drill
 - No zero-tolerance failures across any day, including transfer capstone days
+- No `peer_reviewer_challenge_quality` score below `3` on any Day 10 or capstone
+  board assignment; reviewer remediation is required before Top Talent can be awarded
 
 **What this means:**
 The engineer operates at elite FDE level. They are capable of leading a production
@@ -69,6 +71,8 @@ pre-loading.
 3. Capstone A review is conducted per `CAPSTONE_REVIEW.md`
 4. Capstone B is conducted per `CAPSTONE_B_TRANSFER.md`
 5. Final tier determination is made by programme lead with evidence from all 14 days
+6. Reviewer accountability and any remediation for weak `peer_reviewer_challenge_quality`
+   must be resolved before a Top Talent decision is finalized
 
 ---
 

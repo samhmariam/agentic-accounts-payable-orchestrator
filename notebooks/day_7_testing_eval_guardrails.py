@@ -156,6 +156,10 @@ def _audit_preview(build_audit_event, json, mo, evidence):
 def _codification_bridge(mo):
     mo.md(
         """
+        ## Why This Fails In Prod
+
+        List three specific ways this notebook logic fails in an Azure Container App. You must reference at least one Azure limit (memory, timeout, or ephemeral storage) and one concurrency issue.
+
         ## Codification Bridge
 
         Treat the leaked telemetry and notebook previews as one guardrail failure.
@@ -163,6 +167,7 @@ def _codification_bridge(mo):
         - Portal state: traces or logs still expose raw identifiers.
         - Notebook proof: the redaction preview and audit-event preview show whether the leak is in masking, audit shaping, or both.
         - Permanent repo change: `src/aegisap/security/redaction.py`, `src/aegisap/audit/events.py`, and, if needed, `src/aegisap/audit/writer.py`.
+        - Drift-repair targets: `src/aegisap/day3/policies/source_authority_rules.yaml` and `src/aegisap/day3/retrieval/authority_policy.py` if the probabilistic authority slice is failing.
 
         Rosetta Stone: `notebooks/bridges/day07_guardrail_redaction.md`
         """
@@ -189,6 +194,7 @@ def _production_patch(mo):
         - `src/aegisap/security/redaction.py`
         - `src/aegisap/audit/events.py` if the audit payload needs stricter shaping
         - `src/aegisap/audit/writer.py` only if the persistence boundary is wrong
+        - `src/aegisap/day3/policies/source_authority_rules.yaml` and `src/aegisap/day3/retrieval/authority_policy.py` when the drift drill shows authoritative evidence is losing on the eval slice
 
         Then update the written Day 7 evidence:
 
@@ -223,6 +229,7 @@ def _verification(repo_root, mo):
         ```bash
         uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q
         uv run aegisap-lab artifact rebuild --day 07
+        uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/synthetic_cases_drift.jsonl --malicious-cases build/day7/malicious_cases_drift.jsonl --thresholds evals/score_thresholds.yaml --output build/day7/prompt_drift_report.json --enforce-thresholds
         ```
 
         {artifact_note}
@@ -237,11 +244,11 @@ def _chaos_gate(mo):
         """
         ## Chaos Gate
 
-        Failure signal: A redaction or audit path leaks sensitive text into a Day 7 evaluation artifact.
+        Failure signal: A probabilistic authority drift keeps the app running while Day 7 eval thresholds quietly fall out of policy.
 
-        Diagnostic surface: Content-safety notebook evidence, redaction code, and audit writer outputs.
+        Diagnostic surface: Content-safety notebook evidence, evaluation traces, drift cases under `build/day7/`, Day 3 authority policy, and audit writer outputs.
 
-        Expected recovery artifact: `build/day7/eval_report.json`
+        Expected recovery artifact: `build/day7/prompt_drift_report.json`
 
         Time box: 25 minutes. If you miss it, stop and rerun the four pillars in `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
         """

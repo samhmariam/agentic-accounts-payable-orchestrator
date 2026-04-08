@@ -115,6 +115,10 @@ def _release_preview(GateResult, build_release_envelope, json, mo):
 def _codification_bridge(mo):
     mo.md(
         """
+        ## Why This Fails In Prod
+
+        List three specific ways this notebook logic fails in an Azure Container App. You must reference at least one Azure limit (memory, timeout, or ephemeral storage) and one concurrency issue.
+
         ## Codification Bridge
 
         Treat the live release state and notebook envelope preview as one go or no-go contract.
@@ -244,9 +248,12 @@ def _pr_defense(mo):
         - Blast radius: <name the affected systems, approvers, and rollback edge>
         - Production failure signal: <monitor, alert, trace, or dashboard link>
         - Constraint held: <which inherited customer rule stayed intact>
+        - CAB evidence artifact: <name the packet, checkpoint, or native Day 9 proof the board will inspect>
         ```
 
         Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
+
+        The Day 10 CAB board will also replay the Day 9 native operator evidence if finance or infra challenges your routing proof.
         """
     )
     return

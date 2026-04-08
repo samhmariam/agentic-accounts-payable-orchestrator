@@ -69,6 +69,7 @@ Say these five things out loud before the lab begins:
 
 - Confirm the difference between static proof and live posture proof is stated before learners run cells.
 - Confirm the room knows that public fallback is not an acceptable production shortcut.
+- Confirm learners know the native-tool gate bans helper CLI commands and requires `build/day12/native_operator_evidence.json`.
 
 ### Day 13
 
@@ -79,6 +80,12 @@ Say these five things out loud before the lab begins:
 
 - Confirm whether the cohort is expected to stay in preview mode or produce authoritative canary/trace evidence.
 - Confirm rollback, partial continuation, and gate-override language stays evidence-based.
+- Confirm the capstone CAB chair is ready to select one saved native proof for a live rerun.
+
+### Day 9
+
+- Confirm learners know Day 9 native evidence is advisory but must be replay-ready for the Day 10 CAB board.
+- Confirm the room knows that raw KQL and raw Azure commands are expected during the native-tool section.
 
 ## First 15 Minutes Of The Session
 

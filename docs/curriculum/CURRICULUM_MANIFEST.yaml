@@ -306,6 +306,8 @@ days:
   - docs/curriculum/artifacts/day04/ACTION_RISK_REGISTER.md
   - docs/curriculum/artifacts/day04/POLICY_PRECEDENCE.md
   - docs/curriculum/artifacts/day04/FAIL_CLOSED_TEST_CASES.json
+  - docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md
+  - adr/ADR-002_irreversible_actions_and_hitl.md
   portal_to_script_mapping:
     portal_surface: Execution trace risk flags, invoice facts, and final routing outcome
     bridge_file: notebooks/bridges/day04_fail_closed_planning.md
@@ -334,6 +336,17 @@ days:
   review_contract:
     evaluator_profile: wave2-day04-fail-open-planner
     human_required: true
+    review_mode: standard
+    required_review_roles:
+    - facilitator
+  stakeholder_inject:
+    requester_role: Executive sponsor
+    channel: escalation_email
+    unsafe_request: Bypass the manual review pause and auto-issue payments so the
+      customer can accelerate financial close before the audit window.
+    required_artifacts:
+    - adr/ADR-002_irreversible_actions_and_hitl.md
+    - docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md
   customer_context: The customer CISO banned public exposure for production-bound
     AI services and wants proof that risky recommendation paths still stop for review
     instead of acting optimistically.
@@ -451,6 +464,9 @@ days:
   review_contract:
     evaluator_profile: wave2-day05-durable-state
     human_required: true
+    review_mode: standard
+    required_review_roles:
+    - facilitator
   customer_context: An approver reopened a paused invoice after a partial outage.
     The customer wants the workflow resumed without duplicate approvals, duplicate
     recommendations, or policy drift.
@@ -711,6 +727,9 @@ days:
   review_contract:
     evaluator_profile: wave3-day07-guardrail-leak
     human_required: true
+    review_mode: standard
+    required_review_roles:
+    - facilitator
   customer_context: The customer risk team wants evidence that prompt injection and
     PII leakage are rejected before anything lands in logs or audit evidence.
   persistent_constraints:
@@ -777,6 +796,18 @@ days:
     - conflicting_authority_refusal
     - pii_redaction_before_audit
     evidence_source: artifact
+  - id: day07_prompt_drift_eval
+    mode: blocking
+    command: uv run python evals/run_eval_suite.py --suite all --synthetic-cases
+      build/day7/synthetic_cases_drift.jsonl --malicious-cases build/day7/malicious_cases_drift.jsonl
+      --thresholds evals/score_thresholds.yaml --output build/day7/prompt_drift_report.json
+      --enforce-thresholds
+    success_marker: '"all_passed": true'
+    covers_constraints:
+    - authoritative_retrieval_sources
+    - conflicting_authority_refusal
+    - pii_redaction_before_audit
+    evidence_source: artifact
   - id: day07_cloud_truth
     mode: blocking
     command: uv run aegisap-lab audit-production --day 07 --strict
@@ -785,18 +816,32 @@ days:
     - no_public_endpoints
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: A redaction or audit path leaks sensitive text into a Day 7 evaluation
-      artifact.
-    diagnostic_surface: Content-safety notebook evidence, redaction code, and audit
-      writer outputs.
-    expected_recovery_artifact: build/day7/eval_report.json
+    failure_signal: A probabilistic authority drift keeps the app running while evaluation
+      evidence shows the source-of-truth policy is quietly being ignored.
+    diagnostic_surface: Content-safety notebook evidence, Day 7 guardrail artifacts,
+      Day 3 authority-policy files, and evaluation traces or reports.
+    expected_recovery_artifact: build/day7/prompt_drift_report.json
     time_box_minutes: 25
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
   automation_drills:
-  - id: day07_incident_replay
+  - id: drill_11_prompt_authority_drift
     default: true
+    mode: artifact
+    name: Probabilistic Prompt Authority Drift
+    description: Rebuilds the Day 7 eval bundle, then injects tougher authority-drift
+      cases so the learner must patch the durable authority policy and drive the evals
+      back under threshold.
+    expected_signal: The eval suite stays live but fails threshold enforcement because
+      authoritative evidence is no longer winning on the drift slice.
+    source_file: evals/failure_drills/drill_11_prompt_authority_drift.json
+    mutation: day07_prompt_authority_drift
+    repair_targets:
+    - src/aegisap/day3/policies/source_authority_rules.yaml
+    - src/aegisap/day3/retrieval/authority_policy.py
+  - id: day07_incident_replay
+    default: false
     mode: incident
     name: Day 7 incident replay
     description: Uses the existing incident scenario as the Phase 2 automated drill
@@ -1002,6 +1047,16 @@ days:
   review_contract:
     evaluator_profile: wave3-day09-routing-drift
     human_required: true
+    review_mode: standard
+    required_review_roles:
+    - facilitator
+  native_operator_evidence:
+    artifact_path: build/day9/native_operator_evidence.json
+    mode: advisory
+    review_stage: day10_cab_board
+    live_demo_required: false
+    minimum_commands: 1
+    minimum_queries: 1
   customer_context: A finance sponsor is alarmed by rising token spend and wants a
     defensible routing and cache policy that respects the same infrastructure and
     identity constraints already in force.
@@ -1167,6 +1222,10 @@ days:
   review_contract:
     evaluator_profile: wave3-day10-release-board
     human_required: true
+    review_mode: cab_board
+    required_review_roles:
+    - cab_chair
+    - client_ciso_or_infra_lead
   customer_context: The customer CAB will not approve rollout without a release packet
     that proves security posture, ownership, rollback readiness, and cost governance
     survived the repair.
@@ -1528,6 +1587,16 @@ days:
   review_contract:
     evaluator_profile: wave4-day12-network-isolation
     human_required: true
+    review_mode: standard
+    required_review_roles:
+    - facilitator
+  native_operator_evidence:
+    artifact_path: build/day12/native_operator_evidence.json
+    mode: blocking
+    review_stage: day12_closeout
+    live_demo_required: true
+    minimum_commands: 2
+    minimum_queries: 0
   customer_context: The customer CISO escalated a DNS drift concern. You must prove
     that the VNet, private endpoints, and DNS links keep the agent invisible to the
     public internet.
@@ -1924,6 +1993,18 @@ days:
   review_contract:
     evaluator_profile: wave4-day14-chaos-command
     human_required: true
+    review_mode: cab_board
+    required_review_roles:
+    - cab_chair
+    - client_ciso
+    - infra_lead
+  native_operator_evidence:
+    artifact_path: build/day14/native_operator_evidence.json
+    mode: blocking
+    review_stage: capstone_cab_board
+    live_demo_required: true
+    minimum_commands: 2
+    minimum_queries: 1
   customer_context: A downstream SAP schema change created a severity-1 incident.
     Leadership needs a rollback-capable repair path that preserves traceability, network
     posture, and release evidence.

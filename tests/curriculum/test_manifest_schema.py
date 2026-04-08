@@ -53,3 +53,28 @@ def test_superseded_constraint_requires_reason_and_approver() -> None:
     module._validate_manifest(errors, broken)
 
     assert any("superseded constraint" in error for error in errors)
+
+
+def test_day4_stakeholder_inject_declared() -> None:
+    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    day4 = manifest["days"][3]
+
+    inject = day4["stakeholder_inject"]
+
+    assert inject["requester_role"]
+    assert inject["channel"]
+    assert inject["unsafe_request"]
+    assert "adr/ADR-002_irreversible_actions_and_hitl.md" in inject["required_artifacts"]
+    assert "docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md" in inject["required_artifacts"]
+
+
+def test_native_operator_evidence_contracts_exist_on_days_9_12_14() -> None:
+    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    days = {day["id"]: day for day in manifest["days"]}
+
+    assert days["09"]["native_operator_evidence"]["mode"] == "advisory"
+    assert days["09"]["native_operator_evidence"]["review_stage"] == "day10_cab_board"
+    assert days["12"]["native_operator_evidence"]["mode"] == "blocking"
+    assert days["12"]["native_operator_evidence"]["live_demo_required"] is True
+    assert days["14"]["native_operator_evidence"]["mode"] == "blocking"
+    assert days["14"]["native_operator_evidence"]["review_stage"] == "capstone_cab_board"

@@ -87,6 +87,17 @@ lead engineer under incident discipline, not a helper.
 - if the learner cannot navigate to the relevant logs or probes themselves, they
   fail the day and move into remediation
 
+## Naked Drill Protocol
+
+Use this protocol for the native-tool sections on Days 9, 12, and 14.
+
+- allowed tools: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup`, and `Resolve-DnsName`
+- trainers may not rescue learners by suggesting helper CLI commands during these sections
+- trainers may not point learners back to `aegisap-lab` or helper verification wrappers once the native gate starts
+- learners must save literal commands and literal query text into `native_operator_evidence.json`
+- facilitators validate fluency by asking the learner to rerun one saved proof live
+- if the learner cannot explain what the native proof shows, the gate does not pass
+
 ## Catch-Up Policy
 
 - Rejoin the main flow only after the missing day artifact and exit ticket are

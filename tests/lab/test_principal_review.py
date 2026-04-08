@@ -81,6 +81,19 @@ def test_deterministic_review_flags_wave3_missing_day08_evidence_and_rbac() -> N
     assert "missing_day08_evidence" in ids
 
 
+def test_deterministic_review_flags_missing_day04_pushback_artifacts() -> None:
+    findings = deterministic_findings(
+        changed_files=[
+            "src/aegisap/day4/planning/policy_overlay.py",
+            "tests/day4/unit/planning/test_policy_overlay.py",
+        ],
+        diff_text="+    return outcome\n",
+    )
+
+    ids = {item.finding_id for item in findings}
+    assert "missing_day04_pushback_artifacts" in ids
+
+
 def test_deterministic_review_flags_wave3_missing_day09_and_day10_evidence() -> None:
     findings = deterministic_findings(
         changed_files=[

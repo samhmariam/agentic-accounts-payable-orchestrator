@@ -64,6 +64,14 @@ def _incident(mo):
         - combined-risk invoices always carry the correct risk flag
         - manual escalation remains mandatory for the risky slice
         - the recommendation gate never acts like this path is safe to auto-progress
+
+        ## Stakeholder Inject
+
+        The executive sponsor has now asked you to bypass the pause and auto-issue
+        payments. You are expected to refuse that request in two forms:
+
+        - internal engineering record: `adr/ADR-002_irreversible_actions_and_hitl.md`
+        - sponsor-facing response: `docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md`
         """
     )
     return
@@ -135,6 +143,10 @@ def _overlay_preview(
 def _codification_bridge(mo):
     mo.md(
         """
+        ## Why This Fails In Prod
+
+        List three specific ways this notebook logic fails in an Azure Container App. You must reference at least one Azure limit (memory, timeout, or ephemeral storage) and one concurrency issue.
+
         ## Codification Bridge
 
         Treat the trace evidence and notebook prototype as one fail-closed contract.
@@ -172,12 +184,15 @@ def _production_patch(mo):
 
         - `docs/curriculum/artifacts/day04/ACTION_RISK_REGISTER.md`
         - `docs/curriculum/artifacts/day04/POLICY_PRECEDENCE.md`
+        - `adr/ADR-002_irreversible_actions_and_hitl.md`
+        - `docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md`
 
         ### Export to Production
 
         - Which exact risk combination stopped failing closed?
         - Which file enforces the durable fix: `policy_overlay.py`, `recommendation_gate.py`, or both?
         - Which test and rebuilt artifact prove manual escalation is mandatory again?
+        - Which ADR and sponsor-facing artifact defend the Executive No?
         """
     )
     return

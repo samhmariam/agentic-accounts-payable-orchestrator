@@ -38,6 +38,13 @@ uv run aegisap-lab incident start --day 12
 - `uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q && uv run aegisap-lab artifact rebuild --day 12`
 - `uv run aegisap-lab audit-production --day 12 --strict`
 
+## Native Tooling Gate
+
+- Save native proof to `build/day12/native_operator_evidence.json`
+- Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Day 12 does not pass until the facilitator makes the learner rerun one saved proof live
+
 ## Verification Commands
 
 ```bash
@@ -54,6 +61,7 @@ uv run aegisap-lab artifact rebuild --day 12
 - `src/aegisap/network/private_endpoint_probe.py`
 - `scripts/check_private_network_static.py`
 - `scripts/verify_private_network_posture.py`
+- `build/day12/native_operator_evidence.json`
 - `scenarios/day12`
 
 ## CAPSTONE_B

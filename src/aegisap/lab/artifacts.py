@@ -509,6 +509,7 @@ def _rebuild_day6_artifact() -> tuple[Path, dict[str, Any]]:
 
 def _rebuild_day7_artifact() -> dict[str, Any]:
     thresholds = _load_day7_thresholds()
+    day7_root = build_root("day7")
     bucket_counts: dict[str, int] = {}
     malicious_cases = Path("evals") / "malicious_cases.jsonl"
     if malicious_cases.exists():
@@ -543,11 +544,25 @@ def _rebuild_day7_artifact() -> dict[str, Any]:
         ],
         "gate_passed": True,
     }
-    artifact_path = write_json_artifact(build_root("day7") / "eval_report.json", artifact)
+    artifact_path = write_json_artifact(day7_root / "eval_report.json", artifact)
+    synthetic_drift_path = day7_root / "synthetic_cases_drift.jsonl"
+    malicious_drift_path = day7_root / "malicious_cases_drift.jsonl"
+    synthetic_drift_path.write_text(
+        (Path("evals") / "synthetic_cases.jsonl").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    malicious_drift_path.write_text(
+        malicious_cases.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     return {
         "day": "07",
         "artifact_path": str(artifact_path),
         "payload": artifact,
+        "supporting_artifacts": {
+            "synthetic_cases_drift_path": str(synthetic_drift_path),
+            "malicious_cases_drift_path": str(malicious_drift_path),
+        },
     }
 
 

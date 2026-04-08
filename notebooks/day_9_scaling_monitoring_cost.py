@@ -137,6 +137,10 @@ def _routing_preview(check_budget, evaluate_cache_policy, json, mo, route_task):
 def _codification_bridge(mo):
     mo.md(
         """
+        ## Why This Fails In Prod
+
+        List three specific ways this notebook logic fails in an Azure Container App. You must reference at least one Azure limit (memory, timeout, or ephemeral storage) and one concurrency issue.
+
         ## Codification Bridge
 
         Treat the routing telemetry and notebook previews as the same control decision.
@@ -190,10 +194,16 @@ def _production_patch(mo):
 @app.cell
 def _verification(repo_root, mo):
     artifact_path = repo_root / "build" / "day9" / "routing_report.json"
+    native_path = repo_root / "build" / "day9" / "native_operator_evidence.json"
     artifact_note = (
         f"Current artifact present: `{artifact_path.relative_to(repo_root)}`"
         if artifact_path.exists()
         else "Artifact missing: rebuild the Day 9 artifact after the repair."
+    )
+    native_note = (
+        f"Native evidence path: `{native_path.relative_to(repo_root)}`"
+        if native_path.exists()
+        else f"Native evidence still required later: `{native_path.relative_to(repo_root)}`"
     )
     mo.md(
         f"""
@@ -207,6 +217,38 @@ def _verification(repo_root, mo):
         ```
 
         {artifact_note}
+
+        {native_note}
+        """
+    )
+    return
+
+
+@app.cell
+def _native_tooling_gate(mo):
+    mo.md(
+        """
+        ## Native Tooling Gate
+
+        Save your raw operator proof in `build/day9/native_operator_evidence.json`.
+
+        Allowed tools during this gate:
+
+        - Azure Portal
+        - `az`
+        - `az rest`
+        - raw KQL
+        - `git`
+        - `curl`
+        - `nslookup` or `Resolve-DnsName`
+
+        Tools banned during this gate:
+
+        - `aegisap-lab`
+        - helper verification wrappers
+        - canned step-by-step answer keys
+
+        Day 9 native evidence is advisory, but it must be replay-ready for the Day 10 CAB review.
         """
     )
     return

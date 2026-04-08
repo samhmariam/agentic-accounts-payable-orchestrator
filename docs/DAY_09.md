@@ -35,6 +35,13 @@ uv run aegisap-lab incident start --day 09
 - `uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_and_cost.py tests/day9/test_runtime_day9_contract.py -q && uv run aegisap-lab artifact rebuild --day 09`
 - `uv run aegisap-lab audit-production --day 09 --strict`
 
+## Native Tooling Gate
+
+- Save native proof to `build/day9/native_operator_evidence.json`
+- Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned step-by-step answer keys
+- Day 9 native evidence is advisory, but it is replayed during the Day 10 CAB review
+
 ## Verification Commands
 
 ```bash
@@ -50,6 +57,7 @@ uv run aegisap-lab artifact rebuild --day 09
 - `src/aegisap/routing/routing_policy.py`
 - `src/aegisap/cache/cache_policy.py`
 - `src/aegisap/cost/budget_gate.py`
+- `build/day9/native_operator_evidence.json`
 - `scenarios/day09`
 
 ## Automated Drill

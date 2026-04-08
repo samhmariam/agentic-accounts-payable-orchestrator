@@ -20,6 +20,9 @@ PASS = "PASS"
 FAIL = "FAIL"
 SKIP = "SKIP"
 
+_NATIVE_COMMAND_KEYS = ("command", "purpose", "expected_signal", "observed_excerpt")
+_NATIVE_QUERY_KEYS = ("query", "purpose", "expected_signal", "observed_excerpt")
+
 
 @dataclass(frozen=True, slots=True)
 class GateResult:
@@ -89,6 +92,122 @@ def _run_gate(
     )
 
 
+def _validate_native_rows(
+    *, entries: Any, keys: tuple[str, ...], label: str, minimum: int
+) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(entries, list):
+        return [f"`{label}` must be a list."]
+    if len(entries) < minimum:
+        errors.append(f"`{label}` must contain at least {minimum} entr{'y' if minimum == 1 else 'ies'}.")
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            errors.append(f"`{label}[{index}]` must be an object.")
+            continue
+        missing = [key for key in keys if not str(entry.get(key, "")).strip()]
+        if missing:
+            errors.append(
+                f"`{label}[{index}]` is missing required field(s): {', '.join(missing)}."
+            )
+    return errors
+
+
+def _validate_native_operator_evidence(
+    *,
+    day_id: str,
+    contract: dict[str, Any],
+    repo_root: Path,
+) -> GateResult:
+    rel_path = contract["artifact_path"]
+    path = repo_root / rel_path
+    gate_id = f"day{day_id}_native_operator_evidence"
+    if not path.exists():
+        return GateResult(
+            gate_id=gate_id,
+            mode=contract["mode"],
+            status=FAIL,
+            command=f"validate {rel_path}",
+            detail=f"Missing native operator evidence artifact `{rel_path}`.",
+        )
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return GateResult(
+            gate_id=gate_id,
+            mode=contract["mode"],
+            status=FAIL,
+            command=f"validate {rel_path}",
+            detail=f"Could not parse `{rel_path}` as JSON: {exc}",
+        )
+
+    errors: list[str] = []
+    if payload.get("day") != day_id:
+        errors.append(f"`day` must equal `{day_id}`.")
+    if not str(payload.get("operator_interpretation", "")).strip():
+        errors.append("`operator_interpretation` must be non-empty.")
+
+    limitations = payload.get("limitations")
+    if isinstance(limitations, str):
+        if not limitations.strip():
+            errors.append("`limitations` must be non-empty.")
+    elif isinstance(limitations, list):
+        if not limitations or not all(str(item).strip() for item in limitations):
+            errors.append("`limitations` must contain at least one non-empty item.")
+    else:
+        errors.append("`limitations` must be a string or a list of strings.")
+
+    errors.extend(
+        _validate_native_rows(
+            entries=payload.get("commands"),
+            keys=_NATIVE_COMMAND_KEYS,
+            label="commands",
+            minimum=int(contract.get("minimum_commands", 0)),
+        )
+    )
+    errors.extend(
+        _validate_native_rows(
+            entries=payload.get("queries"),
+            keys=_NATIVE_QUERY_KEYS,
+            label="queries",
+            minimum=int(contract.get("minimum_queries", 0)),
+        )
+    )
+
+    live_demo = payload.get("live_demo")
+    if not isinstance(live_demo, dict):
+        errors.append("`live_demo` must be an object.")
+    else:
+        if live_demo.get("required") != bool(contract.get("live_demo_required")):
+            errors.append("`live_demo.required` does not match the manifest contract.")
+        if live_demo.get("review_stage") != contract.get("review_stage"):
+            errors.append("`live_demo.review_stage` does not match the manifest contract.")
+        if contract.get("live_demo_required"):
+            if live_demo.get("passed") is not True:
+                errors.append("`live_demo.passed` must be `true` for blocking native evidence.")
+            if not str(live_demo.get("witnessed_by", "")).strip():
+                errors.append("`live_demo.witnessed_by` must be recorded for blocking native evidence.")
+            if not str(live_demo.get("recorded_at", "")).strip():
+                errors.append("`live_demo.recorded_at` must be recorded for blocking native evidence.")
+
+    if errors:
+        return GateResult(
+            gate_id=gate_id,
+            mode=contract["mode"],
+            status=FAIL,
+            command=f"validate {rel_path}",
+            detail="; ".join(errors),
+        )
+
+    return GateResult(
+        gate_id=gate_id,
+        mode=contract["mode"],
+        status=PASS,
+        command=f"validate {rel_path}",
+        detail=f"Native operator evidence validated from `{rel_path}`.",
+    )
+
+
 def _day0_gates(track: str) -> list[dict[str, str]]:
     return [
         {
@@ -114,11 +233,13 @@ def run_mastery(
         gates = _day0_gates(track)
         title = f"Bootstrap {track.title()} Environment"
         lineage = {"day": day_id, "title": title, "active_constraints": []}
+        native_contract: dict[str, Any] | None = None
     else:
         manifest = load_manifest(root)
         day_entry = get_day(manifest, day_id)
         gates = day_entry.get("mastery_gates", [])
         title = day_entry.get("title", f"Day {day_id}")
+        native_contract = day_entry.get("native_operator_evidence")
         lineage = constraint_lineage_for_day(manifest, day_id)
         target = root / "build" / f"day{day_id}" / "constraint_lineage.json"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -135,6 +256,14 @@ def run_mastery(
         )
         for gate in gates
     ]
+    if native_contract is not None:
+        results.append(
+            _validate_native_operator_evidence(
+                day_id=day_id,
+                contract=native_contract,
+                repo_root=root,
+            )
+        )
 
     blocking_failures = [
         result for result in results if result.mode == "blocking" and result.status == FAIL

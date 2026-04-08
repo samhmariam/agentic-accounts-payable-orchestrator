@@ -29,13 +29,14 @@ The customer risk team wants evidence that prompt injection and PII leakage are 
 ## Mastery Gate
 
 - `uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q && uv run aegisap-lab artifact rebuild --day 07`
+- `uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/synthetic_cases_drift.jsonl --malicious-cases build/day7/malicious_cases_drift.jsonl --thresholds evals/score_thresholds.yaml --output build/day7/prompt_drift_report.json --enforce-thresholds`
 - `uv run aegisap-lab audit-production --day 07 --strict`
 
 ## Chaos Gate
 
-- Failure signal: A redaction or audit path leaks sensitive text into a Day 7 evaluation artifact.
-- Diagnostic surface: Content-safety notebook evidence, redaction code, and audit writer outputs.
-- Expected recovery artifact: `build/day7/eval_report.json`
+- Failure signal: A probabilistic authority drift keeps the app running while eval evidence shows the authority boundary is eroding.
+- Diagnostic surface: Content-safety notebook evidence, evaluation traces, `build/day7/` drift cases, and Day 3 authority-policy code.
+- Expected recovery artifact: `build/day7/prompt_drift_report.json`
 - Time box: 25 minutes
 
 ## Day X File Manifest
@@ -48,9 +49,12 @@ Do not edit code in this module folder.
 - Production Target: `src/aegisap/security/redaction.py`
 - Production Target: `src/aegisap/audit/events.py`
 - Production Target: `src/aegisap/audit/writer.py`
+- Drift Repair Target: `src/aegisap/day3/policies/source_authority_rules.yaml`
+- Drift Repair Target: `src/aegisap/day3/retrieval/authority_policy.py`
 - Scenario Pack: `scenarios/day07`
 - Verification Command: `uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 07`
+- Verification Command: `uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/synthetic_cases_drift.jsonl --malicious-cases build/day7/malicious_cases_drift.jsonl --thresholds evals/score_thresholds.yaml --output build/day7/prompt_drift_report.json --enforce-thresholds`
 
 ## Automated Drill
 

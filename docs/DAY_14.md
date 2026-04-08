@@ -40,6 +40,13 @@ uv run aegisap-lab incident start --day 14
 - `uv run python -m pytest tests/day14/test_breaking_changes.py -q && uv run python scripts/run_chaos_capstone.py && uv run aegisap-lab artifact rebuild --day 14`
 - `uv run aegisap-lab audit-production --day 14 --strict`
 
+## Native Tooling Gate
+
+- Save native proof to `build/day14/native_operator_evidence.json`
+- Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- The capstone CAB chair may randomly select one saved proof and require a live rerun
+
 ## Verification Commands
 
 ```bash
@@ -57,6 +64,7 @@ uv run aegisap-lab artifact rebuild --day 14
 - `src/aegisap/traceability/correlation.py`
 - `scripts/verify_trace_correlation.py`
 - `scripts/run_chaos_capstone.py`
+- `build/day14/native_operator_evidence.json`
 - `scenarios/day14`
 
 ## CAPSTONE_B

@@ -37,6 +37,13 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
 
 
+def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> str:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    body = "\n".join(json.dumps(row, sort_keys=True) for row in rows) + "\n"
+    path.write_text(body, encoding="utf-8")
+    return str(path)
+
+
 def _load_drill_metadata(repo_root: Path, drill: dict[str, Any]) -> dict[str, Any]:
     source_file = drill.get("source_file")
     if not source_file:
@@ -129,6 +136,75 @@ def _apply_day12_public_endpoint_reenabled(repo_root: Path) -> list[str]:
         return payload
 
     return [_mutate_json(static_path, updater)]
+
+
+def _apply_day07_prompt_authority_drift(repo_root: Path) -> list[str]:
+    synthetic_path = repo_root / "build" / "day7" / "synthetic_cases_drift.jsonl"
+    report_path = repo_root / "build" / "day7" / "prompt_drift_report.json"
+    drift_cases = [
+        {
+            "case_name": "authority_drift_missing_vendor_id_01",
+            "slice": "probabilistic_authority_drift",
+            "cost_class": "exception",
+            "eval_mode": "day3_authority",
+            "invoice": {
+                "case_id": "CASE-DRIFT-701",
+                "invoice_id": "INV-DRIFT-701",
+                "invoice_date": "2026-03-01",
+                "vendor_id": None,
+                "vendor_name": "Acme Office Supplies",
+                "po_number": "PO-9001",
+                "amount": 12500.0,
+                "currency": "GBP",
+                "bank_account_last4": "4421",
+            },
+            "expected_outcome": "manual_review",
+            "expected_primary_source_type": "approved_bank_change",
+        },
+        {
+            "case_name": "authority_drift_missing_vendor_id_02",
+            "slice": "probabilistic_authority_drift",
+            "cost_class": "exception",
+            "eval_mode": "day3_authority",
+            "invoice": {
+                "case_id": "CASE-DRIFT-702",
+                "invoice_id": "INV-DRIFT-702",
+                "invoice_date": "2026-03-03",
+                "vendor_id": None,
+                "vendor_name": "Acme Office Supplies",
+                "po_number": "PO-9001",
+                "amount": 9800.0,
+                "currency": "GBP",
+                "bank_account_last4": "4421",
+            },
+            "expected_outcome": "manual_review",
+            "expected_primary_source_type": "approved_bank_change",
+        },
+        {
+            "case_name": "authority_drift_missing_vendor_id_03",
+            "slice": "probabilistic_authority_drift",
+            "cost_class": "exception",
+            "eval_mode": "day3_authority",
+            "invoice": {
+                "case_id": "CASE-DRIFT-703",
+                "invoice_id": "INV-DRIFT-703",
+                "invoice_date": "2026-03-04",
+                "vendor_id": None,
+                "vendor_name": "Acme Office Supplies",
+                "po_number": "PO-9001",
+                "amount": 18600.0,
+                "currency": "GBP",
+                "bank_account_last4": "4421",
+            },
+            "expected_outcome": "manual_review",
+            "expected_primary_source_type": "approved_bank_change",
+        },
+    ]
+    mutated = [_write_jsonl(synthetic_path, drift_cases)]
+    if report_path.exists():
+        report_path.unlink()
+        mutated.append(str(report_path))
+    return mutated
 
 
 def _apply_day13_dlq_overflow(repo_root: Path) -> list[str]:
@@ -254,6 +330,7 @@ def _apply_day14_rollback_failure(repo_root: Path) -> list[str]:
 
 
 _ARTIFACT_MUTATORS: dict[str, Callable[[Path], list[str]]] = {
+    "day07_prompt_authority_drift": _apply_day07_prompt_authority_drift,
     "day11_iam_drift": _apply_day11_iam_drift,
     "day11_obo_scope_mismatch": _apply_day11_obo_scope_mismatch,
     "day12_dns_misconfiguration": _apply_day12_dns_misconfiguration,
@@ -294,6 +371,7 @@ def list_drills(
                     "description": drill["description"],
                     "source_file": drill.get("source_file"),
                     "expected_signal": drill["expected_signal"],
+                    "repair_targets": drill.get("repair_targets", []),
                     "active": bool(active and active.get("drill_id") == drill["id"]),
                 }
             )
@@ -335,6 +413,7 @@ def inject_drill(
         "name": drill["name"],
         "mode": drill["mode"],
         "expected_signal": drill["expected_signal"],
+        "repair_targets": drill.get("repair_targets", []),
         "source_metadata": metadata,
         "mutated_files": mutated_files,
         "constraint_lineage": lineage,
@@ -363,7 +442,11 @@ def reset_drill(
     else:
         rebuild = rebuild_day_artifact(normalized_day)
         restored = [rebuild["artifact_path"]]
-        restored.extend(rebuild.get("supporting_artifacts", {}).values())
+        restored.extend(
+            value
+            for value in rebuild.get("supporting_artifacts", {}).values()
+            if isinstance(value, str)
+        )
 
     state_path.unlink()
     return {

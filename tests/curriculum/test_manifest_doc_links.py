@@ -130,6 +130,30 @@ def test_primary_doc_points_to_module_readme(day: dict) -> None:
     assert "## Automated Drill" in content
 
 
+def test_day04_docs_reference_pushback_artifacts() -> None:
+    for rel_path in ("docs/DAY_04.md", "modules/day_04_single_agent_loops/README.md"):
+        content = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+        assert "SPONSOR_PUSHBACK_EMAIL.md" in content
+        assert "ADR-002_irreversible_actions_and_hitl.md" in content
+
+
+@pytest.mark.parametrize(
+    "rel_path",
+    [
+        "docs/DAY_09.md",
+        "modules/day_09_observability_cost/README.md",
+        "docs/DAY_12.md",
+        "modules/day_12_private_networking/README.md",
+        "docs/DAY_14.md",
+        "modules/day_14_elite_ops/README.md",
+    ],
+)
+def test_native_tooling_gate_docs_exist(rel_path: str) -> None:
+    content = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+    assert "## Native Tooling Gate" in content
+    assert "native_operator_evidence.json" in content
+
+
 # ---------------------------------------------------------------------------
 # Capstone B section marker in flagged day docs
 # ---------------------------------------------------------------------------

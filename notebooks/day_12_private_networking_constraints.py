@@ -135,6 +135,10 @@ def _lab_preview(BicepPolicyChecker, json, mo):
 def _codification_bridge(mo):
     mo.md(
         """
+        ## Why This Fails In Prod
+
+        List three specific ways this notebook logic fails in an Azure Container App. You must reference at least one Azure limit (memory, timeout, or ephemeral storage) and one concurrency issue.
+
         ## Codification Bridge
 
         Treat the network portal evidence and notebook checker output as one private-only contract.
@@ -189,8 +193,9 @@ def _production_patch(mo):
 def _verification(repo_root, mo):
     posture_path = repo_root / "build" / "day12" / "private_network_posture.json"
     static_path = repo_root / "build" / "day12" / "static_bicep_analysis.json"
+    native_path = repo_root / "build" / "day12" / "native_operator_evidence.json"
     notes = []
-    for path in (static_path, posture_path):
+    for path in (static_path, posture_path, native_path):
         if path.exists():
             notes.append(f"Current artifact present: `{path.relative_to(repo_root)}`")
         else:
@@ -207,6 +212,36 @@ def _verification(repo_root, mo):
         ```
 
         {'\n\n'.join(notes)}
+        """
+    )
+    return
+
+
+@app.cell
+def _native_tooling_gate(mo):
+    mo.md(
+        """
+        ## Native Tooling Gate
+
+        Save your raw private-network proof in `build/day12/native_operator_evidence.json`.
+
+        Allowed tools during this gate:
+
+        - Azure Portal
+        - `az`
+        - `az rest`
+        - `nslookup` or `Resolve-DnsName`
+        - `curl`
+        - raw KQL when you need to prove the request path
+        - `git`
+
+        Tools banned during this gate:
+
+        - `aegisap-lab`
+        - helper verification wrappers
+        - canned answer keys
+
+        Day 12 does not pass until the facilitator selects one saved proof and you rerun it live on screen.
         """
     )
     return

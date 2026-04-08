@@ -25,10 +25,15 @@ Use the Phase 2 drill CLI instead of ad-hoc manual breakage.
 ## Preferred Mapping
 
 - Days 1-10 use the day scenario as the default Phase 2 automated drill.
+- Day 7 now defaults to probabilistic prompt authority drift rather than a binary outage. The learner must patch the authority policy and re-run the enforced eval suite.
 - Day 11 defaults to IAM drift, with OBO scope mismatch as an alternate.
 - Day 12 defaults to DNS misconfiguration, with public endpoint re-enabled as an alternate.
 - Day 13 defaults to DLQ overflow, with MCP contract break as an alternate.
 - Day 14 defaults to rollback failure, with canary regression, data residency violation, and correlation gap as alternates.
+
+For Days 9, 12, and 14, pair the drill with the native-tool gate. The learner
+must save raw operator proof to `native_operator_evidence.json` and be ready to
+rerun one saved proof live without helper CLI commands.
 
 ## Scoring Priority
 

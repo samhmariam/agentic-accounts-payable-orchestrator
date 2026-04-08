@@ -95,7 +95,7 @@ def test_all_artifact_files_exist(day: dict) -> None:
 
 def test_total_artifact_count(days: list[dict]) -> None:
     total = sum(len(d["artifact_files"]) for d in days)
-    assert total == 43, f"Expected 43 artifact files across all days, got {total}"
+    assert total == 45, f"Expected 45 artifact files across all days, got {total}"
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
@@ -115,6 +115,46 @@ def test_phase1_metadata_contract_declared(day: dict) -> None:
     assert day["persistent_constraints"], f"Day {day['id']} missing persistent_constraints"
     assert day["mastery_gates"], f"Day {day['id']} missing mastery_gates"
     assert day["chaos_gate"], f"Day {day['id']} missing chaos_gate"
+
+
+def test_day4_declares_stakeholder_inject(days: list[dict]) -> None:
+    day = next(item for item in days if item["id"] == "04")
+    assert day["stakeholder_inject"]["required_artifacts"]
+
+
+@pytest.mark.parametrize("day_id,mode", [("09", "advisory"), ("12", "blocking"), ("14", "blocking")])
+def test_native_operator_evidence_contract_declared(day_id: str, mode: str, days: list[dict]) -> None:
+    day = next(item for item in days if item["id"] == day_id)
+    contract = day.get("native_operator_evidence")
+    assert contract, f"Day {day_id} missing native_operator_evidence"
+    assert contract["mode"] == mode
+
+
+def test_day7_default_drill_targets_authority_drift(days: list[dict]) -> None:
+    day = next(item for item in days if item["id"] == "07")
+    default = next(drill for drill in day["automation_drills"] if drill.get("default"))
+    assert default["id"] == "drill_11_prompt_authority_drift"
+    assert default["repair_targets"] == [
+        "src/aegisap/day3/policies/source_authority_rules.yaml",
+        "src/aegisap/day3/retrieval/authority_policy.py",
+    ]
+
+
+def test_day10_and_day14_use_cab_board_review_mode(days: list[dict]) -> None:
+    day10 = next(item for item in days if item["id"] == "10")
+    day14 = next(item for item in days if item["id"] == "14")
+
+    assert day10["review_contract"]["review_mode"] == "cab_board"
+    assert day10["review_contract"]["required_review_roles"] == [
+        "cab_chair",
+        "client_ciso_or_infra_lead",
+    ]
+    assert day14["review_contract"]["review_mode"] == "cab_board"
+    assert day14["review_contract"]["required_review_roles"] == [
+        "cab_chair",
+        "client_ciso",
+        "infra_lead",
+    ]
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in

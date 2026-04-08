@@ -82,6 +82,7 @@ REQUIRED_DOCS = (
     "docs/curriculum/curriculum.schema.json",
     "docs/curriculum/templates/DAILY_ARTIFACT_PACK.md",
     "docs/curriculum/templates/DAILY_SCORECARD.md",
+    "docs/curriculum/templates/NATIVE_OPERATOR_EVIDENCE_TEMPLATE.json",
     "docs/curriculum/templates/ORAL_DEFENSE_SCORECARD.md",
     "docs/curriculum/templates/PILOT_RETRO.md",
 )
@@ -129,6 +130,8 @@ TRAINER_OPS_REQUIRED_SNIPPETS = (
     "Learner Status Model",
     "trainer may not touch the learner's keyboard",
     "expected topology",
+    "## Naked Drill Protocol",
+    "helper CLI commands",
 )
 
 PREFLIGHT_REQUIRED_SNIPPETS = (
@@ -136,6 +139,8 @@ PREFLIGHT_REQUIRED_SNIPPETS = (
     "az login",
     "scripts/verify_env.py",
     "scripts/setup-env.sh",
+    "This is not a tutorial",
+    "Native Azure and Git fluency is assessed by Week 2",
 )
 
 FACILITATOR_REQUIRED_SNIPPETS = (
@@ -157,6 +162,7 @@ INCIDENT_NOTEBOOK_SECTIONS = (
     "## Incident",
     "## Portal Investigation",
     "## Lab Repair",
+    "## Why This Fails In Prod",
     "## Codification Bridge",
     "## Production Patch",
     "## Verification",
@@ -174,6 +180,36 @@ MODULE_REQUIRED_HEADINGS = (
     "## Chaos Gate",
     "## Day X File Manifest",
 )
+
+WHY_FAILS_PROMPT = (
+    "List three specific ways this notebook logic fails in an Azure Container App. "
+    "You must reference at least one Azure limit (memory, timeout, or ephemeral storage) "
+    "and one concurrency issue."
+)
+
+NATIVE_OPERATOR_EVIDENCE_DAYS = {
+    "09": {
+        "mode": "advisory",
+        "review_stage": "day10_cab_board",
+        "minimum_commands": 1,
+        "minimum_queries": 1,
+        "live_demo_required": False,
+    },
+    "12": {
+        "mode": "blocking",
+        "review_stage": "day12_closeout",
+        "minimum_commands": 2,
+        "minimum_queries": 0,
+        "live_demo_required": True,
+    },
+    "14": {
+        "mode": "blocking",
+        "review_stage": "capstone_cab_board",
+        "minimum_commands": 2,
+        "minimum_queries": 1,
+        "live_demo_required": True,
+    },
+}
 
 INCIDENT_NOTEBOOKS = {
     1: "notebooks/day_1_agentic_fundamentals.py",
@@ -380,6 +416,47 @@ def main() -> int:
         FACILITATOR_REQUIRED_SNIPPETS,
         "Facilitator day-start checklist is missing required delivery controls",
     )
+    _expect_snippets(
+        errors,
+        ROOT / "docs" / "curriculum" / "CAPSTONE_PR_REVIEW.md",
+        (
+            "peer_reviewer_challenge_quality",
+            "skeptical questions",
+            "concrete evidence artifact",
+            "rerun the selected native proof live",
+        ),
+        "Capstone PR review guide is missing the adversarial CAB contract",
+    )
+    _expect_snippets(
+        errors,
+        ROOT / "docs" / "curriculum" / "CAPSTONE_REVIEW.md",
+        (
+            "cab_board",
+            "peer_reviewer_challenge_quality",
+            "rerun the selected native proof live",
+        ),
+        "Capstone review guide is missing the live CAB review contract",
+    )
+    _expect_snippets(
+        errors,
+        ROOT / "docs" / "curriculum" / "ASSESSOR_CALIBRATION.md",
+        (
+            "peer_reviewer_challenge_quality",
+            "Rubber-stamping",
+            "Top Talent",
+        ),
+        "Assessor calibration guide is missing reviewer-accountability language",
+    )
+    _expect_snippets(
+        errors,
+        ROOT / "docs" / "curriculum" / "GRADUATION_RUBRIC.md",
+        (
+            "peer_reviewer_challenge_quality",
+            "Top Talent",
+            "remediation",
+        ),
+        "Graduation rubric is missing reviewer-accountability criteria",
+    )
 
     if manifest is not None:
         _validate_manifest_schema(errors, manifest)
@@ -521,6 +598,11 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                         errors.append(
                             f"Manifest day {day['id']} artifact drill `{drill['id']}` must declare mutation."
                         )
+                    for repair_target in drill.get("repair_targets", []):
+                        if not (ROOT / repair_target).exists():
+                            errors.append(
+                                f"Manifest day {day['id']} drill `{drill['id']}` repair target missing: {repair_target}"
+                            )
 
         artifact_files = day.get("artifact_files", [])
         if not artifact_files:
@@ -545,6 +627,8 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 (
                     "markdown-only",
                     "Do not edit repo files from this notebook",
+                    "## Why This Fails In Prod",
+                    WHY_FAILS_PROMPT,
                     "### Export to Production",
                     "STOP. Close this notebook.",
                     "cohort/<",
@@ -554,6 +638,13 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 ),
                 f"Day {day_id} notebook is missing the markdown-only production patch boundary",
             )
+            if day_id_str in NATIVE_OPERATOR_EVIDENCE_DAYS:
+                _expect_snippets(
+                    errors,
+                    notebook_path,
+                    ("## Native Tooling Gate", "native_operator_evidence.json"),
+                    f"Day {day_id} notebook is missing the native-tooling evidence gate",
+                )
             _expect_absent_snippets(
                 errors,
                 notebook_path,
@@ -665,6 +756,52 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
             errors.append(f"Manifest day {day['id']} must declare verification_commands.")
         if "review_contract" not in day:
             errors.append(f"Manifest day {day['id']} must declare review_contract.")
+        else:
+            review_contract = day["review_contract"]
+            if day_id_str == "10":
+                if review_contract.get("review_mode") != "cab_board":
+                    errors.append("Manifest day 10 review_contract must declare `review_mode: cab_board`.")
+                if review_contract.get("required_review_roles") != ["cab_chair", "client_ciso_or_infra_lead"]:
+                    errors.append(
+                        "Manifest day 10 review_contract must declare CAB roles `cab_chair` and `client_ciso_or_infra_lead`."
+                    )
+            if day_id_str == "14":
+                if review_contract.get("review_mode") != "cab_board":
+                    errors.append("Manifest day 14 review_contract must declare `review_mode: cab_board`.")
+                if review_contract.get("required_review_roles") != ["cab_chair", "client_ciso", "infra_lead"]:
+                    errors.append(
+                        "Manifest day 14 review_contract must declare CAB roles `cab_chair`, `client_ciso`, and `infra_lead`."
+                    )
+        stakeholder_inject = day.get("stakeholder_inject")
+        if day_id_str == "04" and not stakeholder_inject:
+            errors.append("Manifest day 04 must declare stakeholder_inject.")
+        if stakeholder_inject:
+            for artifact_rel in stakeholder_inject.get("required_artifacts", []):
+                if not (ROOT / artifact_rel).exists():
+                    errors.append(
+                        f"Manifest day {day['id']} stakeholder inject artifact missing: {artifact_rel}"
+                    )
+        native_operator = day.get("native_operator_evidence")
+        expected_native = NATIVE_OPERATOR_EVIDENCE_DAYS.get(day_id_str)
+        if expected_native is None:
+            if native_operator is not None:
+                errors.append(
+                    f"Manifest day {day['id']} should not declare native_operator_evidence."
+                )
+        else:
+            if native_operator is None:
+                errors.append(f"Manifest day {day['id']} must declare native_operator_evidence.")
+            else:
+                for key, expected_value in expected_native.items():
+                    if native_operator.get(key) != expected_value:
+                        errors.append(
+                            f"Manifest day {day['id']} native_operator_evidence `{key}` must be `{expected_value}`."
+                        )
+                expected_artifact = f"build/day{int(day_id_str)}/native_operator_evidence.json"
+                if native_operator.get("artifact_path") != expected_artifact:
+                    errors.append(
+                        f"Manifest day {day['id']} native_operator_evidence artifact_path must be `{expected_artifact}`."
+                    )
         if day.get("legacy_doc_files"):
             errors.append(
                 f"Manifest day {day['id']} should not declare legacy_doc_files after the incident-driven redesign."
@@ -697,6 +834,20 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 ("Do not edit code in this module folder.", "## Day X File Manifest", "aegisap-lab drill inject --day"),
                 "Module README is missing file-manifest or edit-boundary guidance",
             )
+            if day_id_str in NATIVE_OPERATOR_EVIDENCE_DAYS:
+                _expect_snippets(
+                    errors,
+                    module_path,
+                    ("## Native Tooling Gate", "native_operator_evidence.json", "banned"),
+                    "Module README is missing the native-tooling gate contract",
+                )
+            if day_id_str == "04":
+                _expect_snippets(
+                    errors,
+                    module_path,
+                    ("SPONSOR_PUSHBACK_EMAIL.md", "ADR-002_irreversible_actions_and_hitl.md"),
+                    "Day 4 module README is missing the executive-pushback artifacts",
+                )
             module_text = module_path.read_text(encoding="utf-8")
             errors.extend(_validate_path_tokens(module_path, module_text))
             errors.extend(_validate_module_commands(module_path, module_text))
@@ -715,6 +866,40 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 (module_rel,),
                 "Primary day doc must point the learner to the module README first",
             )
+            if day_id_str in NATIVE_OPERATOR_EVIDENCE_DAYS:
+                _expect_snippets(
+                    errors,
+                    primary_doc_path,
+                    ("## Native Tooling Gate", "native_operator_evidence.json"),
+                    "Primary day doc is missing the native-tooling gate contract",
+                )
+            if day_id_str == "04":
+                _expect_snippets(
+                    errors,
+                    primary_doc_path,
+                    ("SPONSOR_PUSHBACK_EMAIL.md", "ADR-002_irreversible_actions_and_hitl.md"),
+                    "Day 4 primary doc is missing the executive-pushback artifacts",
+                )
+        if day_id_str == "07":
+            matching_gate = next(
+                (
+                    gate
+                    for gate in mastery_gates
+                    if "evals/run_eval_suite.py" in gate.get("command", "")
+                    and "build/day7/prompt_drift_report.json" in gate.get("command", "")
+                    and "--enforce-thresholds" in gate.get("command", "")
+                ),
+                None,
+            )
+            if matching_gate is None:
+                errors.append(
+                    "Manifest day 07 must declare the enforced prompt-drift eval mastery gate."
+                )
+            default_drill = next((drill for drill in drills if drill.get("default")), None)
+            if not default_drill or default_drill.get("id") != "drill_11_prompt_authority_drift":
+                errors.append(
+                    "Manifest day 07 must use `drill_11_prompt_authority_drift` as the default automation drill."
+                )
 
 
 def _expect_headings(

@@ -154,3 +154,81 @@ def test_inject_incident_drill_delegates_to_incident_engine(monkeypatch, tmp_pat
     assert injected["mode"] == "incident"
     assert reset["mode"] == "incident"
     assert calls == [("start", "01"), ("reset", "01")]
+
+
+def test_day7_prompt_authority_drift_writes_drift_cases_and_resets(monkeypatch, tmp_path: Path) -> None:
+    manifest = {
+        "days": [
+            {
+                "id": "07",
+                "title": "Prompt authority drift",
+                "persistent_constraints": [
+                    {
+                        "id": "authoritative_retrieval_sources",
+                        "type": "business",
+                        "description": "Authority must win.",
+                        "introduced_on": "03",
+                        "persists": True,
+                    }
+                ],
+                "mastery_gates": [
+                    {
+                        "id": "day07_repo_evidence",
+                        "mode": "blocking",
+                        "command": "echo ok",
+                        "success_marker": "ok",
+                        "covers_constraints": ["authoritative_retrieval_sources"],
+                        "evidence_source": "artifact",
+                    }
+                ],
+                "automation_drills": [
+                    {
+                        "id": "drill_11_prompt_authority_drift",
+                        "default": True,
+                        "mode": "artifact",
+                        "name": "Prompt authority drift",
+                        "description": "Drive eval drift.",
+                        "expected_signal": "authority drift",
+                        "source_file": "evals/failure_drills/drill_11_prompt_authority_drift.json",
+                        "mutation": "day07_prompt_authority_drift",
+                        "repair_targets": [
+                            "src/aegisap/day3/policies/source_authority_rules.yaml",
+                            "src/aegisap/day3/retrieval/authority_policy.py",
+                        ],
+                    }
+                ],
+            }
+        ]
+    }
+    target = tmp_path / "build" / "day7" / "synthetic_cases_drift.jsonl"
+
+    def fake_rebuild_day_artifact(day: str) -> dict:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text('{"case_name":"baseline"}\n', encoding="utf-8")
+        return {
+            "day": day,
+            "artifact_path": str(tmp_path / "build" / "day7" / "eval_report.json"),
+            "supporting_artifacts": {
+                "synthetic_cases_drift_path": str(target),
+                "malicious_cases_drift_path": str(tmp_path / "build" / "day7" / "malicious_cases_drift.jsonl"),
+            },
+        }
+
+    monkeypatch.setattr(drills, "load_manifest", lambda _root=None: manifest)
+    monkeypatch.setattr(drills, "_load_drill_metadata", lambda repo_root, drill: {})
+    monkeypatch.setattr(drills, "rebuild_day_artifact", fake_rebuild_day_artifact)
+
+    injected = drills.inject_drill(day="07", repo_root=tmp_path)
+
+    assert injected["drill_id"] == "drill_11_prompt_authority_drift"
+    assert target.exists()
+    assert "authority_drift_missing_vendor_id_01" in target.read_text(encoding="utf-8")
+    assert injected["repair_targets"] == [
+        "src/aegisap/day3/policies/source_authority_rules.yaml",
+        "src/aegisap/day3/retrieval/authority_policy.py",
+    ]
+
+    reset = drills.reset_drill(day="07", repo_root=tmp_path)
+
+    assert reset["drill_id"] == "drill_11_prompt_authority_drift"
+    assert '{"case_name":"baseline"}' in target.read_text(encoding="utf-8")

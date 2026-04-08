@@ -80,8 +80,12 @@ The capstone uses the shared rubric in
 1. Learner submits the one-page design brief with scope, risk, rollback,
    expected artifacts, and assumption handling.
 2. Learner completes the PR-style review cycle defined in [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md).
-3. Learner walks through the bounded enhancement and why it belongs in the chosen category.
-4. Learner shows the test, eval, or gate evidence for the change.
-5. Learner opens the Day 10 release envelope and checkpoint artifacts.
-6. Learner presents the rollback command and explains when they would use it.
-7. Trainer scores the release-style defense against the rubric and records follow-up remediation if needed.
+3. Session runs in `cab_board` mode with facilitator as CAB chair and peer reviewers assigned as `client_ciso` and `infra_lead`.
+4. Learner walks through the bounded enhancement and why it belongs in the chosen category.
+5. Learner shows the test, eval, or gate evidence for the change.
+6. Learner opens the Day 10 release envelope and checkpoint artifacts.
+7. Learner presents the rollback command and explains when they would use it.
+8. CAB chair may require the learner to rerun the selected native proof live.
+9. Facilitator scores the release-style defense and records `peer_reviewer_challenge_quality` for each reviewer.
+
+Peer reviewers are not observers. They are accountable for adversarial, evidence-seeking questions and can force revision before approval.

@@ -535,6 +535,7 @@ def _strategy_examples(*, strategy: dict[str, Any], profiles: list[str]) -> list
 
 def deterministic_findings(*, changed_files: list[str], diff_text: str) -> list[ReviewFinding]:
     findings: list[ReviewFinding] = []
+    changed_set = set(changed_files)
 
     if any(pattern.search(diff_text) for pattern in RBAC_PATTERNS):
         findings.append(
@@ -560,6 +561,28 @@ def deterministic_findings(*, changed_files: list[str], diff_text: str) -> list[
         )
 
     scope_days = detect_scope_days(changed_files=changed_files)
+    if {"04", "05"} & set(scope_days):
+        required_pushback_artifacts = {
+            "adr/ADR-002_irreversible_actions_and_hitl.md",
+            "docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md",
+        }
+        missing_pushback = sorted(required_pushback_artifacts - changed_set)
+        if missing_pushback:
+            findings.append(
+                ReviewFinding(
+                    finding_id="missing_day04_pushback_artifacts",
+                    severity="blocking",
+                    summary="Irreversible-action or HITL changes landed without the required Day 4 pushback artifacts.",
+                    detail=(
+                        "Day 4 and Day 5 repairs must preserve the executive refusal trail and the internal ADR for "
+                        "irreversible actions. Missing artifacts: " + ", ".join(missing_pushback)
+                    ),
+                    suggested_fix=(
+                        "Update both `adr/ADR-002_irreversible_actions_and_hitl.md` and "
+                        "`docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md` before asking for approval."
+                    ),
+                )
+            )
     if len(scope_days) > 1:
         findings.append(
             ReviewFinding(

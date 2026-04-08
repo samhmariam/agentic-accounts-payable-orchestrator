@@ -36,6 +36,12 @@ uv run aegisap-lab incident start --day 10
 - `uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py -q && uv run aegisap-lab artifact rebuild --day 10`
 - `uv run aegisap-lab audit-production --day 10 --strict`
 
+## CAB Review Mode
+
+- Review mode: `cab_board`
+- Required review roles: `cab_chair`, `client_ciso_or_infra_lead`
+- The board may replay `build/day9/native_operator_evidence.json` live before approving the release packet
+
 ## Verification Commands
 
 ```bash

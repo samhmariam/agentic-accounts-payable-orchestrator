@@ -12,5 +12,6 @@
 - security_reasoning:
 - production_readiness_judgment:
 - review_response_quality: not_applicable / weak / acceptable / strong
+- peer_reviewer_challenge_quality: not_applicable / 1 / 2 / 3 / 4 / 5
 - remediation_assigned:
 - trainer_notes_for_next_day:

@@ -38,7 +38,9 @@ def _bootstrap():
 def _title(mo):
     mo.md(
         """
-        # Day 1 — Trust Boundary Rescue Mission
+        # Day 1 - Agentic Systems Fundamentals, Business Value, and FDE Judgment
+
+        Primary learner entrypoint: `modules/day_01_trust_boundary/README.md`. Read the customer context and file manifest there before you start the incident.
 
         Day 1 is no longer a conceptual tour. You are responding to a real intake failure,
         proving where the break lives, prototyping the repair in the notebook, and then
@@ -222,6 +224,10 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
+        STOP. Close this notebook.
+
+        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+
         Your prototype is only a hypothesis until the real code changes land in the repo.
         Open the production files in your editor and implement the fix there:
 
@@ -267,17 +273,62 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _chaos_gate(mo):
+    mo.md(
+        """
+        ## Chaos Gate
+
+        Failure signal: A locale-formatted invoice amount is rejected even though the extraction payload and endpoint health are clean.
+
+        Diagnostic surface: Foundry extraction payload, notebook fixture replay, and trust-boundary parser behavior.
+
+        Expected recovery artifact: `build/day1/golden_thread_day1.json`
+
+        Time box: 20 minutes. If you miss it, stop and rerun the four pillars in `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
+        """
+    )
+    return
+
+
+@app.cell
+def _map_the_gap(mo):
+    mo.md(
+        """
+        ## Map the Gap
+
+        Capture these before you ask for review:
+
+        - Portal action or observed state:
+        - Exact API/SDK/Python call that matches it:
+        - Exact relative production filepath that made the fix durable:
+        """
+    )
+    return
+
+
+@app.cell
 def _pr_defense(mo):
     mo.md(
         """
         ## PR Defense
 
-        Your pull request must include:
+        Answer these three questions before you push:
 
-        - the exact failing signal you started from
-        - why the bug lived in deterministic normalization instead of extraction or IAM
-        - proof that the repaired path still rejects malformed amounts
-        - one sentence on blast radius if the trust boundary were allowed to fail open
+        - What trade-off did I make today to satisfy the customer constraint?
+        - What is the blast radius if my code fails?
+        - How will I know it failed in production?
+
+        Copy-ready PR body:
+
+        ```md
+        ## Principal Review Defense
+        - Trade-off: <name the compromise and why it was worth it>
+        - Blast radius: <name the affected systems, approvers, and rollback edge>
+        - Production failure signal: <monitor, alert, trace, or dashboard link>
+        - Constraint held: <which inherited customer rule stayed intact>
+        ```
+
+        Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
         """
     )
     return

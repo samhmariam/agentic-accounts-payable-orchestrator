@@ -28,7 +28,9 @@ def _bootstrap():
 def _title(mo):
     mo.md(
         """
-        # Day 7 — Guardrail Breach Rescue Mission
+        # Day 7 - Evaluation, Guardrails, Structured Refusal, and Slice Governance
+
+        Primary learner entrypoint: `modules/day_07_eval_guardrails/README.md`. Read the customer context and file manifest there before you start the incident.
 
         Day 7 starts with a safety failure: sensitive approval evidence is leaking
         through the redaction boundary into audit material. Your job is to prove the
@@ -178,6 +180,10 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
+        STOP. Close this notebook.
+
+        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+
         Move into the real guardrail boundary and implement the repair in:
 
         - `src/aegisap/security/redaction.py`
@@ -226,17 +232,62 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _chaos_gate(mo):
+    mo.md(
+        """
+        ## Chaos Gate
+
+        Failure signal: A redaction or audit path leaks sensitive text into a Day 7 evaluation artifact.
+
+        Diagnostic surface: Content-safety notebook evidence, redaction code, and audit writer outputs.
+
+        Expected recovery artifact: `build/day7/eval_report.json`
+
+        Time box: 25 minutes. If you miss it, stop and rerun the four pillars in `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
+        """
+    )
+    return
+
+
+@app.cell
+def _map_the_gap(mo):
+    mo.md(
+        """
+        ## Map the Gap
+
+        Capture these before you ask for review:
+
+        - Portal action or observed state:
+        - Exact API/SDK/Python call that matches it:
+        - Exact relative production filepath that made the fix durable:
+        """
+    )
+    return
+
+
+@app.cell
 def _pr_defense(mo):
     mo.md(
         """
         ## PR Defense
 
-        Your pull request must include:
+        Answer these three questions before you push:
 
-        - the exact field that was leaking before the repair
-        - why this is a guardrail failure, not just a cosmetic logging bug
-        - proof that the repaired redaction still preserves operator-usable context
-        - one sentence explaining the business blast radius of audit evidence leaking raw identifiers
+        - What trade-off did I make today to satisfy the customer constraint?
+        - What is the blast radius if my code fails?
+        - How will I know it failed in production?
+
+        Copy-ready PR body:
+
+        ```md
+        ## Principal Review Defense
+        - Trade-off: <name the compromise and why it was worth it>
+        - Blast radius: <name the affected systems, approvers, and rollback edge>
+        - Production failure signal: <monitor, alert, trace, or dashboard link>
+        - Constraint held: <which inherited customer rule stayed intact>
+        ```
+
+        Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
         """
     )
     return

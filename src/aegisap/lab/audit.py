@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from aegisap.network.private_endpoint_probe import NetworkPostureProbe
+
+from .curriculum import infrastructure_constraints_for_day, load_manifest, normalize_day
+
 
 PASS = "pass"
 FAIL = "fail"
@@ -228,21 +232,94 @@ def _check_key_vault(resource_group: str) -> dict[str, Any]:
     )
 
 
+def _check_private_dns() -> dict[str, Any]:
+    try:
+        probe = NetworkPostureProbe.from_env()
+    except Exception as exc:
+        return _result("private_dns_posture", SKIP, str(exc))
+
+    result = probe.run()
+    services = result.to_dict()["services"]
+    detail = "All configured hostnames resolved privately and blocked public reachability."
+    if not result.all_passed:
+        failures = [service["detail"] for service in services if not service["passed"]]
+        detail = "; ".join(failures)
+    return _result(
+        "private_dns_posture",
+        PASS if result.all_passed else FAIL,
+        detail,
+        services=services,
+    )
+
+
+def _constraint_checks(day: str | None, resource_group: str) -> list[dict[str, Any]]:
+    if not day:
+        return [
+            _check_search(resource_group),
+            _check_openai(resource_group),
+            _check_storage(resource_group),
+            _check_key_vault(resource_group),
+        ]
+
+    manifest = load_manifest()
+    infrastructure = infrastructure_constraints_for_day(manifest, day)
+    checks: list[dict[str, Any]] = []
+    seen: set[str] = set()
+
+    def add_check(name: str, factory) -> None:
+        if name in seen:
+            return
+        seen.add(name)
+        checks.append(factory())
+
+    for constraint in infrastructure:
+        constraint_id = constraint["id"]
+        if constraint_id == "no_public_endpoints":
+            add_check("search_posture", lambda: _check_search(resource_group))
+            add_check("openai_posture", lambda: _check_openai(resource_group))
+            add_check("storage_posture", lambda: _check_storage(resource_group))
+            add_check("key_vault_posture", lambda: _check_key_vault(resource_group))
+        elif constraint_id == "search_token_auth_only":
+            add_check("search_posture", lambda: _check_search(resource_group))
+        elif constraint_id == "private_dns_resolution":
+            add_check("private_dns_posture", _check_private_dns)
+
+    return checks
+
+
 def run_production_audit(
     *,
     repo_root: str | Path | None = None,
     out_path: str | Path | None = None,
+    day: str | None = None,
 ) -> dict[str, Any]:
     root = _resolve_repo_root(repo_root)
-    target = Path(out_path) if out_path is not None else root / "build" / "audit" / "production_audit.json"
+    normalized_day = normalize_day(day) if day is not None else None
+    target = (
+        Path(out_path)
+        if out_path is not None
+        else (
+            root / "build" / f"day{normalized_day}" / "production_audit.json"
+            if normalized_day is not None
+            else root / "build" / "audit" / "production_audit.json"
+        )
+    )
     resource_group = os.environ.get("AZURE_RESOURCE_GROUP", "").strip()
+    manifest = load_manifest(root) if normalized_day is not None else None
+    relevant_constraints = (
+        [constraint["id"] for constraint in infrastructure_constraints_for_day(manifest, normalized_day)]
+        if manifest is not None
+        else []
+    )
 
     if not resource_group:
         return _write_payload(
             target,
             {
                 "generated_at": _utc_now_iso(),
+                "day": normalized_day,
                 "resource_group": None,
+                "relevant_constraints": relevant_constraints,
                 "training_artifact": True,
                 "authoritative_evidence": False,
                 "all_passed": False,
@@ -251,12 +328,7 @@ def run_production_audit(
             },
         )
 
-    checks = [
-        _check_search(resource_group),
-        _check_openai(resource_group),
-        _check_storage(resource_group),
-        _check_key_vault(resource_group),
-    ]
+    checks = _constraint_checks(normalized_day, resource_group)
     actionable = [check for check in checks if check["status"] != SKIP]
     failed = [check for check in actionable if check["status"] == FAIL]
     authoritative = bool(actionable)
@@ -269,7 +341,9 @@ def run_production_audit(
         target,
         {
             "generated_at": _utc_now_iso(),
+            "day": normalized_day,
             "resource_group": resource_group,
+            "relevant_constraints": relevant_constraints,
             "training_artifact": not authoritative,
             "authoritative_evidence": authoritative,
             "all_passed": authoritative and not failed,

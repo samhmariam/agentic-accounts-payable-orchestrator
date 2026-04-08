@@ -25,7 +25,9 @@ def _bootstrap():
 def _title(mo):
     mo.md(
         """
-        # Day 11 - Delegated Identity Rescue Mission
+        # Day 11 - Delegated Identity, OBO, and Authority Confusion Defense
+
+        Primary learner entrypoint: `modules/day_11_delegated_identity/README.md`. Read the customer context and file manifest there before you start the incident.
 
         Day 11 starts with an authority-confusion incident: the approval path no
         longer proves that the OBO actor still belongs to the finance approver
@@ -142,6 +144,10 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
+        STOP. Close this notebook.
+
+        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+
         Move into the real identity boundary and implement the repair in:
 
         - `src/aegisap/identity/actor_verifier.py`
@@ -190,17 +196,62 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _chaos_gate(mo):
+    mo.md(
+        """
+        ## Chaos Gate
+
+        Failure signal: The OBO path loses actor fidelity, making approvals or downstream actions look like app-only activity.
+
+        Diagnostic surface: Entra or app registration evidence, OBO notebook proof, actor verifier code, and cloud-truth posture checks.
+
+        Expected recovery artifact: `build/day11/obo_contract.json`
+
+        Time box: 30 minutes. If you miss it, stop and rerun the four pillars in `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
+        """
+    )
+    return
+
+
+@app.cell
+def _map_the_gap(mo):
+    mo.md(
+        """
+        ## Map the Gap
+
+        Capture these before you ask for review:
+
+        - Portal action or observed state:
+        - Exact API/SDK/Python call that matches it:
+        - Exact relative production filepath that made the fix durable:
+        """
+    )
+    return
+
+
+@app.cell
 def _pr_defense(mo):
     mo.md(
         """
         ## PR Defense
 
-        Your pull request must include:
+        Answer these three questions before you push:
 
-        - the exact actor-binding bug and why it creates an authority-confusion path
-        - why the repair proves group authority independently of payload claims
-        - the evidence that `build/day11/obo_contract.json` now shows a safe delegated path
-        - one sentence on the blast radius of approving a payment with the wrong actor identity
+        - What trade-off did I make today to satisfy the customer constraint?
+        - What is the blast radius if my code fails?
+        - How will I know it failed in production?
+
+        Copy-ready PR body:
+
+        ```md
+        ## Principal Review Defense
+        - Trade-off: <name the compromise and why it was worth it>
+        - Blast radius: <name the affected systems, approvers, and rollback edge>
+        - Production failure signal: <monitor, alert, trace, or dashboard link>
+        - Constraint held: <which inherited customer rule stayed intact>
+        ```
+
+        Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
         """
     )
     return

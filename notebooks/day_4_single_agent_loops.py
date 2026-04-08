@@ -38,7 +38,9 @@ def _bootstrap():
 def _title(mo):
     mo.md(
         """
-        # Day 4 — Fail-Closed Planning Rescue Mission
+        # Day 4 - Single-Agent Loops, Policy Overlay, and Fail-Closed Repair
+
+        Primary learner entrypoint: `modules/day_04_single_agent_loops/README.md`. Read the customer context and file manifest there before you start the incident.
 
         Day 4 starts from a dangerous regression: combined-risk invoices are no longer
         guaranteed to trigger manual review. You are here to prove that the planner and
@@ -157,6 +159,10 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
+        STOP. Close this notebook.
+
+        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+
         Implement the repair in the production files:
 
         - `src/aegisap/day4/planning/policy_overlay.py`
@@ -203,17 +209,62 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _chaos_gate(mo):
+    mo.md(
+        """
+        ## Chaos Gate
+
+        Failure signal: Execution traces show a risky recommendation escaping the policy overlay while public exposure constraints stay in force.
+
+        Diagnostic surface: Execution traces, policy overlay cells, and live cloud posture for AI and data endpoints.
+
+        Expected recovery artifact: `build/day4/golden_thread_day4.json`
+
+        Time box: 25 minutes. If you miss it, stop and rerun the four pillars in `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
+        """
+    )
+    return
+
+
+@app.cell
+def _map_the_gap(mo):
+    mo.md(
+        """
+        ## Map the Gap
+
+        Capture these before you ask for review:
+
+        - Portal action or observed state:
+        - Exact API/SDK/Python call that matches it:
+        - Exact relative production filepath that made the fix durable:
+        """
+    )
+    return
+
+
+@app.cell
 def _pr_defense(mo):
     mo.md(
         """
         ## PR Defense
 
-        Your pull request must include:
+        Answer these three questions before you push:
 
-        - the exact risk combination that stopped failing closed
-        - whether the defect lived in overlay derivation, recommendation gating, or both
-        - proof that manual escalation is mandatory for the risky slice
-        - one sentence on why a fail-open plan is worse than a false-positive manual review
+        - What trade-off did I make today to satisfy the customer constraint?
+        - What is the blast radius if my code fails?
+        - How will I know it failed in production?
+
+        Copy-ready PR body:
+
+        ```md
+        ## Principal Review Defense
+        - Trade-off: <name the compromise and why it was worth it>
+        - Blast radius: <name the affected systems, approvers, and rollback edge>
+        - Production failure signal: <monitor, alert, trace, or dashboard link>
+        - Constraint held: <which inherited customer rule stayed intact>
+        ```
+
+        Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
         """
     )
     return

@@ -15,6 +15,8 @@ INCIDENT_SECTIONS = (
     "## Codification Bridge",
     "## Production Patch",
     "## Verification",
+    "## Chaos Gate",
+    "## Map the Gap",
     "## PR Defense",
 )
 INCIDENT_NOTEBOOKS = {
@@ -181,7 +183,12 @@ def test_wave4_notebooks_use_incident_scaffold_and_markdown_only_patch_boundary(
             assert section in text, f"Notebook {day_id} is missing {section}"
         assert "markdown-only" in text
         assert "Do not edit repo files from this notebook" in text
+        assert "STOP. Close this notebook." in text
         assert "### Export to Production" in text
+        assert "What trade-off did I make today to satisfy the customer constraint?" in text
+        assert "What is the blast radius if my code fails?" in text
+        assert "How will I know it failed in production?" in text
+        assert "cohort/<" in text
 
 
 def test_wave4_notebooks_do_not_reference_retired_learner_entry_surfaces() -> None:

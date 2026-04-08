@@ -18,6 +18,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from aegisap.lab.curriculum import module_readme_relpath
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
 CAPSTONE_MARKER = "CAPSTONE_B"
@@ -107,6 +109,23 @@ def test_bridge_targets_exist(day: dict) -> None:
         f"Day {day['id']} production_targets missing:\n"
         + "\n".join(f"  {p}" for p in missing)
     )
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS])
+def test_module_readme_exists_and_has_file_manifest(day: dict) -> None:
+    rel_path = module_readme_relpath(day["id"])
+    path = REPO_ROOT / rel_path
+    assert path.exists(), f"Day {day['id']} module README not found: {rel_path}"
+    content = path.read_text(encoding="utf-8")
+    assert "## Day X File Manifest" in content
+    assert "Do not edit code in this module folder." in content
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS])
+def test_primary_doc_points_to_module_readme(day: dict) -> None:
+    rel_path = module_readme_relpath(day["id"])
+    content = (REPO_ROOT / day["primary_doc_file"]).read_text(encoding="utf-8")
+    assert rel_path in content
 
 
 # ---------------------------------------------------------------------------

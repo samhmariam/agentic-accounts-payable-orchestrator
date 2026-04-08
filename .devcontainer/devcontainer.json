@@ -22,6 +22,7 @@
         "ms-azuretools.vscode-azurefunctions",
         "ms-azuretools.vscode-docker",
         "ms-vscode.azurecli",
+        "redhat.vscode-yaml",
         "github.copilot",
         "github.copilot-chat",
         "mtxr.sqltools",
@@ -34,6 +35,9 @@
         "python.terminal.activateEnvironment": true,
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "ms-python.python",
+        "yaml.schemas": {
+          "${containerWorkspaceFolder}/docs/curriculum/curriculum.schema.json": "docs/curriculum/CURRICULUM_MANIFEST.yaml"
+        },
         "[bicep]": {
           "editor.defaultFormatter": "ms-azuretools.vscode-bicep"
         }

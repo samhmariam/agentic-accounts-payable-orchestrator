@@ -1,23 +1,61 @@
-# Day 12 - Private Network Rescue Mission
+# Day 12 - Private Networking, Egress Control, and Security Dependency Management
 
-Day 12 is now a network-isolation incident. Start with:
+Primary learner entrypoint: `modules/day_12_private_networking/README.md`.
+
+## Why This Matters to an FDE
+
+Private networking is a hard customer boundary, not an optimization. Financial customers will fail your deployment instantly if you cannot prove traffic never falls back to the public internet.
+
+## Customer Context
+
+The customer CISO escalated a DNS drift concern. You must prove that the VNet, private endpoints, and DNS links keep the agent invisible to the public internet.
+
+## Persistent Constraints
+
+- `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.
+- `latency_budget_guardrails`: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
+- `authoritative_retrieval_sources`: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
+- `no_public_endpoints`: Production-bound AI and data services must not expose public network access.
+- `fail_closed_decisions`: Risky automation paths must fail closed and require explicit human review.
+- `durable_resume_idempotency`: Durable state recovery must resume safely without duplicating side effects.
+- `conflicting_authority_refusal`: Conflicting records or review evidence must trigger refusal rather than silent blending.
+- `pii_redaction_before_audit`: Sensitive content must be redacted before logging, audit writes, or downstream release evidence.
+- `search_token_auth_only`: Search runtime access must rely on token auth and disable local keys.
+- `keyless_runtime_identity`: Runtime identity should prefer managed identity or delegated flows over embedded credentials.
+- `cost_ceiling_enforced`: Economic controls must prevent runaway routing, caching, or model-selection cost drift.
+- `release_packet_before_prod`: Production acceptance requires a release packet, explicit ownership, and rollback-ready evidence.
+- `actor_bound_approvals`: Approval and impersonation flows must remain bound to the real human actor.
+- `private_dns_resolution`: Private endpoints must resolve privately and block public fallback through DNS and routing.
+
+## Incident Entry
 
 ```bash
 uv run aegisap-lab incident start --day 12
 ```
 
-Use `notebooks/day_12_private_networking_constraints.py` to prove the static
-and live posture drift, then repair the private-network checker and verify with:
+## Mastery Gate
+
+- `uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q && uv run aegisap-lab artifact rebuild --day 12`
+- `uv run aegisap-lab audit-production --day 12 --strict`
+
+## Verification Commands
 
 ```bash
 uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q
 uv run aegisap-lab artifact rebuild --day 12
 ```
 
-Success means the static checker catches public endpoints again and the Day 12
-artifacts under `build/day12/` are regenerated.
+## Key Files
+
+- `modules/day_12_private_networking/README.md`
+- `notebooks/day_12_private_networking_constraints.py`
+- `notebooks/bridges/day12_private_networking.md`
+- `src/aegisap/network/bicep_policy_checker.py`
+- `src/aegisap/network/private_endpoint_probe.py`
+- `scripts/check_private_network_static.py`
+- `scripts/verify_private_network_posture.py`
+- `scenarios/day12`
 
 ## CAPSTONE_B
 
-Day 12 feeds the capstone transfer track by establishing the private-network
-posture and exception evidence that later release decisions must inherit.
+This day still feeds the transfer track and must preserve the inherited customer constraints while the second domain comes online.

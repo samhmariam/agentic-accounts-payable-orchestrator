@@ -11,6 +11,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from aegisap.lab.curriculum import PHASE1_GATE_MODES
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
 
@@ -47,6 +49,13 @@ def test_day_ids_are_sequential(days: list[dict]) -> None:
 def test_pass_bars_defined(manifest: dict) -> None:
     assert manifest["daily_pass_bar"] == 80
     assert manifest["elite_pass_bar"] == 90
+
+
+def test_customer_profile_declared(manifest: dict) -> None:
+    profile = manifest["customer_profile"]
+    assert profile["name"]
+    assert profile["operating_context"]
+    assert profile["non_negotiables"]
 
 
 # ---------------------------------------------------------------------------
@@ -96,6 +105,69 @@ def test_portal_to_script_mapping_declared(day: dict) -> None:
     assert mapping.get("portal_surface"), f"Day {day['id']} missing portal_surface"
     assert mapping.get("bridge_file"), f"Day {day['id']} missing bridge_file"
     assert mapping.get("production_targets"), f"Day {day['id']} missing production_targets"
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
+                                 yaml.safe_load(MANIFEST_PATH.open())["days"]])
+def test_phase1_metadata_contract_declared(day: dict) -> None:
+    assert day["customer_context"], f"Day {day['id']} missing customer_context"
+    assert day["persistent_constraints"], f"Day {day['id']} missing persistent_constraints"
+    assert day["mastery_gates"], f"Day {day['id']} missing mastery_gates"
+    assert day["chaos_gate"], f"Day {day['id']} missing chaos_gate"
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
+                                 yaml.safe_load(MANIFEST_PATH.open())["days"]])
+def test_mastery_gate_modes_follow_phase1_policy(day: dict) -> None:
+    expected = PHASE1_GATE_MODES[day["id"]]
+    assert all(gate["mode"] == expected for gate in day["mastery_gates"]), (
+        f"Day {day['id']} mastery gates must all be {expected}"
+    )
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
+                                 yaml.safe_load(MANIFEST_PATH.open())["days"]])
+def test_infrastructure_constraints_require_cloud_probe_gate(day: dict) -> None:
+    infra_ids = [
+        constraint["id"]
+        for constraint in day["persistent_constraints"]
+        if constraint["type"] == "infrastructure" and not constraint.get("superseded_by")
+    ]
+    if not infra_ids:
+        return
+    covered = {
+        constraint_id
+        for gate in day["mastery_gates"]
+        if gate["evidence_source"] == "cloud_probe"
+        and f"uv run aegisap-lab audit-production --day {day['id']} --strict" in gate["command"]
+        for constraint_id in gate["covers_constraints"]
+    }
+    assert set(infra_ids).issubset(covered), (
+        f"Day {day['id']} infrastructure constraints missing cloud-truth audit coverage: "
+        f"{sorted(set(infra_ids) - covered)}"
+    )
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
+                                 yaml.safe_load(MANIFEST_PATH.open())["days"]])
+def test_persistent_constraints_accumulate(day: dict, days: list[dict]) -> None:
+    day_index = int(day["id"]) - 1
+    if day_index == 0:
+        return
+    previous = days[day_index - 1]
+    previous_active = {
+        constraint["id"]
+        for constraint in previous["persistent_constraints"]
+        if not constraint.get("superseded_by")
+    }
+    current_active = {
+        constraint["id"]
+        for constraint in day["persistent_constraints"]
+        if not constraint.get("superseded_by")
+    }
+    assert previous_active.issubset(current_active), (
+        f"Day {day['id']} dropped inherited constraints: {sorted(previous_active - current_active)}"
+    )
 
 
 # ---------------------------------------------------------------------------

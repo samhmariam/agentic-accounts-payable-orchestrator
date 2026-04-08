@@ -81,6 +81,10 @@ def print_results(results: list[dict[str, str]]) -> int:
     for item in results:
         print(f"{item['check']:<{width}} {item['status']:<5} {item['detail']}")
     print("=" * 80)
+    if overall_fail:
+        print("[FAIL] FDE Environment Invalid")
+    else:
+        print("[PASS] FDE Environment Validated")
     return 1 if overall_fail else 0
 
 

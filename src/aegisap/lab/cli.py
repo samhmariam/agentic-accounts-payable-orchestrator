@@ -4,6 +4,8 @@ import argparse
 import json
 from typing import Any
 
+from .mastery import SKIP as MASTERY_SKIP
+from .mastery import run_mastery
 from .engine import (
     IncidentError,
     InterruptedIncident,
@@ -33,10 +35,25 @@ def _build_parser() -> argparse.ArgumentParser:
 
     audit = subparsers.add_parser("audit-production", help="Audit live Azure posture and write a production-readiness artifact.")
     audit.add_argument("--out", default=None, help="Optional output path for the audit artifact JSON.")
+    audit.add_argument("--day", default=None, help="Optional day number for manifest-driven cloud-truth checks.")
     audit.add_argument(
         "--strict",
         action="store_true",
         help="Fail if the audit runs in preview mode or any live check fails.",
+    )
+
+    mastery = subparsers.add_parser("mastery", help="Run the manifest-backed mastery gates for a curriculum day.")
+    mastery.add_argument("--day", required=True, help="Two-digit day number, for example 08, or 00 for bootstrap.")
+    mastery.add_argument(
+        "--track",
+        choices=("core", "full"),
+        default="core",
+        help="Bootstrap track for day 00. Ignored for days 01-14.",
+    )
+    mastery.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail on skipped preview gates in addition to blocking failures.",
     )
 
     return parser
@@ -78,7 +95,7 @@ def main() -> int:
         if args.command == "audit-production":
             from .audit import FAIL, SKIP, run_production_audit
 
-            payload = run_production_audit(repo_root=args.repo_root, out_path=args.out)
+            payload = run_production_audit(repo_root=args.repo_root, out_path=args.out, day=args.day)
             _print_payload(payload)
             checks = payload.get("checks", [])
             if any(check.get("status") == FAIL for check in checks):
@@ -89,6 +106,19 @@ def main() -> int:
             ):
                 return 1
             return 0
+        if args.command == "mastery":
+            payload = run_mastery(
+                day=args.day,
+                strict=args.strict,
+                repo_root=args.repo_root,
+                track=args.track,
+            )
+            print(f"Mastery Gates: Day {payload['day']} - {payload['title']}")
+            for result in payload["results"]:
+                print(f"[{result['status']}] {result['gate_id']} ({result['mode']}): {result['detail']}")
+            if not payload["results"]:
+                print(f"[{MASTERY_SKIP}] no_manifest_gates: No mastery gates were declared for this day.")
+            return 0 if payload["overall_ok"] else 1
     except IncidentError as exc:
         print(str(exc))
         return 1

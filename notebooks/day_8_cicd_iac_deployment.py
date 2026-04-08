@@ -24,7 +24,9 @@ def _bootstrap():
 def _title(mo):
     mo.md(
         """
-        # Day 8 — Identity Drift Rescue Mission
+        # Day 8 - IaC, Identity Planes, and Secure Release Ownership
+
+        Primary learner entrypoint: `modules/day_08_iac_identity/README.md`. Read the customer context and file manifest there before you start the incident.
 
         Day 8 begins with an IaC drift failure: the runtime identity is asking for
         more Azure AI Search authority than the production contract allows. Your job
@@ -153,6 +155,10 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
+        STOP. Close this notebook.
+
+        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+
         Move into the real infrastructure boundary and implement the repair in:
 
         - `infra/modules/role_assignments.bicep`
@@ -201,17 +207,62 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _chaos_gate(mo):
+    mo.md(
+        """
+        ## Chaos Gate
+
+        Failure signal: Role assignments or service posture drifted, and the runtime principal can mutate resources it should only read.
+
+        Diagnostic surface: Portal role assignments, Marimo Bicep bridge, and live audit-production probes.
+
+        Expected recovery artifact: `build/day8/deployment_design.json`
+
+        Time box: 30 minutes. If you miss it, stop and rerun the four pillars in `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
+        """
+    )
+    return
+
+
+@app.cell
+def _map_the_gap(mo):
+    mo.md(
+        """
+        ## Map the Gap
+
+        Capture these before you ask for review:
+
+        - Portal action or observed state:
+        - Exact API/SDK/Python call that matches it:
+        - Exact relative production filepath that made the fix durable:
+        """
+    )
+    return
+
+
+@app.cell
 def _pr_defense(mo):
     mo.md(
         """
         ## PR Defense
 
-        Your pull request must include:
+        Answer these three questions before you push:
 
-        - the exact runtime principal that was over-privileged before the repair
-        - why reader vs contributor is a production trust-boundary distinction, not a style preference
-        - proof that the admin path still retains the contributor access it legitimately needs
-        - one sentence on the blast radius if runtime search mutation remained possible in production
+        - What trade-off did I make today to satisfy the customer constraint?
+        - What is the blast radius if my code fails?
+        - How will I know it failed in production?
+
+        Copy-ready PR body:
+
+        ```md
+        ## Principal Review Defense
+        - Trade-off: <name the compromise and why it was worth it>
+        - Blast radius: <name the affected systems, approvers, and rollback edge>
+        - Production failure signal: <monitor, alert, trace, or dashboard link>
+        - Constraint held: <which inherited customer rule stayed intact>
+        ```
+
+        Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
         """
     )
     return

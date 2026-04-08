@@ -71,6 +71,22 @@ The exact artifact filenames for each day are the authoritative source in
 - `red`: stop forward motion, assign remediation immediately, and do not let
   the learner advance to the next checkpoint or capstone without recovery
 
+## Timeboxed Chaos Intervention
+
+When a learner enters the daily chaos gate, the facilitator must behave like a
+lead engineer under incident discipline, not a helper.
+
+- trainer may not touch the learner's keyboard
+- trainer may not use the learner's mouse
+- trainer may not point at the screen to reveal the fix
+- trainer may only ask Socratic questions grounded in the four pillars:
+  expected topology, network proof, RBAC or identity proof, and log evidence
+- if the learner misses `time_box_minutes`, they fail the chaos gate for the day
+- the facilitator must walk the learner through
+  `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`
+- if the learner cannot navigate to the relevant logs or probes themselves, they
+  fail the day and move into remediation
+
 ## Catch-Up Policy
 
 - Rejoin the main flow only after the missing day artifact and exit ticket are

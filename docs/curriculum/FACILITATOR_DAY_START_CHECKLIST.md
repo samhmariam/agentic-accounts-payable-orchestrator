@@ -41,6 +41,7 @@ If you are teaching Day 0, also open `docs/curriculum/portal/DAY_00_PORTAL.md`.
 - Which learners are not safe to advance without catch-up?
 - Which live Azure steps today can fall back to preview mode, and which cannot?
 - Is `uv run aegisap-lab audit-production` expected today or only the local verification path?
+- Is `uv run aegisap-lab mastery --day XX` the blocking gate today, and which inherited constraints must it prove?
 
 ## Day-Start Script For Facilitators
 
@@ -93,6 +94,19 @@ Say these five things out loud before the lab begins:
 - Sweep for `yellow` and `red` learners every 10-15 minutes.
 - Prefer one exact command or one precise hint over broad reteaching.
 - Keep the room moving toward the day's outputs, not just notebook completion.
+
+## Chaos Gate Intervention Protocol
+
+- During a timeboxed chaos failure, the trainer may not touch the learner's keyboard.
+- The trainer may not use the learner's mouse.
+- The trainer may not point at the screen to identify the fix.
+- The trainer may only ask Socratic questions using the four pillars:
+  expected topology, network proof, RBAC or identity proof, and log evidence.
+- If the learner misses `time_box_minutes`, they fail the chaos gate for the day.
+- The trainer must reset the conversation around
+  `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
+- If the learner cannot navigate to the relevant logs or probes themselves, they
+  fail the day and enter remediation.
 
 ## Before You End The Day
 

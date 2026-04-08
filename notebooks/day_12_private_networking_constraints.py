@@ -27,7 +27,9 @@ def _bootstrap():
 def _title(mo):
     mo.md(
         """
-        # Day 12 - Private Network Rescue Mission
+        # Day 12 - Private Networking, Egress Control, and Security Dependency Management
+
+        Primary learner entrypoint: `modules/day_12_private_networking/README.md`. Read the customer context and file manifest there before you start the incident.
 
         Day 12 starts with a network-isolation incident: the static policy check
         stopped seeing a public endpoint, which means a deployment can look safe
@@ -157,6 +159,10 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
+        STOP. Close this notebook.
+
+        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+
         Move into the real network boundary and implement the repair in:
 
         - `src/aegisap/network/bicep_policy_checker.py`
@@ -207,17 +213,62 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _chaos_gate(mo):
+    mo.md(
+        """
+        ## Chaos Gate
+
+        Failure signal: Private endpoint DNS or routing drift makes a production-bound service resolve publicly or appear publicly reachable.
+
+        Diagnostic surface: Network Watcher evidence, private endpoint probe cells, and live audit-production DNS posture checks.
+
+        Expected recovery artifact: `build/day12/private_network_posture.json`
+
+        Time box: 30 minutes. If you miss it, stop and rerun the four pillars in `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
+        """
+    )
+    return
+
+
+@app.cell
+def _map_the_gap(mo):
+    mo.md(
+        """
+        ## Map the Gap
+
+        Capture these before you ask for review:
+
+        - Portal action or observed state:
+        - Exact API/SDK/Python call that matches it:
+        - Exact relative production filepath that made the fix durable:
+        """
+    )
+    return
+
+
+@app.cell
 def _pr_defense(mo):
     mo.md(
         """
         ## PR Defense
 
-        Your pull request must include:
+        Answer these three questions before you push:
 
-        - the exact property-path or posture bug that hid a public endpoint
-        - why static IaC proof and live DNS or reachability proof are both required
-        - the evidence that the rebuilt Day 12 artifacts show a private-only posture again
-        - one sentence on the blast radius of shipping a public AI endpoint behind a false-green check
+        - What trade-off did I make today to satisfy the customer constraint?
+        - What is the blast radius if my code fails?
+        - How will I know it failed in production?
+
+        Copy-ready PR body:
+
+        ```md
+        ## Principal Review Defense
+        - Trade-off: <name the compromise and why it was worth it>
+        - Blast radius: <name the affected systems, approvers, and rollback edge>
+        - Production failure signal: <monitor, alert, trace, or dashboard link>
+        - Constraint held: <which inherited customer rule stayed intact>
+        ```
+
+        Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
         """
     )
     return

@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import importlib.util
 import re
 import subprocess
 import sys
 from pathlib import Path
+
+from jsonschema import Draft202012Validator
 
 try:
     import yaml
@@ -18,8 +21,11 @@ MANIFEST_PATH = ROOT / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "notebooks"))
 
+from aegisap.lab.curriculum import PHASE1_GATE_MODES, module_readme_relpath
+
 PATH_PREFIXES = (
     "docs/",
+    "modules/",
     "notebooks/",
     "scripts/",
     "src/",
@@ -73,6 +79,7 @@ REQUIRED_DOCS = (
     "docs/curriculum/PILOT_MEASUREMENT_PLAN.md",
     "docs/curriculum/GRADUATE_PROFILE.md",
     "docs/curriculum/CURRICULUM_MANIFEST.yaml",
+    "docs/curriculum/curriculum.schema.json",
     "docs/curriculum/templates/DAILY_ARTIFACT_PACK.md",
     "docs/curriculum/templates/DAILY_SCORECARD.md",
     "docs/curriculum/templates/ORAL_DEFENSE_SCORECARD.md",
@@ -120,6 +127,8 @@ TRAINER_OPS_REQUIRED_SNIPPETS = (
     "FDE_DEBUGGING_FRAMEWORK.md",
     "Daily Operating Rhythm",
     "Learner Status Model",
+    "trainer may not touch the learner's keyboard",
+    "expected topology",
 )
 
 PREFLIGHT_REQUIRED_SNIPPETS = (
@@ -136,6 +145,7 @@ FACILITATOR_REQUIRED_SNIPPETS = (
     "docs/curriculum/portal/DAY_00_PORTAL.md",
     "uv run aegisap-lab incident start --day",
     "audit-production",
+    "aegisap-lab mastery --day",
     "Day 8",
     "Day 11",
     "Day 12",
@@ -150,7 +160,19 @@ INCIDENT_NOTEBOOK_SECTIONS = (
     "## Codification Bridge",
     "## Production Patch",
     "## Verification",
+    "## Chaos Gate",
+    "## Map the Gap",
     "## PR Defense",
+)
+
+MODULE_REQUIRED_HEADINGS = (
+    "## Why This Matters to an FDE",
+    "## Customer Context",
+    "## Persistent Constraints",
+    "## FDE Implementation Cycle",
+    "## Mastery Gate",
+    "## Chaos Gate",
+    "## Day X File Manifest",
 )
 
 INCIDENT_NOTEBOOKS = {
@@ -360,6 +382,7 @@ def main() -> int:
     )
 
     if manifest is not None:
+        _validate_manifest_schema(errors, manifest)
         _validate_manifest(errors, manifest)
 
     for rel_path in STRICT_VALIDATION_DOCS:
@@ -411,11 +434,37 @@ def _load_manifest(errors: list[str]) -> dict | None:
     return payload
 
 
+def _load_schema(errors: list[str]) -> dict | None:
+    schema_path = ROOT / "docs" / "curriculum" / "curriculum.schema.json"
+    if not schema_path.exists():
+        errors.append(f"Missing required curriculum file: {schema_path.relative_to(ROOT)}")
+        return None
+    try:
+        return json.loads(schema_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        errors.append(f"Could not parse {schema_path.relative_to(ROOT)}: {exc}")
+        return None
+
+
+def _validate_manifest_schema(errors: list[str], manifest: dict) -> None:
+    schema = _load_schema(errors)
+    if schema is None:
+        return
+    validator = Draft202012Validator(schema)
+    for issue in sorted(validator.iter_errors(manifest), key=lambda err: list(err.path)):
+        path = ".".join(str(part) for part in issue.path) or "<root>"
+        errors.append(f"Manifest schema violation at {path}: {issue.message}")
+
+
 def _validate_manifest(errors: list[str], manifest: dict) -> None:
     days = manifest.get("days", [])
     if len(days) != 14:
         errors.append("Curriculum manifest should declare exactly 14 days.")
         return
+
+    customer_profile = manifest.get("customer_profile", {})
+    if not customer_profile:
+        errors.append("Curriculum manifest must declare customer_profile.")
 
     expected_ids = [f"{i:02d}" for i in range(1, 15)]
     ids = [str(day.get("id", "")) for day in days]
@@ -424,8 +473,11 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
             f"Curriculum manifest day ids should be {expected_ids}, found {ids}"
         )
 
+    previous_active_constraints: dict[str, dict] = {}
+
     for day in days:
         day_id = int(day["id"])
+        day_id_str = day["id"]
         notebook_rel = day.get("notebook_file", "")
         notebook_path = ROOT / notebook_rel
         if not notebook_rel or not notebook_path.exists():
@@ -443,6 +495,9 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
             errors.append(
                 f"Manifest day {day['id']} must declare exactly 3 oral defense prompts."
             )
+
+        if not day.get("customer_context"):
+            errors.append(f"Manifest day {day['id']} must declare customer_context.")
 
         artifact_files = day.get("artifact_files", [])
         if not artifact_files:
@@ -464,7 +519,16 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
             _expect_snippets(
                 errors,
                 notebook_path,
-                ("markdown-only", "Do not edit repo files from this notebook", "### Export to Production"),
+                (
+                    "markdown-only",
+                    "Do not edit repo files from this notebook",
+                    "### Export to Production",
+                    "STOP. Close this notebook.",
+                    "cohort/<",
+                    "What trade-off did I make today to satisfy the customer constraint?",
+                    "What is the blast radius if my code fails?",
+                    "How will I know it failed in production?",
+                ),
                 f"Day {day_id} notebook is missing the markdown-only production patch boundary",
             )
             _expect_absent_snippets(
@@ -499,6 +563,77 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                         errors.append(
                             f"Manifest day {day['id']} portal_to_script_mapping target missing: {target}"
                         )
+        constraints = day.get("persistent_constraints", [])
+        if not constraints:
+            errors.append(f"Manifest day {day['id']} must declare persistent_constraints.")
+        listed_constraints = {constraint["id"]: constraint for constraint in constraints}
+        active_constraints = {
+            constraint_id: constraint
+            for constraint_id, constraint in listed_constraints.items()
+            if not constraint.get("superseded_by")
+        }
+        for constraint in constraints:
+            if constraint.get("superseded_by") and (
+                not constraint.get("supersession_reason") or not constraint.get("approver_role")
+            ):
+                errors.append(
+                    f"Manifest day {day['id']} superseded constraint `{constraint['id']}` must declare supersession_reason and approver_role."
+                )
+        for constraint_id, prior_constraint in previous_active_constraints.items():
+            if constraint_id in active_constraints:
+                continue
+            current_version = listed_constraints.get(constraint_id)
+            if current_version and current_version.get("superseded_by"):
+                continue
+            errors.append(
+                f"Manifest day {day['id']} drops persistent constraint `{constraint_id}` introduced on day {prior_constraint['introduced_on']} without explicit supersession."
+            )
+        previous_active_constraints = active_constraints
+
+        mastery_gates = day.get("mastery_gates", [])
+        if not mastery_gates:
+            errors.append(f"Manifest day {day['id']} must declare mastery_gates.")
+        expected_gate_mode = PHASE1_GATE_MODES.get(day_id_str)
+        if expected_gate_mode:
+            invalid_modes = [
+                gate["id"]
+                for gate in mastery_gates
+                if gate.get("mode") != expected_gate_mode
+            ]
+            if invalid_modes:
+                errors.append(
+                    f"Manifest day {day['id']} mastery gates must all be `{expected_gate_mode}` in Phase 1: {', '.join(invalid_modes)}"
+                )
+        for gate in mastery_gates:
+            gate_constraints = set(gate.get("covers_constraints", []))
+            unknown_constraints = sorted(gate_constraints - set(listed_constraints))
+            if unknown_constraints:
+                errors.append(
+                    f"Manifest day {day['id']} mastery gate `{gate['id']}` references unknown constraints: {', '.join(unknown_constraints)}"
+                )
+        infrastructure_constraints = [
+            constraint
+            for constraint in active_constraints.values()
+            if constraint.get("type") == "infrastructure"
+        ]
+        for constraint in infrastructure_constraints:
+            matching_gate = next(
+                (
+                    gate
+                    for gate in mastery_gates
+                    if constraint["id"] in gate.get("covers_constraints", [])
+                    and gate.get("evidence_source") == "cloud_probe"
+                    and f"uv run aegisap-lab audit-production --day {day_id_str} --strict" in gate.get("command", "")
+                ),
+                None,
+            )
+            if matching_gate is None:
+                errors.append(
+                    f"Manifest day {day['id']} infrastructure constraint `{constraint['id']}` must be covered by a cloud_probe mastery gate invoking `uv run aegisap-lab audit-production --day {day_id_str} --strict`."
+                )
+        chaos_gate = day.get("chaos_gate", {})
+        if not chaos_gate:
+            errors.append(f"Manifest day {day['id']} must declare chaos_gate.")
         if not day.get("injection_command"):
             errors.append(f"Manifest day {day['id']} must declare an injection_command.")
         if not day.get("revert_state"):
@@ -521,6 +656,42 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 errors.append(f"Manifest day {day['id']} scenario file missing: {scenario_path.relative_to(ROOT)}")
             else:
                 _validate_scenario_file(errors, scenario_path)
+
+        module_rel = module_readme_relpath(day_id_str)
+        module_path = ROOT / module_rel
+        if not module_path.exists():
+            errors.append(f"Manifest day {day['id']} module README missing: {module_rel}")
+        else:
+            _expect_headings(
+                errors,
+                module_path,
+                MODULE_REQUIRED_HEADINGS,
+                "Module README is missing the learner-entry wormhole contract",
+            )
+            _expect_snippets(
+                errors,
+                module_path,
+                ("Do not edit code in this module folder.", "## Day X File Manifest"),
+                "Module README is missing file-manifest or edit-boundary guidance",
+            )
+            module_text = module_path.read_text(encoding="utf-8")
+            errors.extend(_validate_path_tokens(module_path, module_text))
+            errors.extend(_validate_module_commands(module_path, module_text))
+
+        primary_doc_path = ROOT / day.get("primary_doc_file", "")
+        if primary_doc_path.exists():
+            _expect_headings(
+                errors,
+                primary_doc_path,
+                ("## Why This Matters to an FDE", "## Customer Context"),
+                "Primary day doc is missing the FDE business framing",
+            )
+            _expect_snippets(
+                errors,
+                primary_doc_path,
+                (module_rel,),
+                "Primary day doc must point the learner to the module README first",
+            )
 
 
 def _expect_headings(

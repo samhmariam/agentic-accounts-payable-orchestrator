@@ -29,7 +29,9 @@ def _bootstrap():
 def _title(mo):
     mo.md(
         """
-        # Day 9 — Routing Regression Rescue Mission
+        # Day 9 - Observability, Routing, Cost, and Economic Control
+
+        Primary learner entrypoint: `modules/day_09_observability_cost/README.md`. Read the customer context and file manifest there before you start the incident.
 
         Day 9 begins with a cost-cutting drift that quietly routes risky work onto a
         cheaper model tier. Your job is to prove the routing mistake, restore the
@@ -159,6 +161,10 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
+        STOP. Close this notebook.
+
+        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+
         Move into the real routing boundary and implement the repair in:
 
         - `src/aegisap/routing/routing_policy.py`
@@ -207,17 +213,62 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _chaos_gate(mo):
+    mo.md(
+        """
+        ## Chaos Gate
+
+        Failure signal: Routing or caching pushes the workload outside the cost ceiling while inherited infrastructure posture still has to hold.
+
+        Diagnostic surface: Azure Monitor or KQL evidence, routing notebook analysis, budget gates, and cloud-truth posture checks.
+
+        Expected recovery artifact: `build/day9/routing_report.json`
+
+        Time box: 25 minutes. If you miss it, stop and rerun the four pillars in `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
+        """
+    )
+    return
+
+
+@app.cell
+def _map_the_gap(mo):
+    mo.md(
+        """
+        ## Map the Gap
+
+        Capture these before you ask for review:
+
+        - Portal action or observed state:
+        - Exact API/SDK/Python call that matches it:
+        - Exact relative production filepath that made the fix durable:
+        """
+    )
+    return
+
+
+@app.cell
 def _pr_defense(mo):
     mo.md(
         """
         ## PR Defense
 
-        Your pull request must include:
+        Answer these three questions before you push:
 
-        - the exact risk flag or confidence rule that caused the unsafe light-tier route
-        - why cheaper routing is subordinate to high-risk safety controls
-        - proof that cache and budget behavior remain explicit after the fix
-        - one sentence on the business blast radius of letting high-risk work ride the cheap tier
+        - What trade-off did I make today to satisfy the customer constraint?
+        - What is the blast radius if my code fails?
+        - How will I know it failed in production?
+
+        Copy-ready PR body:
+
+        ```md
+        ## Principal Review Defense
+        - Trade-off: <name the compromise and why it was worth it>
+        - Blast radius: <name the affected systems, approvers, and rollback edge>
+        - Production failure signal: <monitor, alert, trace, or dashboard link>
+        - Constraint held: <which inherited customer rule stayed intact>
+        ```
+
+        Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
         """
     )
     return

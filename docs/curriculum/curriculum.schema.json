@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aegisap.local/curriculum.schema.json",
+  "title": "AegisAP Curriculum Manifest",
+  "type": "object",
+  "required": [
+    "daily_pass_bar",
+    "elite_pass_bar",
+    "customer_profile",
+    "days"
+  ],
+  "properties": {
+    "daily_pass_bar": {
+      "type": "integer"
+    },
+    "elite_pass_bar": {
+      "type": "integer"
+    },
+    "graduation_tiers": {
+      "type": "object"
+    },
+    "customer_profile": {
+      "type": "object",
+      "required": [
+        "name",
+        "operating_context",
+        "non_negotiables"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operating_context": {
+          "type": "string",
+          "minLength": 1
+        },
+        "non_negotiables": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "days": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "notebook_file",
+          "primary_doc_file",
+          "legacy_doc_files",
+          "rubric_weights",
+          "artifact_files",
+          "portal_to_script_mapping",
+          "customer_context",
+          "persistent_constraints",
+          "mastery_gates",
+          "chaos_gate",
+          "oral_defense_prompts",
+          "zero_tolerance",
+          "capstone_flags",
+          "phase",
+          "scenario_dir",
+          "injection_command",
+          "revert_state",
+          "verification_commands",
+          "review_contract"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9]{2}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "notebook_file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "primary_doc_file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "legacy_doc_files": {
+            "type": "array"
+          },
+          "rubric_weights": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "artifact_files": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "portal_to_script_mapping": {
+            "type": "object",
+            "required": [
+              "portal_surface",
+              "bridge_file",
+              "production_targets"
+            ],
+            "properties": {
+              "portal_surface": {
+                "type": "string",
+                "minLength": 1
+              },
+              "bridge_file": {
+                "type": "string",
+                "minLength": 1
+              },
+              "production_targets": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "customer_context": {
+            "type": "string",
+            "minLength": 1
+          },
+          "persistent_constraints": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/constraint"
+            }
+          },
+          "mastery_gates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/masteryGate"
+            }
+          },
+          "chaos_gate": {
+            "$ref": "#/$defs/chaosGate"
+          },
+          "oral_defense_prompts": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "zero_tolerance": {
+            "type": "array"
+          },
+          "capstone_flags": {
+            "type": "object"
+          },
+          "phase": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scenario_dir": {
+            "type": "string",
+            "minLength": 1
+          },
+          "injection_command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revert_state": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification_commands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "review_contract": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "$defs": {
+    "constraint": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "description",
+        "introduced_on",
+        "persists"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "business",
+            "application",
+            "identity",
+            "infrastructure",
+            "process"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "introduced_on": {
+          "type": "string",
+          "pattern": "^[0-9]{2}$"
+        },
+        "persists": {
+          "const": true
+        },
+        "superseded_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "supersession_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approver_role": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "masteryGate": {
+      "type": "object",
+      "required": [
+        "id",
+        "mode",
+        "command",
+        "success_marker",
+        "covers_constraints",
+        "evidence_source"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "advisory",
+            "blocking"
+          ]
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "success_marker": {
+          "type": "string",
+          "minLength": 1
+        },
+        "covers_constraints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence_source": {
+          "type": "string",
+          "enum": [
+            "unit_test",
+            "static_analysis",
+            "artifact",
+            "cloud_probe",
+            "workflow"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "chaosGate": {
+      "type": "object",
+      "required": [
+        "failure_signal",
+        "diagnostic_surface",
+        "expected_recovery_artifact",
+        "time_box_minutes",
+        "facilitator_intervention_rule"
+      ],
+      "properties": {
+        "failure_signal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "diagnostic_surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_recovery_artifact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "time_box_minutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "facilitator_intervention_rule": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

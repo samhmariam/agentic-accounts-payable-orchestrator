@@ -28,7 +28,9 @@ def _bootstrap():
 def _title(mo):
     mo.md(
         """
-        # Day 2 — Quota Storm and Resilience Repair
+        # Day 2 - Resilience Under Load, NFR Enforcement, and Ownership
+
+        Primary learner entrypoint: `modules/day_02_resilience_ownership/README.md`. Read the customer context and file manifest there before you start the incident.
 
         Day 2 now starts where real FDE work starts: a customer has flooded the
         orchestrator, Azure OpenAI is returning `429` throttle responses, and the
@@ -254,6 +256,10 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
+        STOP. Close this notebook.
+
+        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+
         Move into the real codebase and repair the production implementation:
 
         - `src/aegisap/observability/retry_policy.py`
@@ -302,17 +308,62 @@ def _verification(repo_root, mo):
 
 
 @app.cell
+def _chaos_gate(mo):
+    mo.md(
+        """
+        ## Chaos Gate
+
+        Failure signal: Retry policy and backpressure assumptions no longer match observed queue pressure and latency targets.
+
+        Diagnostic surface: Azure OpenAI metrics, queue pressure notes, and the resilience policy code paths.
+
+        Expected recovery artifact: `build/day2/golden_thread_day2.json`
+
+        Time box: 20 minutes. If you miss it, stop and rerun the four pillars in `docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md`.
+        """
+    )
+    return
+
+
+@app.cell
+def _map_the_gap(mo):
+    mo.md(
+        """
+        ## Map the Gap
+
+        Capture these before you ask for review:
+
+        - Portal action or observed state:
+        - Exact API/SDK/Python call that matches it:
+        - Exact relative production filepath that made the fix durable:
+        """
+    )
+    return
+
+
+@app.cell
 def _pr_defense(mo):
     mo.md(
         """
         ## PR Defense
 
-        Your pull request should defend:
+        Answer these three questions before you push:
 
-        - why `429` was a resilience policy problem rather than an excuse to widen privilege
-        - which paths are safe to retry and which are not
-        - how protected planning paths behave when capacity is saturated
-        - how the updated NFR or ADR evidence constrains future changes under load
+        - What trade-off did I make today to satisfy the customer constraint?
+        - What is the blast radius if my code fails?
+        - How will I know it failed in production?
+
+        Copy-ready PR body:
+
+        ```md
+        ## Principal Review Defense
+        - Trade-off: <name the compromise and why it was worth it>
+        - Blast radius: <name the affected systems, approvers, and rollback edge>
+        - Production failure signal: <monitor, alert, trace, or dashboard link>
+        - Constraint held: <which inherited customer rule stayed intact>
+        ```
+
+        Open or update a PR targeting `cohort/<your-name>/<day-slug>`, paste the markdown block below into the PR body, and push to trigger `.github/workflows/principal-review.yml` on `opened`, `synchronize`, or `ready_for_review`.
         """
     )
     return

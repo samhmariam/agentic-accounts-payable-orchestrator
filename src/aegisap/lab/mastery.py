@@ -6,7 +6,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from .curriculum import PHASE1_GATE_MODES, get_day, load_manifest, normalize_day, resolve_repo_root
+from .curriculum import (
+    PHASE1_GATE_MODES,
+    constraint_lineage_for_day,
+    get_day,
+    load_manifest,
+    normalize_day,
+    resolve_repo_root,
+)
 
 
 PASS = "PASS"
@@ -102,14 +109,21 @@ def run_mastery(
 ) -> dict[str, Any]:
     root = resolve_repo_root(repo_root)
     day_id = normalize_day(day)
+    lineage_path: str | None = None
     if day_id == "00":
         gates = _day0_gates(track)
         title = f"Bootstrap {track.title()} Environment"
+        lineage = {"day": day_id, "title": title, "active_constraints": []}
     else:
         manifest = load_manifest(root)
         day_entry = get_day(manifest, day_id)
         gates = day_entry.get("mastery_gates", [])
         title = day_entry.get("title", f"Day {day_id}")
+        lineage = constraint_lineage_for_day(manifest, day_id)
+        target = root / "build" / f"day{day_id}" / "constraint_lineage.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(lineage, indent=2, sort_keys=True), encoding="utf-8")
+        lineage_path = str(target)
 
     results = [
         _run_gate(
@@ -132,6 +146,8 @@ def run_mastery(
         "title": title,
         "strict": strict,
         "overall_ok": overall_ok,
+        "constraint_lineage_path": lineage_path,
+        "constraint_lineage": lineage,
         "results": [
             {
                 "gate_id": result.gate_id,
@@ -144,4 +160,3 @@ def run_mastery(
             for result in results
         ],
     }
-

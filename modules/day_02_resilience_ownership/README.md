@@ -43,3 +43,10 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day02`
 - Verification Command: `uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 02`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 02`
+- Inject default drill: `uv run aegisap-lab drill inject --day 02`
+- Reset active drill: `uv run aegisap-lab drill reset --day 02`
+- Constraint lineage artifact after mastery: `build/day2/constraint_lineage.json`

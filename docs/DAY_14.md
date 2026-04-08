@@ -62,3 +62,10 @@ uv run aegisap-lab artifact rebuild --day 14
 ## CAPSTONE_B
 
 This day still feeds the transfer track and must preserve the inherited customer constraints while the second domain comes online.
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 14`
+- `uv run aegisap-lab drill inject --day 14`
+- `uv run aegisap-lab drill reset --day 14`
+- `uv run aegisap-lab mastery --day 14` writes `build/day14/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

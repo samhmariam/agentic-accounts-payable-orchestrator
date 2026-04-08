@@ -42,3 +42,10 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day01`
 - Verification Command: `uv run python -m pytest tests/test_day_01_money.py tests/test_day_01_fixtures.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 01`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 01`
+- Inject default drill: `uv run aegisap-lab drill inject --day 01`
+- Reset active drill: `uv run aegisap-lab drill reset --day 01`
+- Constraint lineage artifact after mastery: `build/day1/constraint_lineage.json`

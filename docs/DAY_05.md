@@ -45,3 +45,10 @@ uv run aegisap-lab artifact rebuild --day 05
 - `src/aegisap/day5/workflow/resume_service.py`
 - `src/aegisap/day5/workflow/checkpoint_manager.py`
 - `scenarios/day05`
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 05`
+- `uv run aegisap-lab drill inject --day 05`
+- `uv run aegisap-lab drill reset --day 05`
+- `uv run aegisap-lab mastery --day 05` writes `build/day5/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

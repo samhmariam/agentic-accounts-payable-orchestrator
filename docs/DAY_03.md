@@ -42,3 +42,10 @@ uv run aegisap-lab artifact rebuild --day 03
 - `src/aegisap/day3/retrieval/ranker.py`
 - `src/aegisap/day3/retrieval/authority_policy.py`
 - `scenarios/day03`
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 03`
+- `uv run aegisap-lab drill inject --day 03`
+- `uv run aegisap-lab drill reset --day 03`
+- `uv run aegisap-lab mastery --day 03` writes `build/day3/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

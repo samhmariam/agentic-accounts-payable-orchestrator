@@ -56,3 +56,10 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day11`
 - Verification Command: `uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 11`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 11`
+- Inject default drill: `uv run aegisap-lab drill inject --day 11`
+- Reset active drill: `uv run aegisap-lab drill reset --day 11`
+- Constraint lineage artifact after mastery: `build/day11/constraint_lineage.json`

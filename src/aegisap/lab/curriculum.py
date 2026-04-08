@@ -104,3 +104,69 @@ def infrastructure_constraints_for_day(
         if constraint.get("type") == "infrastructure"
     ]
 
+
+def default_drill_for_day(
+    manifest: dict[str, Any], day: str | int
+) -> dict[str, Any]:
+    drills = get_day(manifest, day).get("automation_drills", [])
+    if not drills:
+        raise ValueError(f"Day {normalize_day(day)} has no automation_drills.")
+    for drill in drills:
+        if drill.get("default") is True:
+            return drill
+    return drills[0]
+
+
+def drill_map_for_day(
+    manifest: dict[str, Any], day: str | int
+) -> dict[str, dict[str, Any]]:
+    return {
+        drill["id"]: drill
+        for drill in get_day(manifest, day).get("automation_drills", [])
+    }
+
+
+def get_drill(
+    manifest: dict[str, Any], day: str | int, drill_id: str | None = None
+) -> dict[str, Any]:
+    if drill_id is None:
+        return default_drill_for_day(manifest, day)
+    try:
+        return drill_map_for_day(manifest, day)[drill_id]
+    except KeyError as exc:
+        raise ValueError(f"Unknown drill `{drill_id}` for day {normalize_day(day)}") from exc
+
+
+def constraint_lineage_for_day(
+    manifest: dict[str, Any], day: str | int
+) -> dict[str, Any]:
+    day_id = normalize_day(day)
+    day_entry = get_day(manifest, day_id)
+    active_constraints = active_constraints_for_day(manifest, day_id)
+    gates = day_entry.get("mastery_gates", [])
+    lineage = []
+    for constraint in active_constraints:
+        coverage = [
+            {
+                "gate_id": gate["id"],
+                "mode": gate["mode"],
+                "evidence_source": gate["evidence_source"],
+                "command": gate["command"],
+            }
+            for gate in gates
+            if constraint["id"] in gate.get("covers_constraints", [])
+        ]
+        lineage.append(
+            {
+                "id": constraint["id"],
+                "type": constraint["type"],
+                "introduced_on": constraint["introduced_on"],
+                "description": constraint["description"],
+                "covered_by": coverage,
+            }
+        )
+    return {
+        "day": day_id,
+        "title": day_entry["title"],
+        "active_constraints": lineage,
+    }

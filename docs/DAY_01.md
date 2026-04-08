@@ -39,3 +39,10 @@ uv run aegisap-lab artifact rebuild --day 01
 - `src/aegisap/day_01/normalizers.py`
 - `src/aegisap/day_01/service.py`
 - `scenarios/day01`
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 01`
+- `uv run aegisap-lab drill inject --day 01`
+- `uv run aegisap-lab drill reset --day 01`
+- `uv run aegisap-lab mastery --day 01` writes `build/day1/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

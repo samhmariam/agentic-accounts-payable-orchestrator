@@ -48,3 +48,10 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day05`
 - Verification Command: `uv run python -m pytest tests/day5/integration/test_resume_service.py tests/day5/integration/test_idempotent_recommendation_resume.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 05`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 05`
+- Inject default drill: `uv run aegisap-lab drill inject --day 05`
+- Reset active drill: `uv run aegisap-lab drill reset --day 05`
+- Constraint lineage artifact after mastery: `build/day5/constraint_lineage.json`

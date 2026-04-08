@@ -498,6 +498,29 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
 
         if not day.get("customer_context"):
             errors.append(f"Manifest day {day['id']} must declare customer_context.")
+        drills = day.get("automation_drills", [])
+        if not drills:
+            errors.append(f"Manifest day {day['id']} must declare automation_drills.")
+        else:
+            defaults = [drill["id"] for drill in drills if drill.get("default")]
+            if len(defaults) != 1:
+                errors.append(
+                    f"Manifest day {day['id']} must declare exactly one default automation drill."
+                )
+            for drill in drills:
+                if drill.get("mode") == "artifact":
+                    if not drill.get("source_file"):
+                        errors.append(
+                            f"Manifest day {day['id']} artifact drill `{drill['id']}` must declare source_file."
+                        )
+                    elif not (ROOT / drill["source_file"]).exists():
+                        errors.append(
+                            f"Manifest day {day['id']} drill source missing: {drill['source_file']}"
+                        )
+                    if not drill.get("mutation"):
+                        errors.append(
+                            f"Manifest day {day['id']} artifact drill `{drill['id']}` must declare mutation."
+                        )
 
         artifact_files = day.get("artifact_files", [])
         if not artifact_files:
@@ -671,7 +694,7 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
             _expect_snippets(
                 errors,
                 module_path,
-                ("Do not edit code in this module folder.", "## Day X File Manifest"),
+                ("Do not edit code in this module folder.", "## Day X File Manifest", "aegisap-lab drill inject --day"),
                 "Module README is missing file-manifest or edit-boundary guidance",
             )
             module_text = module_path.read_text(encoding="utf-8")

@@ -50,3 +50,10 @@ uv run aegisap-lab artifact rebuild --day 08
 - `infra/foundations/search_service.bicep`
 - `infra/modules/container_app.bicep`
 - `scenarios/day08`
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 08`
+- `uv run aegisap-lab drill inject --day 08`
+- `uv run aegisap-lab drill reset --day 08`
+- `uv run aegisap-lab mastery --day 08` writes `build/day8/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

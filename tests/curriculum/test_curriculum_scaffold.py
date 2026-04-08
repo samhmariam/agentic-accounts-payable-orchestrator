@@ -111,6 +111,7 @@ def test_portal_to_script_mapping_declared(day: dict) -> None:
                                  yaml.safe_load(MANIFEST_PATH.open())["days"]])
 def test_phase1_metadata_contract_declared(day: dict) -> None:
     assert day["customer_context"], f"Day {day['id']} missing customer_context"
+    assert day["automation_drills"], f"Day {day['id']} missing automation_drills"
     assert day["persistent_constraints"], f"Day {day['id']} missing persistent_constraints"
     assert day["mastery_gates"], f"Day {day['id']} missing mastery_gates"
     assert day["chaos_gate"], f"Day {day['id']} missing chaos_gate"
@@ -123,6 +124,13 @@ def test_mastery_gate_modes_follow_phase1_policy(day: dict) -> None:
     assert all(gate["mode"] == expected for gate in day["mastery_gates"]), (
         f"Day {day['id']} mastery gates must all be {expected}"
     )
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
+                                 yaml.safe_load(MANIFEST_PATH.open())["days"]])
+def test_automation_drills_have_one_default(day: dict) -> None:
+    defaults = [drill["id"] for drill in day["automation_drills"] if drill.get("default")]
+    assert len(defaults) == 1, f"Day {day['id']} expected one default drill, found {defaults}"
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in

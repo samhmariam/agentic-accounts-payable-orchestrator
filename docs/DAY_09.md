@@ -51,3 +51,10 @@ uv run aegisap-lab artifact rebuild --day 09
 - `src/aegisap/cache/cache_policy.py`
 - `src/aegisap/cost/budget_gate.py`
 - `scenarios/day09`
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 09`
+- `uv run aegisap-lab drill inject --day 09`
+- `uv run aegisap-lab drill reset --day 09`
+- `uv run aegisap-lab mastery --day 09` writes `build/day9/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

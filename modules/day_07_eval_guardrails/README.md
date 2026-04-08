@@ -51,3 +51,10 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day07`
 - Verification Command: `uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 07`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 07`
+- Inject default drill: `uv run aegisap-lab drill inject --day 07`
+- Reset active drill: `uv run aegisap-lab drill reset --day 07`
+- Constraint lineage artifact after mastery: `build/day7/constraint_lineage.json`

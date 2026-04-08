@@ -53,3 +53,10 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day08`
 - Verification Command: `uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests/day8/test_security_and_context.py tests/day8/test_observability_contract.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 08`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 08`
+- Inject default drill: `uv run aegisap-lab drill inject --day 08`
+- Reset active drill: `uv run aegisap-lab drill reset --day 08`
+- Constraint lineage artifact after mastery: `build/day8/constraint_lineage.json`

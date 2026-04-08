@@ -119,6 +119,7 @@ def test_module_readme_exists_and_has_file_manifest(day: dict) -> None:
     content = path.read_text(encoding="utf-8")
     assert "## Day X File Manifest" in content
     assert "Do not edit code in this module folder." in content
+    assert "aegisap-lab drill inject --day" in content
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS])
@@ -126,6 +127,7 @@ def test_primary_doc_points_to_module_readme(day: dict) -> None:
     rel_path = module_readme_relpath(day["id"])
     content = (REPO_ROOT / day["primary_doc_file"]).read_text(encoding="utf-8")
     assert rel_path in content
+    assert "## Automated Drill" in content
 
 
 # ---------------------------------------------------------------------------

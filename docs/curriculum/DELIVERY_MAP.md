@@ -8,7 +8,8 @@ This is the fastest way to stay oriented during delivery.
 2. For Days 1-14, start with the day module README under `modules/`.
 3. Run `uv run aegisap-lab incident start --day XX` only after you have read the customer context and file manifest.
 4. Use the notebook as the diagnostic lens, then stop and patch the durable repo targets in your IDE.
-5. Run the canonical mastery gate after the verification commands.
+5. Inject or reset the daily drill from the module entrypoint when the session calls for a timed failure recovery.
+6. Run the canonical mastery gate after the verification commands.
 
 ## Folder Roles
 
@@ -46,3 +47,10 @@ This is the fastest way to stay oriented during delivery.
 - Use `notebooks/` to diagnose and prototype, not to write the durable patch.
 - Use `src/`, `infra/`, and `scripts/` for the permanent fix.
 - Use `uv run aegisap-lab mastery --day XX` to prove the repair holds under the curriculum contract.
+
+
+## Drill Flow
+
+- Use `uv run aegisap-lab drill list --day XX` to see the default and alternate drills for a day.
+- Use `uv run aegisap-lab drill inject --day XX` to seed the broken state.
+- Use `uv run aegisap-lab drill reset --day XX` to restore the baseline before the next learner.

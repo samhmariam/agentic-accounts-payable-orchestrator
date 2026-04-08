@@ -40,3 +40,10 @@ uv run aegisap-lab artifact rebuild --day 02
 - `src/aegisap/observability/retry_policy.py`
 - `src/aegisap/resilience/backpressure.py`
 - `scenarios/day02`
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 02`
+- `uv run aegisap-lab drill inject --day 02`
+- `uv run aegisap-lab drill reset --day 02`
+- `uv run aegisap-lab mastery --day 02` writes `build/day2/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

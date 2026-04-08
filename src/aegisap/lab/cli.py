@@ -33,6 +33,16 @@ def _build_parser() -> argparse.ArgumentParser:
     rebuild = artifact_subparsers.add_parser("rebuild", help="Rebuild a day artifact from the fixed reference path.")
     rebuild.add_argument("--day", required=True, help="Two-digit day number, for example 01.")
 
+    drill = subparsers.add_parser("drill", help="Manage Phase 2 automated drills.")
+    drill_subparsers = drill.add_subparsers(dest="drill_command", required=True)
+    drill_list = drill_subparsers.add_parser("list", help="List available drills.")
+    drill_list.add_argument("--day", default=None, help="Optional day filter, for example 12.")
+    drill_inject = drill_subparsers.add_parser("inject", help="Inject the default or selected drill for a day.")
+    drill_inject.add_argument("--day", required=True, help="Two-digit day number, for example 12.")
+    drill_inject.add_argument("--drill-id", default=None, help="Optional explicit drill id for days with multiple drills.")
+    drill_reset = drill_subparsers.add_parser("reset", help="Reset the active drill for a day.")
+    drill_reset.add_argument("--day", required=True, help="Two-digit day number, for example 12.")
+
     audit = subparsers.add_parser("audit-production", help="Audit live Azure posture and write a production-readiness artifact.")
     audit.add_argument("--out", default=None, help="Optional output path for the audit artifact JSON.")
     audit.add_argument("--day", default=None, help="Optional day number for manifest-driven cloud-truth checks.")
@@ -92,6 +102,21 @@ def main() -> int:
 
             _print_payload(rebuild_day_artifact(day=args.day))
             return 0
+        if args.command == "drill" and args.drill_command == "list":
+            from .drills import list_drills
+
+            _print_payload(list_drills(repo_root=args.repo_root, day=args.day))
+            return 0
+        if args.command == "drill" and args.drill_command == "inject":
+            from .drills import inject_drill
+
+            _print_payload(inject_drill(day=args.day, repo_root=args.repo_root, drill_id=args.drill_id))
+            return 0
+        if args.command == "drill" and args.drill_command == "reset":
+            from .drills import reset_drill
+
+            _print_payload(reset_drill(day=args.day, repo_root=args.repo_root))
+            return 0
         if args.command == "audit-production":
             from .audit import FAIL, SKIP, run_production_audit
 
@@ -114,10 +139,17 @@ def main() -> int:
                 track=args.track,
             )
             print(f"Mastery Gates: Day {payload['day']} - {payload['title']}")
+            for constraint in payload["constraint_lineage"]["active_constraints"]:
+                gate_ids = ", ".join(item["gate_id"] for item in constraint["covered_by"]) or "uncovered"
+                print(
+                    f"  constraint {constraint['id']} ({constraint['type']}, day {constraint['introduced_on']}): {gate_ids}"
+                )
             for result in payload["results"]:
                 print(f"[{result['status']}] {result['gate_id']} ({result['mode']}): {result['detail']}")
             if not payload["results"]:
                 print(f"[{MASTERY_SKIP}] no_manifest_gates: No mastery gates were declared for this day.")
+            if payload.get("constraint_lineage_path"):
+                print(f"Constraint lineage artifact: {payload['constraint_lineage_path']}")
             return 0 if payload["overall_ok"] else 1
     except IncidentError as exc:
         print(str(exc))

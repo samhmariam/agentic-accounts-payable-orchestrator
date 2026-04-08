@@ -62,6 +62,7 @@
           "artifact_files",
           "portal_to_script_mapping",
           "customer_context",
+          "automation_drills",
           "persistent_constraints",
           "mastery_gates",
           "chaos_gate",
@@ -139,6 +140,13 @@
           "customer_context": {
             "type": "string",
             "minLength": 1
+          },
+          "automation_drills": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/automationDrill"
+            }
           },
           "persistent_constraints": {
             "type": "array",
@@ -332,6 +340,53 @@
           "minimum": 1
         },
         "facilitator_intervention_rule": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "automationDrill": {
+      "type": "object",
+      "required": [
+        "id",
+        "mode",
+        "name",
+        "description",
+        "expected_signal"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "incident",
+            "artifact"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_signal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mutation": {
           "type": "string",
           "minLength": 1
         }

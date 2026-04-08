@@ -44,3 +44,10 @@ uv run aegisap-lab artifact rebuild --day 04
 - `src/aegisap/day4/planning/policy_overlay.py`
 - `src/aegisap/day4/recommendation/recommendation_gate.py`
 - `scenarios/day04`
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 04`
+- `uv run aegisap-lab drill inject --day 04`
+- `uv run aegisap-lab drill reset --day 04`
+- `uv run aegisap-lab mastery --day 04` writes `build/day4/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

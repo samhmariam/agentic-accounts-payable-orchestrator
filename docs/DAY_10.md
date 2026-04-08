@@ -52,3 +52,10 @@ uv run aegisap-lab artifact rebuild --day 10
 - `scripts/check_all_gates.py`
 - `src/aegisap/training/checkpoints.py`
 - `scenarios/day10`
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 10`
+- `uv run aegisap-lab drill inject --day 10`
+- `uv run aegisap-lab drill reset --day 10`
+- `uv run aegisap-lab mastery --day 10` writes `build/day10/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

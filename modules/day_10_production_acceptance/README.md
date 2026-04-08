@@ -55,3 +55,10 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day10`
 - Verification Command: `uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 10`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 10`
+- Inject default drill: `uv run aegisap-lab drill inject --day 10`
+- Reset active drill: `uv run aegisap-lab drill reset --day 10`
+- Constraint lineage artifact after mastery: `build/day10/constraint_lineage.json`

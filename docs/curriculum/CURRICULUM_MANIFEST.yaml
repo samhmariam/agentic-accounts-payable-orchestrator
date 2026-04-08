@@ -93,6 +93,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day01_incident_replay
+    default: true
+    mode: incident
+    name: Day 1 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: A locale-formatted invoice amount is rejected even though the
+      extraction payload and endpoint health are clean.
 - id: '02'
   title: Resilience Under Load, NFR Enforcement, and Ownership
   notebook_file: notebooks/day_2_requirements_architecture.py
@@ -174,6 +184,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day02_incident_replay
+    default: true
+    mode: incident
+    name: Day 2 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: Retry policy and backpressure assumptions no longer match observed
+      queue pressure and latency targets.
 - id: '03'
   title: Retrieval Authority, Search Evidence, and Boundary Repair
   notebook_file: notebooks/day_3_azure_ai_services.py
@@ -261,6 +281,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day03_incident_replay
+    default: true
+    mode: incident
+    name: Day 3 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: Search evidence disagrees with the source-of-truth policy and
+      the ranker surfaces the wrong authority.
 - id: '04'
   title: Single-Agent Loops, Policy Overlay, and Fail-Closed Repair
   notebook_file: notebooks/day_4_single_agent_loops.py
@@ -368,6 +398,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day04_incident_replay
+    default: true
+    mode: incident
+    name: Day 4 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: Execution traces show a risky recommendation escaping the policy
+      overlay while public exposure constraints stay in force.
 - id: '05'
   title: Multi-Agent Orchestration, Durable State, and Resume Safety
   notebook_file: notebooks/day_5_multi_agent_orchestration.py
@@ -482,6 +522,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day05_incident_replay
+    default: true
+    mode: incident
+    name: Day 5 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: The durable workflow stalls or resumes unsafely after interruption,
+      risking duplicate state transitions.
 - id: '06'
   title: Data Authority, Review Boundaries, and Conflict Refusal
   notebook_file: notebooks/day_6_data_ml_integration.py
@@ -602,6 +652,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day06_incident_replay
+    default: true
+    mode: incident
+    name: Day 6 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: The review path accepts conflicting authority instead of refusing
+      and escalating the dispute.
 - id: '07'
   title: Evaluation, Guardrails, Structured Refusal, and Slice Governance
   notebook_file: notebooks/day_7_testing_eval_guardrails.py
@@ -734,6 +794,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day07_incident_replay
+    default: true
+    mode: incident
+    name: Day 7 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: A redaction or audit path leaks sensitive text into a Day 7 evaluation
+      artifact.
 - id: 08
   title: IaC, Identity Planes, and Secure Release Ownership
   notebook_file: notebooks/day_8_cicd_iac_deployment.py
@@ -877,6 +947,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day08_incident_replay
+    default: true
+    mode: incident
+    name: Day 8 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: Role assignments or service posture drifted, and the runtime
+      principal can mutate resources it should only read.
 - id: 09
   title: Observability, Routing, Cost, and Economic Control
   notebook_file: notebooks/day_9_scaling_monitoring_cost.py
@@ -1027,6 +1107,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day09_incident_replay
+    default: true
+    mode: incident
+    name: Day 9 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: Routing or caching pushes the workload outside the cost ceiling
+      while inherited infrastructure posture still has to hold.
 - id: '10'
   title: Production Acceptance, Release Evidence, and Change Board Readiness
   notebook_file: notebooks/day_10_production_operations.py
@@ -1189,6 +1279,16 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: day10_incident_replay
+    default: true
+    mode: incident
+    name: Day 10 incident replay
+    description: Uses the existing incident scenario as the Phase 2 automated drill
+      so the learner must debug from the first signal and restore the repo-backed
+      repair path.
+    expected_signal: A release gate or evidence packet is incomplete, leaving production
+      acceptance without defensible proof.
 - id: '11'
   title: Delegated Identity, OBO, and Authority Confusion Defense
   notebook_file: notebooks/day_11_delegated_identity_obo.py
@@ -1357,6 +1457,27 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: drill_01_iam_drift
+    default: true
+    mode: artifact
+    name: IAM Drift - Managed Identity deleted
+    description: Rebuilds the Day 11 artifacts, then flips actor binding proof to
+      a failing state so the learner must restore delegated identity evidence.
+    expected_signal: gate_actor_binding fails because actor binding no longer matches
+      the required approver group.
+    source_file: evals/failure_drills/drill_01_iam_drift.json
+    mutation: day11_iam_drift
+  - id: drill_02_obo_scope_mismatch
+    default: false
+    mode: artifact
+    name: OBO Scope Mismatch
+    description: Rebuilds the Day 11 artifacts, then breaks the delegated token exchange
+      evidence to simulate a scope mismatch.
+    expected_signal: gate_obo_exchange fails because the delegated token exchange
+      lost the correct audience or scope.
+    source_file: evals/failure_drills/drill_02_obo_scope_mismatch.json
+    mutation: day11_obo_scope_mismatch
 - id: '12'
   title: Private Networking, Egress Control, and Security Dependency Management
   notebook_file: notebooks/day_12_private_networking_constraints.py
@@ -1532,6 +1653,27 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: drill_03_dns_misconfiguration
+    default: true
+    mode: artifact
+    name: Private Endpoint DNS Misconfiguration
+    description: Rebuilds the Day 12 posture bundle, then forces private DNS resolution
+      to fail so the learner must restore the private-only boundary.
+    expected_signal: gate_private_network_posture fails because a service resolves
+      publicly instead of privately.
+    source_file: evals/failure_drills/drill_03_dns_misconfiguration.json
+    mutation: day12_dns_misconfiguration
+  - id: drill_04_public_endpoint_reenabled
+    default: false
+    mode: artifact
+    name: Public Endpoint Re-enabled
+    description: Rebuilds the Day 12 static analysis artifact, then injects a publicNetworkAccess
+      violation into the posture evidence.
+    expected_signal: gate_private_network_static fails because the static analysis
+      now reports a public endpoint violation.
+    source_file: evals/failure_drills/drill_04_public_endpoint_reenabled.json
+    mutation: day12_public_endpoint_reenabled
 - id: '13'
   title: Integration Boundaries, Async Reliability, and Contract Management
   notebook_file: notebooks/day_13_integration_boundary_and_mcp.py
@@ -1711,6 +1853,27 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: drill_05_dlq_overflow
+    default: true
+    mode: artifact
+    name: Service Bus DLQ Overflow
+    description: Rebuilds the Day 13 reports, then injects DLQ and webhook failures
+      so the learner must restore compensating-action coverage.
+    expected_signal: gate_dlq_drain_health fails because DLQ processing now records
+      errors and unhandled messages.
+    source_file: evals/failure_drills/drill_05_dlq_overflow.json
+    mutation: day13_dlq_overflow
+  - id: drill_06_mcp_contract_break
+    default: false
+    mode: artifact
+    name: MCP Tool Removed - Contract Break
+    description: Rebuilds the Day 13 contract report, then removes a required MCP
+      capability from the evidence bundle.
+    expected_signal: gate_mcp_contract_integrity fails because query_invoice_status
+      is missing from the MCP contract.
+    source_file: evals/failure_drills/drill_06_mcp_contract_break.json
+    mutation: day13_mcp_contract_break
 - id: '14'
   title: Elite Operations, Breaking Changes, and Executive Incident Leadership
   notebook_file: notebooks/day_14_breaking_changes_elite_ops.py
@@ -1901,6 +2064,47 @@ days:
     facilitator_intervention_rule: If the learner misses the time box, the facilitator
       must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
       topology, network, RBAC, and log-evidence questions.
+  automation_drills:
+  - id: drill_07_model_regression
+    default: false
+    mode: artifact
+    name: Model Version Changed - F1 Regression
+    description: Rebuilds the Day 14 release artifacts, then injects a canary regression
+      into the protected baseline comparison.
+    expected_signal: gate_canary_regression fails because the canary F1 drops below
+      the protected baseline.
+    source_file: evals/failure_drills/drill_07_model_regression.json
+    mutation: day14_canary_regression
+  - id: drill_08_data_residency_violation
+    default: false
+    mode: artifact
+    name: Data Residency Violation - Wrong Region
+    description: Rebuilds the Day 14 residency report, then injects a non-compliant
+      resource location into the evidence chain.
+    expected_signal: gate_data_residency fails because at least one resource now violates
+      the approved region.
+    source_file: evals/failure_drills/drill_08_data_residency_violation.json
+    mutation: day14_data_residency_violation
+  - id: drill_09_correlation_gap
+    default: false
+    mode: artifact
+    name: Correlation ID Not Propagated - Trace Gap
+    description: Rebuilds the Day 14 trace report, then drops correlation coverage
+      so the learner must restore trace continuity.
+    expected_signal: gate_trace_correlation fails because at least one trace no longer
+      carries correlation_id.
+    source_file: evals/failure_drills/drill_09_correlation_gap.json
+    mutation: day14_correlation_gap
+  - id: drill_10_rollback_failure
+    default: true
+    mode: artifact
+    name: Rollback Failure - Invalid Image Manifest
+    description: Rebuilds the Day 14 release bundle, then erases rollback readiness
+      so the learner must restore the stable revision path.
+    expected_signal: gate_rollback_readiness fails because the stable revision and
+      runbook are no longer available.
+    source_file: evals/failure_drills/drill_10_rollback_failure.json
+    mutation: day14_rollback_failure
 customer_profile:
   name: Northwind Treasury Services
   operating_context: Regulated financial customer running invoice and claims automation

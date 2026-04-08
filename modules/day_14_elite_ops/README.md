@@ -61,3 +61,10 @@ Do not edit code in this module folder.
 - Verification Command: `uv run python -m pytest tests/day14/test_breaking_changes.py -q`
 - Verification Command: `uv run python scripts/run_chaos_capstone.py`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 14`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 14`
+- Inject default drill: `uv run aegisap-lab drill inject --day 14`
+- Reset active drill: `uv run aegisap-lab drill reset --day 14`
+- Constraint lineage artifact after mastery: `build/day14/constraint_lineage.json`

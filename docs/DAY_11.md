@@ -53,3 +53,10 @@ uv run aegisap-lab artifact rebuild --day 11
 - `src/aegisap/identity/obo.py`
 - `scripts/verify_delegated_identity_contract.py`
 - `scenarios/day11`
+
+## Automated Drill
+
+- `uv run aegisap-lab drill list --day 11`
+- `uv run aegisap-lab drill inject --day 11`
+- `uv run aegisap-lab drill reset --day 11`
+- `uv run aegisap-lab mastery --day 11` writes `build/day11/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.

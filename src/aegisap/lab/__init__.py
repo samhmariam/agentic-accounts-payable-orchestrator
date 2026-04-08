@@ -5,6 +5,7 @@ __all__ = [
     "baseline",
     "cli",
     "curriculum",
+    "drills",
     "engine",
     "mastery",
     "models",

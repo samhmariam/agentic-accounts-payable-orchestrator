@@ -58,3 +58,10 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day12`
 - Verification Command: `uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 12`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 12`
+- Inject default drill: `uv run aegisap-lab drill inject --day 12`
+- Reset active drill: `uv run aegisap-lab drill reset --day 12`
+- Constraint lineage artifact after mastery: `build/day12/constraint_lineage.json`

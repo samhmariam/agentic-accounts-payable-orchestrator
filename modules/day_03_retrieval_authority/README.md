@@ -45,3 +45,10 @@ Do not edit code in this module folder.
 - Scenario Pack: `scenarios/day03`
 - Verification Command: `uv run python -m pytest tests/day3/test_vendor_authority_ranking.py tests/day3/test_day3_exit_check.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 03`
+
+## Automated Drill
+
+- List drills: `uv run aegisap-lab drill list --day 03`
+- Inject default drill: `uv run aegisap-lab drill inject --day 03`
+- Reset active drill: `uv run aegisap-lab drill reset --day 03`
+- Constraint lineage artifact after mastery: `build/day3/constraint_lineage.json`

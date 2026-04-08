@@ -84,24 +84,17 @@ def _lab_repair_intro(mo):
         ## Lab Repair
 
         Use this notebook to prototype the detector and review why the boundary should
-        refuse the case before you touch the production review code.
+        refuse the case before you touch the production review code. Reduced-scaffold
+        mode is active here: start from the seeded fixture below and then build the
+        terminal or SDK probe you actually need.
         """
     )
     return
 
 
 @app.cell
-def _fixture_picker(mo):
-    fixture_name = mo.ui.dropdown(
-        options=[
-            "prompt_injection_email_case",
-            "unsupported_approval_channel_case",
-            "missing_po_exception_case",
-        ],
-        value="prompt_injection_email_case",
-        label="Review fixture",
-    )
-    fixture_name
+def _fixture_picker():
+    fixture_name = "prompt_injection_email_case"
     return (fixture_name,)
 
 
@@ -115,7 +108,7 @@ def _detector_preview(
     mo,
     repo_root,
 ):
-    review_input = load_day6_review_input(repo_root / "fixtures" / "day06" / f"{fixture_name.value}.json")
+    review_input = load_day6_review_input(repo_root / "fixtures" / "day06" / f"{fixture_name}.json")
     signals = detect_prompt_injection(review_input)
     authority = evaluate_authority_boundary(review_input, injection_detected=bool(signals))
     mo.callout(

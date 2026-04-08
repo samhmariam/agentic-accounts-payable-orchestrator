@@ -583,6 +583,26 @@ def deterministic_findings(*, changed_files: list[str], diff_text: str) -> list[
                     ),
                 )
             )
+    if "10" in scope_days and "docs/curriculum/artifacts/day10/REVERT_PROOF.md" not in changed_set:
+        findings.append(
+            ReviewFinding(
+                finding_id="missing_day10_revert_proof",
+                severity="blocking",
+                summary="Day 10 release changes landed without Revert Proof.",
+                detail="Release-board changes must update the explicit Revert Proof artifact with the rollback mechanism, last-known-good target, and recovery time box.",
+                suggested_fix="Update `docs/curriculum/artifacts/day10/REVERT_PROOF.md` before asking for CAB approval.",
+            )
+        )
+    if "14" in scope_days and "docs/curriculum/artifacts/day14/REVERT_PROOF.md" not in changed_set:
+        findings.append(
+            ReviewFinding(
+                finding_id="missing_day14_revert_proof",
+                severity="blocking",
+                summary="Day 14 incident-command changes landed without Revert Proof.",
+                detail="Elite-ops changes must update the explicit Revert Proof artifact with the rollback mechanism, last-known-good target, and recovery time box.",
+                suggested_fix="Update `docs/curriculum/artifacts/day14/REVERT_PROOF.md` before asking for capstone CAB approval.",
+            )
+        )
     if len(scope_days) > 1:
         findings.append(
             ReviewFinding(

@@ -10,6 +10,10 @@ Trust-boundary failures are customer-facing finance incidents. An FDE has to pro
 
 A finance operations lead is blocking go-live after a valid European supplier invoice was rejected. They want proof that the deterministic trust boundary can be repaired without widening the blast radius.
 
+## Cost of Failure
+
+Every hour this locale parsing failure survives, valid supplier invoices remain unpaid and finance risks breach-of-contract escalation.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.

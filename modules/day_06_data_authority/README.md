@@ -8,6 +8,10 @@ Enterprise data integration is mostly refusal discipline. An elite FDE must know
 
 A reviewer found a conflict between ERP data and the extracted invoice narrative. The customer expects the system to refuse unsafe blending and document who owns the discrepancy.
 
+## Cost of Failure
+
+If hostile review evidence is normalized incorrectly, unsafe approval claims can leak through the control boundary and poison later decisions.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.

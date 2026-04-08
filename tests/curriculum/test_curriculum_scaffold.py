@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from aegisap.lab.curriculum import PHASE1_GATE_MODES
+from aegisap.lab.curriculum import INFRA_SURFACE_TYPES, KQL_EVIDENCE_DAYS, PHASE1_GATE_MODES, expected_scaffold_level
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
@@ -95,7 +95,7 @@ def test_all_artifact_files_exist(day: dict) -> None:
 
 def test_total_artifact_count(days: list[dict]) -> None:
     total = sum(len(d["artifact_files"]) for d in days)
-    assert total == 45, f"Expected 45 artifact files across all days, got {total}"
+    assert total == 47, f"Expected 47 artifact files across all days, got {total}"
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
@@ -105,12 +105,17 @@ def test_portal_to_script_mapping_declared(day: dict) -> None:
     assert mapping.get("portal_surface"), f"Day {day['id']} missing portal_surface"
     assert mapping.get("bridge_file"), f"Day {day['id']} missing bridge_file"
     assert mapping.get("production_targets"), f"Day {day['id']} missing production_targets"
+    for target in mapping["production_targets"]:
+        assert target["path"], f"Day {day['id']} production target missing path"
+        assert target["surface_type"] in {"application", "infrastructure", "ci_cd", "policy", "eval"}
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
                                  yaml.safe_load(MANIFEST_PATH.open())["days"]])
 def test_phase1_metadata_contract_declared(day: dict) -> None:
     assert day["customer_context"], f"Day {day['id']} missing customer_context"
+    assert day["cost_of_failure"], f"Day {day['id']} missing cost_of_failure"
+    assert day["scaffold_level"] == expected_scaffold_level(day["id"])
     assert day["automation_drills"], f"Day {day['id']} missing automation_drills"
     assert day["persistent_constraints"], f"Day {day['id']} missing persistent_constraints"
     assert day["mastery_gates"], f"Day {day['id']} missing mastery_gates"
@@ -128,6 +133,15 @@ def test_native_operator_evidence_contract_declared(day_id: str, mode: str, days
     contract = day.get("native_operator_evidence")
     assert contract, f"Day {day_id} missing native_operator_evidence"
     assert contract["mode"] == mode
+
+
+@pytest.mark.parametrize("day_id", KQL_EVIDENCE_DAYS)
+def test_kql_evidence_contract_declared(day_id: str, days: list[dict]) -> None:
+    day = next(item for item in days if item["id"] == day_id)
+    contract = day.get("kql_evidence")
+    assert contract, f"Day {day_id} missing kql_evidence"
+    assert contract["artifact_path"] == f"build/day{int(day_id)}/kql_evidence.json"
+    assert contract["minimum_queries"] >= 1
 
 
 def test_day7_default_drill_targets_authority_drift(days: list[dict]) -> None:
@@ -149,12 +163,18 @@ def test_day10_and_day14_use_cab_board_review_mode(days: list[dict]) -> None:
         "cab_chair",
         "client_ciso_or_infra_lead",
     ]
+    assert day10["review_contract"]["requires_kql_replay"] is True
+    assert day10["review_contract"]["requires_revert_proof"] is True
+    assert day10["review_contract"]["peer_checklist_file"] == "docs/curriculum/checklists/day10_peer_red_team.md"
     assert day14["review_contract"]["review_mode"] == "cab_board"
     assert day14["review_contract"]["required_review_roles"] == [
         "cab_chair",
         "client_ciso",
         "infra_lead",
     ]
+    assert day14["review_contract"]["requires_kql_replay"] is True
+    assert day14["review_contract"]["requires_revert_proof"] is True
+    assert day14["review_contract"]["peer_checklist_file"] == "docs/curriculum/checklists/day14_peer_red_team.md"
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
@@ -171,6 +191,42 @@ def test_mastery_gate_modes_follow_phase1_policy(day: dict) -> None:
 def test_automation_drills_have_one_default(day: dict) -> None:
     defaults = [drill["id"] for drill in day["automation_drills"] if drill.get("default")]
     assert len(defaults) == 1, f"Day {day['id']} expected one default drill, found {defaults}"
+
+
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in yaml.safe_load(MANIFEST_PATH.open())["days"]])
+def test_drift_layers_declared(day: dict) -> None:
+    for drill in day["automation_drills"]:
+        assert drill["drift_layers"], f"Day {day['id']} drill {drill['id']} missing drift_layers"
+
+
+def test_default_drills_use_platform_drift_in_days_4_to_14(days: list[dict]) -> None:
+    for day in [item for item in days if item["id"] >= "04"]:
+        default = next(drill for drill in day["automation_drills"] if drill.get("default"))
+        assert any(layer != "application" for layer in default["drift_layers"])
+
+
+def test_final_week_default_drills_include_two_non_application_layers(days: list[dict]) -> None:
+    for day in [item for item in days if item["id"] >= "10"]:
+        default = next(drill for drill in day["automation_drills"] if drill.get("default"))
+        non_application = {
+            layer for layer in default["drift_layers"] if layer in {"identity", "networking", "iac", "ci_cd"}
+        }
+        assert len(non_application) >= 2, f"Day {day['id']} default drill drift layers too thin: {default['drift_layers']}"
+
+
+def test_program_and_final_week_infra_target_ratios(days: list[dict]) -> None:
+    targets = [target for day in days for target in day["portal_to_script_mapping"]["production_targets"]]
+    infra = [target for target in targets if target["surface_type"] in INFRA_SURFACE_TYPES]
+    assert len(infra) / len(targets) >= 0.30
+
+    final_targets = [
+        target
+        for day in days
+        if day["id"] >= "10"
+        for target in day["portal_to_script_mapping"]["production_targets"]
+    ]
+    final_infra = [target for target in final_targets if target["surface_type"] in INFRA_SURFACE_TYPES]
+    assert len(final_infra) / len(final_targets) >= 0.50
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in

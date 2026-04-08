@@ -21,7 +21,15 @@ MANIFEST_PATH = ROOT / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "notebooks"))
 
-from aegisap.lab.curriculum import PHASE1_GATE_MODES, module_readme_relpath
+from aegisap.lab.curriculum import (
+    INFRA_SURFACE_TYPES,
+    KQL_EVIDENCE_DAYS,
+    PHASE1_GATE_MODES,
+    RAW_SDK_NOTEBOOK_BAN_DAYS,
+    expected_scaffold_level,
+    module_readme_relpath,
+    production_target_counts,
+)
 
 PATH_PREFIXES = (
     "docs/",
@@ -82,9 +90,13 @@ REQUIRED_DOCS = (
     "docs/curriculum/curriculum.schema.json",
     "docs/curriculum/templates/DAILY_ARTIFACT_PACK.md",
     "docs/curriculum/templates/DAILY_SCORECARD.md",
+    "docs/curriculum/templates/KQL_EVIDENCE_TEMPLATE.json",
     "docs/curriculum/templates/NATIVE_OPERATOR_EVIDENCE_TEMPLATE.json",
     "docs/curriculum/templates/ORAL_DEFENSE_SCORECARD.md",
     "docs/curriculum/templates/PILOT_RETRO.md",
+    "docs/curriculum/checklists/day10_peer_red_team.md",
+    "docs/curriculum/checklists/day14_peer_red_team.md",
+    "docs/curriculum/submissions/README.md",
 )
 
 STRICT_VALIDATION_DOCS = (
@@ -174,6 +186,7 @@ INCIDENT_NOTEBOOK_SECTIONS = (
 MODULE_REQUIRED_HEADINGS = (
     "## Why This Matters to an FDE",
     "## Customer Context",
+    "## Cost of Failure",
     "## Persistent Constraints",
     "## FDE Implementation Cycle",
     "## Mastery Gate",
@@ -185,6 +198,10 @@ WHY_FAILS_PROMPT = (
     "List three specific ways this notebook logic fails in an Azure Container App. "
     "You must reference at least one Azure limit (memory, timeout, or ephemeral storage) "
     "and one concurrency issue."
+)
+
+RAW_SDK_BAN_SNIPPET = (
+    "Do not use the shared lab wrapper helpers in this phase."
 )
 
 NATIVE_OPERATOR_EVIDENCE_DAYS = {
@@ -551,15 +568,24 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
         )
 
     previous_active_constraints: dict[str, dict] = {}
+    ratio_days: list[dict] = []
 
     for day in days:
         day_id = int(day["id"])
         day_id_str = day["id"]
+        ratio_days.append(day)
         notebook_rel = day.get("notebook_file", "")
         notebook_path = ROOT / notebook_rel
         if not notebook_rel or not notebook_path.exists():
             errors.append(f"Manifest day {day['id']} notebook missing: {notebook_rel}")
             continue
+
+        if day.get("scaffold_level") != expected_scaffold_level(day_id_str):
+            errors.append(
+                f"Manifest day {day['id']} scaffold_level must be `{expected_scaffold_level(day_id_str)}`."
+            )
+        if not day.get("cost_of_failure"):
+            errors.append(f"Manifest day {day['id']} must declare cost_of_failure.")
 
         rubric_weights = day.get("rubric_weights", {})
         if sum(int(v) for v in rubric_weights.values()) != 100:
@@ -585,6 +611,21 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     f"Manifest day {day['id']} must declare exactly one default automation drill."
                 )
             for drill in drills:
+                drift_layers = drill.get("drift_layers", [])
+                if not drift_layers:
+                    errors.append(
+                        f"Manifest day {day['id']} drill `{drill['id']}` must declare drift_layers."
+                    )
+                if day_id_str >= "04" and drill.get("default") and set(drift_layers) == {"application"}:
+                    errors.append(
+                        f"Manifest day {day['id']} default drill `{drill['id']}` must include at least one non-application drift layer."
+                    )
+                if day_id_str >= "10" and drill.get("default"):
+                    non_application = [layer for layer in drift_layers if layer in {"identity", "networking", "iac", "ci_cd"}]
+                    if len(set(non_application)) < 2:
+                        errors.append(
+                            f"Manifest day {day['id']} default drill `{drill['id']}` must include at least two non-application drift layers in the final week."
+                        )
                 if drill.get("mode") == "artifact":
                     if not drill.get("source_file"):
                         errors.append(
@@ -645,6 +686,30 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     ("## Native Tooling Gate", "native_operator_evidence.json"),
                     f"Day {day_id} notebook is missing the native-tooling evidence gate",
                 )
+            if day_id_str in KQL_EVIDENCE_DAYS:
+                _expect_snippets(
+                    errors,
+                    notebook_path,
+                    ("## KQL Evidence", f"build/day{day_id}/kql_evidence.json"),
+                    f"Day {day_id} notebook is missing the KQL evidence contract",
+                )
+            if day_id_str in RAW_SDK_NOTEBOOK_BAN_DAYS:
+                _expect_snippets(
+                    errors,
+                    notebook_path,
+                    (
+                        RAW_SDK_BAN_SNIPPET,
+                        "azure-identity",
+                        "azure-mgmt-",
+                    ),
+                    f"Day {day_id} notebook is missing the raw-SDK starter contract",
+                )
+                _expect_absent_snippets(
+                    errors,
+                    notebook_path,
+                    ("notebooks/_shared/azure_probe.py", "notebooks/_shared/curriculum_scaffolds.py"),
+                    f"Day {day_id} notebook still references banned shared investigation wrappers",
+                )
             _expect_absent_snippets(
                 errors,
                 notebook_path,
@@ -673,9 +738,19 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 errors.append(f"Manifest day {day['id']} portal_to_script_mapping must declare production_targets.")
             else:
                 for target in targets:
-                    if not (ROOT / target).exists():
+                    target_path = target.get("path", "")
+                    if not target_path:
                         errors.append(
-                            f"Manifest day {day['id']} portal_to_script_mapping target missing: {target}"
+                            f"Manifest day {day['id']} portal_to_script_mapping target missing `path`."
+                        )
+                        continue
+                    if target.get("surface_type") not in {"application", "infrastructure", "ci_cd", "policy", "eval"}:
+                        errors.append(
+                            f"Manifest day {day['id']} portal_to_script_mapping target `{target_path}` has an invalid surface_type."
+                        )
+                    if not (ROOT / target_path).exists():
+                        errors.append(
+                            f"Manifest day {day['id']} portal_to_script_mapping target missing: {target_path}"
                         )
         constraints = day.get("persistent_constraints", [])
         if not constraints:
@@ -765,12 +840,28 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     errors.append(
                         "Manifest day 10 review_contract must declare CAB roles `cab_chair` and `client_ciso_or_infra_lead`."
                     )
+                if review_contract.get("requires_kql_replay") is not True:
+                    errors.append("Manifest day 10 review_contract must declare `requires_kql_replay: true`.")
+                if review_contract.get("requires_revert_proof") is not True:
+                    errors.append("Manifest day 10 review_contract must declare `requires_revert_proof: true`.")
+                if review_contract.get("peer_checklist_file") != "docs/curriculum/checklists/day10_peer_red_team.md":
+                    errors.append(
+                        "Manifest day 10 review_contract must declare `peer_checklist_file: docs/curriculum/checklists/day10_peer_red_team.md`."
+                    )
             if day_id_str == "14":
                 if review_contract.get("review_mode") != "cab_board":
                     errors.append("Manifest day 14 review_contract must declare `review_mode: cab_board`.")
                 if review_contract.get("required_review_roles") != ["cab_chair", "client_ciso", "infra_lead"]:
                     errors.append(
                         "Manifest day 14 review_contract must declare CAB roles `cab_chair`, `client_ciso`, and `infra_lead`."
+                    )
+                if review_contract.get("requires_kql_replay") is not True:
+                    errors.append("Manifest day 14 review_contract must declare `requires_kql_replay: true`.")
+                if review_contract.get("requires_revert_proof") is not True:
+                    errors.append("Manifest day 14 review_contract must declare `requires_revert_proof: true`.")
+                if review_contract.get("peer_checklist_file") != "docs/curriculum/checklists/day14_peer_red_team.md":
+                    errors.append(
+                        "Manifest day 14 review_contract must declare `peer_checklist_file: docs/curriculum/checklists/day14_peer_red_team.md`."
                     )
         stakeholder_inject = day.get("stakeholder_inject")
         if day_id_str == "04" and not stakeholder_inject:
@@ -802,6 +893,22 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     errors.append(
                         f"Manifest day {day['id']} native_operator_evidence artifact_path must be `{expected_artifact}`."
                     )
+        kql_evidence = day.get("kql_evidence")
+        if day_id_str in KQL_EVIDENCE_DAYS:
+            if not kql_evidence:
+                errors.append(f"Manifest day {day['id']} must declare kql_evidence.")
+            else:
+                expected_artifact = f"build/day{int(day_id_str)}/kql_evidence.json"
+                if kql_evidence.get("artifact_path") != expected_artifact:
+                    errors.append(
+                        f"Manifest day {day['id']} kql_evidence artifact_path must be `{expected_artifact}`."
+                    )
+                if int(kql_evidence.get("minimum_queries", 0)) < 1:
+                    errors.append(
+                        f"Manifest day {day['id']} kql_evidence minimum_queries must be at least 1."
+                    )
+        elif kql_evidence is not None:
+            errors.append(f"Manifest day {day['id']} should not declare kql_evidence.")
         if day.get("legacy_doc_files"):
             errors.append(
                 f"Manifest day {day['id']} should not declare legacy_doc_files after the incident-driven redesign."
@@ -848,6 +955,20 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     ("SPONSOR_PUSHBACK_EMAIL.md", "ADR-002_irreversible_actions_and_hitl.md"),
                     "Day 4 module README is missing the executive-pushback artifacts",
                 )
+            if day_id_str in KQL_EVIDENCE_DAYS:
+                _expect_snippets(
+                    errors,
+                    module_path,
+                    ("## KQL Evidence", f"build/day{day_id}/kql_evidence.json"),
+                    "Module README is missing the KQL evidence contract",
+                )
+            if day_id_str in {"10", "14"}:
+                _expect_snippets(
+                    errors,
+                    module_path,
+                    ("Revert Proof", "Peer checklist file"),
+                    "CAB module README is missing the revert-proof or peer-checklist contract",
+                )
             module_text = module_path.read_text(encoding="utf-8")
             errors.extend(_validate_path_tokens(module_path, module_text))
             errors.extend(_validate_module_commands(module_path, module_text))
@@ -857,7 +978,7 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
             _expect_headings(
                 errors,
                 primary_doc_path,
-                ("## Why This Matters to an FDE", "## Customer Context"),
+                ("## Why This Matters to an FDE", "## Customer Context", "## Cost of Failure"),
                 "Primary day doc is missing the FDE business framing",
             )
             _expect_snippets(
@@ -873,12 +994,26 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     ("## Native Tooling Gate", "native_operator_evidence.json"),
                     "Primary day doc is missing the native-tooling gate contract",
                 )
+            if day_id_str in KQL_EVIDENCE_DAYS:
+                _expect_snippets(
+                    errors,
+                    primary_doc_path,
+                    ("## KQL Evidence", f"build/day{day_id}/kql_evidence.json"),
+                    "Primary day doc is missing the KQL evidence contract",
+                )
             if day_id_str == "04":
                 _expect_snippets(
                     errors,
                     primary_doc_path,
                     ("SPONSOR_PUSHBACK_EMAIL.md", "ADR-002_irreversible_actions_and_hitl.md"),
                     "Day 4 primary doc is missing the executive-pushback artifacts",
+                )
+            if day_id_str in {"10", "14"}:
+                _expect_snippets(
+                    errors,
+                    primary_doc_path,
+                    ("Revert Proof", "Peer checklist file"),
+                    "CAB primary doc is missing the revert-proof or peer-checklist contract",
                 )
         if day_id_str == "07":
             matching_gate = next(
@@ -900,6 +1035,18 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 errors.append(
                     "Manifest day 07 must use `drill_11_prompt_authority_drift` as the default automation drill."
                 )
+
+    infra_targets, total_targets = production_target_counts(ratio_days)
+    if total_targets and infra_targets / total_targets < 0.30:
+        errors.append(
+            f"Curriculum manifest must keep infrastructure/ci_cd production targets at or above 30%; found {infra_targets}/{total_targets}."
+        )
+    final_week_days = [day for day in ratio_days if day["id"] >= "10"]
+    final_week_infra, final_week_total = production_target_counts(final_week_days)
+    if final_week_total and final_week_infra / final_week_total < 0.50:
+        errors.append(
+            f"Curriculum manifest Days 10-14 must keep infrastructure/ci_cd production targets at or above 50%; found {final_week_infra}/{final_week_total}."
+        )
 
 
 def _expect_headings(

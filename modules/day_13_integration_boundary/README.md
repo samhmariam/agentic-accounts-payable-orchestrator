@@ -8,6 +8,10 @@ Integration boundaries fail at the seams between teams. Elite FDEs have to prese
 
 A line-of-business integration is dropping events at the boundary. The customer expects the MCP surface and DLQ path to recover without breaking inherited identity or network controls.
 
+## Cost of Failure
+
+If the integration contract drifts, partner systems fail unpredictably and compensating-action load spikes across the boundary.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.
@@ -37,6 +41,10 @@ A line-of-business integration is dropping events at the boundary. The customer 
 
 - `uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_server.py tests/day13/test_payment_hold.py -q && uv run aegisap-lab artifact rebuild --day 13`
 - `uv run aegisap-lab audit-production --day 13 --strict`
+
+## KQL Evidence
+
+Save `build/day13/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Chaos Gate
 

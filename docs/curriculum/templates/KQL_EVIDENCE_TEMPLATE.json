@@ -1,0 +1,13 @@
+{
+  "day": "08",
+  "queries": [
+    {
+      "query": "traces | where customDimensions.workflow_id == '<workflow-id>' | take 20",
+      "workspace": "log-analytics-workspace-name",
+      "signal_found": true,
+      "purpose": "Prove the exact production footprint that triggered the repair.",
+      "observed_excerpt": "workflow_id, gate_name, passed=false",
+      "operator_interpretation": "Explain why this query proves the failure lives in the named Azure surface."
+    }
+  ]
+}

@@ -22,6 +22,13 @@ SKIP = "SKIP"
 
 _NATIVE_COMMAND_KEYS = ("command", "purpose", "expected_signal", "observed_excerpt")
 _NATIVE_QUERY_KEYS = ("query", "purpose", "expected_signal", "observed_excerpt")
+_KQL_QUERY_KEYS = (
+    "query",
+    "workspace",
+    "purpose",
+    "observed_excerpt",
+    "operator_interpretation",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,6 +215,77 @@ def _validate_native_operator_evidence(
     )
 
 
+def _validate_kql_evidence(
+    *,
+    day_id: str,
+    contract: dict[str, Any],
+    repo_root: Path,
+) -> GateResult:
+    rel_path = contract["artifact_path"]
+    path = repo_root / rel_path
+    gate_id = f"day{day_id}_kql_evidence"
+    mode = PHASE1_GATE_MODES.get(day_id, "blocking")
+    if not path.exists():
+        return GateResult(
+            gate_id=gate_id,
+            mode=mode,
+            status=FAIL,
+            command=f"validate {rel_path}",
+            detail=f"Missing KQL evidence artifact `{rel_path}`.",
+        )
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return GateResult(
+            gate_id=gate_id,
+            mode=mode,
+            status=FAIL,
+            command=f"validate {rel_path}",
+            detail=f"Could not parse `{rel_path}` as JSON: {exc}",
+        )
+
+    errors: list[str] = []
+    if payload.get("day") != day_id:
+        errors.append(f"`day` must equal `{day_id}`.")
+    queries = payload.get("queries")
+    if not isinstance(queries, list):
+        errors.append("`queries` must be a list.")
+    else:
+        minimum = int(contract.get("minimum_queries", 1))
+        if len(queries) < minimum:
+            errors.append(f"`queries` must contain at least {minimum} entr{'y' if minimum == 1 else 'ies'}.")
+        for index, query in enumerate(queries):
+            if not isinstance(query, dict):
+                errors.append(f"`queries[{index}]` must be an object.")
+                continue
+            missing = [key for key in _KQL_QUERY_KEYS if not str(query.get(key, "")).strip()]
+            if missing:
+                errors.append(
+                    f"`queries[{index}]` is missing required field(s): {', '.join(missing)}."
+                )
+            signal_found = query.get("signal_found")
+            if not isinstance(signal_found, bool):
+                errors.append(f"`queries[{index}].signal_found` must be a boolean.")
+
+    if errors:
+        return GateResult(
+            gate_id=gate_id,
+            mode=mode,
+            status=FAIL,
+            command=f"validate {rel_path}",
+            detail="; ".join(errors),
+        )
+
+    return GateResult(
+        gate_id=gate_id,
+        mode=mode,
+        status=PASS,
+        command=f"validate {rel_path}",
+        detail=f"KQL evidence validated from `{rel_path}`.",
+    )
+
+
 def _day0_gates(track: str) -> list[dict[str, str]]:
     return [
         {
@@ -229,6 +307,7 @@ def run_mastery(
     root = resolve_repo_root(repo_root)
     day_id = normalize_day(day)
     lineage_path: str | None = None
+    kql_contract: dict[str, Any] | None = None
     if day_id == "00":
         gates = _day0_gates(track)
         title = f"Bootstrap {track.title()} Environment"
@@ -240,6 +319,7 @@ def run_mastery(
         gates = day_entry.get("mastery_gates", [])
         title = day_entry.get("title", f"Day {day_id}")
         native_contract = day_entry.get("native_operator_evidence")
+        kql_contract = day_entry.get("kql_evidence")
         lineage = constraint_lineage_for_day(manifest, day_id)
         target = root / "build" / f"day{day_id}" / "constraint_lineage.json"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -261,6 +341,14 @@ def run_mastery(
             _validate_native_operator_evidence(
                 day_id=day_id,
                 contract=native_contract,
+                repo_root=root,
+            )
+        )
+    if day_id != "00" and kql_contract is not None:
+        results.append(
+            _validate_kql_evidence(
+                day_id=day_id,
+                contract=kql_contract,
                 repo_root=root,
             )
         )

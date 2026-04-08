@@ -8,6 +8,10 @@ Retrieval authority is where elegant demos become enterprise liabilities. An FDE
 
 A procurement stakeholder discovered that the system cited an outdated vendor record. They need you to prove which source is authoritative and codify that boundary permanently.
 
+## Cost of Failure
+
+If stale or ambiguous evidence wins, the system can route payment decisions against the wrong source of truth and trigger audit exposure.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.

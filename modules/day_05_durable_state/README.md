@@ -8,6 +8,10 @@ Durable state work is the difference between a demo and a recoverable production
 
 An approver reopened a paused invoice after a partial outage. The customer wants the workflow resumed without duplicate approvals, duplicate recommendations, or policy drift.
 
+## Cost of Failure
+
+If stale resume tokens are accepted, duplicate or misrouted side effects can hit downstream finance systems and create expensive manual cleanup.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.

@@ -10,6 +10,10 @@ Release acceptance is where technical fixes become enterprise commitments. An FD
 
 The customer CAB will not approve rollout without a release packet that proves security posture, ownership, rollback readiness, and cost governance survived the repair.
 
+## Cost of Failure
+
+If release evidence goes false-green, the CAB can approve a broken deployment and force an emergency rollback under executive scrutiny.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.
@@ -38,9 +42,18 @@ uv run aegisap-lab incident start --day 10
 
 ## CAB Review Mode
 
+- Peer checklist file: `docs/curriculum/checklists/day10_peer_red_team.md`
+- Reviewers must replay at least one saved KQL query live before approval.
+- Revert Proof is mandatory and must name the rollback mechanism, last-known-good target, time-box, and exercised or dry-run evidence.
+
+
 - Review mode: `cab_board`
 - Required review roles: `cab_chair`, `client_ciso_or_infra_lead`
 - The board may replay `build/day9/native_operator_evidence.json` live before approving the release packet
+
+## KQL Evidence
+
+Save `build/day10/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 

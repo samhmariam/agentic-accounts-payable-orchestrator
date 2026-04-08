@@ -8,6 +8,10 @@ Production economics are part of the design, not a dashboard afterthought. FDEs 
 
 A finance sponsor is alarmed by rising token spend and wants a defensible routing and cache policy that respects the same infrastructure and identity constraints already in force.
 
+## Cost of Failure
+
+If routing and cost telemetry drift silently, runaway spend and untraceable failures can continue until finance or operations halts rollout.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.
@@ -40,6 +44,10 @@ A finance sponsor is alarmed by rising token spend and wants a defensible routin
 - Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned step-by-step answer keys
 - Day 9 native evidence is advisory, but it is replayed during the Day 10 CAB review
+
+## KQL Evidence
+
+Save `build/day9/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Chaos Gate
 

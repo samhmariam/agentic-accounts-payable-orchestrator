@@ -37,6 +37,14 @@ jobs:
         run: |
           git fetch --no-tags origin ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
 
+      - name: Render rubric-check PR section
+        run: |
+          uv run python scripts/render_rubric_check_pr_section.py \
+            --base-ref "${{ github.event.pull_request.base.sha }}" \
+            --head-ref "${{ github.event.pull_request.head.sha }}" \
+            --out-json build/review/rubric_check_section.json \
+            --out-md build/review/rubric_check_section.md
+
       - name: Compile principal-review strategy
         run: |
           uv run python scripts/compile_principal_review_dspy.py \
@@ -108,6 +116,41 @@ jobs:
                 body,
               });
             }
+
+      - name: Publish rubric-check section to PR body
+        uses: actions/github-script@v7
+        continue-on-error: true
+        env:
+          RUBRIC_PAYLOAD_PATH: build/review/rubric_check_section.json
+        with:
+          script: |
+            const fs = require("fs");
+            const payloadPath = process.env.RUBRIC_PAYLOAD_PATH;
+            if (!fs.existsSync(payloadPath)) {
+              core.info("No rubric-check payload found.");
+              return;
+            }
+            const payload = JSON.parse(fs.readFileSync(payloadPath, "utf8"));
+            if (!payload.found || !payload.markdown) {
+              core.info("No rubric-check content to publish.");
+              return;
+            }
+            const markerStart = "<!-- aegisap-rubric-check:start -->";
+            const markerEnd = "<!-- aegisap-rubric-check:end -->";
+            const section = `${markerStart}\n${payload.markdown}\n${markerEnd}`;
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+            const existingBody = context.payload.pull_request.body || "";
+            const markerRegex = new RegExp(`${markerStart}[\\s\\S]*?${markerEnd}`, "m");
+            const nextBody = markerRegex.test(existingBody)
+              ? existingBody.replace(markerRegex, section)
+              : `${existingBody.trim()}\n\n${section}`.trim();
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number,
+              body: nextBody,
+            });
 
       - name: Fail on blocking findings
         run: |

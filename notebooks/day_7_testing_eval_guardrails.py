@@ -85,28 +85,28 @@ def _lab_intro(mo):
 
         Use the notebook to prove the leak and the repaired behavior in-memory only.
         The real fix belongs in the repo, not in notebook cells.
+
+        Starter-only mode begins here.
+
+        Do not use the shared lab wrapper helpers in this phase.
+        Build your own probes with `azure-identity` and the relevant `azure-mgmt-*` SDK clients from a clean starter, then return here only to record evidence.
         """
     )
     return
 
 
 @app.cell
-def _controls(mo):
-    evidence = mo.ui.text_area(
-        value=(
-            "Blocked because finance@example.com requested approval via phone +44 20 7946 0958 "
-            "for VAT GB123456789 and account 12345678."
-        ),
-        label="Evidence summary to redact",
-        rows=4,
+def _seed_evidence():
+    evidence = (
+        "Blocked because finance@example.com requested approval via phone +44 20 7946 0958 "
+        "for VAT GB123456789 and account 12345678."
     )
-    mo.vstack([evidence])
     return (evidence,)
 
 
 @app.cell
 def _redaction_preview(json, mo, redact_text, evidence):
-    redacted, changed = redact_text(evidence.value)
+    redacted, changed = redact_text(evidence)
     mo.callout(
         mo.md(
             f"""
@@ -132,7 +132,7 @@ def _audit_preview(build_audit_event, json, mo, evidence):
         actor_id="runtime-api",
         action_type="refusal",
         decision_outcome="not_authorised_to_continue",
-        evidence_summary=evidence.value,
+        evidence_summary=evidence,
         evidence_refs=["email_017", "POL-AUTH-004"],
         error_code="UNVERIFIED_APPROVAL_CLAIM",
         trace_id="trace-training-guardrail",

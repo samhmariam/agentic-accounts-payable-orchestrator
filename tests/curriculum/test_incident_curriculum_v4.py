@@ -123,6 +123,8 @@ def test_manifest_wave4_days_include_incident_contract_fields() -> None:
         assert day["verification_commands"]
         assert day["portal_to_script_mapping"]["bridge_file"]
         assert day["portal_to_script_mapping"]["production_targets"]
+        assert day["cost_of_failure"]
+        assert day["scaffold_level"]
         assert day["review_contract"]["human_required"] is True
 
 
@@ -191,6 +193,11 @@ def test_wave4_notebooks_use_incident_scaffold_and_markdown_only_patch_boundary(
         assert "What is the blast radius if my code fails?" in text
         assert "How will I know it failed in production?" in text
         assert "cohort/<" in text
+        if day_id >= "08":
+            assert "## KQL Evidence" in text
+            assert f"build/day{int(day_id)}/kql_evidence.json" in text
+        if day_id >= "07":
+            assert "Do not use the shared lab wrapper helpers in this phase." in text
 
 
 def test_wave4_notebooks_do_not_reference_retired_learner_entry_surfaces() -> None:

@@ -55,6 +55,7 @@
         "required": [
           "id",
           "title",
+          "scaffold_level",
           "notebook_file",
           "primary_doc_file",
           "legacy_doc_files",
@@ -84,6 +85,14 @@
           "title": {
             "type": "string",
             "minLength": 1
+          },
+          "scaffold_level": {
+            "type": "string",
+            "enum": [
+              "guided",
+              "reduced",
+              "starter_only"
+            ]
           },
           "notebook_file": {
             "type": "string",
@@ -130,14 +139,17 @@
                 "type": "array",
                 "minItems": 1,
                 "items": {
-                  "type": "string",
-                  "minLength": 1
+                  "$ref": "#/$defs/productionTarget"
                 }
               }
             },
             "additionalProperties": true
           },
           "customer_context": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cost_of_failure": {
             "type": "string",
             "minLength": 1
           },
@@ -153,6 +165,9 @@
           },
           "native_operator_evidence": {
             "$ref": "#/$defs/nativeOperatorEvidence"
+          },
+          "kql_evidence": {
+            "$ref": "#/$defs/kqlEvidenceContract"
           },
           "persistent_constraints": {
             "type": "array",
@@ -218,6 +233,30 @@
     }
   },
   "$defs": {
+    "productionTarget": {
+      "type": "object",
+      "required": [
+        "path",
+        "surface_type"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surface_type": {
+          "type": "string",
+          "enum": [
+            "application",
+            "infrastructure",
+            "ci_cd",
+            "policy",
+            "eval"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "constraint": {
       "type": "object",
       "required": [
@@ -357,6 +396,29 @@
       },
       "additionalProperties": true
     },
+    "kqlEvidenceContract": {
+      "type": "object",
+      "required": [
+        "artifact_path",
+        "minimum_queries",
+        "review_stage"
+      ],
+      "properties": {
+        "artifact_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minimum_queries": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "review_stage": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
     "chaosGate": {
       "type": "object",
       "required": [
@@ -427,6 +489,19 @@
           "items": {
             "type": "string",
             "minLength": 1
+          }
+        },
+        "drift_layers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "application",
+              "identity",
+              "networking",
+              "iac",
+              "ci_cd"
+            ]
           }
         },
         "expected_signal": {
@@ -503,6 +578,16 @@
             "type": "string",
             "minLength": 1
           }
+        },
+        "requires_kql_replay": {
+          "type": "boolean"
+        },
+        "requires_revert_proof": {
+          "type": "boolean"
+        },
+        "peer_checklist_file": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "additionalProperties": true

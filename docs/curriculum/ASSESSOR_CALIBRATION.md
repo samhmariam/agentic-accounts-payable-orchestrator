@@ -127,6 +127,7 @@ For Day 10 and capstone `cab_board` sessions, the facilitator also scores the
 peer reviewers.
 
 - `peer_reviewer_challenge_quality = 5`: reviewer asks probing role-appropriate questions, requests concrete evidence, and tests the native proof live when needed
+- `peer_reviewer_challenge_quality = 5` also requires replaying saved KQL proof and challenging Revert Proof when Day 10 or capstone evidence depends on them
 - `peer_reviewer_challenge_quality = 3`: reviewer is credible but misses one major evidence gap
 - `peer_reviewer_challenge_quality = 1`: reviewer rubber-stamps, avoids skepticism, or never asks for evidence
 

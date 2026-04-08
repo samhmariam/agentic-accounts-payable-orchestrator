@@ -92,6 +92,21 @@ def _lab_intro(mo):
 
 
 @app.cell
+def _starter_investigation(mo):
+    mo.md(
+        """
+        ## Starter Investigation
+
+        Starter-only mode is active from this day onward.
+
+        Do not use the shared lab wrapper helpers in this phase.
+        Build your own probes with `azure-identity` and the relevant `azure-mgmt-*` SDK clients, then carry only the proof back into the notebook.
+        """
+    )
+    return
+
+
+@app.cell
 def _lab_preview(McpCapabilities, json, mo):
     preview = McpCapabilities().model_dump(mode="json")
     mo.callout(
@@ -105,6 +120,25 @@ def _lab_preview(McpCapabilities, json, mo):
             """
         ),
         kind="info",
+    )
+    return
+
+
+@app.cell
+def _kql_evidence(mo):
+    mo.md(
+        """
+        ## KQL Evidence
+
+        Save `build/day13/kql_evidence.json` before you patch production code.
+
+        Capture at least one literal Log Analytics query with:
+
+        - workspace
+        - purpose
+        - observed excerpt
+        - operator interpretation
+        """
     )
     return
 

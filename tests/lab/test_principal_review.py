@@ -109,6 +109,7 @@ def test_deterministic_review_flags_wave3_missing_day09_and_day10_evidence() -> 
     assert "cross_day_scope_drift" in ids
     assert "missing_day09_evidence" in ids
     assert "missing_day10_evidence" in ids
+    assert "missing_day10_revert_proof" in ids
 
 
 def test_deterministic_review_flags_wave4_missing_day11_and_day12_evidence() -> None:
@@ -143,6 +144,7 @@ def test_deterministic_review_flags_wave4_missing_day13_and_day14_evidence() -> 
     assert "cross_day_scope_drift" in ids
     assert "missing_day13_evidence" in ids
     assert "missing_day14_evidence" in ids
+    assert "missing_day14_revert_proof" in ids
 
 
 def test_blocking_mode_verdict_blocks_on_deterministic_findings() -> None:

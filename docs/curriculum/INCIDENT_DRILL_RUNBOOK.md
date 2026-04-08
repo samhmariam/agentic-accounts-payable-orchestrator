@@ -34,6 +34,9 @@ Use the Phase 2 drill CLI instead of ad-hoc manual breakage.
 For Days 9, 12, and 14, pair the drill with the native-tool gate. The learner
 must save raw operator proof to `native_operator_evidence.json` and be ready to
 rerun one saved proof live without helper CLI commands.
+For Days 8-14, the learner must also save `kql_evidence.json` before patching
+so the facilitator or CAB reviewer can replay the exact Log Analytics query
+that proved the failure surface.
 
 ## Scoring Priority
 

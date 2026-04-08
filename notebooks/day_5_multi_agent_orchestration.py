@@ -81,17 +81,18 @@ def _lab_repair_intro(mo):
         ## Lab Repair
 
         Use this notebook to reason about the resume-token contract, not to patch the
-        workflow implementation directly.
+        workflow implementation directly. Reduced-scaffold mode is active here:
+        inspect the fixed seed values below and then build the terminal or SDK probe
+        you actually need in the repo.
         """
     )
     return
 
 
 @app.cell
-def _binding_controls(mo):
-    token_checkpoint = mo.ui.text(value="cp-1", label="Checkpoint ID stored in the resume token")
-    approval_checkpoint = mo.ui.text(value="cp-2", label="Checkpoint ID stored on the approval task")
-    mo.vstack([token_checkpoint, approval_checkpoint])
+def _binding_seed():
+    approval_checkpoint = "cp-2"
+    token_checkpoint = "cp-1"
     return approval_checkpoint, token_checkpoint
 
 
@@ -101,13 +102,13 @@ def _binding_preview(ResumeTokenCodec, ResumeTokenPayload, approval_checkpoint, 
     token = codec.encode(
         ResumeTokenPayload(
             thread_id="thread-golden-001",
-            checkpoint_id=token_checkpoint.value.strip(),
+            checkpoint_id=token_checkpoint,
             checkpoint_seq=7,
             approval_task_id="approval-task-1",
         )
     )
     decoded = codec.decode(token)
-    checkpoint_match = decoded.checkpoint_id == approval_checkpoint.value.strip()
+    checkpoint_match = decoded.checkpoint_id == approval_checkpoint
     panel_kind = "success" if checkpoint_match else "danger"
     mo.callout(
         mo.md(
@@ -116,7 +117,7 @@ def _binding_preview(ResumeTokenCodec, ResumeTokenPayload, approval_checkpoint, 
 
             - `encoded_token={token}`
             - `decoded_checkpoint_id={decoded.checkpoint_id}`
-            - `approval_task_checkpoint_id={approval_checkpoint.value.strip()}`
+            - `approval_task_checkpoint_id={approval_checkpoint}`
             - `resume_allowed={checkpoint_match}`
             """
         ),

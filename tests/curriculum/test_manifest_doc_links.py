@@ -102,7 +102,8 @@ def test_bridge_file_exists(day: dict) -> None:
 def test_bridge_targets_exist(day: dict) -> None:
     mapping = day["portal_to_script_mapping"]
     missing = []
-    for rel_path in mapping["production_targets"]:
+    for target in mapping["production_targets"]:
+        rel_path = target["path"]
         if not (REPO_ROOT / rel_path).exists():
             missing.append(rel_path)
     assert not missing, (
@@ -128,6 +129,7 @@ def test_primary_doc_points_to_module_readme(day: dict) -> None:
     content = (REPO_ROOT / day["primary_doc_file"]).read_text(encoding="utf-8")
     assert rel_path in content
     assert "## Automated Drill" in content
+    assert "## Cost of Failure" in content
 
 
 def test_day04_docs_reference_pushback_artifacts() -> None:
@@ -152,6 +154,46 @@ def test_native_tooling_gate_docs_exist(rel_path: str) -> None:
     content = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
     assert "## Native Tooling Gate" in content
     assert "native_operator_evidence.json" in content
+
+
+@pytest.mark.parametrize(
+    "rel_path,day_id",
+    [
+        ("docs/DAY_08.md", "08"),
+        ("modules/day_08_iac_identity/README.md", "08"),
+        ("docs/DAY_09.md", "09"),
+        ("modules/day_09_observability_cost/README.md", "09"),
+        ("docs/DAY_10.md", "10"),
+        ("modules/day_10_production_acceptance/README.md", "10"),
+        ("docs/DAY_11.md", "11"),
+        ("modules/day_11_delegated_identity/README.md", "11"),
+        ("docs/DAY_12.md", "12"),
+        ("modules/day_12_private_networking/README.md", "12"),
+        ("docs/DAY_13.md", "13"),
+        ("modules/day_13_integration_boundary/README.md", "13"),
+        ("docs/DAY_14.md", "14"),
+        ("modules/day_14_elite_ops/README.md", "14"),
+    ],
+)
+def test_kql_evidence_docs_exist(rel_path: str, day_id: str) -> None:
+    content = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+    assert "## KQL Evidence" in content
+    assert f"build/day{int(day_id)}/kql_evidence.json" in content
+
+
+@pytest.mark.parametrize(
+    "rel_path,checklist_rel",
+    [
+        ("docs/DAY_10.md", "docs/curriculum/checklists/day10_peer_red_team.md"),
+        ("modules/day_10_production_acceptance/README.md", "docs/curriculum/checklists/day10_peer_red_team.md"),
+        ("docs/DAY_14.md", "docs/curriculum/checklists/day14_peer_red_team.md"),
+        ("modules/day_14_elite_ops/README.md", "docs/curriculum/checklists/day14_peer_red_team.md"),
+    ],
+)
+def test_cab_docs_reference_revert_proof_and_peer_checklist(rel_path: str, checklist_rel: str) -> None:
+    content = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+    assert "Revert Proof" in content
+    assert checklist_rel in content
 
 
 # ---------------------------------------------------------------------------

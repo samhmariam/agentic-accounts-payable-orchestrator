@@ -84,8 +84,9 @@ The capstone uses the shared rubric in
 4. Learner walks through the bounded enhancement and why it belongs in the chosen category.
 5. Learner shows the test, eval, or gate evidence for the change.
 6. Learner opens the Day 10 release envelope and checkpoint artifacts.
-7. Learner presents the rollback command and explains when they would use it.
-8. CAB chair may require the learner to rerun the selected native proof live.
-9. Facilitator scores the release-style defense and records `peer_reviewer_challenge_quality` for each reviewer.
+7. Learner presents Revert Proof and explains the rollback mechanism, last-known-good target, and target recovery time box.
+8. CAB chair or peer reviewers may require the learner to rerun the selected native proof live.
+9. CAB chair or peer reviewers may require the learner to rerun the selected KQL query live.
+10. Facilitator scores the release-style defense and records `peer_reviewer_challenge_quality` for each reviewer.
 
 Peer reviewers are not observers. They are accountable for adversarial, evidence-seeking questions and can force revision before approval.

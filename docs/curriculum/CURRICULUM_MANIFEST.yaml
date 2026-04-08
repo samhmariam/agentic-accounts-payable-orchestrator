@@ -40,8 +40,10 @@ days:
       health
     bridge_file: notebooks/bridges/day01_trust_boundary.md
     production_targets:
-    - src/aegisap/day_01/normalizers.py
-    - src/aegisap/day_01/service.py
+    - path: src/aegisap/day_01/normalizers.py
+      surface_type: application
+    - path: src/aegisap/day_01/service.py
+      surface_type: application
   oral_defense_prompts:
   - What alternative automation approach did you reject for this pain point, and why
     does the agent design win on this dimension?
@@ -103,6 +105,11 @@ days:
       repair path.
     expected_signal: A locale-formatted invoice amount is rejected even though the
       extraction payload and endpoint health are clean.
+    drift_layers:
+    - application
+  scaffold_level: guided
+  cost_of_failure: Every hour this locale parsing failure survives, valid supplier
+    invoices remain unpaid and finance risks breach-of-contract escalation.
 - id: '02'
   title: Resilience Under Load, NFR Enforcement, and Ownership
   notebook_file: notebooks/day_2_requirements_architecture.py
@@ -124,8 +131,10 @@ days:
       evidence
     bridge_file: notebooks/bridges/day02_resilience_controls.md
     production_targets:
-    - src/aegisap/observability/retry_policy.py
-    - src/aegisap/resilience/backpressure.py
+    - path: src/aegisap/observability/retry_policy.py
+      surface_type: application
+    - path: src/aegisap/resilience/backpressure.py
+      surface_type: application
   oral_defense_prompts:
   - Which NFR did you classify as zero-tolerance and why can it not be tuned post-launch
     without a full change-board review?
@@ -194,6 +203,11 @@ days:
       repair path.
     expected_signal: Retry policy and backpressure assumptions no longer match observed
       queue pressure and latency targets.
+    drift_layers:
+    - application
+  scaffold_level: guided
+  cost_of_failure: If queue and retry controls drift under load, invoice SLAs slip
+    and the customer loses confidence in the team's operational ownership.
 - id: '03'
   title: Retrieval Authority, Search Evidence, and Boundary Repair
   notebook_file: notebooks/day_3_azure_ai_services.py
@@ -213,9 +227,12 @@ days:
     portal_surface: Azure AI Search index evidence and source-of-truth mismatch
     bridge_file: notebooks/bridges/day03_retrieval_authority.md
     production_targets:
-    - src/aegisap/day3/policies/source_authority_rules.yaml
-    - src/aegisap/day3/retrieval/ranker.py
-    - src/aegisap/day3/retrieval/authority_policy.py
+    - path: src/aegisap/day3/policies/source_authority_rules.yaml
+      surface_type: policy
+    - path: src/aegisap/day3/retrieval/ranker.py
+      surface_type: application
+    - path: src/aegisap/day3/retrieval/authority_policy.py
+      surface_type: policy
   oral_defense_prompts:
   - You chose one framework and rejected three. Explain the single strongest argument
     for each rejected alternative and why that argument was still insufficient.
@@ -291,6 +308,11 @@ days:
       repair path.
     expected_signal: Search evidence disagrees with the source-of-truth policy and
       the ranker surfaces the wrong authority.
+    drift_layers:
+    - application
+  scaffold_level: guided
+  cost_of_failure: If stale or ambiguous evidence wins, the system can route payment
+    decisions against the wrong source of truth and trigger audit exposure.
 - id: '04'
   title: Single-Agent Loops, Policy Overlay, and Fail-Closed Repair
   notebook_file: notebooks/day_4_single_agent_loops.py
@@ -312,8 +334,10 @@ days:
     portal_surface: Execution trace risk flags, invoice facts, and final routing outcome
     bridge_file: notebooks/bridges/day04_fail_closed_planning.md
     production_targets:
-    - src/aegisap/day4/planning/policy_overlay.py
-    - src/aegisap/day4/recommendation/recommendation_gate.py
+    - path: src/aegisap/day4/planning/policy_overlay.py
+      surface_type: policy
+    - path: src/aegisap/day4/recommendation/recommendation_gate.py
+      surface_type: application
   oral_defense_prompts:
   - Which action in your risk register did you classify as irreversible and what deterministic
     policy prevents the model from triggering it?
@@ -421,6 +445,12 @@ days:
       repair path.
     expected_signal: Execution traces show a risky recommendation escaping the policy
       overlay while public exposure constraints stay in force.
+    drift_layers:
+    - application
+    - ci_cd
+  scaffold_level: reduced
+  cost_of_failure: If risky invoices auto-progress, the customer can issue irreversible
+    payments without human approval and create immediate financial loss.
 - id: '05'
   title: Multi-Agent Orchestration, Durable State, and Resume Safety
   notebook_file: notebooks/day_5_multi_agent_orchestration.py
@@ -440,8 +470,10 @@ days:
     portal_surface: Approval-task state, checkpoint records, and failed-resume evidence
     bridge_file: notebooks/bridges/day05_durable_state.md
     production_targets:
-    - src/aegisap/day5/workflow/resume_service.py
-    - src/aegisap/day5/workflow/checkpoint_manager.py
+    - path: src/aegisap/day5/workflow/resume_service.py
+      surface_type: application
+    - path: src/aegisap/day5/workflow/checkpoint_manager.py
+      surface_type: application
   oral_defense_prompts:
   - Which HITL failure mode did you consider but choose not to handle in the contract,
     and why is that an acceptable omission?
@@ -548,6 +580,12 @@ days:
       repair path.
     expected_signal: The durable workflow stalls or resumes unsafely after interruption,
       risking duplicate state transitions.
+    drift_layers:
+    - application
+    - identity
+  scaffold_level: reduced
+  cost_of_failure: If stale resume tokens are accepted, duplicate or misrouted side
+    effects can hit downstream finance systems and create expensive manual cleanup.
 - id: '06'
   title: Data Authority, Review Boundaries, and Conflict Refusal
   notebook_file: notebooks/day_6_data_ml_integration.py
@@ -567,8 +605,10 @@ days:
     portal_surface: Stored review evidence, claim ledger, and authority context
     bridge_file: notebooks/bridges/day06_review_boundary.md
     production_targets:
-    - src/aegisap/day6/review/prompt_injection.py
-    - src/aegisap/day6/review/authority_boundary.py
+    - path: src/aegisap/day6/review/prompt_injection.py
+      surface_type: policy
+    - path: src/aegisap/day6/review/authority_boundary.py
+      surface_type: policy
   oral_defense_prompts:
   - Which data source did you demote in the authority hierarchy, and what scenario
     would cause a conflict between it and the authoritative source?
@@ -678,6 +718,12 @@ days:
       repair path.
     expected_signal: The review path accepts conflicting authority instead of refusing
       and escalating the dispute.
+    drift_layers:
+    - application
+    - identity
+  scaffold_level: reduced
+  cost_of_failure: If hostile review evidence is normalized incorrectly, unsafe approval
+    claims can leak through the control boundary and poison later decisions.
 - id: '07'
   title: Evaluation, Guardrails, Structured Refusal, and Slice Governance
   notebook_file: notebooks/day_7_testing_eval_guardrails.py
@@ -698,9 +744,12 @@ days:
       leaked identifiers
     bridge_file: notebooks/bridges/day07_guardrail_redaction.md
     production_targets:
-    - src/aegisap/security/redaction.py
-    - src/aegisap/audit/events.py
-    - src/aegisap/audit/writer.py
+    - path: src/aegisap/security/redaction.py
+      surface_type: application
+    - path: src/aegisap/audit/events.py
+      surface_type: policy
+    - path: src/aegisap/audit/writer.py
+      surface_type: application
   oral_defense_prompts:
   - The aggregate eval score improved but one critical slice regressed. Walk through
     your decision to block or release and name the approver chain.
@@ -798,10 +847,9 @@ days:
     evidence_source: artifact
   - id: day07_prompt_drift_eval
     mode: blocking
-    command: uv run python evals/run_eval_suite.py --suite all --synthetic-cases
-      build/day7/synthetic_cases_drift.jsonl --malicious-cases build/day7/malicious_cases_drift.jsonl
-      --thresholds evals/score_thresholds.yaml --output build/day7/prompt_drift_report.json
-      --enforce-thresholds
+    command: uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/synthetic_cases_drift.jsonl
+      --malicious-cases build/day7/malicious_cases_drift.jsonl --thresholds evals/score_thresholds.yaml
+      --output build/day7/prompt_drift_report.json --enforce-thresholds
     success_marker: '"all_passed": true'
     covers_constraints:
     - authoritative_retrieval_sources
@@ -840,6 +888,9 @@ days:
     repair_targets:
     - src/aegisap/day3/policies/source_authority_rules.yaml
     - src/aegisap/day3/retrieval/authority_policy.py
+    drift_layers:
+    - application
+    - ci_cd
   - id: day07_incident_replay
     default: false
     mode: incident
@@ -849,6 +900,11 @@ days:
       repair path.
     expected_signal: A redaction or audit path leaks sensitive text into a Day 7 evaluation
       artifact.
+    drift_layers:
+    - application
+  scaffold_level: starter_only
+  cost_of_failure: If sensitive content leaks into audit material, the customer faces
+    privacy escalation, frozen releases, and possible regulator notification.
 - id: 08
   title: IaC, Identity Planes, and Secure Release Ownership
   notebook_file: notebooks/day_8_cicd_iac_deployment.py
@@ -869,9 +925,12 @@ days:
       drift
     bridge_file: notebooks/bridges/day08_identity_iac.md
     production_targets:
-    - infra/modules/role_assignments.bicep
-    - infra/foundations/search_service.bicep
-    - infra/modules/container_app.bicep
+    - path: infra/modules/role_assignments.bicep
+      surface_type: infrastructure
+    - path: infra/foundations/search_service.bicep
+      surface_type: infrastructure
+    - path: infra/modules/container_app.bicep
+      surface_type: infrastructure
   oral_defense_prompts:
   - Which IaC pattern did you choose over an alternative and what is the security
     consequence of the rejected approach?
@@ -1002,6 +1061,17 @@ days:
       repair path.
     expected_signal: Role assignments or service posture drifted, and the runtime
       principal can mutate resources it should only read.
+    drift_layers:
+    - identity
+    - iac
+    - ci_cd
+  scaffold_level: starter_only
+  cost_of_failure: If runtime identity stays over-privileged, a single deployment
+    drift can become cross-service data access and immediate CAB rejection.
+  kql_evidence:
+    artifact_path: build/day8/kql_evidence.json
+    minimum_queries: 1
+    review_stage: day08_closeout
 - id: 09
   title: Observability, Routing, Cost, and Economic Control
   notebook_file: notebooks/day_9_scaling_monitoring_cost.py
@@ -1022,9 +1092,12 @@ days:
       and cost signals
     bridge_file: notebooks/bridges/day09_routing_cost.md
     production_targets:
-    - src/aegisap/routing/routing_policy.py
-    - src/aegisap/cache/cache_policy.py
-    - src/aegisap/cost/budget_gate.py
+    - path: src/aegisap/routing/routing_policy.py
+      surface_type: application
+    - path: src/aegisap/cache/cache_policy.py
+      surface_type: application
+    - path: src/aegisap/cost/budget_gate.py
+      surface_type: policy
   oral_defense_prompts:
   - Which capability did you route to the mini model and what is the quality degradation
     risk if that routing decision is wrong?
@@ -1172,6 +1245,16 @@ days:
       repair path.
     expected_signal: Routing or caching pushes the workload outside the cost ceiling
       while inherited infrastructure posture still has to hold.
+    drift_layers:
+    - application
+    - ci_cd
+  scaffold_level: starter_only
+  cost_of_failure: If routing and cost telemetry drift silently, runaway spend and
+    untraceable failures can continue until finance or operations halts rollout.
+  kql_evidence:
+    artifact_path: build/day9/kql_evidence.json
+    minimum_queries: 1
+    review_stage: day09_closeout
 - id: '10'
   title: Production Acceptance, Release Evidence, and Change Board Readiness
   notebook_file: notebooks/day_10_production_operations.py
@@ -1187,14 +1270,18 @@ days:
   - docs/curriculum/artifacts/day10/CAB_PACKET.md
   - docs/curriculum/artifacts/day10/EXECUTIVE_RELEASE_BRIEF.md
   - docs/curriculum/artifacts/day10/GATE_EXCEPTION_POLICY.md
+  - docs/curriculum/artifacts/day10/REVERT_PROOF.md
   portal_to_script_mapping:
     portal_surface: Candidate revision health, gate evidence, and false-green release
       summaries
     bridge_file: notebooks/bridges/day10_release_evidence.md
     production_targets:
-    - src/aegisap/deploy/gates.py
-    - scripts/check_all_gates.py
-    - src/aegisap/training/checkpoints.py
+    - path: src/aegisap/deploy/gates.py
+      surface_type: ci_cd
+    - path: scripts/check_all_gates.py
+      surface_type: ci_cd
+    - path: src/aegisap/training/checkpoints.py
+      surface_type: policy
   oral_defense_prompts:
   - Walk through one gate in your CAB packet that almost failed and explain what evidence
     tipped the decision.
@@ -1226,6 +1313,9 @@ days:
     required_review_roles:
     - cab_chair
     - client_ciso_or_infra_lead
+    requires_kql_replay: true
+    requires_revert_proof: true
+    peer_checklist_file: docs/curriculum/checklists/day10_peer_red_team.md
   customer_context: The customer CAB will not approve rollout without a release packet
     that proves security posture, ownership, rollback readiness, and cost governance
     survived the repair.
@@ -1348,6 +1438,16 @@ days:
       repair path.
     expected_signal: A release gate or evidence packet is incomplete, leaving production
       acceptance without defensible proof.
+    drift_layers:
+    - iac
+    - ci_cd
+  scaffold_level: starter_only
+  cost_of_failure: If release evidence goes false-green, the CAB can approve a broken
+    deployment and force an emergency rollback under executive scrutiny.
+  kql_evidence:
+    artifact_path: build/day10/kql_evidence.json
+    minimum_queries: 2
+    review_stage: day10_cab_board
 - id: '11'
   title: Delegated Identity, OBO, and Authority Confusion Defense
   notebook_file: notebooks/day_11_delegated_identity_obo.py
@@ -1368,9 +1468,12 @@ days:
       evidence
     bridge_file: notebooks/bridges/day11_delegated_identity.md
     production_targets:
-    - src/aegisap/identity/actor_verifier.py
-    - src/aegisap/identity/obo.py
-    - scripts/verify_delegated_identity_contract.py
+    - path: src/aegisap/identity/actor_verifier.py
+      surface_type: application
+    - path: src/aegisap/identity/obo.py
+      surface_type: application
+    - path: scripts/verify_delegated_identity_contract.py
+      surface_type: ci_cd
   oral_defense_prompts:
   - Walk through the authority confusion attack path you modelled and explain exactly
     which control in the OBO flow breaks the chain.
@@ -1527,6 +1630,9 @@ days:
       the required approver group.
     source_file: evals/failure_drills/drill_01_iam_drift.json
     mutation: day11_iam_drift
+    drift_layers:
+    - identity
+    - iac
   - id: drill_02_obo_scope_mismatch
     default: false
     mode: artifact
@@ -1537,6 +1643,16 @@ days:
       lost the correct audience or scope.
     source_file: evals/failure_drills/drill_02_obo_scope_mismatch.json
     mutation: day11_obo_scope_mismatch
+    drift_layers:
+    - identity
+    - ci_cd
+  scaffold_level: starter_only
+  cost_of_failure: If actor binding fails, the system can accept the wrong human as
+    an approver and invalidate the authority model for production changes.
+  kql_evidence:
+    artifact_path: build/day11/kql_evidence.json
+    minimum_queries: 1
+    review_stage: day11_closeout
 - id: '12'
   title: Private Networking, Egress Control, and Security Dependency Management
   notebook_file: notebooks/day_12_private_networking_constraints.py
@@ -1557,10 +1673,14 @@ days:
       evidence
     bridge_file: notebooks/bridges/day12_private_networking.md
     production_targets:
-    - src/aegisap/network/bicep_policy_checker.py
-    - src/aegisap/network/private_endpoint_probe.py
-    - scripts/check_private_network_static.py
-    - scripts/verify_private_network_posture.py
+    - path: src/aegisap/network/bicep_policy_checker.py
+      surface_type: infrastructure
+    - path: src/aegisap/network/private_endpoint_probe.py
+      surface_type: infrastructure
+    - path: scripts/check_private_network_static.py
+      surface_type: ci_cd
+    - path: scripts/verify_private_network_posture.py
+      surface_type: ci_cd
   oral_defense_prompts:
   - Which network dependency has the longest lead time and what is your plan if it
     is not resolved before production cutover?
@@ -1733,6 +1853,9 @@ days:
       publicly instead of privately.
     source_file: evals/failure_drills/drill_03_dns_misconfiguration.json
     mutation: day12_dns_misconfiguration
+    drift_layers:
+    - networking
+    - iac
   - id: drill_04_public_endpoint_reenabled
     default: false
     mode: artifact
@@ -1743,6 +1866,16 @@ days:
       now reports a public endpoint violation.
     source_file: evals/failure_drills/drill_04_public_endpoint_reenabled.json
     mutation: day12_public_endpoint_reenabled
+    drift_layers:
+    - networking
+    - iac
+  scaffold_level: starter_only
+  cost_of_failure: If public access returns, regulated data escapes the private boundary
+    and security approval is revoked immediately.
+  kql_evidence:
+    artifact_path: build/day12/kql_evidence.json
+    minimum_queries: 1
+    review_stage: day12_closeout
 - id: '13'
   title: Integration Boundaries, Async Reliability, and Contract Management
   notebook_file: notebooks/day_13_integration_boundary_and_mcp.py
@@ -1763,10 +1896,14 @@ days:
       evidence
     bridge_file: notebooks/bridges/day13_integration_boundary.md
     production_targets:
-    - src/aegisap/mcp/server.py
-    - src/aegisap/mcp/schemas.py
-    - src/aegisap/integration/dlq_consumer.py
-    - src/aegisap/integration/compensating_action.py
+    - path: src/aegisap/mcp/server.py
+      surface_type: application
+    - path: src/aegisap/mcp/schemas.py
+      surface_type: policy
+    - path: src/aegisap/integration/dlq_consumer.py
+      surface_type: application
+    - path: src/aegisap/integration/compensating_action.py
+      surface_type: application
   oral_defense_prompts:
   - A partner demands direct access to the orchestrator. Walk through your boundary
     defense and what you offer instead.
@@ -1933,6 +2070,10 @@ days:
       errors and unhandled messages.
     source_file: evals/failure_drills/drill_05_dlq_overflow.json
     mutation: day13_dlq_overflow
+    drift_layers:
+    - application
+    - identity
+    - ci_cd
   - id: drill_06_mcp_contract_break
     default: false
     mode: artifact
@@ -1943,6 +2084,16 @@ days:
       is missing from the MCP contract.
     source_file: evals/failure_drills/drill_06_mcp_contract_break.json
     mutation: day13_mcp_contract_break
+    drift_layers:
+    - application
+    - ci_cd
+  scaffold_level: starter_only
+  cost_of_failure: If the integration contract drifts, partner systems fail unpredictably
+    and compensating-action load spikes across the boundary.
+  kql_evidence:
+    artifact_path: build/day13/kql_evidence.json
+    minimum_queries: 1
+    review_stage: day13_closeout
 - id: '14'
   title: Elite Operations, Breaking Changes, and Executive Incident Leadership
   notebook_file: notebooks/day_14_breaking_changes_elite_ops.py
@@ -1958,14 +2109,19 @@ days:
   - docs/curriculum/artifacts/day14/INCIDENT_COMMAND_PLAYBOOK.md
   - docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md
   - docs/curriculum/artifacts/day14/ELITE_READINESS_SCORECARD.md
+  - docs/curriculum/artifacts/day14/REVERT_PROOF.md
   portal_to_script_mapping:
     portal_surface: Canary health, rollback markers, and dual-sink trace evidence
     bridge_file: notebooks/bridges/day14_elite_operations.md
     production_targets:
-    - src/aegisap/deploy/gates_v2.py
-    - src/aegisap/traceability/correlation.py
-    - scripts/verify_trace_correlation.py
-    - scripts/run_chaos_capstone.py
+    - path: src/aegisap/deploy/gates_v2.py
+      surface_type: ci_cd
+    - path: src/aegisap/traceability/correlation.py
+      surface_type: application
+    - path: scripts/verify_trace_correlation.py
+      surface_type: ci_cd
+    - path: scripts/run_chaos_capstone.py
+      surface_type: ci_cd
   oral_defense_prompts:
   - During the war-game, three failures arrive simultaneously. Walk through your triage
     order, the mental model driving each decision, and the first action you would
@@ -1998,6 +2154,9 @@ days:
     - cab_chair
     - client_ciso
     - infra_lead
+    requires_kql_replay: true
+    requires_revert_proof: true
+    peer_checklist_file: docs/curriculum/checklists/day14_peer_red_team.md
   native_operator_evidence:
     artifact_path: build/day14/native_operator_evidence.json
     mode: blocking
@@ -2156,6 +2315,8 @@ days:
       the protected baseline.
     source_file: evals/failure_drills/drill_07_model_regression.json
     mutation: day14_canary_regression
+    drift_layers:
+    - application
   - id: drill_08_data_residency_violation
     default: false
     mode: artifact
@@ -2166,6 +2327,9 @@ days:
       the approved region.
     source_file: evals/failure_drills/drill_08_data_residency_violation.json
     mutation: day14_data_residency_violation
+    drift_layers:
+    - iac
+    - ci_cd
   - id: drill_09_correlation_gap
     default: false
     mode: artifact
@@ -2176,6 +2340,9 @@ days:
       carries correlation_id.
     source_file: evals/failure_drills/drill_09_correlation_gap.json
     mutation: day14_correlation_gap
+    drift_layers:
+    - application
+    - ci_cd
   - id: drill_10_rollback_failure
     default: true
     mode: artifact
@@ -2186,6 +2353,16 @@ days:
       runbook are no longer available.
     source_file: evals/failure_drills/drill_10_rollback_failure.json
     mutation: day14_rollback_failure
+    drift_layers:
+    - iac
+    - ci_cd
+  scaffold_level: starter_only
+  cost_of_failure: If elite-ops gates stay false-green during an incident, executives
+    lose trustworthy go/no-go evidence exactly when recovery decisions matter most.
+  kql_evidence:
+    artifact_path: build/day14/kql_evidence.json
+    minimum_queries: 2
+    review_stage: capstone_cab_board
 customer_profile:
   name: Northwind Treasury Services
   operating_context: Regulated financial customer running invoice and claims automation

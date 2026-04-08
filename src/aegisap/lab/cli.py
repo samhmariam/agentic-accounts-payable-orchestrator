@@ -66,6 +66,32 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Fail on skipped preview gates in addition to blocking failures.",
     )
 
+    rubric = subparsers.add_parser("rubric-check", help="Write a learner self-score artifact for the current day.")
+    rubric.add_argument("--day", required=True, help="Two-digit day number, for example 10.")
+    rubric.add_argument("--learner-name", default=None, help="Optional learner name. Prompts if omitted.")
+    rubric.add_argument(
+        "--confidence",
+        choices=("low", "medium", "high"),
+        default=None,
+        help="Optional self-declared confidence level. Prompts if omitted.",
+    )
+    rubric.add_argument("--weakness", default=None, help="Optional declared weakness. Prompts if omitted.")
+    rubric.add_argument("--remediation", default=None, help="Optional remediation action. Prompts if omitted.")
+    rubric.add_argument(
+        "--score",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="Optional rubric score override, for example technical_correctness=28.",
+    )
+    rubric.add_argument(
+        "--rationale",
+        action="append",
+        default=[],
+        metavar="KEY=TEXT",
+        help="Optional rubric rationale override, for example technical_correctness=Green gates after fix.",
+    )
+
     return parser
 
 
@@ -151,6 +177,43 @@ def main() -> int:
             if payload.get("constraint_lineage_path"):
                 print(f"Constraint lineage artifact: {payload['constraint_lineage_path']}")
             return 0 if payload["overall_ok"] else 1
+        if args.command == "rubric-check":
+            from .rubric_check import run_rubric_check
+
+            def _parse_pairs(items: list[str], *, cast_int: bool) -> dict[str, Any]:
+                parsed: dict[str, Any] = {}
+                for item in items:
+                    if "=" not in item:
+                        raise ValueError(f"Expected KEY=VALUE pair, got `{item}`.")
+                    key, value = item.split("=", 1)
+                    key = key.strip()
+                    if not key:
+                        raise ValueError(f"Expected KEY=VALUE pair, got `{item}`.")
+                    parsed[key] = int(value) if cast_int else value.strip()
+                return parsed
+
+            payload = run_rubric_check(
+                day=args.day,
+                repo_root=args.repo_root,
+                learner_name=args.learner_name,
+                confidence=args.confidence,
+                weakness=args.weakness,
+                remediation=args.remediation,
+                scores=_parse_pairs(args.score, cast_int=True),
+                rationales=_parse_pairs(args.rationale, cast_int=False),
+                prompt_for_missing=True,
+            )
+            _print_payload(
+                {
+                    "day": payload["day"],
+                    "build_path": payload["build_path"],
+                    "tracked_path": payload["tracked_path"],
+                    "self_score_total": payload["payload"]["self_score_total"],
+                }
+            )
+            print()
+            print(payload["markdown"])
+            return 0
     except IncidentError as exc:
         print(str(exc))
         return 1

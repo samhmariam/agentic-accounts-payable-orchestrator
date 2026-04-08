@@ -8,6 +8,10 @@ Single-agent loops only become production-safe when policy can override model en
 
 The customer CISO banned public exposure for production-bound AI services and wants proof that risky recommendation paths still stop for review instead of acting optimistically.
 
+## Cost of Failure
+
+If risky invoices auto-progress, the customer can issue irreversible payments without human approval and create immediate financial loss.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.

@@ -10,6 +10,10 @@ Enterprise FDE work starts with constraints, not code. If you cannot make reliab
 
 The customer architecture board is pressing for throughput gains during an invoice spike, but the service owner refuses any change that weakens queue safety or approval lines.
 
+## Cost of Failure
+
+If queue and retry controls drift under load, invoice SLAs slip and the customer loses confidence in the team's operational ownership.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.

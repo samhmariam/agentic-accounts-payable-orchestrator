@@ -10,6 +10,10 @@ Private networking is a hard customer boundary, not an optimization. Financial c
 
 The customer CISO escalated a DNS drift concern. You must prove that the VNet, private endpoints, and DNS links keep the agent invisible to the public internet.
 
+## Cost of Failure
+
+If public access returns, regulated data escapes the private boundary and security approval is revoked immediately.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.
@@ -44,6 +48,10 @@ uv run aegisap-lab incident start --day 12
 - Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
 - Day 12 does not pass until the facilitator makes the learner rerun one saved proof live
+
+## KQL Evidence
+
+Save `build/day12/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 

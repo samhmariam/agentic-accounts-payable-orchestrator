@@ -91,6 +91,9 @@ By the time the cohort reaches Day 8, you should also be ready for:
 
 Native Azure and Git fluency is assessed by Week 2. Days 9, 12, and 14 require
 saved native operator evidence and live replay on request.
+Days 8-14 also require saved KQL evidence, and every submission should run
+`uv run aegisap-lab rubric-check --day XX` before review prep so your declared
+weak spots are visible in the PR.
 
 ## If You Get Blocked
 

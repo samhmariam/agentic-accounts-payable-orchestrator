@@ -11,6 +11,8 @@ Every learner submits a short review packet containing:
 - change summary
 - risk assessment
 - test evidence
+- KQL replay evidence
+- Revert Proof
 - rollback plan
 - release evidence
 - one known limitation
@@ -28,6 +30,8 @@ For Day 10 and capstone CAB reviews:
 
 - each peer reviewer must ask at least 2 skeptical questions
 - each peer reviewer must demand at least 1 concrete evidence artifact
+- each peer reviewer must replay at least one saved KQL query and confirm it returns the claimed footprint
+- each peer reviewer must inspect Revert Proof and challenge the stated recovery time box
 - the board may require the learner to rerun the selected native proof live
 - the facilitator records `peer_reviewer_challenge_quality` for each reviewer
 - capstone peer roles are `client_ciso` and `infra_lead`, with the facilitator acting as CAB chair
@@ -40,6 +44,7 @@ A substantive finding must address one of:
 - security gap
 - observability or release blind spot
 - rollback weakness
+- missing or weak KQL proof
 - missing or weak test evidence
 
 “Looks good” is not a valid review cycle.

@@ -10,6 +10,10 @@ IaC and identity are where customer trust is won or lost. If you cannot map a po
 
 A rogue admin changed runtime permissions and the customer now suspects the search tier is over-privileged. You must restore least privilege without violating the no-public-endpoints rule inherited from Day 4.
 
+## Cost of Failure
+
+If runtime identity stays over-privileged, a single deployment drift can become cross-service data access and immediate CAB rejection.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.
@@ -33,6 +37,10 @@ uv run aegisap-lab incident start --day 08
 
 - `uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests/day8/test_security_and_context.py tests/day8/test_observability_contract.py -q && uv run aegisap-lab artifact rebuild --day 08`
 - `uv run aegisap-lab audit-production --day 08 --strict`
+
+## KQL Evidence
+
+Save `build/day8/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 

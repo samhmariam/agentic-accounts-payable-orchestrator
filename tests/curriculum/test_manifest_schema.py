@@ -78,3 +78,25 @@ def test_native_operator_evidence_contracts_exist_on_days_9_12_14() -> None:
     assert days["12"]["native_operator_evidence"]["live_demo_required"] is True
     assert days["14"]["native_operator_evidence"]["mode"] == "blocking"
     assert days["14"]["native_operator_evidence"]["review_stage"] == "capstone_cab_board"
+
+
+def test_kql_evidence_contracts_exist_on_days_8_to_14() -> None:
+    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    days = {day["id"]: day for day in manifest["days"]}
+
+    for day_id in [f"{i:02d}" for i in range(8, 15)]:
+        contract = days[day_id]["kql_evidence"]
+        assert contract["artifact_path"] == f"build/day{int(day_id)}/kql_evidence.json"
+        assert contract["minimum_queries"] >= 1
+
+
+def test_scaffold_levels_follow_day_band() -> None:
+    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    days = {day["id"]: day for day in manifest["days"]}
+
+    for day_id in ("01", "02", "03"):
+        assert days[day_id]["scaffold_level"] == "guided"
+    for day_id in ("04", "05", "06"):
+        assert days[day_id]["scaffold_level"] == "reduced"
+    for day_id in [f"{i:02d}" for i in range(7, 15)]:
+        assert days[day_id]["scaffold_level"] == "starter_only"

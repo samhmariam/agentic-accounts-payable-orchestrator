@@ -10,6 +10,10 @@ Elite operations is executive engineering under pressure. FDEs must manage break
 
 A downstream SAP schema change created a severity-1 incident. Leadership needs a rollback-capable repair path that preserves traceability, network posture, and release evidence.
 
+## Cost of Failure
+
+If elite-ops gates stay false-green during an incident, executives lose trustworthy go/no-go evidence exactly when recovery decisions matter most.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.
@@ -46,6 +50,12 @@ uv run aegisap-lab incident start --day 14
 - Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
 - The capstone CAB chair may randomly select one saved proof and require a live rerun
+- Peer checklist file: `docs/curriculum/checklists/day14_peer_red_team.md`
+- Revert Proof: `docs/curriculum/artifacts/day14/REVERT_PROOF.md`
+
+## KQL Evidence
+
+Save `build/day14/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 

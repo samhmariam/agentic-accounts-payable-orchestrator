@@ -10,6 +10,10 @@ Guardrails are not decorations. FDEs have to prove that sensitive content stays 
 
 The customer risk team wants evidence that prompt injection and PII leakage are rejected before anything lands in logs or audit evidence.
 
+## Cost of Failure
+
+If sensitive content leaks into audit material, the customer faces privacy escalation, frozen releases, and possible regulator notification.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.

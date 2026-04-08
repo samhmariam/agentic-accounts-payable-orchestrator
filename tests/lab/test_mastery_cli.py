@@ -208,6 +208,30 @@ def _write_native_operator_evidence(
     path.write_text(json.dumps(payload), encoding="utf-8")
 
 
+def _write_kql_evidence(
+    path: Path,
+    *,
+    day: str,
+    minimum_queries: int,
+) -> None:
+    payload = {
+        "day": day,
+        "queries": [
+            {
+                "query": f"traces | take {index + 1}",
+                "workspace": "training-workspace",
+                "signal_found": True,
+                "purpose": "prove the production footprint",
+                "observed_excerpt": "gate_name, passed=false",
+                "operator_interpretation": "This proves the failure signal showed up in Log Analytics.",
+            }
+            for index in range(minimum_queries)
+        ],
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
 def test_run_mastery_day9_native_evidence_is_advisory(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(
         mastery,
@@ -353,3 +377,88 @@ def test_run_mastery_blocking_native_evidence_requires_live_demo_pass(monkeypatc
 
     assert payload["overall_ok"] is False
     assert payload["results"][-1]["status"] == mastery.FAIL
+
+
+def test_run_mastery_requires_kql_evidence_for_day8_plus(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": "10",
+                    "title": "KQL day",
+                    "persistent_constraints": [],
+                    "mastery_gates": [
+                        {
+                            "id": "day10_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["release_packet_before_prod"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "kql_evidence": {
+                        "artifact_path": "build/day10/kql_evidence.json",
+                        "minimum_queries": 2,
+                        "review_stage": "day10_cab_board",
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+
+    payload = mastery.run_mastery(day="10", repo_root=tmp_path)
+
+    assert payload["overall_ok"] is False
+    assert payload["results"][-1]["gate_id"] == "day10_kql_evidence"
+    assert payload["results"][-1]["status"] == mastery.FAIL
+
+
+def test_run_mastery_accepts_valid_kql_evidence(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": "10",
+                    "title": "KQL day",
+                    "persistent_constraints": [],
+                    "mastery_gates": [
+                        {
+                            "id": "day10_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["release_packet_before_prod"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "kql_evidence": {
+                        "artifact_path": "build/day10/kql_evidence.json",
+                        "minimum_queries": 2,
+                        "review_stage": "day10_cab_board",
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+    _write_kql_evidence(tmp_path / "build" / "day10" / "kql_evidence.json", day="10", minimum_queries=2)
+
+    payload = mastery.run_mastery(day="10", repo_root=tmp_path)
+
+    assert payload["overall_ok"] is True
+    assert payload["results"][-1]["gate_id"] == "day10_kql_evidence"
+    assert payload["results"][-1]["status"] == mastery.PASS

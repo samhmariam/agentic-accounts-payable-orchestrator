@@ -39,7 +39,9 @@ The exact artifact filenames for each day are the authoritative source in
    defense prompts for the day so learners can build toward them during the lab.
 3. Lab block: keep the room moving toward all four outputs (technical build,
    decision memo, corporate process artifact, oral defense prep). Notebook
-   completion alone is not the goal.
+   completion alone is not the goal. Require the learner to capture KQL evidence
+   before they patch, and require `uv run aegisap-lab rubric-check --day XX`
+   before they ask for review.
 4. Intervention sweep: scan for yellow/red learners every 10–15 minutes.
 5. Oral defense sessions: run after the lab block. Two assessors per trainee.
    Score using `docs/curriculum/templates/ORAL_DEFENSE_SCORECARD.md` and the
@@ -95,6 +97,7 @@ Use this protocol for the native-tool sections on Days 9, 12, and 14.
 - trainers may not rescue learners by suggesting helper CLI commands during these sections
 - trainers may not point learners back to `aegisap-lab` or helper verification wrappers once the native gate starts
 - learners must save literal commands and literal query text into `native_operator_evidence.json`
+- learners on Days 8-14 must also save literal Log Analytics proof into `kql_evidence.json`
 - facilitators validate fluency by asking the learner to rerun one saved proof live
 - if the learner cannot explain what the native proof shows, the gate does not pass
 

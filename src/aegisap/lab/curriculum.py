@@ -27,6 +27,23 @@ MODULE_SLUGS = {
     "14": "day_14_elite_ops",
 }
 
+SCAFFOLD_LEVELS = {
+    "01": "guided",
+    "02": "guided",
+    "03": "guided",
+    "04": "reduced",
+    "05": "reduced",
+    "06": "reduced",
+    "07": "starter_only",
+    "08": "starter_only",
+    "09": "starter_only",
+    "10": "starter_only",
+    "11": "starter_only",
+    "12": "starter_only",
+    "13": "starter_only",
+    "14": "starter_only",
+}
+
 PHASE1_GATE_MODES = {
     "00": "blocking",
     "01": "blocking",
@@ -44,6 +61,10 @@ PHASE1_GATE_MODES = {
     "13": "blocking",
     "14": "blocking",
 }
+
+INFRA_SURFACE_TYPES = {"infrastructure", "ci_cd"}
+KQL_EVIDENCE_DAYS = tuple(f"{day:02d}" for day in range(8, 15))
+RAW_SDK_NOTEBOOK_BAN_DAYS = tuple(f"{day:02d}" for day in range(7, 15))
 
 
 def resolve_repo_root(repo_root: str | Path | None = None) -> Path:
@@ -83,6 +104,29 @@ def get_day(manifest: dict[str, Any], day: str | int) -> dict[str, Any]:
 def module_readme_relpath(day: str | int) -> str:
     day_id = normalize_day(day)
     return f"modules/{MODULE_SLUGS[day_id]}/README.md"
+
+
+def expected_scaffold_level(day: str | int) -> str:
+    return SCAFFOLD_LEVELS[normalize_day(day)]
+
+
+def production_targets_for_day_entry(day_entry: dict[str, Any]) -> list[dict[str, Any]]:
+    return day_entry.get("portal_to_script_mapping", {}).get("production_targets", [])
+
+
+def production_target_paths(day_entry: dict[str, Any]) -> list[str]:
+    return [target["path"] for target in production_targets_for_day_entry(day_entry)]
+
+
+def production_target_counts(day_entries: list[dict[str, Any]]) -> tuple[int, int]:
+    infra_targets = 0
+    total_targets = 0
+    for day_entry in day_entries:
+        for target in production_targets_for_day_entry(day_entry):
+            total_targets += 1
+            if target.get("surface_type") in INFRA_SURFACE_TYPES:
+                infra_targets += 1
+    return infra_targets, total_targets
 
 
 def active_constraints_for_day(

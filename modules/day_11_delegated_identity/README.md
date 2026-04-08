@@ -8,6 +8,10 @@ Delegated identity failures create real authorization and audit gaps. FDEs need 
 
 The security team caught an approval path that may be acting as the app instead of the user. You must repair the actor binding without regressing release or network controls.
 
+## Cost of Failure
+
+If actor binding fails, the system can accept the wrong human as an approver and invalidate the authority model for production changes.
+
 ## Persistent Constraints
 
 - `regulated_invoice_auditability`: Every financial decision path must leave auditable evidence that survives hostile review.
@@ -35,6 +39,10 @@ The security team caught an approval path that may be acting as the app instead 
 
 - `uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q && uv run aegisap-lab artifact rebuild --day 11`
 - `uv run aegisap-lab audit-production --day 11 --strict`
+
+## KQL Evidence
+
+Save `build/day11/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Chaos Gate
 

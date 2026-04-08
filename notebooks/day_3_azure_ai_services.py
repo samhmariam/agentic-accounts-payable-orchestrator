@@ -6,902 +6,151 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _bootstrap():
+    import json
     import sys
     from pathlib import Path
 
-    _root = Path(__file__).resolve().parents[1]
-    for _p in [str(_root / "src"), str(_root / "notebooks")]:
-        if _p not in sys.path:
-            sys.path.insert(0, _p)
-    return (Path,)
-
-
-@app.cell
-def _imports():
-    import json
-    import time
-    from datetime import date
-
     import marimo as mo
 
-    return date, json, mo, time
+    repo_root = Path(__file__).resolve().parents[1]
+    for candidate in [repo_root / "src", repo_root / "notebooks"]:
+        text = str(candidate)
+        if text not in sys.path:
+            sys.path.insert(0, text)
+
+    from aegisap.day3.graph import run_day3_workflow
+    from aegisap.day3.retrieval.authority_policy import load_authority_policy
+    from aegisap.day3.retrieval.azure_ai_search_adapter import AzureAISearchFixtureAdapter
+    from aegisap.day3.retrieval.ranker import apply_authority_ranking
+    from aegisap.day3.retrieval.structured_vendor_lookup import StructuredVendorLookup
+
+    return (
+        AzureAISearchFixtureAdapter,
+        Path,
+        StructuredVendorLookup,
+        apply_authority_ranking,
+        json,
+        load_authority_policy,
+        mo,
+        repo_root,
+        run_day3_workflow,
+    )
 
 
 @app.cell
 def _title(mo):
-    mo.md("""
-    # Day 3 — Retrieval Authority with Azure AI Search
+    mo.md(
+        """
+        # Day 3 — Retrieval Authority Rescue Mission
 
-    > **WAF Pillars covered:** Performance Efficiency · Reliability
-    > **Estimated time:** 2.5 hours
-    > **Primary source:** `docs/curriculum/trainee/DAY_03_TRAINEE.md`
-    > **CLI rebuild path after notebook review:** `scripts/run_day3_case.py`
-    > **Expected artifact:** `build/day3/golden_thread_day3.json`
-    > **Prerequisite:** Day 2 artifact strongly preferred. Fixture fallback is valid for practice, not for lineage-complete mastery.
-
-    ---
-
-    ## Learning Objectives
-
-    1. Explain Retrieval-Augmented Generation (RAG) and its common failure modes.
-    2. Distinguish between a retrieval system and an authority system.
-    3. Describe Azure AI Search hybrid search and when semantic reranking helps.
-    4. Explain why citations are mandatory for enterprise auditability.
-    5. Describe AegisAP's multi-agent retrieval pattern and inspect the typed handoffs it produces.
-
-    ---
-
-    ## Microsoft Learn Anchors
-
-    - [Hybrid search overview](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)
-    - [Create a hybrid query](https://learn.microsoft.com/en-us/azure/search/hybrid-search-how-to-query)
-    - [Semantic ranking overview](https://learn.microsoft.com/en-us/azure/search/semantic-ranking)
-    - [Connect using Azure roles](https://learn.microsoft.com/en-us/azure/search/search-security-rbac)
-    - [Keyless connection quickstart](https://learn.microsoft.com/en-us/azure/search/search-get-started-rbac)
-    """)
-    return
-
-
-@app.cell
-def _full_day_agenda(mo):
-    from _shared.curriculum_scaffolds import render_full_day_agenda
-
-    render_full_day_agenda(
-        mo,
-        day_label="Day 3 Azure AI service selection and framework choice",
-        core_outcome="justify the Azure service stack and framework choices against the Day 2 architecture and authority boundaries",
+        Day 3 begins with a poisoned evidence ranking problem: stale email context is
+        being treated like authority. Your job is to prove where the ranking broke,
+        prototype the repair, and then move the real fix into the production retrieval
+        boundary.
+        """
     )
     return
 
 
 @app.cell
-def _lab_contract(mo):
-    mo.callout(
-        mo.md(
-            """
-    **Lab contract**
+def _incident(mo):
+    mo.md(
+        """
+        ## Incident
 
-    Required inputs:
-    - `build/day2/golden_thread_day2.json` or the Day 3 fixture invoice
-    - Retrieval backend selection: `fixture`, `azure_search_live`, or `pgvector_fixture`
-    - Azure AI Search access only if you want the live path
+        Finance and Security caught a case where stale onboarding email evidence was
+        ranking above the structured vendor master for bank details.
 
-    Pass criteria:
-    - Retrieved evidence is shown with citations and authority-adjusted ranking
-    - A stale, lower-authority source does not outrank the current system of record
-    - `build/day3/golden_thread_day3.json` is written and can hand off to Day 4
+        **What success looks like**
 
-    **Lineage rule:** if Day 2 is missing, today is still valuable practice, but the
-    resulting run should be treated as a fallback rehearsal rather than a
-    lineage-complete progression through the curriculum.
-
-    Rebuild command after the notebook walkthrough:
-
-    ```bash
-    uv run python scripts/run_day3_case.py --retrieval-mode fixture
-    ```
-    """
-        ),
-        kind="info",
+        - structured vendor master evidence outranks stale email evidence again
+        - stale evidence is preserved as history, not deleted or ignored
+        - the ranking repair is defended with tests and Day 3 boundary evidence
+        """
     )
     return
 
 
 @app.cell
-def _setup_header(mo):
-    mo.md("""
-    ## Before You Start
-    """)
-    return
+def _portal_investigation(mo):
+    mo.md(
+        """
+        ## Portal Investigation
 
+        Investigate the live surfaces before you touch the ranker:
 
-@app.cell
-def _setup_body(mo):
-    mo.vstack(
-        [
-            mo.callout(
-                mo.md(
-                    """
-            **What Day 3 is actually doing**
-
-            This notebook is about the **retrieval and authority boundary**, not about provisioning an entire
-            application stack from scratch. In practice:
-
-            - Day 0 usually provisions the shared Azure resources in `infra/core.bicep` or `infra/full.bicep`
-            - Day 3 adds a **dedicated search index and Day 3 document ingestion** only if you choose the live Azure path
-            - The local `fixture` and `pgvector_fixture` modes do **not** require you to create Azure resources
-            - `scripts/run_day3_case.py` is a reproducibility wrapper around the same retrieval and authority logic you should inspect in this notebook first
-            """
-                ),
-                kind="info",
-            ),
-            mo.callout(
-                mo.md(
-                    """
-            **Agent-era working mode**
-
-            - Focus on the boundary between retrieval relevance and business authority
-            - Treat the Python snippets in this notebook as reference patterns to review, not long blocks to transcribe
-            - If an agent drafts retrieval code, your job is to verify the auth pattern, the source-authority policy, and the artifact evidence it produces
-            - Use the workflow output and citations to judge correctness, not whether the code "looks smart"
-            """
-                ),
-                kind="warn",
-            ),
-            mo.md(
-                """
-            ### Resource and Folder Map
-
-            | Item | Why it matters on Day 3 | Where it lives | Create now? |
-            |---|---|---|---|
-            | Azure AI Search service | Needed only for `azure_search_live` retrieval | `infra/core.bicep` or `infra/full.bicep` | Usually already provisioned in Day 0 |
-            | Blob Storage account + container | Optional staging path for uploading Day 3 docs before indexing | `infra/core.bicep` or `infra/full.bicep` | Only if you want blob-backed ingestion |
-            | Day 3 search index | Dedicated index for Day 3 unstructured evidence | Created by `scripts/ensure_day3_search_index.py` | Yes, but only for `azure_search_live` |
-            | Unstructured Day 3 documents | Markdown evidence used for retrieval | `data/day3/unstructured/` | Already in the repo |
-            | Structured vendor and PO records | System-of-record data used in authority checks | `data/day3/structured/` | Already in the repo |
-            | Day 2 input artifact | Preferred upstream workflow input | `build/day2/golden_thread_day2.json` | Produced earlier by Day 2 |
-            | Day 3 fallback input | Safe local practice input when Day 2 is missing | `fixtures/golden_thread/day3_invoice.json` | Already in the repo |
-            | Day 3 workflow code | Retrieval, ranking, typed handoffs, evaluation | `src/aegisap/day3/` | Already in the repo |
-            | Day 3 generated artifact | Output handed to Day 4 | `build/day3/golden_thread_day3.json` | Created when you run the workflow |
-
-            ### Recommended Setup Sequence
-
-            1. Start with `fixture` mode if your goal is understanding the workflow and authority ranking.
-            2. Use `pgvector_fixture` if you want a local stand-in for a vector-backed retriever without Azure dependencies.
-            3. Use `azure_search_live` only after the Azure Search service already exists and the Day 3 index has been prepared.
-
-            ### Live Azure Search Path
-
-            If you choose `azure_search_live`, the minimum Day 3 setup is:
-
-            ```bash
-            uv run python scripts/ensure_day3_search_index.py \
-              --endpoint "$AZURE_SEARCH_ENDPOINT" \
-              --index-name "$AZURE_SEARCH_DAY3_INDEX"
-
-            uv run python scripts/ingest_day3_search_docs.py \
-              --endpoint "$AZURE_SEARCH_ENDPOINT" \
-              --index-name "$AZURE_SEARCH_DAY3_INDEX"
-
-            uv run python scripts/verify_day3_live_retrieval.py \
-              --endpoint "$AZURE_SEARCH_ENDPOINT" \
-              --index-name "$AZURE_SEARCH_DAY3_INDEX"
-            ```
-
-            Optional blob-backed staging uses:
-
-            - `scripts/upload_day3_fixtures_to_blob.py`
-            - `AZURE_STORAGE_ACCOUNT_URL`
-            - `AZURE_STORAGE_CONTAINER`
-
-            If your notebook infrastructure outputs the container name as `AZURE_STORAGE_CONTAINER_NAME`,
-            map that value into `AZURE_STORAGE_CONTAINER` before running the Day 3 blob helper scripts.
-
-            ### Where to look if something feels "missing"
-
-            - `infra/`: Azure resources and environment outputs
-            - `scripts/`: setup and verification commands for Day 3
-            - `data/day3/`: the evidence corpus used by retrieval and authority checks
-            - `src/aegisap/day3/`: the actual workflow logic
-            - `docs/DAY_03_MULTI_AGENT_RETRIEVAL.md`: the command-oriented Day 3 live setup note
-            """
-            ),
-        ]
+        1. Open Azure AI Search and inspect the index entries for the vendor and bank-change evidence.
+        2. Confirm the stale email document is still present and timestamped correctly.
+        3. Compare the portal evidence with the structured system-of-record vendor data.
+        4. Capture the exact reason the wrong source won: weight, recency, or exact-match policy.
+        """
     )
     return
 
 
 @app.cell
-def _three_surface_linkage(mo):
-    from _shared.lab_guide import render_surface_linkage
+def _lab_repair_intro(mo):
+    mo.md(
+        """
+        ## Lab Repair
 
-    render_surface_linkage(
-        mo,
-        portal_guide="docs/curriculum/portal/DAY_03_PORTAL.md",
-        portal_activity="Open Azure AI Search in the portal, inspect or prepare the Day 3 index, and confirm the IAM split between query-only access and indexing authority before you trust retrieval output.",
-        notebook_activity="Use the setup map, Azure Mastery Loop, retrieval walkthrough, and authority-ranking sections to compare raw search relevance with the local authority policy that ultimately decides what evidence is trustworthy.",
-        automation_steps=[
-            "`uv run python scripts/ensure_day3_search_index.py --endpoint \"$AZURE_SEARCH_ENDPOINT\" --index-name \"$AZURE_SEARCH_DAY3_INDEX\"` recreates the index you first inspected manually.",
-            "`uv run python scripts/ingest_day3_search_docs.py --endpoint \"$AZURE_SEARCH_ENDPOINT\" --index-name \"$AZURE_SEARCH_DAY3_INDEX\"` automates the evidence load after you already understand the schema.",
-            "`uv run python scripts/run_day3_case.py --retrieval-mode azure_search_live` then proves the notebook and portal story against the canonical workflow path.",
-        ],
-        evidence_checks=[
-            "The portal index schema, semantic settings, and IAM model should match the assumptions made in the notebook retrieval logic.",
-            "`build/day3/golden_thread_day3.json` should cite evidence that actually exists in the live or fixture retrieval surface you inspected.",
-            "If stale or lower-authority content outranks the system of record, stop and reconcile the portal state, notebook reasoning, and automation output.",
-        ],
+        Use this notebook as a ranking scratchpad only. Prove the authority order here,
+        then move the real repair into the repo.
+        """
     )
     return
 
 
 @app.cell
-def _azure_mastery_guide(mo):
-    from _shared.lab_guide import render_azure_mastery_guide
-
-    render_azure_mastery_guide(
-        mo,
-        focus="Day 3 Azure fluency means you can inspect the Day 3 search index in Azure AI Search, prepare it from the CLI, recognise the keyless `SearchClient` shape in code, and explain why retrieval relevance still needs local authority checks.",
-        portal_tasks="""
-    - Open the Azure AI Search service behind `AZURE_SEARCH_ENDPOINT`, then inspect **Indexes** and confirm `AZURE_SEARCH_DAY3_INDEX` exists.
-    - In the index schema, look for Day 3 fields such as `authority_tier`, `vendor_id`, `bank_account_last4`, and the semantic configuration if you enabled semantic ranking.
-    - Use **Search explorer** to query `Acme bank change 4421` and confirm the stale onboarding email appears as context, not as the final business truth.
-    - Open **Access control (IAM)** and verify the calling identity has `Search Index Data Reader` for query-only access; use contributor roles only for indexing or bootstrap paths.
-    - If you use blob-backed ingestion, inspect the storage container and confirm the `day3/unstructured/` content is present before indexing.
-    """,
-        cli_verification="""
-    **Bootstrap the Day 3 index and ingest the evidence corpus**
-
-    ```bash
-    uv run python scripts/ensure_day3_search_index.py \
-      --endpoint "$AZURE_SEARCH_ENDPOINT" \
-      --index-name "$AZURE_SEARCH_DAY3_INDEX"
-
-    uv run python scripts/ingest_day3_search_docs.py \
-      --endpoint "$AZURE_SEARCH_ENDPOINT" \
-      --index-name "$AZURE_SEARCH_DAY3_INDEX"
-    ```
-
-    **Verify the live retrieval path and then run the canonical Day 3 case**
-
-    ```bash
-    uv run python scripts/verify_day3_live_retrieval.py \
-      --endpoint "$AZURE_SEARCH_ENDPOINT" \
-      --index-name "$AZURE_SEARCH_DAY3_INDEX"
-
-    uv run python scripts/run_day3_case.py --retrieval-mode azure_search_live
-    ```
-
-    **Optional blob-backed ingestion path**
-
-    ```bash
-    uv run python scripts/ingest_day3_search_docs.py \
-      --source blob \
-      --endpoint "$AZURE_SEARCH_ENDPOINT" \
-      --index-name "$AZURE_SEARCH_DAY3_INDEX" \
-      --account-url "$AZURE_STORAGE_ACCOUNT_URL" \
-      --container-name "$AZURE_STORAGE_CONTAINER"
-    ```
-    """,
-        sdk_snippet="""
-    Use the SDK to recognise the keyless query boundary. The app authenticates with `DefaultAzureCredential`; Azure AI Search returns candidates, not business truth.
-
-    ```python
-    from azure.identity import DefaultAzureCredential
-    from azure.search.documents import SearchClient
-    import os
-
-    client = SearchClient(
-    endpoint=os.environ["AZURE_SEARCH_ENDPOINT"],
-    index_name=os.environ["AZURE_SEARCH_DAY3_INDEX"],
-    credential=DefaultAzureCredential(),
-    )
-
-    hits = list(client.search("Acme bank change 4421", top=3))
-    ```
-    """,
-        proof_in_azure="""
-    - `uv run python scripts/verify_day3_live_retrieval.py` prints a `PASS` result against the live Day 3 index.
-    - Search Explorer returns Day 3 documents and the index document count is non-zero.
-    - `build/day3/golden_thread_day3.json` exists and the decision still cites the vendor master record as authoritative while preserving the stale email as lower-authority history.
-    - Fixture and `pgvector_fixture` runs are valid learning paths, but only `azure_search_live` proves the Azure Search surface works end to end.
-    """,
-    )
-    return
+def _controls(mo):
+    vendor_id = mo.ui.text(value="VEND-001", label="Vendor ID")
+    bank_last4 = mo.ui.text(value="4421", label="Expected bank-account last four")
+    mo.vstack([vendor_id, bank_last4])
+    return bank_last4, vendor_id
 
 
 @app.cell
-def _load_inputs(Path, json, mo):
-    day2_path = Path(__file__).resolve().parents[1] / "build" / "day2" / "golden_thread_day2.json"
-    fixture_path = Path(__file__).resolve().parents[1] / "fixtures" / "golden_thread" / "day3_invoice.json"
-    vendor_master_path = (
-        Path(__file__).resolve().parents[1] / "data" / "day3" / "structured" / "vendor_master.json"
-    )
-
-    invoice_data = None
-    invoice_source = ""
-    _day2_payload = None
-
-    if day2_path.exists():
-        _day2_payload = json.loads(day2_path.read_text(encoding="utf-8"))
-        _workflow_state = _day2_payload.get("workflow_state", _day2_payload)
-        _canonical_invoice = _workflow_state.get("invoice", {})
-        vendor_rows = json.loads(vendor_master_path.read_text(encoding="utf-8"))
-
-        supplier_name = _canonical_invoice.get("supplier_name") or _workflow_state.get("vendor", {}).get(
-            "vendor_name"
-        )
-        vendor_row = next(
-            (
-                row
-                for row in vendor_rows
-                if row.get("vendor_name", "").lower() == str(supplier_name or "").lower()
-            ),
-            {},
-        )
-
-        invoice_number = _canonical_invoice.get("invoice_number") or _workflow_state.get("invoice_id") or "INV-UNKNOWN"
-        invoice_data = {
-            "case_id": f"case_{str(invoice_number).lower().replace('-', '_')}",
-            "invoice_id": invoice_number,
-            "invoice_date": _canonical_invoice.get("invoice_date"),
-            "vendor_id": vendor_row.get("vendor_id") or "VEND-UNKNOWN",
-            "vendor_name": supplier_name or "Unknown Vendor",
-            "po_number": _canonical_invoice.get("po_reference") or "PO-9001",
-            "amount": float(_canonical_invoice.get("gross_amount") or 0.0),
-            "currency": _canonical_invoice.get("currency") or "GBP",
-            "bank_account_last4": vendor_row.get("bank_account_last4") or "",
-        }
-        invoice_source = "Loaded from `build/day2/golden_thread_day2.json`."
-    elif fixture_path.exists():
-        invoice_data = json.loads(fixture_path.read_text(encoding="utf-8"))
-        invoice_source = (
-            "Day 2 artifact not found, so the notebook fell back to "
-            "`fixtures/golden_thread/day3_invoice.json`."
-        )
-    else:
-        invoice_data = {
-            "case_id": "CASE-MISSING",
-            "invoice_id": "INV-MISSING",
-            "invoice_date": "2026-03-01",
-            "vendor_id": "VEND-001",
-            "vendor_name": "Acme Office Supplies",
-            "po_number": "PO-9001",
-            "amount": 12500.0,
-            "currency": "GBP",
-            "bank_account_last4": "4421",
-        }
-        invoice_source = "Neither Day 2 artifact nor fixture invoice was found; using a safe in-notebook fallback."
-
-    _fallback_used = "fell back" in invoice_source or "safe in-notebook fallback" in invoice_source
-    _source_kind = "warn" if _fallback_used else "success"
-    _lineage_note = (
-        "This run is excellent for practising retrieval authority, but it does **not** prove "
-        "the full Day 2 -> Day 3 evidence chain. Re-run after producing the Day 2 artifact "
-        "before treating Day 3 as mastery-complete."
-        if _fallback_used
-        else "Lineage is intact: Day 3 is consuming Day 2 output as intended."
-    )
-
-    mo.vstack(
-        [
-            mo.md("## Active Invoice Context"),
-            mo.callout(mo.md(invoice_source), kind=_source_kind),
-            mo.callout(mo.md(_lineage_note), kind="warn" if _fallback_used else "info"),
-            mo.hstack(
-                [
-                    mo.stat(label="Invoice ID", value=invoice_data["invoice_id"]),
-                    mo.stat(label="Vendor", value=invoice_data["vendor_name"]),
-                    mo.stat(label="PO Number", value=invoice_data.get("po_number", "—") or "—"),
-                ]
-            ),
-        ]
-    )
-    return (invoice_data,)
-
-
-@app.cell
-def _rag_header(mo):
-    mo.md("""
-    ## 1. Retrieval-Augmented Generation
-    """)
-    return
-
-
-@app.cell
-def _rag_body(mo):
-    mo.md("""
-    RAG improves an LLM by retrieving external evidence at inference time and grounding
-    the answer in that evidence. In AegisAP, the LLM must not treat training knowledge as
-    authoritative policy.
-
-    ```
-    User question
-        │
-        ▼
-    [ Retrieval ]  -> candidate evidence
-        │
-        ▼
-    [ Authority policy ]  -> allowed evidence ordering
-        │
-        ▼
-    [ Specialist agents ]  -> typed findings + citations
-        │
-        ▼
-    Decision recommendation
-    ```
-
-    ### Common failure modes
-
-    | Failure mode | What goes wrong | Day 3 mitigation |
-    |---|---|---|
-    | Context stuffing | Too many chunks, weak grounding | Keep top results small and inspect ranking |
-    | Hallucinated citations | Model names a source it never retrieved | Persist real chunk IDs and evidence IDs |
-    | Stale retrieval | Old evidence looks relevant | Apply recency weighting and inspect event dates |
-    | Authority confusion | High relevance is mistaken for truth | Rank by source authority after retrieval |
-    """)
-    return
-
-
-@app.cell
-def _authority_header(mo):
-    mo.md("""
-    ## 2. Retrieval vs Authority
-    """)
-    return
-
-
-@app.cell
-def _authority_body(mo):
-    mo.md("""
-    Retrieval answers **"what looks relevant?"**. Authority answers **"what are we allowed
-    to trust?"**. Day 3 exists because those are not the same question.
-
-    | Property | Retrieval system | Authority system |
-    |---|---|---|
-    | Primary signal | BM25, vectors, semantic reranking | Source tier, effective date, explicit policy |
-    | Typical infrastructure | Azure AI Search | Local workflow policy + typed evidence models |
-    | Failure when misused | Missing useful context | Letting stale or unofficial sources drive decisions |
-    | Correct enterprise boundary | Candidate generation | Truth and auditability enforcement |
-
-    **AegisAP rule:** Azure AI Search finds candidate evidence. The workflow code decides whether
-    that evidence is authoritative enough to influence payment decisions.
-    """)
-    return
-
-
-@app.cell
-def _search_header(mo):
-    mo.md("""
-    ## 3. Azure AI Search Best-Practice Boundary
-    """)
-    return
-
-
-@app.cell
-def _search_body(mo):
-    mo.md("""
-    Azure AI Search is the Day 3 retrieval engine for unstructured evidence. Microsoft Learn
-    guidance supports the same choices this repo makes:
-
-    - Use **hybrid search** when you want both exact matches and semantic similarity.
-    - Add **semantic reranking** only when the latency and billing budget allow it.
-    - Use **Microsoft Entra ID / RBAC** for application access; avoid admin keys in app code.
-    - Keep **authority policy outside the search service**. Search relevance is not business truth.
-
-    ### Managed identity / keyless query pattern
-
-    ```python
-    from azure.identity import DefaultAzureCredential
-    from azure.search.documents import SearchClient
-    import os
-
-    credential = DefaultAzureCredential()
-
-    client = SearchClient(
-        endpoint=os.environ["AZURE_SEARCH_ENDPOINT"],
-        index_name=os.environ["AZURE_SEARCH_DAY3_INDEX"],
-        credential=credential,
-    )
-
-    results = client.search(
-        search_text="Acme bank change approved account 4421",
-        query_type="semantic",
-        semantic_query="Acme bank change approved account 4421",
-        semantic_configuration_name="day3-semantic-config",
-        top=5,
-        select=[
-            "id",
-            "doc_id",
-            "title",
-            "content",
-            "source_name",
-            "source_type",
-            "authority_tier",
-            "event_time",
-            "vendor_id",
-            "bank_account_last4",
-        ],
-    )
-    ```
-
-    ### Operational notes from Microsoft Learn
-
-    - `Search Index Data Reader` is the least-privilege role for query-only app paths.
-    - Semantic reranking reranks an initial result set; it does not replace your authority logic.
-    - Semantic captions can reduce grounding token load, but they still come from retrieved content.
-    - Do not add explicit sorting when you want relevance-driven semantic results.
-    """)
-    return
-
-
-@app.cell
-def _rrf_header(mo):
-    mo.md("""
-    ### Why Hybrid Search Helps
-    """)
-    return
-
-
-@app.cell
-def _rrf_body(mo):
-    mo.md(r"""
-    Hybrid search merges keyword and vector rankings with Reciprocal Rank Fusion (RRF):
-
-    $$
-    \text{RRF}(d) = \sum_{r \in \{\text{keyword, vector}\}} \frac{1}{k + \text{rank}_r(d)}
-    $$
-
-    RRF is useful because it gives us a stronger **candidate set**. It still does **not**
-    answer the authority question. Day 3 adds a second scoring layer after retrieval:
-
-    $$
-    \text{final\_score} =
-    \text{retrieval\_score} \times
-    \text{authority\_weight} \times
-    \text{recency\_weight} +
-    \text{exact\_match\_bonus}
-    $$
-    """)
-    return
-
-
-@app.cell
-def _multi_agent_header(mo):
-    mo.md("""
-    ## 4. Multi-Agent Retrieval Pattern
-    """)
-    return
-
-
-@app.cell
-def _multi_agent_body(mo):
-    mo.md("""
-    Day 3 does not use one giant free-form agent. It uses specialist retrieval and typed handoffs.
-
-    ```
-    Intake router
-        │
-        ├── retrieve_vendor_context
-        │     ├── structured vendor master lookup
-        │     └── Azure AI Search or fixture search for unstructured docs
-        │
-        ├── vendor_risk_verifier
-        │     └── returns typed vendor-risk finding
-        │
-        ├── retrieve_po_context
-        │     └── structured PO lookup
-        │
-        ├── po_match_agent
-        │     └── returns typed PO-match finding
-        │
-        └── decision_synthesizer
-              └── merges specialist findings into a recommendation
-    ```
-
-    This structure is deliberate:
-
-    - Retrieval stays separate from judgment.
-    - Each specialist can be tested independently.
-    - The final decision retains explicit evidence IDs and policy notes.
-    """)
-    return
-
-
-@app.cell
-def _authority_sim_header(mo):
-    mo.md("""
-    ## 5. Authority Ranking Simulator
-    """)
-    return
-
-
-@app.cell
-def _authority_sim_inputs(mo):
-    stale_email_score = mo.ui.slider(
-        start=40,
-        stop=100,
-        step=5,
-        value=95,
-        label="Stale onboarding email retrieval score (%)",
-    )
-    approved_email_score = mo.ui.slider(
-        start=40,
-        stop=100,
-        step=5,
-        value=80,
-        label="Approved bank-change email retrieval score (%)",
-    )
-    policy_score = mo.ui.slider(
-        start=40,
-        stop=100,
-        step=5,
-        value=65,
-        label="AP policy retrieval score (%)",
-    )
-
-    mo.vstack(
-        [
-            mo.md(
-                "These sliders only change **retrieval relevance**. The simulator still applies the "
-                "repo's Day 3 authority policy afterwards."
-            ),
-            stale_email_score,
-            approved_email_score,
-            policy_score,
-        ]
-    )
-    return approved_email_score, policy_score, stale_email_score
-
-
-@app.cell
-def _authority_sim_output(
-    Path,
-    approved_email_score,
-    date,
+def _ranking_preview(
+    AzureAISearchFixtureAdapter,
+    StructuredVendorLookup,
+    apply_authority_ranking,
+    bank_last4,
+    json,
+    load_authority_policy,
     mo,
-    policy_score,
-    stale_email_score,
+    repo_root,
+    vendor_id,
 ):
-    from aegisap.day3.export import evidence_to_table as _evidence_to_table
-    from aegisap.day3.retrieval.authority_policy import load_authority_policy
-    from aegisap.day3.retrieval.azure_ai_search_adapter import evidence_item_from_markdown
-    from aegisap.day3.retrieval.interfaces import parse_front_matter_markdown
-    from aegisap.day3.retrieval.ranker import apply_authority_ranking
-    from aegisap.day3.retrieval.structured_vendor_lookup import StructuredVendorLookup
-
-    repo_root = Path(__file__).resolve().parents[1]
     policy = load_authority_policy(repo_root / "src" / "aegisap" / "day3" / "policies" / "source_authority_rules.yaml")
-
-    vendor_master = StructuredVendorLookup().search(
-        vendor_id="VEND-001",
-        vendor_name="Acme Office Supplies",
+    structured = StructuredVendorLookup().search(vendor_id=vendor_id.value.strip(), vendor_name=None)
+    unstructured = AzureAISearchFixtureAdapter().search(
+        query=f"Acme Office Supplies bank change {bank_last4.value.strip()}"
     )
-
-    stale_email = evidence_item_from_markdown(
-        parse_front_matter_markdown(repo_root / "data" / "day3" / "unstructured" / "supplier_onboarding_old_email.md"),
-        retrieval_score=stale_email_score.value / 100,
-        backend="simulated_hybrid",
-    )
-    approved_email = evidence_item_from_markdown(
-        parse_front_matter_markdown(repo_root / "data" / "day3" / "unstructured" / "bank_change_approval_email.md"),
-        retrieval_score=approved_email_score.value / 100,
-        backend="simulated_hybrid",
-    )
-    policy_doc = evidence_item_from_markdown(
-        parse_front_matter_markdown(repo_root / "data" / "day3" / "unstructured" / "ap_policy_bank_change.md"),
-        retrieval_score=policy_score.value / 100,
-        backend="simulated_hybrid",
-    )
-
     ranked = apply_authority_ranking(
-        vendor_master + [stale_email, approved_email, policy_doc],
+        structured + unstructured,
         policy=policy,
-        query_terms={
-            "vendor_id": "VEND-001",
-            "vendor_name": "Acme Office Supplies",
-            "bank_account_last4": "4421",
-        },
-        today=date.fromisoformat("2026-03-01"),
-        recency_mode="mutable_fact",
+        query_terms={"bank_account_last4": bank_last4.value.strip()},
     )
-
-    _ranked_rows = _evidence_to_table(ranked)
-    _winner = _ranked_rows[0]
-
-    mo.vstack(
-        [
-            mo.ui.table(_ranked_rows, selection=None),
-            mo.callout(
-                mo.md(
-                    f"""
-                **Top-ranked evidence:** `{_winner["evidence_id"]}`
-
-                This is the behavior Day 3 is designed to enforce: even when the stale email
-                retrieves strongly, the current authoritative vendor record should still win.
-                """
-                ),
-                kind="success",
-            ),
-        ]
-    )
-    return
-
-
-@app.cell
-def _workflow_header(mo):
-    mo.md("""
-    ## 6. Run the Canonical Day 3 Workflow
-    """)
-    return
-
-
-@app.cell
-def _workflow_mode(mo):
-    retrieval_mode = mo.ui.dropdown(
-        options=["fixture", "azure_search_live", "pgvector_fixture"],
-        value="fixture",
-        label="Retrieval backend",
-    )
-    retrieval_mode
-    return (retrieval_mode,)
-
-
-@app.cell
-def _workflow_mode_help(mo, retrieval_mode):
-    _messages = {
-        "fixture": (
-            "This mode is fully local. It uses the Day 3 files already checked into the repo, "
-            "so you do not need to create Azure resources before running the workflow."
-        ),
-        "pgvector_fixture": (
-            "This mode is also local-only. It acts like a pgvector-style retriever for training purposes "
-            "without requiring Azure AI Search or PostgreSQL provisioning."
-        ),
-        "azure_search_live": (
-            "This mode calls your live Azure AI Search service. Before running it, make sure "
-            "`AZURE_SEARCH_ENDPOINT` and `AZURE_SEARCH_DAY3_INDEX` are set, then prepare and verify "
-            "the Day 3 index with the helper scripts in `scripts/`."
-        ),
-    }
-    _kinds = {
-        "fixture": "info",
-        "pgvector_fixture": "info",
-        "azure_search_live": "warn",
-    }
-    _live_commands = """
-    ```bash
-    uv run python scripts/ensure_day3_search_index.py --endpoint "$AZURE_SEARCH_ENDPOINT" --index-name "$AZURE_SEARCH_DAY3_INDEX"
-    uv run python scripts/ingest_day3_search_docs.py --endpoint "$AZURE_SEARCH_ENDPOINT" --index-name "$AZURE_SEARCH_DAY3_INDEX"
-    uv run python scripts/verify_day3_live_retrieval.py --endpoint "$AZURE_SEARCH_ENDPOINT" --index-name "$AZURE_SEARCH_DAY3_INDEX"
-    ```
-    """
-    _selected_mode = retrieval_mode.value
-    _body = _messages[_selected_mode]
-    if _selected_mode == "azure_search_live":
-        _body = f"{_body}\n\n{_live_commands}"
-    mo.callout(mo.md(_body), kind=_kinds[_selected_mode])
-    return
-
-
-@app.cell
-def _workflow_run(invoice_data, mo, retrieval_mode, time):
-    from aegisap.training.labs import run_day3_case_artifact
-
-    t0 = time.monotonic()
-    try:
-        artifact_path, payload = run_day3_case_artifact(
-            invoice=invoice_data,
-            retrieval_mode=retrieval_mode.value,
-        )
-        elapsed_ms = int((time.monotonic() - t0) * 1000)
-        error = None
-    except Exception as exc:  # noqa: BLE001
-        artifact_path = None
-        payload = None
-        elapsed_ms = int((time.monotonic() - t0) * 1000)
-        error = str(exc)
-
-    if error:
-        mo.callout(
-            mo.md(
-                f"""
-            **Workflow run failed:** `{error}`
-
-            If you selected `azure_search_live`, confirm:
-            - `AZURE_SEARCH_ENDPOINT` is set
-            - `AZURE_SEARCH_DAY3_INDEX` is set
-            - the calling identity has `Search Index Data Reader`
-            """
-            ),
-            kind="danger",
-        )
-    else:
-        _decision = payload["workflow_state"]["agent_findings"]["decision"]
-        mo.vstack(
-            [
-                mo.hstack(
-                    [
-                        mo.stat(label="Latency", value=f"{elapsed_ms} ms"),
-                        mo.stat(label="Recommendation", value=_decision["recommendation"]),
-                        mo.stat(label="Next step", value=_decision["next_step"]),
-                    ]
-                ),
-                mo.callout(
-                    mo.md(
-                        f"Artifact written to `{artifact_path.relative_to(artifact_path.parents[2])}`"
-                    ),
-                    kind="success",
-                ),
-            ]
-        )
-    return (payload,)
-
-
-@app.cell
-def _evidence_view(mo, payload):
-    from aegisap.day3.export import evidence_to_table as _evidence_to_table
-
-    mo.stop(payload is None, mo.md("No workflow payload to display."))
-
-    _all_items = []
-    _retrieval_context = payload["workflow_state"]["retrieval_context"]
-    for bucket_name in ("vendor", "policy", "po"):
-        _all_items.extend(_retrieval_context.get(bucket_name, []))
-
-    _evidence_rows = _evidence_to_table(_all_items)
-    mo.vstack(
-        [
-            mo.md("### Ranked Evidence"),
-            mo.ui.table(_evidence_rows, selection=None),
-        ]
-    )
-    return
-
-
-@app.cell
-def _findings_view(mo, payload):
-    mo.stop(payload is None, mo.md("No workflow payload to display."))
-
-    _workflow_state = payload["workflow_state"]
-    mo.vstack(
-        [
-            mo.md("### Typed Specialist Findings"),
-            mo.tree(_workflow_state["agent_findings"]),
-            mo.md("### Evaluation Scores"),
-            mo.tree(_workflow_state["eval_scores"]),
-        ]
-    )
-    return
-
-
-@app.cell
-def _handoff_header(mo):
-    mo.md("""
-    ## 7. Why Citations Matter
-    """)
-    return
-
-
-@app.cell
-def _handoff_body(mo, payload):
-    mo.stop(payload is None, mo.md("Run the workflow first to inspect handoff evidence."))
-
-    _decision = payload["workflow_state"]["agent_findings"]["decision"]
-    evidence_ids = _decision.get("evidence_ids", [])
-    notes = _decision.get("policy_notes", [])
-
+    preview = [
+        {
+            "rank": index + 1,
+            "evidence_id": item.evidence_id,
+            "source_type": item.source_type,
+            "authority_tier": item.authority_tier,
+            "authority_adjusted_score": item.authority_adjusted_score,
+            "bank_account_last4": item.metadata.get("bank_account_last4"),
+        }
+        for index, item in enumerate(ranked[:5])
+    ]
     mo.callout(
         mo.md(
             f"""
-        **Decision evidence IDs:** `{evidence_ids}`
+            Top ranked evidence:
 
-        **Policy notes:**
-        {chr(10).join(f"- {note}" for note in notes)}
-
-        In this repo, a recommendation is only defensible if we can trace it back to specific
-        evidence IDs and their source metadata. That is the difference between a plausible answer
-        and an auditable one.
-        """
+            ```json
+            {json.dumps(preview, indent=2)}
+            ```
+            """
         ),
         kind="info",
     )
@@ -909,226 +158,89 @@ def _handoff_body(mo, payload):
 
 
 @app.cell
-def _code_contract_header(mo):
-    mo.md("""
-    ## 8. Code-Level Day 3 Contract
-    """)
-    return
-
-
-@app.cell
-def _code_contract_body(mo):
-    mo.md("""
-    The repo's implementation boundary is intentionally explicit:
-
-    - [graph.py](/workspaces/agentic-accounts-payable-orchestrator/src/aegisap/day3/graph.py) runs retrieval, specialist verification, synthesis, and scoring.
-    - [ranker.py](/workspaces/agentic-accounts-payable-orchestrator/src/aegisap/day3/retrieval/ranker.py) applies authority weights, recency decay, and exact-match bonus.
-    - [authority_policy.py](/workspaces/agentic-accounts-payable-orchestrator/src/aegisap/day3/retrieval/authority_policy.py) defines the policy knobs.
-    - [run_day3_case.py](/workspaces/agentic-accounts-payable-orchestrator/scripts/run_day3_case.py) is the canonical script path.
-    - [DAY_03_TRAINEE.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/trainee/DAY_03_TRAINEE.md) defines the learning contract and pass criteria.
-
-    The notebook should explain this contract, not replace it with a separate mini-curriculum.
-    """)
-    return
-
-
-@app.cell
-def _ms_learn_notes(mo):
-    mo.md("""
-    ## 9. Microsoft Learn Notes Applied Here
-
-    | Microsoft Learn guidance | How this notebook applies it |
-    |---|---|
-    | Hybrid queries are a strong default for relevance | Day 3 uses Azure AI Search as a candidate generator for unstructured evidence |
-    | Semantic ranker improves top-result quality but adds cost/latency | The notebook discusses semantic mode as optional, not mandatory |
-    | Use Azure roles for query access | Examples use `DefaultAzureCredential` and least-privilege reader roles |
-    | Semantic ranking reranks existing results, it does not define truth | Day 3 keeps authority ranking in local workflow code |
-    """)
-    return
-
-
-@app.cell
-def _exercises_header(mo):
-    mo.md("""
-    ## Exercises
-    """)
-    return
-
-
-@app.cell
-def _exercise_1(mo):
-    mo.accordion(
-        {
-            "Exercise 1 — Highest score vs highest authority": mo.vstack(
-                [
-                    mo.md(
-                        """
-                **Task:** The stale onboarding email retrieves with a higher raw search score than the
-                current vendor master. Which source should the workflow trust, and why?
-                """
-                    ),
-                    mo.accordion(
-                        {
-                            "Show solution": mo.md(
-                                """
-                Trust the vendor master. Retrieval score only tells us which text looked relevant to the query.
-                The vendor master is Tier 1 system-of-record evidence, is more recent, and matches the approved
-                bank account. The email remains useful historical context but must not override the current truth.
-                """
-                            )
-                        }
-                    ),
-                ]
-            )
-        }
-    )
-    return
-
-
-@app.cell
-def _exercise_2(mo):
-    mo.accordion(
-        {
-            "Exercise 2 — Azure AI Search RBAC": mo.vstack(
-                [
-                    mo.md(
-                        """
-                **Task:** Review the least-privilege Python pattern for querying Azure AI Search on Day 3.
-                Identify the correct auth pattern and the RBAC role required.
-                """
-                    ),
-                    mo.accordion(
-                        {
-                            "Show solution": mo.md(
-                                """
-                ```python
-                from azure.identity import DefaultAzureCredential
-                from azure.search.documents import SearchClient
-                import os
-
-                client = SearchClient(
-                    endpoint=os.environ["AZURE_SEARCH_ENDPOINT"],
-                    index_name=os.environ["AZURE_SEARCH_DAY3_INDEX"],
-                    credential=DefaultAzureCredential(),
-                )
-
-                results = client.search(
-                    search_text="Acme bank change",
-                    top=5,
-                )
-                ```
-
-                Required role: `Search Index Data Reader`.
-                Do not use admin keys in application code for this path.
-                """
-                            )
-                        }
-                    ),
-                ]
-            )
-        }
-    )
-    return
-
-
-@app.cell
-def _exercise_3(mo):
-    mo.accordion(
-        {
-            "Exercise 3 — Canonical rerun command": mo.vstack(
-                [
-                    mo.md(
-                        """
-                **Task:** What exact command should you run to rebuild the Day 3 artifact in fixture mode,
-                and which citation would you inspect first if a reviewer said the wrong bank-change evidence won?
-                """
-                    ),
-                    mo.accordion(
-                        {
-                            "Show solution": mo.md(
-                                """
-                ```bash
-                uv run python scripts/run_day3_case.py --retrieval-mode fixture
-                ```
-
-                First inspect the stale onboarding citation, `doc-onboarding-old-bank`, because the Day 3 adversarial
-                case is specifically about proving that the stale Tier 3 email does **not** outrank the current
-                authoritative vendor record.
-                """
-                            )
-                        }
-                    ),
-                ]
-            )
-        }
-    )
-    return
-
-
-@app.cell
-def _exercise_4(mo):
-    mo.accordion(
-        {
-            "Exercise 4 — Explain the boundary": mo.vstack(
-                [
-                    mo.md(
-                        """
-                **Task:** In one paragraph, explain the boundary between Azure AI Search and the local
-                Day 3 authority policy.
-                """
-                    ),
-                    mo.accordion(
-                        {
-                            "Show solution": mo.md(
-                                """
-                Azure AI Search is responsible for candidate retrieval: it finds documents that look relevant
-                using keyword, vector, and optional semantic reranking signals. The Day 3 workflow is responsible
-                for deciding whether those documents are trustworthy enough to influence a payment decision. That
-                second step depends on source tier, recency, and exact-match policy, not just search relevance.
-                                """
-                            )
-                        }
-                    ),
-                ]
-            )
-        }
-    )
-    return
-
-
-@app.cell
-def _summary(mo):
-    mo.md("""
-    ## Day 3 Summary Checklist
-
-    - [ ] Explain the difference between retrieval and authority
-    - [ ] Describe at least two common RAG failure modes
-    - [ ] Explain why Azure AI Search hybrid retrieval helps but does not define truth
-    - [ ] Configure a `SearchClient` with `DefaultAzureCredential`
-    - [ ] Name the least-privilege query role: `Search Index Data Reader`
-    - [ ] Show why the current vendor master outranks the stale onboarding email
-    - [ ] Inspect typed specialist findings and decision evidence IDs
-    - [ ] Write `build/day3/golden_thread_day3.json`
-    - [ ] State the canonical rerun command for fixture mode
-    """)
-    return
-
-
-@app.cell
-def _forward(mo):
+def _workflow_preview(json, mo, repo_root, run_day3_workflow):
+    invoice = json.loads((repo_root / "fixtures" / "golden_thread" / "day3_invoice.json").read_text(encoding="utf-8"))
+    state = run_day3_workflow(invoice, retrieval_mode="fixture")
+    decision = state.agent_findings["decision"]
+    vendor_risk = state.agent_findings["vendor_risk"]
     mo.callout(
         mo.md(
-            """
-    **Tomorrow — Day 4: Single-Agent Planning on Top of Trusted Evidence**
+            f"""
+            Workflow preview:
 
-    Day 4 assumes Day 3 already separated candidate retrieval from authority. The planner should only
-    reason over evidence that Day 3 allowed into the decision path.
-    """
+            - `recommendation={decision.recommendation}`
+            - `next_step={decision.next_step}`
+            - `vendor_risk_status={vendor_risk.status}`
+            - `evidence_ids={decision.evidence_ids}`
+            """
         ),
         kind="success",
     )
     return
 
 
-if __name__ == "__main__":
-    app.run()
+@app.cell
+def _production_patch(mo):
+    mo.md(
+        """
+        ## Production Patch
+
+        This section is **markdown-only**.
+
+        Do not edit repo files from this notebook.
+
+        Move into the real retrieval boundary and implement the repair in the codebase:
+
+        - `src/aegisap/day3/policies/source_authority_rules.yaml`
+        - `src/aegisap/day3/retrieval/ranker.py`
+        - `src/aegisap/day3/retrieval/authority_policy.py` if the policy loader needs help
+
+        Then update the written Day 3 evidence:
+
+        - `docs/curriculum/artifacts/day03/RAG_BOUNDARY_DECISION.md`
+        - `docs/curriculum/artifacts/day03/FRAMEWORK_DECISION_MATRIX.md`
+        """
+    )
+    return
+
+
+@app.cell
+def _verification(repo_root, mo):
+    artifact_path = repo_root / "build" / "day3" / "golden_thread_day3.json"
+    artifact_note = (
+        f"Current artifact present: `{artifact_path.relative_to(repo_root)}`"
+        if artifact_path.exists()
+        else "Artifact missing: rebuild the Day 3 artifact after the repair."
+    )
+    mo.md(
+        f"""
+        ## Verification
+
+        Run these commands in the terminal:
+
+        ```bash
+        uv run python -m pytest tests/day3/test_vendor_authority_ranking.py tests/day3/test_day3_exit_check.py -q
+        uv run aegisap-lab artifact rebuild --day 03
+        ```
+
+        {artifact_note}
+        """
+    )
+    return
+
+
+@app.cell
+def _pr_defense(mo):
+    mo.md(
+        """
+        ## PR Defense
+
+        Your pull request must include:
+
+        - the exact source that was wrongly winning before the repair
+        - why the failure lived in authority ranking rather than search ingestion alone
+        - proof that authoritative evidence still cites the stale email as lower-trust history
+        - one sentence explaining the business blast radius of retrieval becoming authority
+        """
+    )
+    return

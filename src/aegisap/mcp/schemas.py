@@ -15,18 +15,23 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
+class McpToolSpec(BaseModel):
+    name: str
+    description: str
+
+
 class McpCapabilities(BaseModel):
     """Advertised capabilities returned by the /capabilities endpoint."""
 
     protocol_version: str = "2024-11-05"
     server_name: str = "aegisap-mcp"
     server_version: str = "1.0.0"
-    tools: list[str] = Field(
+    tools: list[McpToolSpec] = Field(
         default_factory=lambda: [
-            "query_invoice_status",
-            "list_pending_approvals",
-            "get_vendor_policy",
-            "submit_payment_hold",
+            McpToolSpec(name="query_invoice_status", description="Query the current status of one invoice."),
+            McpToolSpec(name="list_pending_approvals", description="List invoices waiting on human approval."),
+            McpToolSpec(name="get_vendor_policy", description="Return the vendor approval policy in force."),
+            McpToolSpec(name="submit_payment_hold", description="Place an actor-bound payment hold on an invoice."),
         ]
     )
 
@@ -66,7 +71,7 @@ class InvoiceQueryResponse(BaseModel):
 class ListPendingApprovalsRequest(BaseModel):
     """Request body for ``list_pending_approvals``."""
 
-    approver_oid: str = Field(..., description="Entra OID of the approver.")
+    approver_oid: str | None = Field(None, description="Entra OID of the approver.")
     limit: int = Field(default=20, ge=1, le=100)
 
 

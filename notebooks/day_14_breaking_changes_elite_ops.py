@@ -6,1049 +6,174 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _bootstrap():
-    import sys
-    from pathlib import Path
-    _root = Path(__file__).resolve().parents[1]
-    for _p in [str(_root / "src"), str(_root / "notebooks")]:
-        if _p not in sys.path:
-            sys.path.insert(0, _p)
-    return
-
-
-@app.cell
-def _imports():
-    import marimo as mo
     import json
-    import os
-    import datetime
     from pathlib import Path
-    return datetime, json, mo, os, Path
+
+    import marimo as mo
+
+    repo_root = Path(__file__).resolve().parents[1]
+    return json, mo, repo_root
 
 
-# ---------------------------------------------------------------------------
-# Title
-# ---------------------------------------------------------------------------
 @app.cell
 def _title(mo):
-    mo.md("""
-    # Day 14 — Breaking Changes & Elite Operations
+    mo.md(
+        """
+        # Day 14 - Chaos Command Rescue Mission
 
-    > **WAF Pillars:** Reliability · Operational Excellence · Security · Performance  
-    > **Estimated time:** 4 hours  
-    > **Prerequisites:** Days 11-13 complete, all prior gate artifacts present  
-    > **Gates validated:** ALL 17 (Gates 1-6 from `gates.py` + Gates 7-17 from `gates_v2.py`)
-
-    ---
-
-    ## Learning Objectives
-
-    1. Execute 10 failure-mode drills and record remediation steps.
-    2. Perform a canary deployment with traffic splitting (10 % → 100 %) and
-       automated rollback on regression.
-    3. Verify data residency constraints using the ARM API (not string matching).
-    4. Generate a CTO trace report aggregating all 17 gate results.
-    5. Pass all 17 gates — the "elite ops" graduation requirement.
-
-    ---
-
-    ## Arc Position
-
-    ```
-    Day 11 ──► Day 12 ──► Day 13 ──►[Day 14]
-    OBO        VNET       Integration  Elite Ops
-                          & MCP        ← ALL GATES HERE
-    ```
-
-    This is the final day.  Every artifact and gate from the full 14-day curriculum
-    converges here into one CTO-level trace report.
-    """)
-    return
-
-
-@app.cell
-def _full_day_agenda(mo):
-    from _shared.curriculum_scaffolds import render_full_day_agenda
-
-    render_full_day_agenda(
-        mo,
-        day_label="Day 14 elite operations and breaking changes",
-        core_outcome="defend rollout, rollback, and executive communication decisions with authoritative evidence rather than optimism",
-        afternoon_focus="Treat the afternoon as a live defense rehearsal: operate under time pressure, keep the evidence chain intact, and stay transfer-domain correct.",
-    )
-    return
-
-@app.cell
-def _notebook_guide(mo):
-    from _shared.lab_guide import render_notebook_learning_context
-
-    render_notebook_learning_context(
-        mo,
-        purpose='Operate the full system under change pressure and produce executive-ready evidence across all gates.',
-        prerequisites=['Days 11-13 complete.', 'Prior gate artifacts are present.', 'Live verification for canary, trace, and residency requires the corresponding environment and telemetry context.'],
-        resources=['`notebooks/day_14_breaking_changes_elite_ops.py`', '`build/day14/` and `build/day12/stale_index_report.json` for final artifacts', '`scripts/check_all_gates_v2.py` and `scripts/generate_cto_trace_report.py` for full-run follow-up', '`docs/curriculum/artifacts/day14/` and `docs/curriculum/CAPSTONE_B_TRANSFER.md`'],
-        setup_sequence=['Verify the upstream Day 11-13 artifacts exist before expecting all Day 14 evidence to turn green.', 'Run the capstone transfer and convergence map cells first so you can see the final dependency chain.', 'Decide whether you are producing training previews only or authoritative live evidence for canary, trace, and residency.'],
-        run_steps=['Work through drills, canary, residency, trace correlation, rollback, stale-index detection, and final trace reporting in order.', 'Use the notebook as the primary operating narrative before invoking the all-gates scripts.', 'Run the artifact cells that populate `build/day14/` and `build/day12/stale_index_report.json`.', 'Finish by generating or reviewing the CTO trace report and the final checklist.'],
-        output_interpretation=['Success is not one file but a coherent evidence pack across canary, residency, rollback, trace, and final CTO trace reporting.', 'The final high-signal output is `build/day14/cto_trace_report.json`, but it is only trustworthy if the upstream artifacts are real.', 'Training previews are useful for learning, but Day 14 teaches you to distinguish them from authoritative operational proof.'],
-        troubleshooting=['If the final day feels overwhelming, follow the convergence map and handle one evidence chain at a time.', 'If a late-stage gate fails, inspect the upstream day artifact before debugging the Day 14 notebook cell.', 'If live telemetry or environment dependencies are missing, complete the notebook with previews first and mark the authoritative rerun as operational follow-up.'],
-        outside_references=['Capstone transfer domain: `docs/curriculum/CAPSTONE_B_TRANSFER.md`', 'Reusable references: `docs/curriculum/artifacts/day14/`', 'Full gate runner and report scripts in `scripts/`'],
+        Day 14 starts in the war room: the trace gate can show green even when
+        the private-network deployment is missing the second sink required for
+        executive-grade incident evidence. Your job is to prove the false-green
+        path, repair the elite-operations gate, and then produce the chaos and
+        executive artifacts that would let a CTO trust the response.
+        """
     )
     return
 
 
 @app.cell
-def _three_surface_linkage(mo):
-    from _shared.lab_guide import render_surface_linkage
+def _incident(mo):
+    mo.md(
+        """
+        ## Incident
 
-    render_surface_linkage(
-        mo,
-        portal_guide="docs/curriculum/portal/DAY_14_PORTAL.md",
-        portal_activity="Inspect canary traffic, telemetry, residency, and private-network posture in Azure before you trust the final operational report or all-gates summary.",
-        notebook_activity="Use the drill, canary, residency, rollback, trace-correlation, and CTO-report sections to explain why the Azure evidence supports continue, hold, or rollback.",
-        automation_steps=[
-            "`uv run python scripts/verify_canary_regression.py` and `uv run python scripts/verify_trace_correlation.py` turn the live rollout evidence into authoritative artifacts.",
-            "`uv run python scripts/verify_private_network_static.py` preserves the private-network constraint inside the final operating pass.",
-            "`uv run python scripts/generate_cto_trace_report.py` and `uv run python -m pytest tests/day14 -q` package the same story into the final executive and regression surface.",
-        ],
-        evidence_checks=[
-            "The portal canary, rollback, telemetry, and residency state should match the notebook's operating narrative.",
-            "`build/day14/canary_regression_report.json`, `build/day14/trace_correlation_report.json`, `build/day14/data_residency_report.json`, and `build/day14/cto_trace_report.json` should all tell the same story as Azure.",
-            "If Azure state and the final reports disagree, the report is not trustworthy enough for executive use.",
-        ],
+        The candidate release is under pressure, but the trace gate is no longer
+        enforcing the dual-sink requirement that Day 12 private networking made
+        mandatory.
+
+        **What success looks like**
+
+        - missing dual-sink evidence forces the Day 14 gate red again
+        - the rollback and canary evidence still survive the repair
+        - the chaos capstone records MTTR and the executive packet tells a coherent incident story
+        """
     )
     return
 
 
 @app.cell
-def _azure_mastery_guide(mo):
-    from _shared.lab_guide import render_azure_mastery_guide
+def _portal_investigation(mo):
+    mo.md(
+        """
+        ## Portal Investigation
 
-    render_azure_mastery_guide(
-        mo,
-        focus="Day 14 mastery means you can operate the final rollout from Azure itself: inspect canary and rollback state in the portal, run the authoritative verification commands, recognise the minimal ARM-based code path, and defend the CTO report with real Azure evidence.",
-        portal_tasks="""
-- Open the **Container App** and inspect **Revisions** plus traffic weights so you can see the canary and stable state without relying on notebook text.
-- Open **Application Insights** or **Log Analytics** and confirm the candidate workflow run and deployment revision appear in live telemetry.
-- Inspect the AI resource blades and confirm the locations and network posture match the residency and private-only claims you are about to make.
-- Treat the portal as a cross-check on the final evidence pack: traffic, traces, and resource location should all agree with the report artifacts.
-""",
-        cli_verification="""
-**Inspect the live canary surface**
+        Start from live operations evidence before touching the gate:
 
-```bash
-export AZURE_CONTAINER_APP_NAME=ca-aegisap-staging
-
-az containerapp revision list \
-  --name "$AZURE_CONTAINER_APP_NAME" \
-  --resource-group "$AZURE_RESOURCE_GROUP" \
-  -o table
-```
-
-**Write the authoritative Day 14 verification artifacts**
-
-```bash
-uv run python scripts/verify_canary_regression.py
-uv run python scripts/verify_trace_correlation.py
-uv run python scripts/verify_private_network_static.py
-uv run python scripts/generate_cto_trace_report.py
-```
-
-**Rollback traffic if the canary evidence turns red**
-
-```bash
-az containerapp ingress traffic set \
-  --name "$AZURE_CONTAINER_APP_NAME" \
-  --resource-group "$AZURE_RESOURCE_GROUP" \
-  --revision-weight "<stable-revision>=100"
-```
-""",
-        sdk_snippet="""
-The authoritative residency path uses ARM data rather than string matching in app config.
-
-```python
-from azure.identity import DefaultAzureCredential
-from azure.mgmt.resource import ResourceManagementClient
-import os
-
-client = ResourceManagementClient(
-    DefaultAzureCredential(),
-    os.environ["AZURE_SUBSCRIPTION_ID"],
-)
-
-resources = list(
-    client.resources.list_by_resource_group(
-        os.environ["AZURE_RESOURCE_GROUP"],
-        expand="properties",
-    )
-)
-```
-""",
-        proof_in_azure="""
-- `build/day14/canary_regression_report.json`, `trace_correlation_report.json`, `data_residency_report.json`, and `cto_trace_report.json` all exist and switch from training preview to authoritative evidence on the live path.
-- The portal traffic view matches the canary or rollback decision reflected in the artifacts.
-- Azure Monitor and LangSmith agree on the workflow run and revision when trace correlation is authoritative.
-- Elite Day 14 proof means the final CTO report can be defended from Azure state, CLI output, and artifact contents without hand-waving.
-""",
+        1. Inspect the candidate revision, rollout status, and any canary or rollback markers in Azure.
+        2. Compare Application Insights evidence to the expected second sink or workspace evidence.
+        3. Verify whether the environment is on the private-network path that should require dual-sink trace proof.
+        4. Capture the exact mismatch between real operator evidence and the Day 14 gate decision.
+        """
     )
     return
 
 
 @app.cell
-def _capstone_b_transfer_lens(mo):
-    mo.callout(
-        mo.md(
-            """
-    ## Capstone B Transfer Lens
+def _lab_intro(mo):
+    mo.md(
+        """
+        ## Lab Repair
 
-    This final day is assessed primarily in the **claims intake** transfer domain.
-
-    Keep these open while you work:
-    - `docs/curriculum/CAPSTONE_B_TRANSFER.md`
-    - `fixtures/capstone_b/claims_intake/`
-    - `fixtures/capstone_b/_assessor_only/claims_intake/claim_006_assessor_only.json`
-
-    Your Day 14 standard is not only "can you operate AegisAP" but
-    "can you preserve the same gate discipline, rollback posture, and executive
-    communication quality when the domain changes under pressure."
-    """
-        ),
-        kind="info",
+        Use the notebook to reason about the trace gate with controlled inputs.
+        The real repair still belongs in the production release and trace code.
+        """
     )
     return
 
 
 @app.cell
-def _day14_convergence_map(mo):
-    mo.callout(
-        mo.md(
-            """
-    ## Visual Guide — Final Convergence Map
-
-    ```
-    Day 11 identity evidence      ┐
-    Day 12 network evidence       ├─► gates 7-11
-    Day 13 boundary evidence      ┘
-    Day 14 canary / residency / trace evidence ─► gates 12-17
-                                                   │
-                                                   └─► build/day14/cto_trace_report.json
-    ```
-
-    A Day 14 claim is only elite-grade when the evidence chain stays intact:
-
-    | Late-stage question | Minimum artifact chain |
-    |---|---|
-    | "Can we trust the actor?" | Day 11 OBO artifacts -> `gate_delegated_identity` |
-    | "Can the data plane stay private?" | Day 12 static + live posture artifacts -> `gate_private_network_*` |
-    | "Can the boundary fail safely?" | Day 13 DLQ + MCP reports -> `gate_dlq_drain_health`, `gate_mcp_contract_integrity` |
-    | "Can we operate change under pressure?" | Day 14 canary, residency, trace, rollback artifacts -> final CTO trace report |
-
-    Training previews help you learn the shape of the evidence.
-    They do not count as the evidence itself.
-    """
-        ),
-        kind="info",
-    )
-    return
-
-
-@app.cell
-def _day14_mastery_checkpoint(mo):
-    mo.callout(
-        mo.md(
-            """
-    ## Mastery Checkpoint — Elite Defense Readiness
-
-    Do not claim Day 14 readiness unless you can defend all four statements:
-    - I know which late-stage artifacts are still training previews and which ones are authoritative
-    - I can name the exact gate that should fail for each of the 10 drills
-    - I can justify a halt, rollback, or partial-service decision in business language, not only technical language
-    - I can repeat the same reasoning in the claims-intake transfer domain without relaxing the evidence bar
-    """
-        ),
-        kind="warn",
-    )
-    return
-
-
-# ---------------------------------------------------------------------------
-# Section 1 — 10 Breaking-Change Drills
-# ---------------------------------------------------------------------------
-@app.cell
-def _s1_header(mo):
-    mo.md("## 1. Breaking-Change Drills")
-    return
-
-
-@app.cell
-def _s1_body(mo):
-    mo.md("""
-    Each drill simulates a failure mode that can occur in production.  For each
-    drill, you will: describe the failure, state its detection mechanism, and
-    record the remediation.
-
-    | Drill | Failure Mode | Detection | Gate affected |
-    |---|---|---|---|
-    | 01 | IAM drift — MI deleted, app uses stale cached token | 401 spike in Azure Monitor | `gate_delegated_identity` (sub-check: `actor_binding`, Day 11) |
-    | 02 | OBO scope mismatch — wrong `scope` in token exchange | `insufficient_claims` error in logs | `gate_delegated_identity` (sub-check: `obo_exchange`, Day 11) |
-    | 03 | Private Endpoint DNS misconfiguration — hostname resolves to public IP | `dns_private=False` in posture probe | `gate_private_network_posture` (Day 12) |
-    | 04 | Public endpoint re-enabled — operator toggles `publicNetworkAccess=Enabled` | `static_bicep_analysis.json` missing or `written_by` mismatch | `gate_private_network_static` (Day 12) |
-    | 05 | Service Bus DLQ overflow — compensating actions not registered | DLQ depth > threshold | `gate_dlq_drain_health` (Day 13) |
-    | 06 | MCP tool removed — contract break between versions | `/capabilities` missing tool | `gate_mcp_contract_integrity` (Day 13) |
-    | 07 | Model version changed — regression in extraction accuracy | F1 drop in canary | `gate_canary_regression` (Day 14) |
-    | 08 | Data residency violation — resource deployed to wrong region | ARM API region check | `gate_data_residency` (Day 14) |
-    | 09 | Correlation ID not propagated — trace gaps in distributed logs | coverage < 100 % in corr report | `gate_trace_correlation` (Day 14) |
-    | 10 | Rollback failure — new image manifest invalid, can't pull | Container restart loop | All gates re-run after rollback |
-
-    > **Exercise:** For each drill, open the relevant source module and identify
-    > exactly which line of code detects the failure condition.  Record the file
-    > path and line number in the Drill Evidence artifact written below.
-    """)
-    return
-
-
-# ---------------------------------------------------------------------------
-# Section 2 — Canary Deployment
-# ---------------------------------------------------------------------------
-@app.cell
-def _s2_header(mo):
-    mo.md("## 2. Canary Deployment with Automated Rollback")
-    return
-
-
-@app.cell
-def _s2_body(mo):
-    mo.md("""
-    ### Traffic Splitting in ACA
-
-    Azure Container Apps supports weighted traffic routing between revisions:
-
-    ```bicep
-    resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
-      // ...
-      properties: {
-        configuration: {
-          ingress: {
-            traffic: [
-              { revisionName: 'aegisap-stable', weight: 90 }
-              { revisionName: 'aegisap-canary', weight: 10 }
-            ]
-          }
-        }
-      }
+def _lab_preview(json, mo):
+    preview = {
+        "private_network_all_passed": True,
+        "dual_sink_ok": False,
+        "uncorrelated": 0,
     }
-    ```
-
-    ### Decision Logic
-
-    ```
-    Deploy canary at 10 %
-         │
-         ├─► wait 15 min
-         │
-         ├─► collect metrics: error rate, p99 latency, extraction F1
-         │
-         ├─ error rate > threshold OR F1 drop > 5 % ──► rollback: set canary weight → 0
-         │
-         └─ all metrics OK ──► promote: set canary weight → 100 %
-    ```
-
-    ### Rollback Command
-
-    ```bash
-    # Azure CLI: restore traffic to stable revision
-    az containerapp ingress traffic set \\
-      --name aegisap-worker \\
-      --resource-group rg-aegisap \\
-      --revision-weight aegisap-stable=100 aegisap-canary=0
-    ```
-
-    Gate `gate_canary_regression` reads `build/day14/canary_regression_report.json`
-    and checks that the promoted revision had F1 ≥ baseline and error rate ≤ threshold.
-    The notebook lab below delegates to a shared verification script so that the same
-    command can be used in training or in a real promotion pipeline.
-    """)
-    return
-
-
-@app.cell
-def _s2_live_runbook(mo):
+    preview["should_pass"] = (
+        preview["uncorrelated"] == 0 and not preview["private_network_all_passed"] or preview["dual_sink_ok"]
+    )
     mo.callout(
         mo.md(
+            f"""
+            Day 14 gate preview:
+
+            ```json
+            {json.dumps(preview, indent=2)}
+            ```
             """
-    ### Live Evidence Runbook — Canary Verification
-
-    Produce authoritative canary evidence with the same artifact shape the gate consumes:
-
-    1. Route a bounded percentage of traffic to the candidate revision.
-    2. Collect the protected canary metrics from your eval runner and live telemetry.
-    3. Export the metrics into the shell:
-
-    ```bash
-    export AEGISAP_CANARY_REVISION=aegisap-worker--candidate
-    export AEGISAP_STABLE_REVISION=aegisap-worker--stable
-    export AEGISAP_CANARY_F1=0.947
-    export AEGISAP_ERROR_RATE_CANARY=0.0015
-    export AEGISAP_ERROR_RATE_STABLE=0.0017
-    uv run python scripts/verify_canary_regression.py
-    ```
-
-    Optional live inputs:
-    - `AEGISAP_BASELINE_F1` if you want to override the Day 8 baseline artifact
-    - `AEGISAP_CANARY_REGRESSIONS` for named slice regressions from your eval runner
-    - `AEGISAP_CANARY_PROMOTED` / `AEGISAP_CANARY_ROLLED_BACK` to record the actual decision
-
-    Authoritative success means:
-    - `build/day14/canary_regression_report.json` has `training_artifact: false`
-    - `authoritative_evidence: true`
-    - `passed: true`
-    - `regressions: []`
-    """
         ),
         kind="info",
     )
     return
 
 
-# ---------------------------------------------------------------------------
-# Section 3 — Data Residency ARM Verification
-# ---------------------------------------------------------------------------
 @app.cell
-def _s3_header(mo):
-    mo.md("## 3. Data Residency — ARM API Verification")
-    return
+def _production_patch(mo):
+    mo.md(
+        """
+        ## Production Patch
 
+        This section is **markdown-only**.
 
-@app.cell
-def _s3_body(mo):
-    mo.md("""
-    ### Why Not String Matching?
+        Do not edit repo files from this notebook.
 
-    A common but fragile approach is to check `AZURE_OPENAI_ENDPOINT` for a region
-    substring (e.g. `"uksouth"`).  This fails because:
-    - The endpoint URL doesn't always contain the region
-    - A placeholder or override env var could pass the check without a real resource
-    - String matching provides no evidence for an auditor
+        Move into the real elite-operations boundary and implement the repair in:
 
-    ### The Right Approach: ARM API
+        - `src/aegisap/deploy/gates_v2.py`
+        - `src/aegisap/traceability/correlation.py` or `scripts/verify_trace_correlation.py` if the trace evidence path is wrong
+        - `scripts/run_chaos_capstone.py` only if the Day 14 operational outputs are incomplete
 
-    `scripts/verify_private_network_static.py` calls the Azure Resource Manager to get the
-    actual resource properties and checks `location` + `publicNetworkAccess`:
+        Then update the Day 14 evidence:
 
-    ```python
-    from azure.mgmt.resource import ResourceManagementClient
-    from azure.identity import DefaultAzureCredential
-
-    client = ResourceManagementClient(DefaultAzureCredential(), subscription_id)
-    for resource_id in ai_resource_ids:
-        resource = client.resources.get_by_id(resource_id, api_version)
-        location = resource.location
-        assert location in ALLOWED_REGIONS, f"{resource_id} is in {location}"
-        pna = resource.properties.get("publicNetworkAccess", "Enabled")
-        assert pna == "Disabled", f"publicNetworkAccess={pna} on {resource_id}"
-    ```
-
-    The gate `gate_data_residency` reads `build/day14/data_residency_report.json`
-    and verifies `all_passed: true`.
-
-    Canonical live command:
-
-    ```bash
-    uv run python scripts/verify_private_network_static.py
-    ```
-
-    ### Allowed Regions for AegisAP
-
-    UK deployments: `["uksouth", "ukwest"]`  
-    EU deployments: `["westeurope", "northeurope", "swedencentral"]`  
-    The allowed list is read from `AEGISAP_ALLOWED_REGIONS` (comma-separated).
-    """)
-    return
-
-
-# ---------------------------------------------------------------------------
-# Section 4 — Trace Correlation
-# ---------------------------------------------------------------------------
-@app.cell
-def _s4_header(mo):
-    mo.md("## 4. Trace Correlation Report")
-    return
-
-
-@app.cell
-def _s4_body(mo):
-    mo.md("""
-    ### What `TraceCorrelator` Does
-
-    The `TraceCorrelator` in `src/aegisap/traceability/correlation.py`:
-
-    1. Reads `build/day12/private_network_posture.json` to determine mode (`dual_sink` vs isolated)
-    2. Checks correlation ID coverage across trace evidence
-    3. If `dual_sink` mode: verifies that both Azure Monitor and the secondary sink are present
-    4. Writes `build/day14/trace_correlation_report.json`
-
-    Canonical command:
-
-    ```bash
-    uv run python scripts/verify_trace_correlation.py
-    ```
-
-    ### Correlation ID Discipline
-
-    Every artifact written by every script and notebook cell must include a
-    `correlation_id` field.  This is the thread that lets an auditor trace any
-    gate result back to a specific deployment and run.
-
-    ```python
-    import uuid
-    correlation_id = os.environ.get("AEGISAP_CORRELATION_ID", str(uuid.uuid4()))
-    artifact = {
-        "correlation_id": correlation_id,
-        "gate": "gate_obo_exchange",
-        # ...
-    }
-    ```
-
-    ### Dual-Sink Architecture
-
-    ```
-    AegisAP Worker
-         │
-         ├──► Azure Monitor (via azure-monitor-opentelemetry)
-         │    └── Log Analytics Workspace → Sentinel alerts
-         │
-         └──► OTLP Collector (sidecar or external)
-              └── Prometheus + Grafana (operational dashboards)
-    ```
-
-    Gate `gate_trace_correlation` fails if either sink is absent in `dual_sink` mode.
-    """)
-    return
-
-
-@app.cell
-def _s4_live_runbook(mo):
-    mo.callout(
-        mo.md(
-            """
-    ### Live Evidence Runbook — Cross-Sink Trace Verification
-
-    Run this from an authenticated shell after the candidate revision has emitted real traces:
-
-    ```bash
-    export AEGISAP_WORKFLOW_RUN_ID=gha-123456789
-    export AEGISAP_DEPLOYMENT_REVISION=aegisap-worker--candidate
-    export AEGISAP_AZURE_APP_ID=<app-insights-app-id>
-    export AEGISAP_LANGSMITH_PROJECT=aegisap-staging
-    uv run python scripts/verify_trace_correlation.py
-    uv run python scripts/generate_cto_trace_report.py
-    ```
-
-    The live trace script verifies:
-    - Azure Monitor contains the candidate workflow run
-    - LangSmith contains the same workflow run and revision
-    - `build/day14/log_analytics_sink_verified.json` exists when dual-sink proof is required
-
-    Authoritative success means:
-    - `build/day14/trace_correlation_report.json` has `training_artifact: false`
-    - `authoritative_evidence: true`
-    - `passed: true`
-    - the final CTO trace report reflects the real trace artifact, not a preview
-    """
-        ),
-        kind="info",
+        - `docs/curriculum/artifacts/day14/INCIDENT_COMMAND_PLAYBOOK.md`
+        - `docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md`
+        - `docs/curriculum/artifacts/day14/ELITE_READINESS_SCORECARD.md`
+        """
     )
     return
 
 
-# ---------------------------------------------------------------------------
-# Section 5 — Lab: Write All Day-14 Gate Artifacts
-# ---------------------------------------------------------------------------
 @app.cell
-def _s5_header(mo):
-    mo.md("## 5. Lab — Write All Day 14 Gate Artifacts")
-    return
-
-
-@app.cell
-def _s5_lab_canary(mo, json, Path):
-    import subprocess
-    import sys
-
-    _root = Path(__file__).resolve().parents[1]
-    _cmd = [sys.executable, str(_root / "scripts" / "verify_canary_regression.py")]
-    _result = subprocess.run(
-        _cmd, cwd=_root, capture_output=True, text=True, check=False
-    )
-    _report_path = _root / "build" / "day14" / "canary_regression_report.json"
-    if not _report_path.exists():
-        _kind = "danger"
-        _msg = (
-            f"Canary verification did not produce `{_report_path}`.\n\n"
-            f"stderr:\n\n```text\n{_result.stderr.strip() or 'no stderr'}\n```"
-        )
-    else:
-        _report = json.loads(_report_path.read_text())
-        _training = bool(_report.get("training_artifact", False))
-        if _training:
-            _kind = "warn"
-            _msg = (
-                f"Training-only canary preview written.\n\n"
-                f"F1 delta: `{_report.get('f1_delta', 0.0):+.3f}` | "
-                f"Candidate revision: `{_report.get('canary_revision')}`\n\n"
-                "Provide live canary metrics and run:\n\n"
-                "`uv run python scripts/verify_canary_regression.py`\n\n"
-                "`gate_canary_regression` stays red until this artifact is authoritative."
-            )
+def _verification(repo_root, mo):
+    cto_path = repo_root / "build" / "day14" / "cto_trace_report.json"
+    drill_path = repo_root / "build" / "day14" / "breaking_changes_drills.json"
+    notes = []
+    for path in (drill_path, cto_path):
+        if path.exists():
+            notes.append(f"Current artifact present: `{path.relative_to(repo_root)}`")
         else:
-            _kind = "success" if _report.get("passed", False) else "danger"
-            _msg = (
-                f"Authoritative canary evidence written.\n\n"
-                f"F1 delta: `{_report.get('f1_delta', 0.0):+.3f}` | "
-                f"Error rate (canary): `{_report.get('error_rate_canary', 0.0):.4f}` | "
-                f"Regressions: `{len(_report.get('regressions', []))}`"
-            )
-    if _result.stderr.strip():
-        _msg += f"\n\nstderr:\n\n```text\n{_result.stderr.strip()}\n```"
-    mo.callout(mo.md(_msg), kind=_kind)
-    return
+            notes.append(f"Artifact missing: `{path.relative_to(repo_root)}`")
+    mo.md(
+        f"""
+        ## Verification
 
+        Run these commands in the terminal:
 
-@app.cell
-def _s5_lab_residency(mo, json, os, Path, datetime):
-    _build = Path(__file__).resolve().parents[1] / "build" / "day14"
-    _build.mkdir(parents=True, exist_ok=True)
+        ```bash
+        uv run python -m pytest tests/day14/test_breaking_changes.py -q
+        uv run python scripts/run_chaos_capstone.py
+        uv run aegisap-lab artifact rebuild --day 14
+        ```
 
-    _allowed_regions = [
-        r.strip()
-        for r in os.environ.get("AEGISAP_ALLOWED_REGIONS", "uksouth,ukwest").split(",")
-        if r.strip()
-    ]
-    _has_live = bool(os.environ.get("AZURE_SUBSCRIPTION_ID", ""))
-
-    if _has_live:
-        try:
-            from azure.mgmt.resource import ResourceManagementClient
-            from azure.identity import DefaultAzureCredential
-            _sub = os.environ["AZURE_SUBSCRIPTION_ID"]
-            _rg = os.environ.get("AZURE_RESOURCE_GROUP", "rg-aegisap")
-            _client = ResourceManagementClient(DefaultAzureCredential(), _sub)
-            _resources = list(_client.resources.list_by_resource_group(
-                _rg, expand="properties"))
-            _violations = []
-            _checked = []
-            for _r in _resources:
-                _loc = (_r.location or "").lower().replace(" ", "")
-                _entry = {"resource": _r.name,
-                          "type": _r.type, "location": _loc}
-                if _loc not in _allowed_regions:
-                    _entry["violation"] = f"region {_loc!r} not in allowed list"
-                    _violations.append(_entry)
-                _checked.append(_entry)
-            _report = {
-                "all_passed": len(_violations) == 0,
-                "training_artifact": False,
-                "authoritative_evidence": True,
-                "execution_tier": 2,
-                "approved_region": ",".join(_allowed_regions),
-                "note": "LIVE_ARM_QUERY",
-                "allowed_regions": _allowed_regions,
-                "resources_checked": len(_checked),
-                "violations": _violations,
-                "run_at": datetime.datetime.utcnow().isoformat() + "Z",
-            }
-            _kind = "success" if _report["all_passed"] else "danger"
-            _msg = f"Data residency check: `all_passed={_report['all_passed']}` ({len(_checked)} resources checked)"
-        except Exception as _exc:
-            _report = {
-                "all_passed": False,
-                "error": str(_exc),
-                "training_artifact": False,
-                "authoritative_evidence": True,
-                "execution_tier": 2,
-                "note": "LIVE_ARM_QUERY_ERROR",
-            }
-            _kind = "danger"
-            _msg = f"Data residency check error: `{_exc}`"
-    else:
-        _report = {
-            "all_passed": False,
-            "training_artifact": True,
-            "authoritative_evidence": False,
-            "execution_tier": 1,
-            "approved_region": ",".join(_allowed_regions),
-            "allowed_regions": _allowed_regions,
-            "resources_checked": 4,
-            "violations": [],
-            "note": "TRAINING_ONLY: no AZURE_SUBSCRIPTION_ID set",
-            "run_at": datetime.datetime.utcnow().isoformat() + "Z",
-            "stub_resources": [
-                {"resource": "aegisap-openai",
-                    "type": "Microsoft.CognitiveServices/accounts", "location": "uksouth"},
-                {"resource": "aegisap-search",
-                    "type": "Microsoft.Search/searchServices", "location": "uksouth"},
-                {"resource": "aegisap-storage",
-                    "type": "Microsoft.Storage/storageAccounts", "location": "uksouth"},
-                {"resource": "aegisap-pg",
-                    "type": "Microsoft.DBforPostgreSQL/flexibleServers", "location": "uksouth"},
-            ],
-        }
-        _kind = "neutral"
-        _msg = (
-            f"No `AZURE_SUBSCRIPTION_ID` set — writing a training-only data residency preview.\n\n"
-            f"Allowed regions: `{', '.join(_allowed_regions)}`\n\n"
-            "`gate_data_residency` stays red until the ARM API is queried against the real resource group."
-        )
-
-    (_build / "data_residency_report.json").write_text(json.dumps(_report, indent=2))
-    mo.callout(mo.md(_msg), kind=_kind)
-    return
-
-
-@app.cell
-def _s5_lab_trace(mo, json, Path):
-    import subprocess
-    import sys
-
-    _root = Path(__file__).resolve().parents[1]
-    _cmd = [sys.executable, str(_root / "scripts" / "verify_trace_correlation.py")]
-    _result = subprocess.run(
-        _cmd, cwd=_root, capture_output=True, text=True, check=False
-    )
-    _report_path = _root / "build" / "day14" / "trace_correlation_report.json"
-    if not _report_path.exists():
-        _kind = "danger"
-        _msg = (
-            f"Trace verification did not produce `{_report_path}`.\n\n"
-            f"stderr:\n\n```text\n{_result.stderr.strip() or 'no stderr'}\n```"
-        )
-    else:
-        _corr_report = json.loads(_report_path.read_text())
-        _training = bool(_corr_report.get("training_artifact", False))
-        if _training:
-            _kind = "warn"
-            _msg = (
-                f"Training-only trace preview written.\n\n"
-                f"Coverage: `{_corr_report.get('correlation_id_coverage', 0.0):.0%}` | "
-                f"Mode: `{_corr_report.get('mode', 'unknown')}`\n\n"
-                "Provide live trace inputs and run:\n\n"
-                "`uv run python scripts/verify_trace_correlation.py`\n\n"
-                "`gate_trace_correlation` stays red until real telemetry is exported and checked."
-            )
-        else:
-            _kind = "success" if _corr_report.get("passed", False) else "danger"
-            _msg = (
-                f"Authoritative trace evidence written.\n\n"
-                f"Correlated: `{_corr_report.get('correlated', 0)}` / `{_corr_report.get('total_traces', 0)}` | "
-                f"Dual-sink satisfied: `{_corr_report.get('dual_sink_satisfied', False)}`"
-            )
-    if _result.stderr.strip():
-        _msg += f"\n\nstderr:\n\n```text\n{_result.stderr.strip()}\n```"
-    mo.callout(mo.md(_msg), kind=_kind)
-    return
-
-
-@app.cell
-def _s5_lab_rollback(mo, json, os, Path, datetime):
-    """Write build/day14/rollback_readiness_report.json for gate_rollback_readiness."""
-    _build = Path(__file__).resolve().parents[1] / "build" / "day14"
-    _build.mkdir(parents=True, exist_ok=True)
-
-    _stable_revision = os.environ.get(
-        "AEGISAP_STABLE_REVISION", "aegisap-stable-stub")
-    _runbook_path = Path(__file__).resolve(
-    ).parents[1] / "runbooks" / "rollback.md"
-
-    _rollback_report = {
-        "stable_revision_known": bool(_stable_revision),
-        "stable_revision": _stable_revision,
-        "runbook_present": _runbook_path.exists(),
-        "runbook_path": str(_runbook_path.relative_to(Path(__file__).resolve().parents[1])),
-        "last_verified_at": datetime.datetime.utcnow().isoformat() + "Z",
-        "written_by": "day14_lab",
-    }
-    (_build / "rollback_readiness_report.json").write_text(json.dumps(_rollback_report, indent=2))
-    _kind = "success" if (
-        _rollback_report["stable_revision_known"] and _rollback_report["runbook_present"]) else "warn"
-    mo.callout(
-        mo.md(
-            f"Rollback readiness report written.\n\n"
-            f"Stable revision: `{_stable_revision}` | "
-            f"Runbook present: `{_rollback_report['runbook_present']}`\n\n"
-            "_Tip: create `runbooks/rollback.md` and set `AEGISAP_STABLE_REVISION` to go green._"
-        ),
-        kind=_kind,
+        {'\n\n'.join(notes)}
+        """
     )
     return
 
 
 @app.cell
-def _s5_lab_stale_index(mo, json, Path, datetime):
-    """Write build/day12/stale_index_report.json for gate_stale_index_detection."""
-    _build12 = Path(__file__).resolve().parents[1] / "build" / "day12"
-    _build12.mkdir(parents=True, exist_ok=True)
+def _pr_defense(mo):
+    mo.md(
+        """
+        ## PR Defense
 
-    _stale_report = {
-        "stale_indexes": [],
-        "threshold_hours": 24,
-        "indexes_checked": ["invoice-index", "vendor-policy-index"],
-        "all_fresh": True,
-        "run_at": datetime.datetime.utcnow().isoformat() + "Z",
-        "written_by": "day14_lab",
-    }
-    (_build12 / "stale_index_report.json").write_text(json.dumps(_stale_report, indent=2))
-    mo.callout(
-        mo.md(
-            f"Stale index report written to `build/day12/stale_index_report.json`.\n\n"
-            f"Indexes checked: `{', '.join(_stale_report['indexes_checked'])}` | "
-            f"All fresh: `{_stale_report['all_fresh']}`"
-        ),
-        kind="success",
+        Your pull request must include:
+
+        - the exact false-green condition in the Day 14 gate and why it is operationally dangerous
+        - why private-network deployments require stronger trace evidence than the public fallback path
+        - proof that the chaos drill and CTO artifacts still tell a coherent rollback and incident story
+        - one sentence on the blast radius of continuing service without trustworthy cross-sink evidence
+        """
     )
-    return
-
-
-@app.cell
-def _s5_lab_drills(mo, json, Path, datetime):
-    _build = Path(__file__).resolve().parents[1] / "build" / "day14"
-    _build.mkdir(parents=True, exist_ok=True)
-
-    _drills = [
-        {"id": f"drill_{i:02d}", "completed": True, "remediation_recorded": True}
-        for i in range(1, 11)
-    ]
-    _drill_artifact = {
-        "drills": _drills,
-        "all_completed": all(d["completed"] for d in _drills),
-        "run_at": datetime.datetime.utcnow().isoformat() + "Z",
-    }
-    (_build / "breaking_changes_drills.json").write_text(json.dumps(_drill_artifact, indent=2))
-    mo.callout(mo.md(
-        f"Breaking-change drills artifact written. All 10 drills: `completed=True`."), kind="success")
-    return
-
-
-# ---------------------------------------------------------------------------
-# Section 6 — CTO Trace Report
-# ---------------------------------------------------------------------------
-@app.cell
-def _s6_header(mo):
-    mo.md("## 6. CTO Trace Report — All 17 Gates")
-    return
-
-
-@app.cell
-def _s6_cto_report(mo, json, Path, datetime, os):
-    import sys as _sys
-
-    _root = Path(__file__).resolve().parents[1]
-    _deploy_path = str(_root / "src")
-    if _deploy_path not in _sys.path:
-        _sys.path.insert(0, _deploy_path)
-
-    _build14 = _root / "build" / "day14"
-    _build14.mkdir(parents=True, exist_ok=True)
-
-    try:
-        from aegisap.deploy.gates import (
-            gate_security_posture,
-            gate_eval_regression,
-            gate_budget,
-            gate_resume_safety,
-            gate_aca_health,
-            gate_refusal_safety,
-        )
-        from aegisap.deploy.gates_v2 import (
-            gate_delegated_identity,
-            gate_private_network_static,
-            gate_private_network_posture,
-            gate_trace_correlation,
-            gate_data_residency,
-            gate_dlq_drain_health,
-            gate_mcp_contract_integrity,
-            gate_canary_regression,
-            gate_stale_index_detection,
-            gate_webhook_reliability,
-            gate_rollback_readiness,
-        )
-
-        _base_fns = [
-            gate_security_posture, gate_eval_regression, gate_budget,
-            gate_resume_safety, gate_aca_health, gate_refusal_safety,
-        ]
-        _elite_fns = [
-            gate_delegated_identity,
-            gate_private_network_static, gate_private_network_posture,
-            gate_trace_correlation, gate_data_residency, gate_dlq_drain_health,
-            gate_mcp_contract_integrity, gate_canary_regression,
-            gate_stale_index_detection, gate_webhook_reliability, gate_rollback_readiness,
-        ]
-        _gate_fns = _base_fns + _elite_fns
-
-        def _run_fns(fns):
-            rows = []
-            for _fn in fns:
-                try:
-                    _r = _fn()
-                    rows.append(
-                        {"gate": _r.name, "passed": _r.passed, "detail": _r.detail})
-                except Exception as _exc:
-                    rows.append(
-                        {"gate": _fn.__name__, "passed": False, "detail": str(_exc)})
-            return rows
-
-        _base_results = _run_fns(_base_fns)
-        _elite_results = _run_fns(_elite_fns)
-        _results = _base_results + _elite_results
-
-        _all_pass = all(r["passed"] for r in _results)
-        _pass_count = sum(1 for r in _results if r["passed"])
-        _cto_report = {
-            "all_gates_passed": _all_pass,
-            "passed": _pass_count,
-            "total": len(_results),
-            "base_gates": _base_results,
-            "elite_gates": _elite_results,
-            "run_at": datetime.datetime.utcnow().isoformat() + "Z",
-        }
-        (_build14 / "cto_trace_report.json").write_text(json.dumps(_cto_report, indent=2))
-
-        def _table_rows(rows):
-            return "\n".join(
-                f"| `{r['gate']}` | {'✅' if r['passed'] else '❌'} | {r['detail'][:80]} |"
-                for r in rows
-            )
-        _hdr = "| Gate | Status | Detail |\n|---|---|---|\n"
-        _summary_text = (
-            f"### Day 10 Base Gates\n\n{_hdr}{_table_rows(_base_results)}\n\n"
-            f"### Day 14 Elite Gates\n\n{_hdr}{_table_rows(_elite_results)}\n\n"
-            f"**Combined: `{_pass_count}/{len(_results)} passed`**"
-        )
-        _kind = "success" if _all_pass else "warn"
-
-    except Exception as _import_exc:
-        _all_pass = False
-        _summary_text = f"Could not load gates: `{_import_exc}`"
-        _kind = "danger"
-        _cto_report = {"error": str(_import_exc), "all_gates_passed": False}
-        (_build14 / "cto_trace_report.json").write_text(json.dumps(_cto_report, indent=2))
-
-    mo.callout(mo.md(_summary_text), kind=_kind)
-    return
-
-
-@app.cell
-def _day14_unscaffolded_block(mo):
-    from _shared.curriculum_scaffolds import render_unscaffolded_block
-
-    render_unscaffolded_block(
-        mo,
-        title="Unscaffolded Afternoon Block — Operator Judgment Under Pressure",
-        brief=(
-            "Set the notebook aside and draft a one-page go / no-go note for a candidate "
-            "revision. You must choose promote, pause, rollback, or partial continuation. "
-            "Use only the artifacts and gates, not intuition, and include the transfer-domain "
-            "implication for claims intake."
-        ),
-        done_when=(
-            "A single decision is stated clearly with named evidence and named authority.",
-            "The note explains what would change your decision in the next observation window.",
-            "The reasoning still holds if the same situation appears in the claims-intake transfer domain.",
-        ),
-    )
-    return
-
-
-# ---------------------------------------------------------------------------
-# Summary + Graduation
-# ---------------------------------------------------------------------------
-@app.cell
-def _summary(mo):
-    mo.md("""
-    ## Day 14 Summary Checklist
-
-    - [ ] Describe all 10 breaking-change drills and their detection mechanisms
-    - [ ] Configure canary traffic split in ACA Bicep and state the rollback command
-    - [ ] Run `uv run python scripts/verify_canary_regression.py` with live canary metrics or explain why the notebook remains in preview mode
-    - [ ] Explain why ARM API is used for data residency (not string matching)
-    - [ ] State what `TraceCorrelator` checks in `dual_sink` mode
-    - [ ] Run `uv run python scripts/verify_trace_correlation.py` with live trace identifiers or explain why the notebook remains in preview mode
-    - [ ] Confirm `build/day14/` has all artifacts: `canary_regression_report.json`,
-          `data_residency_report.json`, `trace_correlation_report.json`,
-          `rollback_readiness_report.json`, `cto_trace_report.json`
-    - [ ] Confirm `build/day12/stale_index_report.json` present (written by lab cell above)
-    - [ ] Run `python scripts/check_all_gates_v2.py` and confirm all 17 gates pass
-    """)
-    return
-
-
-@app.cell
-def _graduation(mo):
-    mo.callout(
-        mo.md("""
-## Curriculum Complete
-
-You have completed the AegisAP 14-day Elite Engineering curriculum.
-
-**Evidence of completion:**
-- 17 gates defined, all with artifact-backed verification
-- 4 new infrastructure patterns: OBO identity, private networking, integration boundaries, MCP
-- CTO trace report aggregates the full curriculum into one auditable artefact
-
-**Next steps:**
-- Run `scripts/check_all_gates_v2.py` against a real staging environment
-- Review `docs/DAY_11_DELEGATED_IDENTITY.md` through `DAY_14_BREAKING_CHANGES.md`
-- Schedule operational drills using the runbooks in `runbooks/`
-        """),
-        kind="success",
-    )
-    return
-
-
-
-@app.cell
-def _fde_learning_contract(mo):
-    mo.md(r"""
-    ---
-    ## FDE Learning Contract — Day 14: Elite Operations, Breaking Changes, and Executive Incident Leadership
-    
-> **Zero-tolerance day** — a hard-fail on any zero-tolerance condition sets the day score to 0.
-> **Capstone B day** — primary deliverables are in the claims intake transfer domain.
-
-    ### Four Daily Outputs
-
-    | # | Output type | Location |
-    |---|---|---|
-    | 1 | Technical build | `LAB_OUTPUT/` |
-    | 2 | Design defense memo | `DECISION_MEMOS/` |
-    | 3 | Corporate process artifact | `PROCESS_ARTIFACTS/` |
-    | 4 | Oral defense prep notes | `ORAL_DEFENSE/` |
-
-    ### Rubric Weights (100 points total)
-
-    | Dimension | Points |
-    |---|---|
-    | Operational Correctness | 30 |
-| Prioritisation Under Pressure | 20 |
-| Executive Communication | 20 |
-| Evidence Gates In Decision Making | 15 |
-| Final Oral Defense | 15 |
-
-    Pass bar: **80 / 100**   Elite bar: **90 / 100**
-
-    ### Oral Defense Prompts
-
-    1. During the war-game, three failures arrive simultaneously. Walk through your triage order, the mental model driving each decision, and the first action you would not take.
-2. You recommend a partial-service continuation. What is the blast radius of that choice, which gates are you explicitly bypassing, and who must countersign?
-3. The CTO asks for a one-page incident brief in ten minutes. Walk through exactly what goes in it, what you leave out, and who reviews it before it is sent.
-
-    ### Artifact Scaffolds
-
-    - `docs/curriculum/artifacts/day14/INCIDENT_COMMAND_PLAYBOOK.md`
-- `docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md`
-- `docs/curriculum/artifacts/day14/ELITE_READINESS_SCORECARD.md`
-
-    See `docs/curriculum/MENTAL_MODELS.md` for mental models reference.
-    See `docs/curriculum/ASSESSOR_CALIBRATION.md` for scoring anchors.
-    """)
     return
 
 

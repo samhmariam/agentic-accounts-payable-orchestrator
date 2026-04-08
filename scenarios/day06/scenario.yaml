@@ -1,0 +1,20 @@
+day: "06"
+title: "Prompt Injection Detector Lost Evidence Normalization"
+phase: "phase_2_agentic_state"
+baseline_track: "core"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track core --scenario day06"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day06 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day6/test_review_gate.py tests/day6/test_training_runtime_integration.py -q"
+  ci_command: "uv run python -m pytest tests/day6/test_review_gate.py tests/day6/test_training_runtime_integration.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day06 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave2-day06-review-boundary"
+  human_required: true

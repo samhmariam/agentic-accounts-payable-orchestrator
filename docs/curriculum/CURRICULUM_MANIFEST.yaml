@@ -8,13 +8,19 @@
 #   title           : canonical day title
 #   notebook_file   : repo-root-relative path to the Marimo notebook
 #   primary_doc_file: repo-root-relative path to the primary day doc (may not exist yet at manifest creation)
-#   legacy_doc_files: superseded docs kept for reference; listed here so tests can assert they still exist
+#   legacy_doc_files: reserved for explicit compatibility exceptions; incident-delivery days should leave this empty
 #   rubric_weights  : five dimensions summing exactly to 100
 #   artifact_files  : all trainee-produced artifact paths under docs/curriculum/artifacts/
 #   oral_defense_prompts: exactly 3 per day (universal + day-specific framing)
 #   zero_tolerance  : conditions that hard-fail the day regardless of total score;
 #                     applies to assessed artifacts and technical decisions, not oral-defense points alone
 #   capstone_flags  : capstone_a and capstone_b participation booleans
+#   phase           : delivery phase for the incident-driven curriculum
+#   scenario_dir    : scenario pack directory for the day; populated during active incident waves
+#   injection_command: canonical learner incident entrypoint
+#   revert_state    : atomic incident journal path for the day
+#   verification_commands: terminal commands used to prove the repair
+#   review_contract : automated review profile and whether humans remain mandatory
 
 daily_pass_bar: 80
 elite_pass_bar: 90
@@ -63,9 +69,19 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_1_trust_boundary"
+    scenario_dir: scenarios/day01
+    injection_command: uv run aegisap-lab incident start --day 01
+    revert_state: .aegisap-lab/state/day01.json
+    verification_commands:
+      - uv run python -m pytest tests/test_day_01_money.py tests/test_day_01_fixtures.py -q
+      - uv run aegisap-lab artifact rebuild --day 01
+    review_contract:
+      evaluator_profile: wave1-day01-trust-boundary
+      human_required: true
 
   - id: "02"
-    title: "Discovery, Scoping, NFRs, and Stakeholder Power Mapping"
+    title: "Resilience Under Load, NFR Enforcement, and Ownership"
     notebook_file: notebooks/day_2_requirements_architecture.py
     primary_doc_file: docs/DAY_02.md
     legacy_doc_files: []
@@ -88,16 +104,22 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_1_trust_boundary"
+    scenario_dir: scenarios/day02
+    injection_command: uv run aegisap-lab incident start --day 02
+    revert_state: .aegisap-lab/state/day02.json
+    verification_commands:
+      - uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py -q
+      - uv run aegisap-lab artifact rebuild --day 02
+    review_contract:
+      evaluator_profile: wave1-day02-resilience
+      human_required: true
 
   - id: "03"
-    title: "Azure AI Services, Framework Selection, and Architectural Choice"
+    title: "Retrieval Authority, Search Evidence, and Boundary Repair"
     notebook_file: notebooks/day_3_azure_ai_services.py
-    primary_doc_file: docs/DAY_03_FRAMEWORK_SELECTION_AND_CHOICE.md
-    legacy_doc_files:
-      - docs/DAY_03_DATA_AUTHORITY.md
-      - docs/DAY_03_EVALUATION.md
-      - docs/DAY_03_LIVE_AZURE_RETRIEVAL.md
-      - docs/DAY_03_MULTI_AGENT_RETRIEVAL.md
+    primary_doc_file: docs/DAY_03.md
+    legacy_doc_files: []
     rubric_weights:
       correct_technical_selection: 30
       rejected_alternatives_strength: 20
@@ -116,15 +138,22 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_1_trust_boundary"
+    scenario_dir: scenarios/day03
+    injection_command: uv run aegisap-lab incident start --day 03
+    revert_state: .aegisap-lab/state/day03.json
+    verification_commands:
+      - uv run python -m pytest tests/day3/test_vendor_authority_ranking.py tests/day3/test_day3_exit_check.py -q
+      - uv run aegisap-lab artifact rebuild --day 03
+    review_contract:
+      evaluator_profile: wave2-day03-retrieval-authority
+      human_required: true
 
   - id: "04"
-    title: "Single-Agent Loops, Policy Overlay, and Failure Containment"
+    title: "Single-Agent Loops, Policy Overlay, and Fail-Closed Repair"
     notebook_file: notebooks/day_4_single_agent_loops.py
-    primary_doc_file: docs/DAY_04_EXECUTION_FLOW.md
-    legacy_doc_files:
-      - docs/DAY_04_EXIT_CHECK.md
-      - docs/DAY_04_EXPLICIT_PLANNING.md
-      - docs/DAY_04_PLAN_SCHEMA.md
+    primary_doc_file: docs/DAY_04.md
+    legacy_doc_files: []
     rubric_weights:
       extraction_correctness: 25
       policy_over_model_precedence: 25
@@ -143,11 +172,21 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_2_agentic_state"
+    scenario_dir: scenarios/day04
+    injection_command: uv run aegisap-lab incident start --day 04
+    revert_state: .aegisap-lab/state/day04.json
+    verification_commands:
+      - uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py -q
+      - uv run aegisap-lab artifact rebuild --day 04
+    review_contract:
+      evaluator_profile: wave2-day04-fail-open-planner
+      human_required: true
 
   - id: "05"
-    title: "Multi-Agent Orchestration, State, and Human Approval Contracts"
+    title: "Multi-Agent Orchestration, Durable State, and Resume Safety"
     notebook_file: notebooks/day_5_multi_agent_orchestration.py
-    primary_doc_file: docs/DAY_05_DURABLE_STATE_AND_RESUMPTION.md
+    primary_doc_file: docs/DAY_05.md
     legacy_doc_files: []
     rubric_weights:
       state_design: 25
@@ -167,11 +206,21 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_2_agentic_state"
+    scenario_dir: scenarios/day05
+    injection_command: uv run aegisap-lab incident start --day 05
+    revert_state: .aegisap-lab/state/day05.json
+    verification_commands:
+      - uv run python -m pytest tests/day5/integration/test_resume_service.py tests/day5/integration/test_idempotent_recommendation_resume.py -q
+      - uv run aegisap-lab artifact rebuild --day 05
+    review_contract:
+      evaluator_profile: wave2-day05-durable-state
+      human_required: true
 
   - id: "06"
-    title: "Data Authority, System of Record, and Change Classification"
+    title: "Data Authority, Review Boundaries, and Conflict Refusal"
     notebook_file: notebooks/day_6_data_ml_integration.py
-    primary_doc_file: docs/DAY_06_REFLECTION_AND_GRACEFUL_REFUSAL.md
+    primary_doc_file: docs/DAY_06.md
     legacy_doc_files: []
     rubric_weights:
       source_of_truth_hierarchy: 25
@@ -191,13 +240,22 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_2_agentic_state"
+    scenario_dir: scenarios/day06
+    injection_command: uv run aegisap-lab incident start --day 06
+    revert_state: .aegisap-lab/state/day06.json
+    verification_commands:
+      - uv run python -m pytest tests/day6/test_review_gate.py tests/day6/test_training_runtime_integration.py -q
+      - uv run aegisap-lab artifact rebuild --day 06
+    review_contract:
+      evaluator_profile: wave2-day06-review-boundary
+      human_required: true
 
   - id: "07"
     title: "Evaluation, Guardrails, Structured Refusal, and Slice Governance"
     notebook_file: notebooks/day_7_testing_eval_guardrails.py
-    primary_doc_file: docs/DAY_07_EVAL_GUARDRAILS_SLICE_GOVERNANCE.md
-    legacy_doc_files:
-      - docs/day7/DAY_07_SECURITY_IDENTITY_AUDITABILITY.md
+    primary_doc_file: docs/DAY_07.md
+    legacy_doc_files: []
     rubric_weights:
       zero_tolerance_metric_handling: 30
       slice_based_reasoning: 20
@@ -220,17 +278,22 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_3_guardrails_eval_release"
+    scenario_dir: scenarios/day07
+    injection_command: uv run aegisap-lab incident start --day 07
+    revert_state: .aegisap-lab/state/day07.json
+    verification_commands:
+      - uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q
+      - uv run aegisap-lab artifact rebuild --day 07
+    review_contract:
+      evaluator_profile: wave3-day07-guardrail-leak
+      human_required: true
 
   - id: "08"
     title: "IaC, Identity Planes, and Secure Release Ownership"
     notebook_file: notebooks/day_8_cicd_iac_deployment.py
-    primary_doc_file: docs/DAY_08_IAC_IDENTITY_RELEASE_OWNERSHIP.md
-    legacy_doc_files:
-      - docs/day8/DAY_08_OBSERVABILITY_AND_RELIABILITY.md
-      - docs/day8/FAILURE_TAXONOMY.md
-      - docs/day8/LATENCY_BUDGETS.md
-      - docs/day8/OBSERVABILITY_CONTRACT.md
-      - docs/day8/RETRY_POLICY.md
+    primary_doc_file: docs/DAY_08.md
+    legacy_doc_files: []
     rubric_weights:
       iac_correctness: 25
       identity_security_reasoning: 25
@@ -249,11 +312,21 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_3_guardrails_eval_release"
+    scenario_dir: scenarios/day08
+    injection_command: uv run aegisap-lab incident start --day 08
+    revert_state: .aegisap-lab/state/day08.json
+    verification_commands:
+      - uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests/day8/test_security_and_context.py tests/day8/test_observability_contract.py -q
+      - uv run aegisap-lab artifact rebuild --day 08
+    review_contract:
+      evaluator_profile: wave3-day08-identity-drift
+      human_required: true
 
   - id: "09"
     title: "Observability, Routing, Cost, and Economic Control"
     notebook_file: notebooks/day_9_scaling_monitoring_cost.py
-    primary_doc_file: docs/day9/DAY_09_COST_SPEED_ROUTING_CACHING_AND_OPTIMISATION.md
+    primary_doc_file: docs/DAY_09.md
     legacy_doc_files: []
     rubric_weights:
       routing_correctness: 25
@@ -273,11 +346,21 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_3_guardrails_eval_release"
+    scenario_dir: scenarios/day09
+    injection_command: uv run aegisap-lab incident start --day 09
+    revert_state: .aegisap-lab/state/day09.json
+    verification_commands:
+      - uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_and_cost.py tests/day9/test_runtime_day9_contract.py -q
+      - uv run aegisap-lab artifact rebuild --day 09
+    review_contract:
+      evaluator_profile: wave3-day09-routing-drift
+      human_required: true
 
   - id: "10"
     title: "Production Acceptance, Release Evidence, and Change Board Readiness"
     notebook_file: notebooks/day_10_production_operations.py
-    primary_doc_file: docs/DAY_10_DEPLOYMENT_AND_ACCEPTANCE.md
+    primary_doc_file: docs/DAY_10.md
     legacy_doc_files: []
     rubric_weights:
       technical_release_readiness: 25
@@ -301,11 +384,21 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_4_elite_operations"
+    scenario_dir: scenarios/day10
+    injection_command: uv run aegisap-lab incident start --day 10
+    revert_state: .aegisap-lab/state/day10.json
+    verification_commands:
+      - uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py -q
+      - uv run aegisap-lab artifact rebuild --day 10
+    review_contract:
+      evaluator_profile: wave3-day10-release-board
+      human_required: true
 
   - id: "11"
     title: "Delegated Identity, OBO, and Authority Confusion Defense"
     notebook_file: notebooks/day_11_delegated_identity_obo.py
-    primary_doc_file: docs/DAY_11_DELEGATED_IDENTITY.md
+    primary_doc_file: docs/DAY_11.md
     legacy_doc_files: []
     rubric_weights:
       obo_correctness: 30
@@ -329,11 +422,21 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: false
+    phase: "phase_4_elite_operations"
+    scenario_dir: scenarios/day11
+    injection_command: uv run aegisap-lab incident start --day 11
+    revert_state: .aegisap-lab/state/day11.json
+    verification_commands:
+      - uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q
+      - uv run aegisap-lab artifact rebuild --day 11
+    review_contract:
+      evaluator_profile: wave4-day11-actor-binding
+      human_required: true
 
   - id: "12"
     title: "Private Networking, Egress Control, and Security Dependency Management"
     notebook_file: notebooks/day_12_private_networking_constraints.py
-    primary_doc_file: docs/DAY_12_PRIVATE_NETWORKING.md
+    primary_doc_file: docs/DAY_12.md
     legacy_doc_files: []
     rubric_weights:
       network_posture_design: 30
@@ -357,11 +460,21 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: true
+    phase: "phase_4_elite_operations"
+    scenario_dir: scenarios/day12
+    injection_command: uv run aegisap-lab incident start --day 12
+    revert_state: .aegisap-lab/state/day12.json
+    verification_commands:
+      - uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q
+      - uv run aegisap-lab artifact rebuild --day 12
+    review_contract:
+      evaluator_profile: wave4-day12-network-isolation
+      human_required: true
 
   - id: "13"
     title: "Integration Boundaries, Async Reliability, and Contract Management"
     notebook_file: notebooks/day_13_integration_boundary_and_mcp.py
-    primary_doc_file: docs/DAY_13_INTEGRATION_AND_MCP.md
+    primary_doc_file: docs/DAY_13.md
     legacy_doc_files: []
     rubric_weights:
       boundary_architecture_correctness: 25
@@ -381,11 +494,21 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: true
+    phase: "phase_4_elite_operations"
+    scenario_dir: scenarios/day13
+    injection_command: uv run aegisap-lab incident start --day 13
+    revert_state: .aegisap-lab/state/day13.json
+    verification_commands:
+      - uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_server.py tests/day13/test_payment_hold.py -q
+      - uv run aegisap-lab artifact rebuild --day 13
+    review_contract:
+      evaluator_profile: wave4-day13-boundary-contract
+      human_required: true
 
   - id: "14"
     title: "Elite Operations, Breaking Changes, and Executive Incident Leadership"
     notebook_file: notebooks/day_14_breaking_changes_elite_ops.py
-    primary_doc_file: docs/DAY_14_BREAKING_CHANGES.md
+    primary_doc_file: docs/DAY_14.md
     legacy_doc_files: []
     rubric_weights:
       operational_correctness: 30
@@ -409,3 +532,14 @@ days:
     capstone_flags:
       capstone_a: true
       capstone_b: true
+    phase: "phase_4_elite_operations"
+    scenario_dir: scenarios/day14
+    injection_command: uv run aegisap-lab incident start --day 14
+    revert_state: .aegisap-lab/state/day14.json
+    verification_commands:
+      - uv run python -m pytest tests/day14/test_breaking_changes.py -q
+      - uv run python scripts/run_chaos_capstone.py
+      - uv run aegisap-lab artifact rebuild --day 14
+    review_contract:
+      evaluator_profile: wave4-day14-chaos-command
+      human_required: true

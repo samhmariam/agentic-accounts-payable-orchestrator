@@ -1,0 +1,15 @@
+diff --git a/src/aegisap/day_01/normalizers.py b/src/aegisap/day_01/normalizers.py
+index 129d627..040af97 100644
+--- a/src/aegisap/day_01/normalizers.py
++++ b/src/aegisap/day_01/normalizers.py
+@@ -132,9 +132,7 @@ def parse_money(raw: str, *, allow_zero: bool = False) -> Decimal:
+         raise ValueError(f"negative amounts not allowed on Day 1: {raw!r}")
+ 
+     if "," in s and "." in s:
+-        decimal_sep = "," if s.rfind(",") > s.rfind(".") else "."
+-        thousand_sep = "." if decimal_sep == "," else ","
+-        s = s.replace(thousand_sep, "").replace(decimal_sep, ".")
++        raise ValueError(f"ambiguous mixed-separator amount, reject at boundary: {raw!r}")
+     elif "," in s:
+         parts = s.split(",")
+         if len(parts) == 2 and len(parts[1]) == 2:

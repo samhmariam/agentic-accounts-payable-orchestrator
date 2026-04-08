@@ -24,6 +24,7 @@ import os
 from dataclasses import dataclass
 
 import msal  # type: ignore[import-untyped]
+from msal import ConfidentialClientApplication  # type: ignore[import-untyped]
 
 
 @dataclass
@@ -45,13 +46,10 @@ class OboTokenProvider:
     """
 
     def __init__(self, tenant_id: str, client_id: str, client_secret: str) -> None:
+        self._tenant_id = tenant_id
         self._client_id = client_id
-        authority = f"https://login.microsoftonline.com/{tenant_id}"
-        self._app = msal.ConfidentialClientApplication(
-            client_id=client_id,
-            client_credential=client_secret,
-            authority=authority,
-        )
+        self._client_secret = client_secret
+        self._app: ConfidentialClientApplication | None = None
 
     @classmethod
     def from_env(cls) -> "OboTokenProvider":
@@ -60,6 +58,18 @@ class OboTokenProvider:
         client_id = os.environ["AZURE_CLIENT_ID"]
         client_secret = os.environ["AZURE_CLIENT_SECRET"]
         return cls(tenant_id=tenant_id, client_id=client_id, client_secret=client_secret)
+
+    def _get_app(self) -> ConfidentialClientApplication:
+        if self._app is None:
+            authority = f"https://login.microsoftonline.com/{self._tenant_id}"
+            self._app = ConfidentialClientApplication(
+                client_id=self._client_id,
+                client_credential=self._client_secret,
+                authority=authority,
+                validate_authority=False,
+                instance_discovery=False,
+            )
+        return self._app
 
     def exchange(self, user_assertion: str, scopes: list[str]) -> OboResult:
         """Exchange a user access token for a downstream access token via OBO.
@@ -75,7 +85,7 @@ class OboTokenProvider:
         Raises:
             RuntimeError: If MSAL returns an error response.
         """
-        result = self._app.acquire_token_on_behalf_of(
+        result = self._get_app().acquire_token_on_behalf_of(
             user_assertion=user_assertion,
             scopes=scopes,
         )

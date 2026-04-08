@@ -1,0 +1,12 @@
+diff --git a/src/aegisap/day4/planning/policy_overlay.py b/src/aegisap/day4/planning/policy_overlay.py
+--- a/src/aegisap/day4/planning/policy_overlay.py
++++ b/src/aegisap/day4/planning/policy_overlay.py
+@@ -47,7 +47,7 @@ def derive_policy_overlay(case_facts: CaseFacts) -> DerivedPolicyOverlay:
+     if (
+         "high_value" in risk_flags
+         and "missing_po" in risk_flags
+-        and "bank_details_changed" in risk_flags
++        and "bank_details_changed" not in risk_flags
+     ):
+         risk_flags.append("combined_risk")
+         if "manual_escalation_package" not in mandatory_task_types:

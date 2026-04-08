@@ -1,0 +1,20 @@
+day: "05"
+title: "Stale Resume Token and Missing Checkpoint Binding"
+phase: "phase_2_agentic_state"
+baseline_track: "core"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track core --scenario day05"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day05 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day5/integration/test_resume_service.py tests/day5/integration/test_idempotent_recommendation_resume.py -q"
+  ci_command: "uv run python -m pytest tests/day5/integration/test_resume_service.py tests/day5/integration/test_idempotent_recommendation_resume.py tests/day5/integration/test_day4_handoff.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day05 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave2-day05-durable-state"
+  human_required: true

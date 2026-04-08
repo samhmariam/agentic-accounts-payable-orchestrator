@@ -1,0 +1,20 @@
+day: "14"
+title: "False-Green Dual-Sink Trace Gate"
+phase: "phase_4_elite_operations"
+baseline_track: "full"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track full --scenario day14"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day14 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day14/test_breaking_changes.py -q"
+  ci_command: "uv run python -m pytest tests/day14/test_breaking_changes.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day14 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave4-day14-chaos-command"
+  human_required: true

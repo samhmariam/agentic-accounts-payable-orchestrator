@@ -51,6 +51,18 @@ The output contract is:
 
 - `build/capstone/<trainee_id>/release_packet.json`
 
+The final Day 14 chaos command review adds:
+
+- `build/day14/breaking_changes_drills.json`
+- `build/day14/chaos_capstone_report.json`
+- `build/day14/cto_trace_report.json`
+
+Generate the Day 14 chaos artifacts with:
+
+```bash
+uv run python scripts/run_chaos_capstone.py
+```
+
 ## Scoring
 
 The capstone uses the shared rubric in

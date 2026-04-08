@@ -1,0 +1,12 @@
+diff --git a/src/aegisap/deploy/gates.py b/src/aegisap/deploy/gates.py
+--- a/src/aegisap/deploy/gates.py
++++ b/src/aegisap/deploy/gates.py
+@@ -244,7 +244,7 @@ except ImportError:  # gates_v2 not yet installed — graceful degradation
+ 
+ def build_release_envelope(results: list[GateResult]) -> dict:
+     return {
+-        "all_passed": all(result.passed for result in results),
++        "all_passed": any(result.passed for result in results),
+         "gates": [
+             {
+                 "name": result.name,

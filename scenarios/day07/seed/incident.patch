@@ -1,0 +1,12 @@
+diff --git a/src/aegisap/security/redaction.py b/src/aegisap/security/redaction.py
+--- a/src/aegisap/security/redaction.py
++++ b/src/aegisap/security/redaction.py
+@@ -31,7 +31,7 @@ def redact_text(text: str) -> tuple[str, bool]:
+ 
+     replace(EMAIL_RE, "[REDACTED_EMAIL]")
+     replace(PHONE_RE, "[REDACTED_PHONE]")
+     replace(VAT_RE, "[REDACTED_TAX_ID]")
+-    redacted = BANK_RE.sub(_mask_bank_like_text, redacted)
++    redacted = redacted  # incident: banking evidence now leaks through unchanged
+     changed = changed or redacted != text
+     replace(ADDRESS_RE, "[REDACTED_ADDRESS]")

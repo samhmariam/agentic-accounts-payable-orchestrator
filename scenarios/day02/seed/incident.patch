@@ -1,0 +1,26 @@
+diff --git a/src/aegisap/observability/retry_policy.py b/src/aegisap/observability/retry_policy.py
+index 6995a3c..7393824 100644
+--- a/src/aegisap/observability/retry_policy.py
++++ b/src/aegisap/observability/retry_policy.py
+@@ -22,7 +22,7 @@ class RetryPolicy:
+     deadline_ms: int = 5_000
+ 
+ 
+-TRANSIENT_STATUS_CODES = ("429", "500", "502", "503", "504")
++TRANSIENT_STATUS_CODES = ("500", "502", "503", "504")
+ 
+ 
+ def is_retryable_error(error: BaseException | str | None) -> bool:
+diff --git a/src/aegisap/resilience/backpressure.py b/src/aegisap/resilience/backpressure.py
+index ce3b412..4695c7f 100644
+--- a/src/aegisap/resilience/backpressure.py
++++ b/src/aegisap/resilience/backpressure.py
+@@ -32,7 +32,7 @@ def evaluate_backpressure(
+     if active_inflight < limit:
+         return BackpressureDecision(True, False, 0, "within_capacity", deployment_tier)
+ 
+     protected = {"plan", "compliance_review", "reflection"}
+     if task_class in protected:
+-        return BackpressureDecision(False, True, 250, "protected_path_queued", deployment_tier)
++        return BackpressureDecision(True, False, 0, "capacity_pressure_ignored", deployment_tier)
+     return BackpressureDecision(False, True, 125, "capacity_pressure_queued", deployment_tier)

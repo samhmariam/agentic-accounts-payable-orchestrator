@@ -1,0 +1,20 @@
+day: "13"
+title: "MCP Capability Drift"
+phase: "phase_4_elite_operations"
+baseline_track: "full"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track full --scenario day13"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day13 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_server.py tests/day13/test_payment_hold.py -q"
+  ci_command: "uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_server.py tests/day13/test_payment_hold.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day13 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave4-day13-boundary-contract"
+  human_required: true

@@ -1,78 +1,39 @@
-# Day 1 - Intake and Canonicalization
+# Day 1 - Trust Boundary Rescue Mission
 
-Day 1 teaches the intake boundary: take a raw invoice package, extract a
-candidate with Azure OpenAI or a fixture payload, and deterministically convert
-that candidate into a trusted `CanonicalInvoice`.
+Day 1 now begins with a live incident, not a theory tour. The learner injects a
+broken Day 1 environment, proves the trust-boundary failure, prototypes the fix
+in Marimo, then patches the real deterministic code under `src/`.
 
-## Lab Command
-
-Fixture mode:
+## Incident Entry
 
 ```bash
-uv run python scripts/run_day1_intake.py --mode fixture
+uv run aegisap-lab incident start --day 01
 ```
 
-Live Azure OpenAI mode:
+## Verification Commands
 
 ```bash
-uv run python scripts/run_day1_intake.py --mode live
+uv run python -m pytest tests/test_day_01_money.py tests/test_day_01_fixtures.py -q
+uv run aegisap-lab artifact rebuild --day 01
 ```
 
 ## Training Artifact
 
-The script writes `build/day1/golden_thread_day1.json` containing:
-
-- the source package metadata
-- the execution mode
-- the canonical invoice payload
+The repaired path should still regenerate `build/day1/golden_thread_day1.json`.
 
 ## Exit Check
 
-Day 1 succeeds when the system emits a canonical invoice or raises an explicit
-intake rejection. No malformed data should cross the Day 1 boundary.
+Day 1 succeeds when:
 
-## What Learners Should Notice
-
-- Azure OpenAI is used only for extraction.
-- Deterministic Python owns normalization, reconciliation, and rejection.
-- The Day 1 artifact is the handoff object for Day 2.
-
-## Golden Thread Input
-
-The default training case uses:
-
-- `fixtures/golden_thread/package.json`
-- `fixtures/golden_thread/candidate.json`
+- the mixed-separator incident is reproduced and explained correctly
+- the deterministic normalization or validation bug is fixed in `src/`
+- valid locale inputs canonicalize and malformed inputs still fail closed
+- the learner can defend the blast radius of a fail-open trust boundary
 
 ## Key Files
 
-- `src/aegisap/day_01/agent.py`
+- `scenarios/day01/scenario.yaml`
 - `src/aegisap/day_01/normalizers.py`
 - `src/aegisap/day_01/service.py`
-- `scripts/run_day1_intake.py`
-
----
-
-## FDE Rubric — Day 1 (100 points)
-
-| Dimension | Points |
-|---|---|
-| Agent-fit signals | 25 |
-| Rejection criteria | 20 |
-| WAF / trust trade-off | 20 |
-| Business framing | 15 |
-| Oral defense | 20 |
-
-**Pass bar: 80.  Elite bar: 90.**
-
-## Oral Defense Prompts
-
-1. What alternative automation approach did you reject for this pain point, and why does the agent design win on this dimension?
-2. What is the blast radius if the agent acts on a misclassified invoice? Name the downstream systems and approvers affected.
-3. Who in a real enterprise must sign off on introducing an agentic system into a financial workflow, and what audit evidence would they demand before go-live?
-
-## Artifact Scaffolds
-
-- `docs/curriculum/artifacts/day01/AGENT_FIT_MEMO.md`
-- `docs/curriculum/artifacts/day01/NO_AGENT_MEMO.md`
-- `docs/curriculum/artifacts/day01/FDE_MENTAL_MODELS.md`
+- `tests/test_day_01_money.py`
+- `tests/test_day_01_fixtures.py`

@@ -1,0 +1,12 @@
+diff --git a/src/aegisap/network/bicep_policy_checker.py b/src/aegisap/network/bicep_policy_checker.py
+--- a/src/aegisap/network/bicep_policy_checker.py
++++ b/src/aegisap/network/bicep_policy_checker.py
+@@ -147,7 +147,7 @@
+                 continue
+             checked += 1
+             rname: str = resource.get("name", "<unknown>")
+-            props: dict[str, Any] = resource.get("properties", {})
++            props: dict[str, Any] = resource
+             pna: str = props.get("publicNetworkAccess", "Enabled")
+             if pna != "Disabled":
+                 violations.append(

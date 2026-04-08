@@ -1,0 +1,20 @@
+day: "12"
+title: "Static Network Checker Blind Spot"
+phase: "phase_4_elite_operations"
+baseline_track: "full"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track full --scenario day12"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day12 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q"
+  ci_command: "uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day12 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave4-day12-network-isolation"
+  human_required: true

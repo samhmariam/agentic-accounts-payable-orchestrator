@@ -1,0 +1,20 @@
+day: "04"
+title: "Fail-Open Combined Risk Planner"
+phase: "phase_2_agentic_state"
+baseline_track: "core"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track core --scenario day04"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day04 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py -q"
+  ci_command: "uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py tests/day4/unit/graph/test_day4_graph.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day04 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave2-day04-fail-open-planner"
+  human_required: true

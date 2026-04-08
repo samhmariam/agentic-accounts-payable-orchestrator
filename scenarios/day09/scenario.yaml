@@ -1,0 +1,20 @@
+day: "09"
+title: "Risk Escalation Routing Drift"
+phase: "phase_3_guardrails_eval_release"
+baseline_track: "core"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track core --scenario day09"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day09 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_and_cost.py tests/day9/test_runtime_day9_contract.py -q"
+  ci_command: "uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_and_cost.py tests/day9/test_runtime_day9_contract.py tests/day9/test_gateway_integration.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day09 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave3-day09-routing-drift"
+  human_required: true

@@ -1,0 +1,12 @@
+diff --git a/src/aegisap/day6/review/prompt_injection.py b/src/aegisap/day6/review/prompt_injection.py
+--- a/src/aegisap/day6/review/prompt_injection.py
++++ b/src/aegisap/day6/review/prompt_injection.py
+@@ -17,7 +17,7 @@ def detect_prompt_injection(review_input: Day6ReviewInput) -> list[InjectionSig
+ def detect_prompt_injection(review_input: Day6ReviewInput) -> list[InjectionSignal]:
+     signals: list[InjectionSignal] = []
+     for evidence in review_input.evidence_ledger:
+-        lowered = evidence.extract.lower()
++        lowered = evidence.extract
+         for pattern in OVERRIDE_PATTERNS:
+             if pattern in lowered:
+                 signals.append(

@@ -66,7 +66,8 @@ class TestSubmitPaymentHoldRoute:
         resp = client.get("/capabilities")
         assert resp.status_code == 200
         tools = resp.json()["tools"]
-        assert "submit_payment_hold" in tools
+        tool_names = {tool["name"] for tool in tools}
+        assert "submit_payment_hold" in tool_names
 
     def test_compensating_action_registered_in_stub(self, client):
         resp = client.post("/tools/submit_payment_hold",

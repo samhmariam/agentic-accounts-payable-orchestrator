@@ -14,6 +14,7 @@ Environment variables:
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import sys
@@ -70,7 +71,7 @@ def _run() -> int:
         return 1
 
     consumer = DlqConsumer.from_env()
-    report = consumer.drain()
+    report = asyncio.run(consumer.drain())
     report_dict = report.to_dict()
     report_dict.update(
         {

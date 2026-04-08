@@ -1,4 +1,4 @@
-P# Agentic Accounts Payable Orchestrator
+# Agentic Accounts Payable Orchestrator
 
 AegisAP is the Golden Thread training repo for Forward Deployed Engineers building
 production-ready agentic systems on Azure. The repo follows one invoice case
@@ -12,20 +12,20 @@ operational readiness.
 | Day | Objective | New Architectural Layer | Azure Services | Command | Artifact | Exit Check |
 | --- | --- | --- | --- | --- | --- | --- |
 | Day 0 | Bootstrap a keyless Azure substrate | Provisioning + RBAC | Microsoft Foundry, Azure AI Search, Blob Storage, optional PostgreSQL, Key Vault, App Insights, Container Apps | `uv run python scripts/verify_env.py --track core` or `--track full` | `.day0/core.json` or `.day0/full.json` | Foundry inference plus Azure services reachable with `DefaultAzureCredential` |
-| Day 1 | Canonicalize invoice intake | Tool-grounded extraction | Azure OpenAI | `uv run python scripts/run_day1_intake.py --mode fixture` or `--mode live` | `build/day1/golden_thread_day1.json` | Canonical invoice emitted or rejected deterministically |
-| Day 2 | Route a trusted invoice through explicit state | Stateful control flow | Azure OpenAI substrate from Day 0 | `uv run python scripts/run_day2_workflow.py --day1-artifact build/day1/golden_thread_day1.json --known-vendor` | `build/day2/golden_thread_day2.json` | Workflow state records route, evidence, and recommendations |
-| Day 3 | Retrieve evidence and rank authority | Multi-agent retrieval with live enterprise search | Azure AI Search, Blob Storage | `uv run python scripts/run_day3_case.py --retrieval-mode azure_search_live` | `build/day3/golden_thread_day3.json` | Live Search evidence is surfaced and authority-ranked correctly |
-| Day 4 | Produce and validate execution plans | Explicit planning and controlled execution | Azure OpenAI, Azure AI Search | `uv run python scripts/run_day4_case.py --planner-mode fixture` or `--planner-mode azure_openai` | `build/day4/golden_thread_day4.json` | Typed plan validates and yields recommendation or escalation |
-| Day 5 | Pause, persist, and resume | Durable checkpoints and approval resume | Azure Database for PostgreSQL, Azure OpenAI, Azure AI Search | `uv run python scripts/run_day5_pause_resume.py` then `uv run python scripts/resume_day5_case.py` | `build/day5/golden_thread_day5_pause.json`, `build/day5/golden_thread_day5_resumed.json` | Approval thread resumes without duplicate side effects |
-| Day 6 | Refuse unsafe or unauthorised progression | Policy review, bounded reflection, and graceful refusal | Azure OpenAI optional, Azure Database for PostgreSQL | `uv run python scripts/run_day6_case.py` | `build/day6/golden_thread_day6.json` | Case ends in `approved_to_proceed`, `needs_human_review`, or `not_authorised_to_continue` with an audit-ready payload |
-| Day 7 | Harden identity, secrets, traces, and audit evidence | Managed identity, secret elimination, redacted observability | Managed Identity, Key Vault RBAC, Azure AI Search RBAC, Log Analytics, PostgreSQL audit store | `uv run python scripts/verify_env.py --track full --env` then `uv run python -m pytest tests/day7 tests/day6/test_training_runtime_integration.py -q` | PostgreSQL audit rows, redacted logs, hardened infra contracts | No forbidden runtime secret fallback, Search local auth disabled, audit rows emitted for sensitive outcomes |
-| Day 8 | Make workflow behavior explorable and reliable | OpenTelemetry traces, regression harness, dashboards, alerts | Application Insights, Azure Monitor, Log Analytics, LangSmith optional, PostgreSQL audit store | `uv run python -m pytest tests/day8 -q` and `az bicep build --file infra/monitoring/alerts/alerts.bicep` | Day 8 docs, regression dataset, monitoring assets, correlation-aware runtime | Operators can pivot from workflow run to trace to audit state, and silent reliability regressions surface in telemetry |
-| Day 9 | Make capability allocation explicit, measurable, and reversible | Model router, workflow cost ledger, conservative cache, slice-governed optimisation | Azure OpenAI deployments, Azure Monitor, Application Insights, APIM policy assets optional, LangSmith optional | `uv run python -m pytest tests/day9 -q` and `uv run python -m pytest tests/day4/test_azure_openai_planner.py tests/api/test_app.py -q` | Day 9 docs, routing dataset, APIM policies, routed runtime | Model routing and cost are visible per workflow, low-risk paths can use cheaper capability safely, and risky slices block bad routing changes |
-| Day 10 | Make deployment success separate from release acceptance | SHA-tagged containers, ACA revisions, OIDC deploys, acceptance gates | Azure Container Apps, ACR, Key Vault, Application Insights, LangSmith optional, GitHub Actions | `uv run python -m pytest tests/day10 tests/api/test_app.py -q` and `az bicep build --file infra/aca/staging.bicep` | Day 10 docs, rollback runbook, staging/prod workflows, gate scripts | A release is blocked unless deployment, telemetry, eval quality, refusal safety, cost, and resume safety all pass |
-| Day 11 | Enforce delegated identity for every actor crossing a trust boundary | OBO token exchange, actor binding, MSAL token verification | Azure AD, Managed Identity, Azure OpenAI | `uv run python scripts/verify_delegated_identity_contract.py` and `uv run python -m pytest tests/day11 -q` | `build/day11/obo_contract.json` | All three identity gate checks pass: `obo_app_identity_ok`, `obo_exchange_ok`, `actor_binding_ok` |
-| Day 12 | Eliminate all public network attack surface | VNET injection, Private Endpoints, Private DNS, external-sink guard | Azure Virtual Network, Private Endpoints, Private DNS, Azure Container Apps | `uv run python scripts/verify_private_network_posture.py` and `uv run python -m pytest tests/day12 -q` | `build/day12/private_network_posture.json`, `build/day12/external_sink_disabled.json` | All AI hostnames resolve to RFC-1918 addresses and no external sink is enabled |
-| Day 13 | Harden integration boundaries and expose a governed MCP server | Azure Functions, Service Bus, DLQ compensating actions, MCP contract | Azure Functions (Flex Consumption), Azure Service Bus Premium, Azure Container Apps | `uv run python scripts/verify_mcp_contract_integrity.py` and `uv run python -m pytest tests/day13 -q` | `build/day13/dlq_drain_report.json`, `build/day13/mcp_contract_report.json` | DLQ drain succeeds with compensating actions and MCP `/capabilities` exposes all required tools |
-| Day 14 | Prove elite operational readiness across all 17 gates and 10 failure drills | Canary regression, data residency ARM check, trace correlation, CTO report | Azure Container Apps, Azure Resource Manager, Application Insights, all prior services | `uv run python scripts/generate_cto_trace_report.py` and `uv run python -m pytest tests/day14 -q` | `build/day14/canary_regression_report.json`, `build/day14/data_residency_report.json`, `build/day14/trace_correlation_report.json`, `build/day14/cto_trace_report.json` | All 17 gates pass, 10 failure drills are documented, CTO trace report is generated |
+| Day 1 | Canonicalize invoice intake | Tool-grounded extraction | Azure OpenAI | `uv run aegisap-lab incident start --day 01` | `build/day1/golden_thread_day1.json` | Canonical invoice emitted or rejected deterministically |
+| Day 2 | Route a trusted invoice through explicit state | Stateful control flow | Azure OpenAI substrate from Day 0 | `uv run aegisap-lab incident start --day 02` | `build/day2/golden_thread_day2.json` | Workflow state records route, evidence, and recommendations |
+| Day 3 | Retrieve evidence and rank authority | Multi-agent retrieval with hostile authority ranking | Azure AI Search, Blob Storage | `uv run aegisap-lab incident start --day 03` | `build/day3/golden_thread_day3.json` | Structured authority outranks stale evidence again |
+| Day 4 | Produce and validate execution plans | Explicit planning and fail-closed control | Azure OpenAI, Azure AI Search | `uv run aegisap-lab incident start --day 04` | `build/day4/golden_thread_day4.json` | Combined-risk cases stay manual-review-only |
+| Day 5 | Pause, persist, and resume | Durable checkpoints and approval resume | Azure Database for PostgreSQL, Azure OpenAI, Azure AI Search | `uv run aegisap-lab incident start --day 05` | `build/day5/golden_thread_day5_pause.json`, `build/day5/golden_thread_day5_resumed.json` | Approval threads reject stale resume material and avoid duplicate side effects |
+| Day 6 | Refuse unsafe or unauthorised progression | Review boundary, authority conflict, and graceful refusal | Azure OpenAI optional, Azure Database for PostgreSQL | `uv run aegisap-lab incident start --day 06` | `build/day6/golden_thread_day6.json` | Unsafe review inputs end in a defended refusal or human review path |
+| Day 7 | Repair a guardrail breach before it becomes an audit finding | Redaction boundaries, refusal evidence, eval governance | Managed Identity, Key Vault RBAC, Azure AI Search RBAC, Log Analytics, PostgreSQL audit store | `uv run aegisap-lab incident start --day 07` | `build/day7/eval_report.json` | Sensitive audit evidence is redacted again before persistence |
+| Day 8 | Repair runtime identity drift and re-prove least privilege | IaC role assignments, secure release ownership, trace evidence | Application Insights, Azure Monitor, Bicep, GitHub OIDC | `uv run aegisap-lab incident start --day 08` | `build/day8/deployment_design.json`, `build/day8/regression_baseline.json`, `build/day8/checkpoint_trace_extension.json` | Runtime search access is least-privilege again and release evidence is regenerated |
+| Day 9 | Repair routing and budget drift before finance notices | Model router, workflow cost ledger, conservative cache | Azure OpenAI deployments, Azure Monitor, Application Insights | `uv run aegisap-lab incident start --day 09` | `build/day9/routing_report.json` | Risky work routes back to the strong tier and cost controls stay intact |
+| Day 10 | Prove go/no-go discipline under false-green release pressure | Release envelope integrity, acceptance gates, CAB packet | Azure Container Apps, ACR, Key Vault, Application Insights, GitHub Actions | `uv run aegisap-lab incident start --day 10` | `build/day10/release_envelope.json`, `build/day10/checkpoint_gate_extension.json` | Any failing gate blocks release readiness again |
+| Day 11 | Repair delegated identity before authority confusion reaches production | OBO token exchange, actor binding, MSAL token verification | Azure AD, Managed Identity, Azure OpenAI | `uv run aegisap-lab incident start --day 11` | `build/day11/obo_contract.json` | Actor-bound approval only passes when the required group evidence matches the OBO actor |
+| Day 12 | Restore private-network truth when the checker goes blind | VNET injection, Private Endpoints, Private DNS, external-sink guard | Azure Virtual Network, Private Endpoints, Private DNS, Azure Container Apps | `uv run aegisap-lab incident start --day 12` | `build/day12/static_bicep_analysis.json`, `build/day12/private_network_posture.json`, `build/day12/external_sink_disabled.json` | Static and live network evidence agree that the AI surface is private-only |
+| Day 13 | Recover a governed integration boundary under contract drift | Azure Functions, Service Bus, DLQ compensating actions, MCP contract | Azure Functions (Flex Consumption), Azure Service Bus Premium, Azure Container Apps | `uv run aegisap-lab incident start --day 13` | `build/day13/dlq_drain_report.json`, `build/day13/mcp_contract_report.json`, `build/day13/webhook_reliability_report.json` | The MCP contract exposes the governed write path again and compensating-action evidence is intact |
+| Day 14 | Lead the war room through trace, rollback, and chaos evidence | Canary regression, data residency ARM check, trace correlation, chaos capstone, CTO report | Azure Container Apps, Azure Resource Manager, Application Insights, all prior services | `uv run aegisap-lab incident start --day 14` | `build/day14/canary_regression_report.json`, `build/day14/data_residency_report.json`, `build/day14/trace_correlation_report.json`, `build/day14/breaking_changes_drills.json`, `build/day14/cto_trace_report.json` | The elite-ops gates, chaos drill evidence, and CTO packet all agree on the safe decision |
 
 ## Start Here
 
@@ -40,18 +40,18 @@ operational readiness.
 - [Day 0 Azure Bootstrap](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md)
 - [Day 1 Intake and Canonicalization](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_01.md)
 - [Day 2 Stateful Workflow](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_02.md)
-- [Day 3 Azure AI Services and Framework Choice](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_03_FRAMEWORK_SELECTION_AND_CHOICE.md)
-- [Day 4 Execution Flow and Policy Overlay](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_04_EXECUTION_FLOW.md)
-- [Day 5 Durable State and Resumption](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_05_DURABLE_STATE_AND_RESUMPTION.md)
-- [Day 6 Reflection and Graceful Refusal](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_06_REFLECTION_AND_GRACEFUL_REFUSAL.md)
-- [Day 7 Eval Guardrails and Slice Governance](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_07_EVAL_GUARDRAILS_SLICE_GOVERNANCE.md)
-- [Day 8 IaC, Identity, and Release Ownership](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_08_IAC_IDENTITY_RELEASE_OWNERSHIP.md)
-- [Day 9 Cost, Speed, Routing, Caching, and Optimisation](/workspaces/agentic-accounts-payable-orchestrator/docs/day9/DAY_09_COST_SPEED_ROUTING_CACHING_AND_OPTIMISATION.md)
-- [Day 10 Deployment and Acceptance Gating](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_10_DEPLOYMENT_AND_ACCEPTANCE.md)
-- [Day 11 Delegated Identity](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_11_DELEGATED_IDENTITY.md)
-- [Day 12 Private Networking](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_12_PRIVATE_NETWORKING.md)
-- [Day 13 Integration and MCP](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_13_INTEGRATION_AND_MCP.md)
-- [Day 14 Breaking Changes and Elite Ops](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_14_BREAKING_CHANGES.md)
+- [Day 3 Retrieval Authority Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_03.md)
+- [Day 4 Fail-Closed Planning Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_04.md)
+- [Day 5 Durable State Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_05.md)
+- [Day 6 Review Boundary Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_06.md)
+- [Day 7 Guardrail Breach Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_07.md)
+- [Day 8 Identity Drift Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_08.md)
+- [Day 9 Routing Regression Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_09.md)
+- [Day 10 Release Board Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_10.md)
+- [Day 11 Delegated Identity Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_11.md)
+- [Day 12 Private Network Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_12.md)
+- [Day 13 Integration Boundary Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_13.md)
+- [Day 14 Chaos Command Rescue Mission](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_14.md)
 
 ## Notebooks
 
@@ -117,7 +117,7 @@ uv run python scripts/apply_migrations.py
 4. Run the Day 6 review gate locally if you want to validate the refusal layer before deployment:
 
 ```bash
-uv run python scripts/run_day6_case.py
+uv run aegisap-lab artifact rebuild --day 06
 ```
 
 5. Build and push the API image:
@@ -148,7 +148,7 @@ Search key fallback while emitting redacted audit rows.
 - `pyproject.toml` and `uv.lock` are the dependency source of truth.
 - `fixtures/golden_thread/` is the primary teaching baseline.
 - `fixtures/day06/` is the primary adversarial safety baseline.
-- `docs/day7/` groups the Day 7 training guides and security reference docs.
+- `docs/` holds the primary day references for the incident-driven curriculum.
 - `tests/day7/` groups the Day 7 security and audit regression suite.
 - `build/day*/` contains generated lab artifacts.
 - `src/aegisap/api/app.py` is the deployable training runtime.
@@ -165,16 +165,14 @@ uv run python -m pytest -q
 Run the deployment-free lab path:
 
 ```bash
-uv run python scripts/run_day1_intake.py
-uv run python scripts/run_day2_workflow.py --day1-artifact build/day1/golden_thread_day1.json --known-vendor
-uv run python scripts/run_day3_case.py --retrieval-mode fixture
-uv run python scripts/run_day4_case.py --planner-mode fixture
-uv run python scripts/run_day6_case.py
+uv run aegisap-lab artifact rebuild --day 01
+uv run aegisap-lab artifact rebuild --day 02
+uv run aegisap-lab artifact rebuild --day 03
+uv run aegisap-lab artifact rebuild --day 04
+uv run aegisap-lab artifact rebuild --day 05
+uv run aegisap-lab artifact rebuild --day 06
+uv run aegisap-lab artifact rebuild --day 07
+uv run aegisap-lab artifact rebuild --day 08
+uv run aegisap-lab artifact rebuild --day 09
+uv run aegisap-lab artifact rebuild --day 10
 ```
-
-## Days 8-10
-
-Day 8 is the observability and reliability milestone, Day 9 adds explicit
-capability allocation and cost governance, and Day 10 turns deployment into a
-gated release decision with ACA revisions, acceptance automation, and rollback
-discipline.

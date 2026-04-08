@@ -49,7 +49,7 @@ def run_from_fixture(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run the legacy Day 2 fixture demo. The preferred training entrypoint is scripts/run_day2_workflow.py."
+        description="Run the Day 2 fixture workflow directly for local debugging. The learner-facing training entrypoint is `uv run aegisap-lab incident start --day 02`."
     )
     parser.add_argument("fixture", help="fixture directory name under fixtures/day2")
     parser.add_argument(

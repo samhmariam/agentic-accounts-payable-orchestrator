@@ -1,0 +1,56 @@
+name: Wave 3 Incident Replay Nightly
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "45 6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  replay-wave3-incidents:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --extra dev --extra day9
+
+      - name: Replay Wave 3 incidents
+        run: |
+          uv run python scripts/replay_wave1_incidents.py \
+            --days 07 08 09 10 \
+            --label wave3 \
+            --out-json build/replay/wave3_incident_replay.json
+
+      - name: Add job summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("build/replay/wave3_incident_replay.json").read_text(encoding="utf-8"))
+          lines = ["# Wave 3 Incident Replay", "", f"- Overall status: `{payload['status']}`", ""]
+          for day in payload["days"]:
+              lines.append(f"- Day {day['day']}: `{day['status']}`")
+          Path("build/replay/wave3_summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+          cat build/replay/wave3_summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload replay artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wave3-incident-replay
+          path: |
+            build/replay/wave3_incident_replay.json
+            build/replay/wave3_summary.md

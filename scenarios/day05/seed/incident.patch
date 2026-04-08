@@ -1,0 +1,12 @@
+diff --git a/src/aegisap/day5/workflow/resume_service.py b/src/aegisap/day5/workflow/resume_service.py
+--- a/src/aegisap/day5/workflow/resume_service.py
++++ b/src/aegisap/day5/workflow/resume_service.py
+@@ -93,8 +93,6 @@ class ResumeService:
+                         raise ValueError("Approval task is no longer pending.")
+                     if approval_task.thread_id != token.thread_id:
+                         raise ValueError("Approval task does not belong to thread.")
+-                    if approval_task.checkpoint_id != token.checkpoint_id:
+-                        raise CheckpointValidationError("Approval task is not bound to the resume checkpoint.")
+ 
+                     loaded = self.checkpoint_manager.load_latest_checkpoint(token.thread_id, conn=conn)
+                     if loaded.checkpoint_id != token.checkpoint_id:

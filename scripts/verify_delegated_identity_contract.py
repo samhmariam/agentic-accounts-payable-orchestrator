@@ -45,6 +45,14 @@ def main() -> int:
             "obo_app_identity_ok": True,
             "obo_exchange_ok": True,
             "actor_binding_ok": True,
+            "execution_tier": 1,
+            "live_entra": False,
+            "training_artifact": True,
+            "authoritative_evidence": False,
+            "app_identity_check": {"passed": False, "detail": "STUB (unverified)"},
+            "obo_exchange_check": {"passed": False, "detail": "STUB (unverified)"},
+            "actor_binding_check": {"passed": False, "detail": "STUB (unverified)"},
+            "gate_passed": False,
             "note": "STUB: no live Azure credentials available",
         }
         (BUILD_DIR / "obo_contract.json").write_text(json.dumps(artifact, indent=2))
@@ -110,6 +118,29 @@ def main() -> int:
         "obo_app_identity_ok": obo_app_identity_ok,
         "obo_exchange_ok": obo_exchange_ok,
         "actor_binding_ok": actor_binding_ok,
+        "execution_tier": 2,
+        "live_entra": True,
+        "training_artifact": False,
+        "authoritative_evidence": True,
+        "app_identity_check": {
+            "passed": obo_app_identity_ok,
+            "detail": "Managed-identity-backed OBO application is configured."
+            if obo_app_identity_ok
+            else obo_error or "OBO app identity check failed.",
+        },
+        "obo_exchange_check": {
+            "passed": obo_exchange_ok,
+            "detail": "OBO exchange returned a downstream access token."
+            if obo_exchange_ok
+            else obo_error or "OBO exchange did not complete.",
+        },
+        "actor_binding_check": {
+            "passed": actor_binding_ok,
+            "detail": "Actor OID is bound to the required approver group."
+            if actor_binding_ok
+            else actor_error or "Actor binding check did not pass.",
+        },
+        "gate_passed": obo_app_identity_ok and obo_exchange_ok and actor_binding_ok,
     }
     if obo_error:
         artifact["obo_error"] = obo_error

@@ -1,0 +1,18 @@
+diff --git a/infra/modules/role_assignments.bicep b/infra/modules/role_assignments.bicep
+--- a/infra/modules/role_assignments.bicep
++++ b/infra/modules/role_assignments.bicep
+@@ -162,12 +162,12 @@
+ }
+ 
+ resource runtimeSearchAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(runtimeApiPrincipalId)) {
+-  name: guid(searchService.id, runtimeApiPrincipalId, searchIndexDataReaderRoleDefinitionId)
++  name: guid(searchService.id, runtimeApiPrincipalId, searchIndexDataContributorRoleDefinitionId)
+   scope: searchService
+   properties: {
+     principalId: runtimeApiPrincipalId
+     principalType: 'ServicePrincipal'
+-    roleDefinitionId: searchIndexDataReaderRoleDefinitionId
++    roleDefinitionId: searchIndexDataContributorRoleDefinitionId
+   }
+ }
+ 

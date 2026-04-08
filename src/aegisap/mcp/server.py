@@ -54,7 +54,13 @@ def create_mcp_app(use_stubs: bool | None = None) -> FastAPI:
     @fast_app.post("/tools/query_invoice_status", response_model=InvoiceQueryResponse)
     async def query_invoice_status(req: InvoiceQueryRequest) -> InvoiceQueryResponse:
         """Retrieve the current status of an invoice by ID."""
-        return adapter.query_invoice_status(req)
+        response = adapter.query_invoice_status(req)
+        if response.error:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=response.error,
+            )
+        return response
 
     @fast_app.post("/tools/list_pending_approvals", response_model=list[InvoiceQueryResponse])
     async def list_pending_approvals(
@@ -66,7 +72,13 @@ def create_mcp_app(use_stubs: bool | None = None) -> FastAPI:
     @fast_app.post("/tools/get_vendor_policy", response_model=VendorPolicyResponse)
     async def get_vendor_policy(req: VendorPolicyRequest) -> VendorPolicyResponse:
         """Retrieve the payment-approval policy for a vendor."""
-        return adapter.get_vendor_policy(req)
+        response = adapter.get_vendor_policy(req)
+        if response.policy_version == "unknown":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Vendor policy {req.vendor_id!r} not found.",
+            )
+        return response
 
     @fast_app.post("/tools/submit_payment_hold", response_model=PaymentHoldResponse)
     async def submit_payment_hold(req: PaymentHoldRequest) -> PaymentHoldResponse:

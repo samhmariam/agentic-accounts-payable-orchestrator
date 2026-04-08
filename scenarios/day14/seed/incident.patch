@@ -1,0 +1,12 @@
+diff --git a/src/aegisap/deploy/gates_v2.py b/src/aegisap/deploy/gates_v2.py
+--- a/src/aegisap/deploy/gates_v2.py
++++ b/src/aegisap/deploy/gates_v2.py
+@@ -314,7 +314,7 @@ def gate_trace_correlation() -> GateResult:
+         if posture_path.exists():
+             try:
+                 posture = json.loads(posture_path.read_text())
+-                dual_sink_required = bool(posture.get("all_passed", False))
++                dual_sink_required = bool(posture.get("authoritative_evidence", False))
+             except Exception:
+                 pass
+

@@ -1,0 +1,20 @@
+day: "07"
+title: "Audit Redaction Guardrail Leak"
+phase: "phase_3_guardrails_eval_release"
+baseline_track: "core"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track core --scenario day07"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day07 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q"
+  ci_command: "uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day07 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave3-day07-guardrail-leak"
+  human_required: true

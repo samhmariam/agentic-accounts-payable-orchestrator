@@ -1,0 +1,14 @@
+diff --git a/src/aegisap/mcp/server.py b/src/aegisap/mcp/server.py
+--- a/src/aegisap/mcp/server.py
++++ b/src/aegisap/mcp/server.py
+@@ -49,7 +49,9 @@ def create_mcp_app(use_stubs: bool | None = None) -> FastAPI:
+     @fast_app.get("/capabilities", response_model=McpCapabilities)
+     async def capabilities() -> McpCapabilities:
+         """Return the server's MCP capabilities advertisement."""
+-        return McpCapabilities()
++        caps = McpCapabilities()
++        caps.tools = [tool for tool in caps.tools if getattr(tool, "name", tool) != "submit_payment_hold"]
++        return caps
+ 
+     @fast_app.post("/tools/query_invoice_status", response_model=InvoiceQueryResponse)
+     async def query_invoice_status(req: InvoiceQueryRequest) -> InvoiceQueryResponse:

@@ -26,10 +26,12 @@ az account show
 
 5. Open these side by side:
 - `docs/curriculum/CURRICULUM_MANIFEST.yaml`
-- the day portal guide in `docs/curriculum/portal/`
 - the day notebook
+- the primary day doc
 - `docs/curriculum/TRAINER_OPERATIONS.md`
 - the prior day's handoff notes
+
+If you are teaching Day 0, also open `docs/curriculum/portal/DAY_00_PORTAL.md`.
 
 ## Cohort Control Check
 
@@ -78,7 +80,7 @@ Say these five things out loud before the lab begins:
 ## First 15 Minutes Of The Session
 
 - Check that learners can open the repo and activate the right shell.
-- Check that learners know the portal guide is today's first surface before the notebook.
+- Check that learners know Day 0 starts in the portal, while Days 1-14 start with `uv run aegisap-lab incident start --day XX`.
 - Confirm who already ran the trainee preflight and who did not.
 - Identify the first artifact or prerequisite that could stall the room.
 - State the fallback path before the first live command is run.

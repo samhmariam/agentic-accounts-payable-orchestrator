@@ -1,0 +1,20 @@
+day: "11"
+title: "Broken OBO Actor Binding"
+phase: "phase_4_elite_operations"
+baseline_track: "full"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track full --scenario day11"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day11 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q"
+  ci_command: "uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day11 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave4-day11-actor-binding"
+  human_required: true

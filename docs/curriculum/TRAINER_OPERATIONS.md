@@ -27,13 +27,14 @@ The exact artifact filenames for each day are the authoritative source in
 `docs/curriculum/CURRICULUM_MANIFEST.yaml` under `artifact_files`.
 
 1. Pre-brief: review the day's manifest entry, expected artifact filenames,
-   checkpoint status, portal guide, and any open remediation notes from the
+   checkpoint status, incident or bootstrap entrypoint, and any open remediation notes from the
    prior day. Run the facilitator day-start checklist before learners enter
    the lab block.
-2. Theory block: start with the portal-first walkthrough for the day, then
-   deliver the theory segment before learners open notebooks. Introduce the
-   three oral defense prompts for the day so learners can build toward them
-   during the lab.
+2. Theory block: for Day 0, start with the portal-first bootstrap walkthrough.
+   For Days 1-14, start with the incident, then use the notebook's portal
+   investigation section to anchor the Azure evidence before learners patch the
+   repo. Introduce the three oral defense prompts for the day so learners can
+   build toward them during the lab.
 3. Lab block: keep the room moving toward all four outputs (technical build,
    decision memo, corporate process artifact, oral defense prep). Notebook
    completion alone is not the goal.
@@ -121,3 +122,6 @@ graduation tier thresholds.
 - [templates/ORAL_DEFENSE_SCORECARD.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/ORAL_DEFENSE_SCORECARD.md)
 - [templates/DAILY_ARTIFACT_PACK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/DAILY_ARTIFACT_PACK.md)
 - [templates/DAILY_SCORECARD.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/DAILY_SCORECARD.md)
+
+Use `portal/README.md` and `DAY_00_PORTAL.md` only for the bootstrap exception.
+For Days 1-14, the live delivery path is `incident start -> notebook -> repo patch -> verification`.

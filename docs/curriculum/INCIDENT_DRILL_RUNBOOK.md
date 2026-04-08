@@ -1,11 +1,13 @@
 # AegisAP Incident Drill Runbook
 
 Run one unsignposted failure drill late in the bootcamp. The goal is to test
-debugging discipline under realistic ambiguity, not notebook memorization.
+debugging discipline under realistic ambiguity, not notebook memorization. Day
+14 extends this into the chaos command review, where MTTR and executive signal
+quality matter as much as the raw fix.
 
 ## When To Run It
 
-- Preferred window: Day 8, Day 9, or Day 10
+- Preferred window: Day 8, Day 9, Day 10, or the Day 14 chaos command block
 - Run one drill per learner or pair
 - Do not reveal the root cause in advance
 
@@ -49,6 +51,12 @@ Score the drill primarily on `Debugging Discipline`, then on correctness:
 
 Record the result as `pass`, `partial`, or `fail` in `incident_drill_result`
 on the daily scorecard.
+
+For Day 14, also record:
+
+- `mean_time_to_recovery_minutes`
+- `max_time_to_recovery_minutes`
+- whether the executive packet was updated before the time box expired
 
 ## Time Box
 

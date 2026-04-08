@@ -1,0 +1,20 @@
+day: "02"
+title: "Quota storm and broken backpressure on protected planning paths"
+phase: "phase_1_trust_boundary"
+baseline_track: "core"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track core --scenario day02"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day02 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/day2/test_resilience_controls.py -q"
+  ci_command: "uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day02 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave1-day02-resilience"
+  human_required: true

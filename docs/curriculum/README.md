@@ -1,31 +1,33 @@
 # AegisAP Curriculum Guide
 
-This folder contains the portal-first and notebook-led delivery materials for
+This folder contains the incident-driven and notebook-led delivery materials for
 the AegisAP FDE curriculum. The notebooks and
 [CURRICULUM_MANIFEST.yaml](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml)
 are the operational source of truth for live delivery.
 
 Use [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md)
 as the single navigation layer for daily delivery. It tells you which notebook,
-primary doc, portal guide, command path, and artifact matter for each day.
+primary doc, incident command, and artifact matter for each day.
 
-The new manual-first Azure layer lives in
+The only remaining manual-first Azure layer is the Day 0 bootstrap exception in
 [portal/README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/README.md).
-Use it to start each day in Azure first, then return to the notebook and only
-after that to the scripts or modules that abstract the same work.
+Days 1-14 now start with `uv run aegisap-lab incident start --day XX`, then use
+the notebook as the primary learner surface. Portal investigation still exists,
+but it is now embedded inside the notebook flow rather than split across a
+separate day guide.
 
-Trainer and trainee day documents still exist as supporting theory material for
-the foundational portions of the course:
+Day 0 keeps its dedicated bootstrap companions:
 
 | Document | Audience | Purpose |
 |---|---|---|
-| `portal/DAY_XX_PORTAL.md` | Trainer + learner | Manual Azure-first guide: what to inspect or operate in the portal before the notebook |
-| `trainer/DAY_XX_TRAINER.md` | Instructor | Facilitation guide, talking points, Q&A, common mistakes |
-| `trainee/DAY_XX_TRAINEE.md` | Learner | Pre-lab reading, theory, Azure best practices, self-check |
+| `portal/DAY_00_PORTAL.md` | Trainer + learner | Manual Azure bootstrap guide before IaC becomes the norm |
+| `trainer/DAY_00_TRAINER.md` | Instructor | Day 0 facilitation guide for Azure setup and identity posture |
+| `trainee/DAY_00_TRAINEE.md` | Learner | Day 0 pre-read covering IaC, identity, and environment setup |
 
-Portal guides now cover Days 00-14. Trainer and trainee companion day docs
-currently cover Days 00-10. Days 11-14 use the portal guide, notebook, primary
-day doc, and artifact templates instead of separate trainer/trainee files.
+Wave 1-4 change:
+
+- Days 1-14 are now incident-driven labs with hidden scenario injection, atomic
+  lab state, and markdown-only production patch sections inside the notebooks.
 
 Program-level operating guides live alongside the day materials:
 
@@ -73,14 +75,14 @@ as the launch-readiness checklist rather than relying on memory.
 | 4 | `day_4_single_agent_loops.py` | Single-agent loops and fail-closed policy | Structured outputs, tool execution |
 | 5 | `day_5_multi_agent_orchestration.py` | Multi-agent orchestration and HITL | LangGraph, durable state |
 | 6 | `day_6_data_ml_integration.py` | Data authority and ML integration | ADF, Cosmos DB, MLflow |
-| 7 | `day_7_testing_eval_guardrails.py` | Evals, guardrails, and structured refusal | Content Safety, slice governance |
-| 8 | `day_8_cicd_iac_deployment.py` | CI/CD, IaC, identity, and secure release | Bicep, OIDC, ACA |
-| 9 | `day_9_scaling_monitoring_cost.py` | Observability, routing, scaling, and cost | Azure Monitor, App Insights, economic control |
-| 10 | `day_10_production_operations.py` | Production acceptance and release evidence | Release gates, CAB readiness |
-| 11 | `day_11_delegated_identity_obo.py` | Delegated identity and OBO | Entra, Key Vault, actor-bound approval |
-| 12 | `day_12_private_networking_constraints.py` | Private networking and security dependencies | Private Endpoints, DNS, egress policy |
-| 13 | `day_13_integration_boundary_and_mcp.py` | Integration boundaries, async reliability, MCP | Azure Functions, Service Bus, MCP |
-| 14 | `day_14_breaking_changes_elite_ops.py` | Elite operations and executive incident leadership | Canary evidence, trace correlation, incident command |
+| 7 | `day_7_testing_eval_guardrails.py` | Guardrail breach triage, redaction repair, and eval governance | Auditability, redacted observability, slice governance |
+| 8 | `day_8_cicd_iac_deployment.py` | Identity drift repair, IaC evidence, and secure release | Bicep, OIDC, least-privilege runtime |
+| 9 | `day_9_scaling_monitoring_cost.py` | Routing regression repair and economic control | Azure Monitor, App Insights, cost-aware routing |
+| 10 | `day_10_production_operations.py` | False-green release triage and CAB readiness | Release gates, go/no-go evidence |
+| 11 | `day_11_delegated_identity_obo.py` | Actor-binding incident and delegated identity recovery | Entra, Key Vault, actor-bound approval |
+| 12 | `day_12_private_networking_constraints.py` | Private-network incident and egress truth | Private Endpoints, DNS, egress policy |
+| 13 | `day_13_integration_boundary_and_mcp.py` | MCP contract drift and async reliability recovery | Azure Functions, Service Bus, MCP |
+| 14 | `day_14_breaking_changes_elite_ops.py` | War-room trace gating, chaos drills, and executive incident command | Canary evidence, trace correlation, incident command |
 
 ---
 
@@ -88,24 +90,25 @@ as the launch-readiness checklist rather than relying on memory.
 
 Every day should leave the learner with four concrete outputs:
 
-- A pre-read that explains the concept and names the production failure mode it prevents
-- A notebook run that generates a day-specific artifact under `build/dayX/`
-- A pass/fail definition of done that can be observed without trainer guesswork
-- An exit ticket that proves the learner can explain the design choice, not just run the code
+- A hostile starting state or explicit bootstrap contract
+- A notebook-guided repair path that makes the failure mode legible
+- A terminal verification path that proves the real repo patch works
+- An artifact and defense packet that proves the learner can explain the design choice, not just run the code
 
 Use [ASSESSMENT_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/ASSESSMENT_RUBRIC.md)
 to score technical correctness, debugging discipline, security reasoning, and
 production-readiness judgment.
 
-Every trainee day and every trainer day must now include the same assessment
-contract:
+Days 1-14 express that contract through the notebook scaffold:
 
-- `Lab Readiness`
-- `Pass Criteria`
-- `Common Failure Signals`
-- `Exit Ticket`
-- `Remediation Task`
-- `Stretch Task`
+- `Incident`
+- `Portal Investigation`
+- `Lab Repair`
+- `Production Patch`
+- `Verification`
+- `PR Defense`
+
+Day 0 remains the only trainer-doc and trainee-doc exception.
 
 ---
 
@@ -138,7 +141,7 @@ Day 13 Integration boundaries ► Day 14 Elite operations
 | Track | When to use | Expected by days | Typical verification |
 |---|---|---|---|
 | `core` | Days 0-4, local notebook work, trust-boundary and planning fundamentals | 0-4 | `uv run python scripts/verify_env.py --track core` |
-| `full` | Days 5-10, durable state, hosted runtime, security, deployment | 5-10 | `uv run python scripts/verify_env.py --track full --env` |
+| `full` | Days 5-14, durable state, hosted runtime, security, deployment, and elite operations | 5-14 | `uv run python scripts/verify_env.py --track full --env` |
 
 ---
 
@@ -156,10 +159,14 @@ artifacts as hard blockers unless a recovery command is supplied.
 | 4 | `build/day4/golden_thread_day4.json`, `build/day4/checkpoint_policy_overlay.json` | Day 5, Day 10 review |
 | 5 | `build/day5/golden_thread_day5_pause.json`, `build/day5/golden_thread_day5_resumed.json` | Day 7, Day 10 |
 | 6 | `build/day6/golden_thread_day6.json` | Day 10 |
-| 7 | `build/day7/security_posture.json` | Day 10 |
+| 7 | `build/day7/eval_report.json` | Day 10 |
 | 8 | `build/day8/regression_baseline.json`, `build/day8/checkpoint_trace_extension.json` | Day 9, Day 10 |
 | 9 | `build/day9/routing_report.json` | Day 10 |
-| 10 | `build/day10/release_envelope.json`, `build/day10/checkpoint_gate_extension.json` | Capstone review |
+| 10 | `build/day10/release_envelope.json`, `build/day10/checkpoint_gate_extension.json` | Day 14 and capstone review |
+| 11 | `build/day11/obo_contract.json` | Day 13 write-path trust and Day 14 CTO evidence |
+| 12 | `build/day12/static_bicep_analysis.json`, `build/day12/private_network_posture.json` | Day 14 trace-mode and residency decisions |
+| 13 | `build/day13/dlq_drain_report.json`, `build/day13/mcp_contract_report.json`, `build/day13/webhook_reliability_report.json` | Day 14 reliability and CTO evidence |
+| 14 | `build/day14/breaking_changes_drills.json`, `build/day14/cto_trace_report.json` | Capstone review and final readiness defense |
 | Capstone | `build/capstone/<trainee_id>/release_packet.json` | Trainer scoring and release-style defense |
 
 ---
@@ -185,6 +192,7 @@ Checkpoint coaching is part of the trainer rubric, not optional enrichment.
 - Days 1-4 build a trustworthy, explainable decision pipeline on top of that substrate.
 - Days 5-7 convert the demo workflow into a resumable, auditable, secure runtime.
 - Days 8-10 add production operations: observability, cost control, and release gating.
+- Days 11-14 turn that runtime into an identity-, network-, boundary-, and chaos-hardened production system.
 
 If a learner falls behind, recover them by regenerating the missing upstream
 artifact with the exact script or notebook command referenced in the notebook
@@ -197,16 +205,16 @@ callouts rather than skipping a day.
 ### For Trainers
 1. Read [TRAINER_OPERATIONS.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINER_OPERATIONS.md) before the cohort begins.
 2. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) and follow the day row for the session you are delivering.
-3. For Days 00-10, read `trainer/DAY_XX_TRAINER.md` the evening before each session. For Days 11-14, use the notebook plus the primary day doc.
+3. For Day 0, read `trainer/DAY_00_TRAINER.md` the evening before the session. For Days 01-14, start the incident first, then use the notebook and primary day doc as the live teaching path.
 4. Score learners with `docs/curriculum/templates/DAILY_SCORECARD.md`.
-5. Use [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md) for the unsignposted failure drill on Days 8-10.
+5. Use [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md) for the unsignposted failure drill on Days 8-10 and the Day 14 chaos command review.
 6. Use [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md) and [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md) together for the final review.
 7. Each trainer file ends with a **Next-Day Bridge** — use it to close the session.
 
 ### For Trainees
-1. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) first and use it to find the current portal guide, notebook, and primary day doc.
-2. Start with `portal/DAY_XX_PORTAL.md` for the day before opening the notebook.
-3. For Days 00-10, read `trainee/DAY_XX_TRAINEE.md` before the session starts. For Days 11-14, use the portal guide, notebook, and primary day doc.
+1. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) first and use it to find the current incident command, notebook, and primary day doc.
+2. For Days 01-14, start with `uv run aegisap-lab incident start --day XX`, then let the notebook direct any portal investigation.
+3. For Day 0, read `trainee/DAY_00_TRAINEE.md` before the session starts. For Days 01-14, use the notebook and primary day doc.
 4. The **Check Your Understanding** questions at the end are not graded — they are
    designed to reveal gaps before you hit them in the notebook.
 5. Refer back to the **Glossary** and **Azure Best Practices** sections while

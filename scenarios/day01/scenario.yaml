@@ -1,0 +1,20 @@
+day: "01"
+title: "Trust boundary regression on mixed-separator invoice amounts"
+phase: "phase_1_trust_boundary"
+baseline_track: "core"
+baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track core --scenario day01"
+setup:
+  apply_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day01 --action break"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "uv run python -m pytest tests/test_day_01_money.py tests/test_day_01_fixtures.py -q"
+  ci_command: "uv run python -m pytest tests/test_day_01_money.py tests/test_day_01_fixtures.py -q"
+teardown:
+  revert_diff: "seed/incident.patch"
+  azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day01 --action restore"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "wave1-day01-trust-boundary"
+  human_required: true

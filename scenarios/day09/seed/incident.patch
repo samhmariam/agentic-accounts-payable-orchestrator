@@ -1,0 +1,13 @@
+diff --git a/src/aegisap/routing/routing_policy.py b/src/aegisap/routing/routing_policy.py
+--- a/src/aegisap/routing/routing_policy.py
++++ b/src/aegisap/routing/routing_policy.py
+@@ -115,7 +115,7 @@ def route_task(
+             risk_flags=risk_flags,
+             escalated=True,
+         )
+ 
+-    if has_escalator or low_confidence:
++    if has_escalator and low_confidence:
+         return ModelRouteDecision(
+             task_class=task_class,
+             deployment_name=active_policy.strong_model_deployment,

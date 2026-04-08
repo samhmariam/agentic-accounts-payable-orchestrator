@@ -53,7 +53,7 @@ _STUB_INVOICES: dict[str, dict[str, Any]] = {
 }
 
 _STUB_VENDOR_POLICIES: dict[str, dict[str, Any]] = {
-    "ACME": {
+    "ACME-001": {
         "policy_version": "2024-v1",
         "auto_approve_threshold": 500.0,
         "requires_dual_approval_above": 10000.0,

@@ -4,7 +4,7 @@ Manifest document-link tests.
 For every day in CURRICULUM_MANIFEST.yaml, verifies that:
   - notebook_file exists on disk
   - primary_doc_file exists on disk
-  - legacy_doc_files (if any) still exist on disk
+  - legacy_doc_files are empty for incident-delivery days
   - every artifact_files path exists on disk
   - every capstone_b-flagged day doc contains the capstone section marker
 
@@ -57,20 +57,15 @@ def test_primary_doc_file_exists(day: dict) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Legacy doc files (must still exist — they are not deleted)
+# Legacy doc files (should be empty after the incident-driven redesign)
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS
-                                 if d.get("legacy_doc_files")])
-def test_legacy_doc_files_still_exist(day: dict) -> None:
-    missing = []
-    for rel_path in day["legacy_doc_files"]:
-        if not (REPO_ROOT / rel_path).exists():
-            missing.append(rel_path)
-    assert not missing, (
-        f"Day {day['id']} legacy_doc_files have been removed (they must be kept):\n"
-        + "\n".join(f"  {p}" for p in missing)
+@pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS])
+def test_legacy_doc_files_are_empty(day: dict) -> None:
+    assert day.get("legacy_doc_files", []) == [], (
+        f"Day {day['id']} still declares legacy_doc_files in the manifest; "
+        "the redesign should not depend on retained legacy day surfaces."
     )
 
 

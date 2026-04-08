@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -128,7 +129,8 @@ PREFLIGHT_REQUIRED_SNIPPETS = (
 FACILITATOR_REQUIRED_SNIPPETS = (
     "uv run python scripts/validate_curriculum.py",
     "CURRICULUM_MANIFEST.yaml",
-    "docs/curriculum/portal/",
+    "docs/curriculum/portal/DAY_00_PORTAL.md",
+    "uv run aegisap-lab incident start --day",
     "Day 8",
     "Day 11",
     "Day 12",
@@ -136,30 +138,98 @@ FACILITATOR_REQUIRED_SNIPPETS = (
     "Day 14",
 )
 
-NOTEBOOK_SCAFFOLD_SNIPPETS = {
-    "all": ("render_full_day_agenda(", "Summary Checklist"),
+INCIDENT_NOTEBOOK_SECTIONS = (
+    "## Incident",
+    "## Portal Investigation",
+    "## Lab Repair",
+    "## Production Patch",
+    "## Verification",
+    "## PR Defense",
+)
+
+INCIDENT_NOTEBOOKS = {
+    1: "notebooks/day_1_agentic_fundamentals.py",
+    2: "notebooks/day_2_requirements_architecture.py",
+    3: "notebooks/day_3_azure_ai_services.py",
+    4: "notebooks/day_4_single_agent_loops.py",
+    5: "notebooks/day_5_multi_agent_orchestration.py",
+    6: "notebooks/day_6_data_ml_integration.py",
+    7: "notebooks/day_7_testing_eval_guardrails.py",
+    8: "notebooks/day_8_cicd_iac_deployment.py",
+    9: "notebooks/day_9_scaling_monitoring_cost.py",
+    10: "notebooks/day_10_production_operations.py",
+    11: "notebooks/day_11_delegated_identity_obo.py",
+    12: "notebooks/day_12_private_networking_constraints.py",
+    13: "notebooks/day_13_integration_boundary_and_mcp.py",
+    14: "notebooks/day_14_breaking_changes_elite_ops.py",
+}
+
+INCIDENT_RETIRED_REFERENCES = {
+    1: (
+        "docs/curriculum/portal/DAY_01_PORTAL.md",
+        "docs/curriculum/trainee/DAY_01_TRAINEE.md",
+        "scripts/run_day1_intake.py",
+    ),
     2: (
-        "Visual Guide — Architecture Lineage Map",
-        "Mastery Checkpoint — Before You Leave Discovery",
-        "render_unscaffolded_block(",
+        "docs/curriculum/portal/DAY_02_PORTAL.md",
+        "docs/curriculum/trainee/DAY_02_TRAINEE.md",
+        "scripts/run_day2_workflow.py",
+    ),
+    3: (
+        "docs/curriculum/portal/DAY_03_PORTAL.md",
+        "docs/curriculum/trainee/DAY_03_TRAINEE.md",
+        "scripts/run_day3_case.py",
+    ),
+    4: (
+        "docs/curriculum/portal/DAY_04_PORTAL.md",
+        "docs/curriculum/trainee/DAY_04_TRAINEE.md",
+        "scripts/run_day4_case.py",
+    ),
+    5: (
+        "docs/curriculum/portal/DAY_05_PORTAL.md",
+        "docs/curriculum/trainee/DAY_05_TRAINEE.md",
+        "scripts/run_day5_pause_resume.py",
+        "scripts/resume_day5_case.py",
+    ),
+    6: (
+        "docs/curriculum/portal/DAY_06_PORTAL.md",
+        "docs/curriculum/trainee/DAY_06_TRAINEE.md",
+        "scripts/run_day6_case.py",
+    ),
+    7: (
+        "docs/curriculum/portal/DAY_07_PORTAL.md",
+        "docs/curriculum/trainee/DAY_07_TRAINEE.md",
     ),
     8: (
-        "Visual Guide — Deployment Evidence Lineage",
-        "Mastery Checkpoint — Before You Trust The Pipeline",
-        "render_unscaffolded_block(",
+        "docs/curriculum/portal/DAY_08_PORTAL.md",
+        "docs/curriculum/trainee/DAY_08_TRAINEE.md",
+        "docs/DAY_08_IAC_IDENTITY_RELEASE_OWNERSHIP.md",
     ),
-    10: ("Mastery Checkpoint — Before You Trust A Green Envelope",),
+    9: (
+        "docs/curriculum/portal/DAY_09_PORTAL.md",
+        "docs/curriculum/trainee/DAY_09_TRAINEE.md",
+        "docs/day9/DAY_09_COST_SPEED_ROUTING_CACHING_AND_OPTIMISATION.md",
+    ),
+    10: (
+        "docs/curriculum/portal/DAY_10_PORTAL.md",
+        "docs/curriculum/trainee/DAY_10_TRAINEE.md",
+        "docs/DAY_10_DEPLOYMENT_AND_ACCEPTANCE.md",
+    ),
     11: (
-        "Visual Guide — Identity Lineage Into OBO",
-        "Mastery Checkpoint — Delegation Without Confusion",
-        "render_unscaffolded_block(",
+        "docs/curriculum/portal/DAY_11_PORTAL.md",
+        "docs/DAY_11_DELEGATED_IDENTITY.md",
     ),
-    12: ("Transfer Lens", "Mastery Checkpoint — Networking Discipline"),
-    13: ("Transfer Lens", "Mastery Checkpoint — Boundary Ownership"),
+    12: (
+        "docs/curriculum/portal/DAY_12_PORTAL.md",
+        "docs/DAY_12_PRIVATE_NETWORKING.md",
+    ),
+    13: (
+        "docs/curriculum/portal/DAY_13_PORTAL.md",
+        "docs/DAY_13_INTEGRATION_AND_MCP.md",
+    ),
     14: (
-        "Transfer Lens",
-        "Mastery Checkpoint — Elite Defense Readiness",
-        "render_unscaffolded_block(",
+        "docs/curriculum/portal/DAY_14_PORTAL.md",
+        "docs/DAY_14_BREAKING_CHANGES.md",
     ),
 }
 
@@ -174,14 +244,6 @@ CORE_TEMPLATE_REQUIREMENTS = (
 
 THREE_SURFACE_PORTAL_DOCS = (
     "docs/curriculum/portal/DAY_00_PORTAL.md",
-    "docs/curriculum/portal/DAY_01_PORTAL.md",
-    "docs/curriculum/portal/DAY_03_PORTAL.md",
-    "docs/curriculum/portal/DAY_08_PORTAL.md",
-    "docs/curriculum/portal/DAY_10_PORTAL.md",
-    "docs/curriculum/portal/DAY_11_PORTAL.md",
-    "docs/curriculum/portal/DAY_12_PORTAL.md",
-    "docs/curriculum/portal/DAY_13_PORTAL.md",
-    "docs/curriculum/portal/DAY_14_PORTAL.md",
 )
 
 THREE_SURFACE_NOTEBOOKS = (
@@ -209,15 +271,23 @@ def main() -> int:
     trainee_docs = sorted((ROOT / "docs" / "curriculum" / "trainee").glob("*.md"))
     trainer_docs = sorted((ROOT / "docs" / "curriculum" / "trainer").glob("*.md"))
     portal_docs = sorted((ROOT / "docs" / "curriculum" / "portal").glob("DAY_*_PORTAL.md"))
-    if len(trainee_docs) < 11:
-        errors.append("Expected trainee pre-read docs for Days 00-10.")
-    if len(trainer_docs) < 11:
-        errors.append("Expected trainer facilitation docs for Days 00-10.")
-    expected_portal_docs = [f"DAY_{i:02d}_PORTAL.md" for i in range(0, 15)]
+    expected_trainee_docs = ["DAY_00_TRAINEE.md"]
+    actual_trainee_docs = [path.name for path in trainee_docs]
+    if actual_trainee_docs != expected_trainee_docs:
+        errors.append(
+            "Expected only the Day 0 trainee bootstrap doc in docs/curriculum/trainee/."
+        )
+    expected_trainer_docs = ["DAY_00_TRAINER.md"]
+    actual_trainer_docs = [path.name for path in trainer_docs]
+    if actual_trainer_docs != expected_trainer_docs:
+        errors.append(
+            "Expected only the Day 0 trainer bootstrap doc in docs/curriculum/trainer/."
+        )
+    expected_portal_docs = ["DAY_00_PORTAL.md"]
     actual_portal_docs = [path.name for path in portal_docs]
     if actual_portal_docs != expected_portal_docs:
         errors.append(
-            "Expected portal guides for Days 00-14 in docs/curriculum/portal/."
+            "Expected only the Day 0 portal bootstrap guide in docs/curriculum/portal/."
         )
 
     for path in trainee_docs:
@@ -254,14 +324,6 @@ def main() -> int:
         ("## Three-Surface Linkage",),
         "Day 0 bootstrap doc is missing the explicit portal-to-automation linkage",
     )
-    for rel_path in THREE_SURFACE_NOTEBOOKS:
-        _expect_snippets(
-            errors,
-            ROOT / rel_path,
-            ("render_surface_linkage(",),
-            "Critical day notebook is missing the explicit three-surface linkage block",
-        )
-
     _expect_snippets(
         errors,
         ROOT / "docs" / "curriculum" / "README.md",
@@ -382,19 +444,51 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     f"Manifest day {day['id']} artifact missing: {artifact_rel}"
                 )
 
-        _expect_snippets(
-            errors,
-            notebook_path,
-            NOTEBOOK_SCAFFOLD_SNIPPETS["all"],
-            f"Day {day_id} notebook is missing the standard full-day scaffold",
-        )
-        if day_id in NOTEBOOK_SCAFFOLD_SNIPPETS:
+        if day_id in INCIDENT_NOTEBOOKS:
             _expect_snippets(
                 errors,
                 notebook_path,
-                NOTEBOOK_SCAFFOLD_SNIPPETS[day_id],
-                f"Day {day_id} notebook is missing anchor-day scaffold elements",
+                INCIDENT_NOTEBOOK_SECTIONS,
+                f"Day {day_id} notebook is missing the incident-driven six-section scaffold",
             )
+            _expect_snippets(
+                errors,
+                notebook_path,
+                ("markdown-only", "Do not edit repo files from this notebook"),
+                f"Day {day_id} notebook is missing the markdown-only production patch boundary",
+            )
+            _expect_absent_snippets(
+                errors,
+                notebook_path,
+                INCIDENT_RETIRED_REFERENCES[day_id],
+                f"Day {day_id} notebook still references retired learner-entry docs",
+            )
+            _validate_notebook_boundaries(errors, notebook_path)
+
+        if not day.get("phase"):
+            errors.append(f"Manifest day {day['id']} must declare a phase.")
+        if not day.get("injection_command"):
+            errors.append(f"Manifest day {day['id']} must declare an injection_command.")
+        if not day.get("revert_state"):
+            errors.append(f"Manifest day {day['id']} must declare a revert_state path.")
+        if "verification_commands" not in day:
+            errors.append(f"Manifest day {day['id']} must declare verification_commands.")
+        if "review_contract" not in day:
+            errors.append(f"Manifest day {day['id']} must declare review_contract.")
+        if day.get("legacy_doc_files"):
+            errors.append(
+                f"Manifest day {day['id']} should not declare legacy_doc_files after the incident-driven redesign."
+            )
+
+        scenario_rel = day.get("scenario_dir", "")
+        if day["id"] in {f"{i:02d}" for i in range(1, 15)} and not scenario_rel:
+            errors.append(f"Manifest day {day['id']} must declare a scenario_dir during incident-delivery waves.")
+        if scenario_rel:
+            scenario_path = ROOT / scenario_rel / "scenario.yaml"
+            if not scenario_path.exists():
+                errors.append(f"Manifest day {day['id']} scenario file missing: {scenario_path.relative_to(ROOT)}")
+            else:
+                _validate_scenario_file(errors, scenario_path)
 
 
 def _expect_headings(
@@ -437,6 +531,121 @@ def _expect_any_snippet(
     if not any(snippet in text for snippet in snippets):
         joined = " or ".join(f"`{snippet}`" for snippet in snippets)
         errors.append(f"{message}: {path.relative_to(ROOT)} is missing one of {joined}")
+
+
+def _expect_absent_snippets(
+    errors: list[str],
+    path: Path,
+    snippets: tuple[str, ...],
+    message: str,
+) -> None:
+    text = path.read_text(encoding="utf-8")
+    for snippet in snippets:
+        if snippet in text:
+            errors.append(f"{message}: {path.relative_to(ROOT)} still contains `{snippet}`")
+
+
+def _validate_scenario_file(errors: list[str], path: Path) -> None:
+    if yaml is None:
+        return
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    scenario_root = path.parent
+    required_top_level = {
+        "setup",
+        "validation",
+        "teardown",
+        "review",
+        "baseline_track",
+        "baseline_reprovision_command",
+    }
+    missing_top_level = sorted(required_top_level - set(payload))
+    if missing_top_level:
+        errors.append(
+            f"{path.relative_to(ROOT)} is missing top-level scenario keys: {', '.join(missing_top_level)}"
+        )
+        return
+    for key in ("apply_diff", "azure_script", "customer_drop"):
+        if key not in payload["setup"]:
+            errors.append(f"{path.relative_to(ROOT)} is missing setup.{key}")
+    apply_diff = payload["setup"].get("apply_diff")
+    if apply_diff:
+        apply_diff_path = scenario_root / apply_diff
+        if not apply_diff_path.exists():
+            errors.append(f"{path.relative_to(ROOT)} references missing setup.apply_diff `{apply_diff}`")
+        else:
+            _validate_scenario_patch(errors, apply_diff_path)
+    customer_drop = payload["setup"].get("customer_drop")
+    if customer_drop and not (scenario_root / customer_drop).exists():
+        errors.append(
+            f"{path.relative_to(ROOT)} references missing setup.customer_drop `{customer_drop}`"
+        )
+    for key in ("reproduce_command", "ci_command"):
+        if key not in payload["validation"]:
+            errors.append(f"{path.relative_to(ROOT)} is missing validation.{key}")
+    for key in ("revert_diff", "azure_script", "cleanup"):
+        if key not in payload["teardown"]:
+            errors.append(f"{path.relative_to(ROOT)} is missing teardown.{key}")
+    revert_diff = payload["teardown"].get("revert_diff")
+    if revert_diff:
+        revert_diff_path = scenario_root / revert_diff
+        if not revert_diff_path.exists():
+            errors.append(f"{path.relative_to(ROOT)} references missing teardown.revert_diff `{revert_diff}`")
+        elif revert_diff != apply_diff:
+            _validate_scenario_patch(errors, revert_diff_path)
+    for key in ("evaluator_profile", "human_required"):
+        if key not in payload["review"]:
+            errors.append(f"{path.relative_to(ROOT)} is missing review.{key}")
+
+
+def _validate_scenario_patch(errors: list[str], patch_path: Path) -> None:
+    if patch_path.suffix != ".patch":
+        return
+    patch_text = patch_path.read_text(encoding="utf-8")
+    for sentinel in (
+        "*** Begin Patch",
+        "*** End Patch",
+        "*** Add File:",
+        "*** Update File:",
+        "*** Delete File:",
+    ):
+        if sentinel in patch_text:
+            errors.append(
+                f"Scenario patch contains apply_patch sentinel text: {patch_path.relative_to(ROOT)} includes `{sentinel}`"
+            )
+    result = subprocess.run(
+        ["git", "apply", "--check", "--cached", str(patch_path.relative_to(ROOT))],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip().splitlines()
+        suffix = f": {detail[0]}" if detail else ""
+        errors.append(f"Scenario patch does not apply cleanly: {patch_path.relative_to(ROOT)}{suffix}")
+
+
+def _validate_notebook_boundaries(errors: list[str], path: Path) -> None:
+    text = path.read_text(encoding="utf-8")
+    forbidden_literals = (
+        "apply_patch(",
+        "git apply",
+        "git checkout",
+    )
+    for literal in forbidden_literals:
+        if literal in text:
+            errors.append(f"{path.relative_to(ROOT)} contains forbidden notebook mutation literal `{literal}`")
+
+    forbidden_write_targets = (
+        "src/",
+        "infra/",
+        "tests/",
+    )
+    for target in forbidden_write_targets:
+        if f"write_text(" in text and target in text:
+            errors.append(
+                f"{path.relative_to(ROOT)} appears to write into repo-tracked path `{target}` from a notebook cell"
+            )
 
 
 def _validate_path_tokens(path: Path, text: str) -> list[str]:

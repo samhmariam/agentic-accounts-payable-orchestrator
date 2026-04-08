@@ -1,0 +1,12 @@
+diff --git a/src/aegisap/identity/actor_verifier.py b/src/aegisap/identity/actor_verifier.py
+--- a/src/aegisap/identity/actor_verifier.py
++++ b/src/aegisap/identity/actor_verifier.py
+@@ -79,7 +79,7 @@ class ActorVerifier:
+         resp.raise_for_status()
+         data = resp.json()
+         members = data.get("value", [])
+-        is_member = any(g.get("id") == group_id for g in members)
++        is_member = any(g.get("id") == oid for g in members)
+         detail = (
+             f"OID {oid} IS a member of group {group_id}"
+             if is_member

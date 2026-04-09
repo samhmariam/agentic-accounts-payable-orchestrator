@@ -14,7 +14,9 @@ The only remaining manual-first Azure layer is the Day 0 bootstrap exception in
 Days 1-14 now start with `uv run aegisap-lab incident start --day XX`, then use
 the notebook as the primary learner surface. Portal investigation still exists,
 but it is now embedded inside the notebook flow rather than split across a
-separate day guide.
+separate day guide. The notebook is a repo-first reload harness: learners edit
+`src/`, `infra/`, or `scripts/` first, rerun the bootstrap cell, and then use
+Marimo to validate the external code.
 
 Day 0 keeps its dedicated bootstrap companions:
 
@@ -111,7 +113,7 @@ Days 1-14 express that contract through the notebook scaffold:
 - `Production Patch`
 - `Verification`
 - `KQL Evidence` on Days 05-14
-- `Native Tooling Gate` on Days 05-14
+- `Native Tooling Gate` on Days 04-14
 - `PR Defense`
 
 Native-tool expectations are governed globally by

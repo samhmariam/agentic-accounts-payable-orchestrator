@@ -2,7 +2,7 @@
   "day": "12",
   "commands": [
     {
-      "command": "az network private-endpoint list --resource-group <rg>",
+      "command": "az network private-endpoint list --resource-group <rg> -o json",
       "purpose": "Prove the expected private endpoint exists in Azure without curriculum helper tooling.",
       "expected_signal": "The target service shows a private endpoint in the approved subnet.",
       "observed_excerpt": "privateEndpointConnections[0].properties.privateLinkServiceConnectionState.status = Approved"
@@ -16,7 +16,7 @@
       "observed_excerpt": "workflow_id, gate_name, passed"
     }
   ],
-  "operator_interpretation": "Explain what the native commands prove and what they do not prove.",
+  "operator_interpretation": "Explain what the native commands prove and what they do not prove. Use machine-readable diagnostic hygiene such as `-o json` for Azure CLI commands.",
   "limitations": [
     "Native evidence proves the operator view for the current environment only.",
     "The facilitator may require a live replay of one saved proof during review."

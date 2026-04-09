@@ -41,6 +41,7 @@ uv run aegisap-lab incident start --day 07
 
 - Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 - Save raw proof to `build/day7/native_operator_evidence.json` before you patch production code.
+- Append `-o json` to Azure CLI diagnostics so the signal-family matcher can replay machine-readable output.
 - Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
@@ -48,6 +49,15 @@ uv run aegisap-lab incident start --day 07
 ## KQL Evidence
 
 Save `build/day7/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. Shadow-drift drills must still be diagnosed from current-day telemetry and evidence only.
+
+## Early Transfer Proof
+
+- Hostile fixtures: `fixtures/capstone_b/claims_intake/`
+- Adapter boundary: `src/aegisap/transfer/claims_adapter.py`
+- Transfer artifact: `build/day7/claims_transfer_report.json`
+
+The claims payloads are intentionally nested and structurally hostile. Flatten
+them into reusable `ControlSignals` before the shared fail-closed logic is trusted.
 
 ## Verification Commands
 
@@ -67,6 +77,9 @@ uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/s
 - `src/aegisap/audit/writer.py`
 - `src/aegisap/day3/policies/source_authority_rules.yaml`
 - `src/aegisap/day3/retrieval/authority_policy.py`
+- `src/aegisap/transfer/claims_adapter.py`
+- `src/aegisap/training/transfer.py`
+- `fixtures/capstone_b/claims_intake`
 - `scenarios/day07`
 
 ## Automated Drill

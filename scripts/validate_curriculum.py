@@ -93,6 +93,7 @@ REQUIRED_DOCS = (
     "docs/curriculum/templates/DAILY_SCORECARD.md",
     "docs/curriculum/templates/KQL_EVIDENCE_TEMPLATE.json",
     "docs/curriculum/templates/NATIVE_OPERATOR_EVIDENCE_TEMPLATE.json",
+    "docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md",
     "docs/curriculum/templates/ORAL_DEFENSE_SCORECARD.md",
     "docs/curriculum/templates/PILOT_RETRO.md",
     "docs/curriculum/checklists/day10_peer_red_team.md",
@@ -211,6 +212,13 @@ RAW_SDK_BAN_SNIPPET = (
 )
 
 NATIVE_OPERATOR_EVIDENCE_DAYS = {
+    "04": {
+        "mode": "blocking",
+        "review_stage": "day04_closeout",
+        "minimum_commands": 1,
+        "minimum_queries": 0,
+        "live_demo_required": False,
+    },
     "05": {
         "mode": "blocking",
         "review_stage": "day05_closeout",
@@ -726,7 +734,9 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     "## Why This Fails In Prod",
                     WHY_FAILS_PROMPT,
                     "### Export to Production",
-                    "STOP. Close this notebook.",
+                    "Edit the repo target in your IDE first.",
+                    "deep_reload_modules",
+                    "Rerun this notebook bootstrap cell",
                     "cohort/<",
                     "What trade-off did I make today to satisfy the customer constraint?",
                     "What is the blast radius if my code fails?",
@@ -762,7 +772,7 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 _expect_absent_snippets(
                     errors,
                     notebook_path,
-                    ("notebooks/_shared/azure_probe.py", "notebooks/_shared/curriculum_scaffolds.py"),
+                    ("notebooks/_shared/azure_probe.py",),
                     f"Day {day_id} notebook still references banned shared investigation wrappers",
                 )
             _expect_absent_snippets(
@@ -919,14 +929,25 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                         "Manifest day 14 review_contract must declare `peer_checklist_file: docs/curriculum/checklists/day14_peer_red_team.md`."
                     )
         stakeholder_inject = day.get("stakeholder_inject")
-        if day_id_str == "04" and not stakeholder_inject:
-            errors.append("Manifest day 04 must declare stakeholder_inject.")
+        if day_id_str in {"02", "04"} and not stakeholder_inject:
+            errors.append(f"Manifest day {day['id']} must declare stakeholder_inject.")
         if stakeholder_inject:
             for artifact_rel in stakeholder_inject.get("required_artifacts", []):
                 if not (ROOT / artifact_rel).exists():
                     errors.append(
                         f"Manifest day {day['id']} stakeholder inject artifact missing: {artifact_rel}"
                     )
+            for key in ("script_path", "capture_artifact", "observer_scorecard"):
+                target = stakeholder_inject.get(key)
+                if target and not (ROOT / target).exists():
+                    errors.append(f"Manifest day {day['id']} stakeholder inject path missing: {target}")
+            for role_path in (stakeholder_inject.get("role_cards") or {}).values():
+                if role_path and not (ROOT / role_path).exists():
+                    errors.append(f"Manifest day {day['id']} stakeholder role card missing: {role_path}")
+            if day_id_str in {"02", "04"} and stakeholder_inject.get("delivery_mode") != "triad_roleplay":
+                errors.append(f"Manifest day {day['id']} stakeholder_inject must declare `delivery_mode: triad_roleplay`.")
+            if day_id_str in {"02", "04"} and len(stakeholder_inject.get("required_questions", [])) < 3:
+                errors.append(f"Manifest day {day['id']} stakeholder_inject must declare at least 3 required_questions.")
         native_operator = day.get("native_operator_evidence")
         expected_native = NATIVE_OPERATOR_EVIDENCE_DAYS.get(day_id_str)
         if expected_native is None:
@@ -948,6 +969,28 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     errors.append(
                         f"Manifest day {day['id']} native_operator_evidence artifact_path must be `{expected_artifact}`."
                     )
+                if day_id_str >= "04":
+                    if native_operator.get("must_use_json_output") is not True:
+                        errors.append(
+                            f"Manifest day {day['id']} native_operator_evidence must declare `must_use_json_output: true`."
+                        )
+                    if not native_operator.get("required_signal_families"):
+                        errors.append(
+                            f"Manifest day {day['id']} native_operator_evidence must declare required_signal_families."
+                        )
+        rollback_rehearsal = day.get("rollback_rehearsal")
+        if day_id_str == "10":
+            if not rollback_rehearsal:
+                errors.append("Manifest day 10 must declare rollback_rehearsal.")
+            else:
+                if rollback_rehearsal.get("artifact_path") != "build/day10/rollback_rehearsal.json":
+                    errors.append(
+                        "Manifest day 10 rollback_rehearsal artifact_path must be `build/day10/rollback_rehearsal.json`."
+                    )
+                if rollback_rehearsal.get("traffic_shift_required") is not True:
+                    errors.append("Manifest day 10 rollback_rehearsal must declare `traffic_shift_required: true`.")
+        elif rollback_rehearsal is not None:
+            errors.append(f"Manifest day {day['id']} should not declare rollback_rehearsal.")
         kql_evidence = day.get("kql_evidence")
         if day_id_str in KQL_EVIDENCE_DAYS:
             if not kql_evidence:

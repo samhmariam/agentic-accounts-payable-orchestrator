@@ -126,6 +126,7 @@ days:
   - docs/curriculum/artifacts/day02/RACI_MATRIX.md
   - docs/curriculum/artifacts/day02/NFR_REGISTER.md
   - docs/curriculum/artifacts/day02/ADR_001_SCOPE_AND_BOUNDARIES.md
+  - docs/curriculum/artifacts/day02/ACTIVE_DISCOVERY_LOG.md
   portal_to_script_mapping:
     portal_surface: Azure OpenAI deployment metrics, retry telemetry, and queue pressure
       evidence
@@ -157,6 +158,26 @@ days:
   review_contract:
     evaluator_profile: wave1-day02-resilience
     human_required: true
+  stakeholder_inject:
+    requester_role: Architecture board chair
+    channel: live_discovery_interview
+    unsafe_request: Increase throughput immediately and relax queue protections unless
+      the learner proves which controls are zero-tolerance.
+    required_artifacts:
+    - docs/curriculum/artifacts/day02/NFR_REGISTER.md
+    - docs/curriculum/artifacts/day02/ADR_001_SCOPE_AND_BOUNDARIES.md
+    delivery_mode: triad_roleplay
+    script_path: scenarios/day02/facilitator_script.yaml
+    role_cards:
+      interviewer: scenarios/day02/role_cards/interviewer.md
+      stakeholder: scenarios/day02/role_cards/stakeholder.md
+      observer_scribe: scenarios/day02/role_cards/observer_scribe.md
+    required_questions:
+    - Which reliability or queue-safety control is non-negotiable even under spike traffic?
+    - Who owns the decision if throughput and auditability conflict in production?
+    - What evidence would justify a rollback if the throughput change harms safe processing?
+    capture_artifact: docs/curriculum/artifacts/day02/ACTIVE_DISCOVERY_LOG.md
+    observer_scorecard: docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md
   customer_context: The customer architecture board is pressing for throughput gains
     during an invoice spike, but the service owner refuses any change that weakens
     queue safety or approval lines.
@@ -329,6 +350,7 @@ days:
   - docs/curriculum/artifacts/day04/POLICY_PRECEDENCE.md
   - docs/curriculum/artifacts/day04/FAIL_CLOSED_TEST_CASES.json
   - docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md
+  - docs/curriculum/artifacts/day04/SPONSOR_NEGOTIATION_LOG.md
   - adr/ADR-002_irreversible_actions_and_hitl.md
   portal_to_script_mapping:
     portal_surface: Execution trace risk flags, invoice facts, and final routing outcome
@@ -363,6 +385,24 @@ days:
     review_mode: standard
     required_review_roles:
     - facilitator
+  native_operator_evidence:
+    artifact_path: build/day4/native_operator_evidence.json
+    mode: blocking
+    review_stage: day04_closeout
+    live_demo_required: false
+    minimum_commands: 1
+    minimum_queries: 0
+    must_use_json_output: true
+    required_signal_families:
+    - name: cloud_truth_network_posture
+      command_patterns:
+      - \baz cognitiveservices account show\b
+      - \baz rest\b
+      output_patterns:
+      - publicNetworkAccess
+      - properties.publicNetworkAccess
+      minimum_matches: 1
+      must_use_json_output: true
   stakeholder_inject:
     requester_role: Executive sponsor
     channel: escalation_email
@@ -371,6 +411,18 @@ days:
     required_artifacts:
     - adr/ADR-002_irreversible_actions_and_hitl.md
     - docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md
+    delivery_mode: triad_roleplay
+    script_path: scenarios/day04/facilitator_script.yaml
+    role_cards:
+      interviewer: scenarios/day04/role_cards/interviewer.md
+      stakeholder: scenarios/day04/role_cards/stakeholder.md
+      observer_scribe: scenarios/day04/role_cards/observer_scribe.md
+    required_questions:
+    - Which conditions make manual review non-negotiable even if finance wants speed?
+    - What production risk or liability would make you reject a bypass request outright?
+    - What evidence would you require before approving any change to policy precedence?
+    capture_artifact: docs/curriculum/artifacts/day04/SPONSOR_NEGOTIATION_LOG.md
+    observer_scorecard: docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md
   customer_context: The customer CISO banned public exposure for production-bound
     AI services and wants proof that risky recommendation paths still stop for review
     instead of acting optimistically.
@@ -506,6 +558,18 @@ days:
     live_demo_required: false
     minimum_commands: 1
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: durable_state_or_queue_truth
+      command_patterns:
+      - \baz postgres flexible-server\b
+      - \baz servicebus queue\b
+      output_patterns:
+      - name
+      - properties
+      - countDetails
+      minimum_matches: 1
+      must_use_json_output: true
   customer_context: An approver reopened a paused invoice after a partial outage.
     The customer wants the workflow resumed without duplicate approvals, duplicate
     recommendations, or policy drift.
@@ -649,6 +713,19 @@ days:
     live_demo_required: false
     minimum_commands: 1
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: authority_surface_truth
+      command_patterns:
+      - \baz datafactory\b
+      - \baz cosmosdb\b
+      - \baz ml\b
+      output_patterns:
+      - properties
+      - provisioningState
+      - identity
+      minimum_matches: 1
+      must_use_json_output: true
   customer_context: A reviewer found a conflict between ERP data and the extracted
     invoice narrative, and the review model now returns schema-incomplete output on
     edge cases. The customer expects the system to refuse or escalate unsafe blending
@@ -809,6 +886,18 @@ days:
     live_demo_required: false
     minimum_commands: 1
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: telemetry_guardrail_surface
+      command_patterns:
+      - \baz monitor app-insights component show\b
+      - \baz resource show\b
+      output_patterns:
+      - Application Insights
+      - properties
+      - WorkspaceResourceId
+      minimum_matches: 1
+      must_use_json_output: true
   customer_context: The customer risk team wants evidence that prompt injection and
     PII leakage are rejected before anything lands in logs or audit evidence.
   persistent_constraints:
@@ -1011,6 +1100,18 @@ days:
     live_demo_required: false
     minimum_commands: 1
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: identity_and_role_truth
+      command_patterns:
+      - \baz role assignment list\b
+      - \baz containerapp identity show\b
+      output_patterns:
+      - principalId
+      - roleDefinitionName
+      - Search Index Data
+      minimum_matches: 1
+      must_use_json_output: true
   customer_context: A rogue admin changed runtime permissions and the customer now
     suspects the search tier is over-privileged. You must restore least privilege
     without violating the no-public-endpoints rule inherited from Day 4.
@@ -1205,6 +1306,18 @@ days:
     live_demo_required: false
     minimum_commands: 2
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: monitoring_or_cost_truth
+      command_patterns:
+      - \baz monitor metrics list\b
+      - \baz consumption usage list\b
+      output_patterns:
+      - cost
+      - timeseries
+      - total
+      minimum_matches: 1
+      must_use_json_output: true
   customer_context: A finance sponsor is alarmed by rising token spend and wants a
     defensible routing and cache policy that respects the same infrastructure and
     identity constraints already in force.
@@ -1415,6 +1528,33 @@ days:
     live_demo_required: false
     minimum_commands: 2
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: aca_revision_or_gate_truth
+      command_patterns:
+      - \baz containerapp revision list\b
+      - \baz containerapp ingress traffic show\b
+      output_patterns:
+      - revisionName
+      - trafficWeight
+      - active
+      minimum_matches: 1
+      must_use_json_output: true
+  rollback_rehearsal:
+    artifact_path: build/day10/rollback_rehearsal.json
+    traffic_shift_required: true
+    command_patterns:
+    - \baz containerapp ingress traffic set\b
+    verification_patterns:
+    - revisionName
+    - '"weight":100'
+    health_checks:
+    - health_ready
+    - version_probe
+    readiness_retry_policy:
+      initial_delay_seconds: 5
+      max_attempts: 5
+      backoff_multiplier: 2
   customer_context: The customer CAB will not approve rollout without a release packet
     that proves security posture, ownership, rollback readiness, and cost governance
     survived the repair.
@@ -1623,6 +1763,19 @@ days:
     live_demo_required: false
     minimum_commands: 2
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: delegated_identity_truth
+      command_patterns:
+      - \baz ad group member list\b
+      - \baz ad app show\b
+      - \baz account get-access-token\b
+      output_patterns:
+      - objectId
+      - appId
+      - expiresOn
+      minimum_matches: 1
+      must_use_json_output: true
   customer_context: The security team caught an approval path that may be acting as
     the app instead of the user. You must repair the actor binding without regressing
     release or network controls.
@@ -1856,6 +2009,18 @@ days:
     live_demo_required: true
     minimum_commands: 2
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: private_network_truth
+      command_patterns:
+      - \baz network private-endpoint list\b
+      - \baz network private-dns zone\b
+      output_patterns:
+      - privateLinkServiceConnections
+      - privateDnsZoneConfigs
+      - subnet
+      minimum_matches: 1
+      must_use_json_output: true
   customer_context: The customer CISO escalated a DNS drift concern. You must prove
     that the VNet, private endpoints, and DNS links keep the agent invisible to the
     public internet.
@@ -2088,6 +2253,18 @@ days:
     live_demo_required: false
     minimum_commands: 2
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: integration_boundary_truth
+      command_patterns:
+      - \baz functionapp\b
+      - \baz servicebus queue\b
+      output_patterns:
+      - state
+      - deadLetterMessageCount
+      - enabled
+      minimum_matches: 1
+      must_use_json_output: true
   customer_context: A line-of-business integration is dropping events at the boundary.
     The customer expects the MCP surface and DLQ path to recover without breaking
     inherited identity or network controls.
@@ -2344,6 +2521,19 @@ days:
     live_demo_required: true
     minimum_commands: 2
     minimum_queries: 1
+    must_use_json_output: true
+    required_signal_families:
+    - name: canary_and_trace_truth
+      command_patterns:
+      - \baz containerapp revision list\b
+      - \baz containerapp ingress traffic show\b
+      - \baz monitor app-insights component show\b
+      output_patterns:
+      - revisionName
+      - trafficWeight
+      - connectionString
+      minimum_matches: 1
+      must_use_json_output: true
   customer_context: A downstream SAP schema change created a severity-1 incident.
     Leadership needs a rollback-capable repair path that preserves traceability, network
     posture, and release evidence.

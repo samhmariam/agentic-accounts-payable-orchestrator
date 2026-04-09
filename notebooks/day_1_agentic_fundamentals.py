@@ -18,6 +18,10 @@ def _bootstrap():
         if text not in sys.path:
             sys.path.insert(0, text)
 
+    from _shared.curriculum_scaffolds import deep_reload_modules
+
+    deep_reload_modules("aegisap")
+
     from aegisap.day_01.normalizers import parse_money
     from aegisap.day_01.service import IntakeReject, canonicalize_with_candidate
     from aegisap.training.labs import load_candidate, load_invoice_package
@@ -228,12 +232,16 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
-        STOP. Close this notebook.
+        Edit the repo target in your IDE first.
 
-        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+        Rerun this notebook bootstrap cell after every repo edit so `deep_reload_modules(...)`
+        reloads the real package imports before you trust the notebook proof again.
+
+        Write the durable patch in the repo target below, not inside Marimo.
 
         Your prototype is only a hypothesis until the real code changes land in the repo.
-        Open the production files in your editor and implement the fix there:
+        Open the production files in your editor, implement the fix there, and then
+        return here to verify the external code:
 
         - `src/aegisap/day_01/normalizers.py`
         - `src/aegisap/day_01/service.py` if the rejection path or exception handling needs adjustment

@@ -1,5 +1,24 @@
 from __future__ import annotations
 
+import importlib
+import sys
+
+
+def deep_reload_modules(*module_prefixes: str) -> list[str]:
+    removed: list[str] = []
+    prefixes = tuple(prefix.strip() for prefix in module_prefixes if prefix and prefix.strip())
+    if not prefixes:
+        return removed
+
+    # Remove deepest modules first so re-imports do not inherit stale transitive state.
+    for name in sorted(sys.modules, key=lambda item: (item.count("."), item), reverse=True):
+        if any(name == prefix or name.startswith(f"{prefix}.") for prefix in prefixes):
+            sys.modules.pop(name, None)
+            removed.append(name)
+
+    importlib.invalidate_caches()
+    return removed
+
 
 def render_full_day_agenda(
     mo,

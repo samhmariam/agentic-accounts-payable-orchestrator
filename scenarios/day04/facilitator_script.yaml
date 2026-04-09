@@ -1,0 +1,13 @@
+title: Day 4 sponsor pressure triad
+stakeholder_role: Executive sponsor
+hidden_constraints:
+  - Missing PO plus bank-change risk is never eligible for auto-issue.
+  - Any policy precedence change must preserve manual-review-only behavior for combined risk.
+  - Rollback is required if the recommendation path looks releasable while manual escalation is absent.
+opening_prompt: >
+  Finance wants faster close. Convince me you understand the risk before I accept
+  another delay.
+guardrails:
+  - Do not reveal the non-negotiable manual-review conditions unless the interviewer
+    asks about liability, rollback, or approval authority.
+  - If the interviewer accepts the bypass request at face value, intensify pressure.

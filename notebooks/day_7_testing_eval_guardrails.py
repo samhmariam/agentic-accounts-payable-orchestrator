@@ -18,6 +18,10 @@ def _bootstrap():
         if text not in sys.path:
             sys.path.insert(0, text)
 
+    from _shared.curriculum_scaffolds import deep_reload_modules
+
+    deep_reload_modules("aegisap")
+
     from aegisap.audit.events import build_audit_event
     from aegisap.security.redaction import redact_text
 
@@ -176,6 +180,23 @@ def _codification_bridge(mo):
 
 
 @app.cell
+def _transfer_domain_lab(mo):
+    mo.md(
+        """
+        ## Transfer Domain Lab
+
+        Day 7 now includes an early hostile transfer proof. After you repair the guardrail,
+        flatten the nested healthcare claims fixtures in `fixtures/capstone_b/claims_intake/`
+        into reusable `ControlSignals` before you trust the shared fail-closed logic.
+
+        Your rebuilt evidence must include `build/day7/claims_transfer_report.json` so the
+        review can see the adapter boundary, not just the AP-shaped code path.
+        """
+    )
+    return
+
+
+@app.cell
 def _production_patch(mo):
     mo.md(
         """
@@ -185,9 +206,12 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
-        STOP. Close this notebook.
+        Edit the repo target in your IDE first.
 
-        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+        Rerun this notebook bootstrap cell after every repo edit so `deep_reload_modules(...)`
+        reloads the real package imports before you trust the notebook proof again.
+
+        Write the durable patch in the repo target below, not inside Marimo.
 
         Move into the real guardrail boundary and implement the repair in:
 
@@ -215,10 +239,16 @@ def _production_patch(mo):
 @app.cell
 def _verification(repo_root, mo):
     artifact_path = repo_root / "build" / "day7" / "eval_report.json"
+    transfer_path = repo_root / "build" / "day7" / "claims_transfer_report.json"
     artifact_note = (
         f"Current artifact present: `{artifact_path.relative_to(repo_root)}`"
         if artifact_path.exists()
         else "Artifact missing: rebuild the Day 7 artifact after the repair."
+    )
+    transfer_note = (
+        f"Transfer artifact present: `{transfer_path.relative_to(repo_root)}`"
+        if transfer_path.exists()
+        else f"Transfer artifact missing until rebuild: `{transfer_path.relative_to(repo_root)}`"
     )
     mo.md(
         f"""
@@ -233,6 +263,8 @@ def _verification(repo_root, mo):
         ```
 
         {artifact_note}
+
+        {transfer_note}
         """
     )
     return
@@ -266,6 +298,8 @@ def _native_tooling_gate(mo):
         Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 
         Save your raw operator proof in `build/day7/native_operator_evidence.json`.
+        Append `-o json` to Azure CLI diagnostics so the machine-graded signal family can
+        replay the command output, not just the command text.
 
         Allowed tools during this gate:
 

@@ -95,7 +95,7 @@ def test_all_artifact_files_exist(day: dict) -> None:
 
 def test_total_artifact_count(days: list[dict]) -> None:
     total = sum(len(d["artifact_files"]) for d in days)
-    assert total == 47, f"Expected 47 artifact files across all days, got {total}"
+    assert total == 49, f"Expected 49 artifact files across all days, got {total}"
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
@@ -122,14 +122,23 @@ def test_phase1_metadata_contract_declared(day: dict) -> None:
     assert day["chaos_gate"], f"Day {day['id']} missing chaos_gate"
 
 
-def test_day4_declares_stakeholder_inject(days: list[dict]) -> None:
-    day = next(item for item in days if item["id"] == "04")
-    assert day["stakeholder_inject"]["required_artifacts"]
+@pytest.mark.parametrize("day_id", ["02", "04"])
+def test_triads_days_declare_stakeholder_inject(day_id: str, days: list[dict]) -> None:
+    day = next(item for item in days if item["id"] == day_id)
+    inject = day["stakeholder_inject"]
+    assert inject["required_artifacts"]
+    assert inject["delivery_mode"] == "triad_roleplay"
+    assert inject["script_path"]
+    assert inject["capture_artifact"]
+    assert inject["observer_scorecard"]
+    assert set(inject["role_cards"]) == {"interviewer", "stakeholder", "observer_scribe"}
+    assert len(inject["required_questions"]) >= 3
 
 
 @pytest.mark.parametrize(
     "day_id,mode",
     [
+        ("04", "blocking"),
         ("05", "blocking"),
         ("06", "blocking"),
         ("07", "blocking"),
@@ -147,6 +156,8 @@ def test_native_operator_evidence_contract_declared(day_id: str, mode: str, days
     contract = day.get("native_operator_evidence")
     assert contract, f"Day {day_id} missing native_operator_evidence"
     assert contract["mode"] == mode
+    assert contract["must_use_json_output"] is True
+    assert contract["required_signal_families"]
 
 
 @pytest.mark.parametrize("day_id", KQL_EVIDENCE_DAYS)
@@ -201,6 +212,16 @@ def test_day10_and_day14_use_cab_board_review_mode(days: list[dict]) -> None:
     assert day14["review_contract"]["requires_kql_replay"] is True
     assert day14["review_contract"]["requires_revert_proof"] is True
     assert day14["review_contract"]["peer_checklist_file"] == "docs/curriculum/checklists/day14_peer_red_team.md"
+
+
+def test_day10_declares_rollback_rehearsal_contract(days: list[dict]) -> None:
+    day10 = next(item for item in days if item["id"] == "10")
+    contract = day10["rollback_rehearsal"]
+    assert contract["artifact_path"] == "build/day10/rollback_rehearsal.json"
+    assert contract["traffic_shift_required"] is True
+    assert contract["command_patterns"]
+    assert contract["verification_patterns"]
+    assert contract["health_checks"] == ["health_ready", "version_probe"]
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in

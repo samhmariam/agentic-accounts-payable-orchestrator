@@ -37,6 +37,8 @@ The exact artifact filenames for each day are the authoritative source in
    editor: what exact state did the portal show, what exact notebook proof
    reproduced it, and what exact file must change? Introduce the three oral
    defense prompts for the day so learners can build toward them during the lab.
+   On Days 02 and 04, run the active-inception triad before the learner opens
+   the notebook so the hidden NFR or risk appetite has to be extracted verbally.
 3. Lab block: keep the room moving toward all four outputs (technical build,
    decision memo, corporate process artifact, oral defense prep). Notebook
    completion alone is not the goal. Require the learner to capture KQL evidence
@@ -73,6 +75,22 @@ The exact artifact filenames for each day are the authoritative source in
 - `red`: stop forward motion, assign remediation immediately, and do not let
   the learner advance to the next checkpoint or capstone without recovery
 
+## Active Inception Triads
+
+Days 02 and 04 use triads by default:
+
+- `interviewer`: extracts the hidden NFR, authority boundary, or risk appetite
+- `stakeholder`: plays from the scripted role card and does not volunteer the answer
+- `observer-scribe`: scores whether the hidden constraint was surfaced and records the durable artifact notes
+
+Delivery rules:
+
+- facilitator seeds the scenario, assigns roles, and sets the time box
+- learners rotate roles after each round when cohort pacing allows
+- observer-scribe must complete the scorecard and capture artifact path before the round is scored
+- facilitator audits selected triads and only steps in for escalation, broken role discipline, or unresolved ambiguity
+- pairs are allowed only when cohort size makes a triad impossible; in that case the non-interviewing learner acts as observer-scribe after the interview
+
 ## Timeboxed Chaos Intervention
 
 When a learner enters the daily chaos gate, the facilitator must behave like a
@@ -91,14 +109,16 @@ lead engineer under incident discipline, not a helper.
 
 ## Naked Drill Protocol
 
-Use this protocol for the native-tool sections on Days 05-14. The source of
+Use this protocol for the native-tool sections on Days 04-14. The source of
 truth is `docs/curriculum/NATIVE_TOOLING_POLICY.md`.
 
 - allowed tools: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup`, and `Resolve-DnsName`
 - trainers may not rescue learners by suggesting helper CLI commands during these sections
 - trainers may not point learners back to `aegisap-lab` or helper verification wrappers once the native gate starts
 - learners must save literal commands and literal query text into `native_operator_evidence.json`
+- Azure CLI evidence must use `-o json` unless the day explicitly allows another machine-readable format
 - learners on Days 05-14 must also save literal Log Analytics proof into `kql_evidence.json`
+- trainers should reject generic evidence that does not match the day's required signal family
 - facilitators may ask the learner to clear recent terminal-history context, rerun one saved proof live, and explain the interpretation
 - if the learner cannot explain what the native proof shows, the gate does not pass
 

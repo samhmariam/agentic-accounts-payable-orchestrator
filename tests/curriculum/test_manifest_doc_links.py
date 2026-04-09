@@ -142,6 +142,8 @@ def test_day04_docs_reference_pushback_artifacts() -> None:
 @pytest.mark.parametrize(
     "rel_path",
     [
+        "docs/DAY_04.md",
+        "modules/day_04_single_agent_loops/README.md",
         "docs/DAY_05.md",
         "modules/day_05_durable_state/README.md",
         "docs/DAY_06.md",
@@ -215,6 +217,20 @@ def test_cab_docs_reference_revert_proof_and_peer_checklist(rel_path: str, check
     content = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
     assert "Revert Proof" in content
     assert checklist_rel in content
+
+
+@pytest.mark.parametrize(
+    "rel_path",
+    [
+        "docs/DAY_04.md",
+        "modules/day_04_single_agent_loops/README.md",
+        "docs/DAY_10.md",
+        "modules/day_10_production_acceptance/README.md",
+    ],
+)
+def test_machine_readable_native_hygiene_is_documented(rel_path: str) -> None:
+    content = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
+    assert "-o json" in content
 
 
 # ---------------------------------------------------------------------------

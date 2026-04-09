@@ -18,6 +18,10 @@ def _bootstrap():
         if text not in sys.path:
             sys.path.insert(0, text)
 
+    from _shared.curriculum_scaffolds import deep_reload_modules
+
+    deep_reload_modules("aegisap")
+
     from aegisap.deploy.gates import GateResult, build_release_envelope
 
     return GateResult, build_release_envelope, json, mo, repo_root
@@ -180,9 +184,12 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
-        STOP. Close this notebook.
+        Edit the repo target in your IDE first.
 
-        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+        Rerun this notebook bootstrap cell after every repo edit so `deep_reload_modules(...)`
+        reloads the real package imports before you trust the notebook proof again.
+
+        Write the durable patch in the repo target below, not inside Marimo.
 
         Move into the real release boundary and implement the repair in:
 
@@ -209,10 +216,16 @@ def _production_patch(mo):
 @app.cell
 def _verification(repo_root, mo):
     artifact_path = repo_root / "build" / "day10" / "release_envelope.json"
+    rollback_path = repo_root / "build" / "day10" / "rollback_rehearsal.json"
     artifact_note = (
         f"Current artifact present: `{artifact_path.relative_to(repo_root)}`"
         if artifact_path.exists()
         else "Artifact missing: rebuild the Day 10 artifact after the repair."
+    )
+    rollback_note = (
+        f"Rollback rehearsal path: `{rollback_path.relative_to(repo_root)}`"
+        if rollback_path.exists()
+        else f"Rollback rehearsal still required later: `{rollback_path.relative_to(repo_root)}`"
     )
     mo.md(
         f"""
@@ -226,6 +239,8 @@ def _verification(repo_root, mo):
         ```
 
         {artifact_note}
+
+        {rollback_note}
         """
     )
     return
@@ -240,6 +255,8 @@ def _native_tooling_gate(mo):
         Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 
         Save your raw operator proof in `build/day10/native_operator_evidence.json`.
+        Append `-o json` to Azure CLI diagnostics so the CAB packet preserves
+        machine-readable evidence.
 
         Allowed tools during this gate:
 
@@ -259,6 +276,29 @@ def _native_tooling_gate(mo):
 
         Wrappers stay banned until both raw evidence files are complete. After that,
         they may be used only for artifact rebuild, mastery, or reset flows.
+        """
+    )
+    return
+
+
+@app.cell
+def _rollback_rehearsal(mo):
+    mo.md(
+        """
+        ## Rollback Rehearsal
+
+        Save `build/day10/rollback_rehearsal.json` after you exercise the live rollback path.
+
+        Required sequence:
+
+        1. Shift 100% of traffic back to the last-known-good ACA revision with
+           `az containerapp ingress traffic set ... -o json`.
+        2. Verify the routed revision identity before you discuss any Git revert.
+        3. Wait for replica readiness with retry/backoff so a control-plane traffic change is
+           not mistaken for a data-plane outage.
+        4. Capture `/health/ready` and `/version` proof from the restored revision.
+
+        A Git-only revert does not satisfy this gate.
         """
     )
     return

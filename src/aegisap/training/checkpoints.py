@@ -245,3 +245,57 @@ def run_day10_gate_extension_checkpoint(
         release_path,
         release_envelope,
     )
+
+
+def build_day10_rollback_rehearsal(
+    *,
+    artifact_name: str = "rollback_rehearsal",
+) -> tuple[Path, dict[str, Any]]:
+    payload = {
+        "day": "10",
+        "rollback_unit": "aca_revision",
+        "traffic_restored_before_git": True,
+        "stable_revision": "aegisap-worker--stable",
+        "failing_revision": "aegisap-worker--canary",
+        "traffic_shift": {
+            "command": (
+                "az containerapp ingress traffic set --name aegisap-worker "
+                "--resource-group $AZURE_RESOURCE_GROUP "
+                "--revision-weight aegisap-worker--stable=100 -o json"
+            ),
+            "observed_excerpt": '{"revisionName":"aegisap-worker--stable","weight":100}',
+            "verification_command": (
+                "az containerapp ingress traffic show --name aegisap-worker "
+                "--resource-group $AZURE_RESOURCE_GROUP -o json"
+            ),
+            "verification_excerpt": '{"traffic":[{"revisionName":"aegisap-worker--stable","weight":100}]}',
+        },
+        "readiness_retry_policy": {
+            "initial_delay_seconds": 5,
+            "max_attempts": 5,
+            "backoff_multiplier": 2,
+        },
+        "health_checks": [
+            {
+                "name": "health_ready",
+                "command": "curl -sf https://aegisap.example/health/ready",
+                "attempts": 2,
+                "passed": True,
+                "observed_excerpt": "HTTP 200 /health/ready on attempt 2 after replica warm-up.",
+            },
+            {
+                "name": "version_probe",
+                "command": "curl -sf https://aegisap.example/version",
+                "attempts": 1,
+                "passed": True,
+                "observed_excerpt": '{"revision":"aegisap-worker--stable","sha":"abc1234"}',
+            },
+        ],
+        "notes": [
+            "Traffic was restored to the immutable stable ACA revision before any Git history discussion.",
+            "Readiness checks used retry/backoff to distinguish routing changes from replica warm-up.",
+        ],
+        "created_at": _timestamp(),
+    }
+    artifact_path = build_root("day10") / f"{artifact_name}.json"
+    return write_json_artifact(artifact_path, payload), payload

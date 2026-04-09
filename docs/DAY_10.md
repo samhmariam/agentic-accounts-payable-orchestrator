@@ -44,16 +44,26 @@ uv run aegisap-lab incident start --day 10
 
 - Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 - Save raw proof to `build/day10/native_operator_evidence.json` before you patch production code.
+- Append `-o json` to Azure CLI diagnostics so the CAB packet stores machine-readable output.
 - Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
 - Day 10 evidence is CAB-facing and must include at least two literal native commands plus one raw KQL query.
 
+## Rollback Rehearsal
+
+- Save exercised rollback proof to `build/day10/rollback_rehearsal.json`.
+- The rollback unit is the ACA revision, not a Git commit.
+- Shift 100% of live traffic back to the last-known-good revision with `az containerapp ingress traffic set ... -o json` before discussing Git history.
+- Verify the routed revision identity with `az containerapp ingress traffic show ... -o json`.
+- Wait for replica readiness with retry/backoff before judging `/health/ready` or `/version` probes.
+- A Git-only revert does not satisfy rollback proof.
+
 ## CAB Review Mode
 
 - Peer checklist file: `docs/curriculum/checklists/day10_peer_red_team.md`
 - Reviewers must replay at least one saved KQL query live before approval.
-- Revert Proof is mandatory and must name the rollback mechanism, last-known-good target, time-box, and exercised or dry-run evidence.
+- Revert Proof is mandatory and must name the rollback mechanism, last-known-good target, time-box, and exercised rollback evidence.
 
 
 - Review mode: `cab_board`
@@ -80,6 +90,8 @@ uv run aegisap-lab artifact rebuild --day 10
 - `src/aegisap/deploy/gates.py`
 - `scripts/check_all_gates.py`
 - `src/aegisap/training/checkpoints.py`
+- `runbooks/rollback.md`
+- `runbooks/rollback_runbook.md`
 - `scenarios/day10`
 
 ## Automated Drill

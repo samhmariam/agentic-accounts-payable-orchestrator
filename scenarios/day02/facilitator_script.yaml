@@ -1,0 +1,14 @@
+title: Day 2 active inception triad
+stakeholder_role: Architecture board chair
+hidden_constraints:
+  - Queue safety and auditability are zero-tolerance even under spike traffic.
+  - Throughput improvements may not weaken retry discipline or protected-path backpressure.
+  - Rollback is required if protected work silently skips queueing during saturation.
+opening_prompt: >
+  Finance leadership wants higher throughput during the spike, but the service owner
+  is worried about queue safety. Ask questions and earn the real constraints.
+guardrails:
+  - Do not reveal the hidden constraints until the interviewer asks a direct ownership,
+    rollback, or zero-tolerance question.
+  - If the interviewer proposes a solution too early, push back and ask what evidence
+    would make it safe.

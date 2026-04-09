@@ -17,6 +17,10 @@ def _bootstrap():
         if text not in sys.path:
             sys.path.insert(0, text)
 
+    from _shared.curriculum_scaffolds import deep_reload_modules
+
+    deep_reload_modules("aegisap")
+
     from aegisap.day4.planning.policy_overlay import derive_policy_overlay
     from aegisap.day4.recommendation.recommendation_gate import evaluate_recommendation_gate
     from aegisap.day4.state.workflow_state import create_initial_workflow_state
@@ -171,9 +175,12 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
-        STOP. Close this notebook.
+        Edit the repo target in your IDE first.
 
-        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+        Rerun this notebook bootstrap cell after every repo edit so `deep_reload_modules(...)`
+        reloads the real package imports before you trust the notebook proof again.
+
+        Write the durable patch in the repo target below, not inside Marimo.
 
         Implement the repair in the production files:
 
@@ -201,10 +208,16 @@ def _production_patch(mo):
 @app.cell
 def _verification(repo_root, mo):
     artifact_path = repo_root / "build" / "day4" / "golden_thread_day4.json"
+    native_path = repo_root / "build" / "day4" / "native_operator_evidence.json"
     artifact_note = (
         f"Current artifact present: `{artifact_path.relative_to(repo_root)}`"
         if artifact_path.exists()
         else "Artifact missing: rebuild the Day 4 artifact after the repair."
+    )
+    native_note = (
+        f"Native evidence path: `{native_path.relative_to(repo_root)}`"
+        if native_path.exists()
+        else f"Native evidence still required later: `{native_path.relative_to(repo_root)}`"
     )
     mo.md(
         f"""
@@ -218,6 +231,35 @@ def _verification(repo_root, mo):
         ```
 
         {artifact_note}
+
+        {native_note}
+        """
+    )
+    return
+
+
+@app.cell
+def _native_tooling_gate(mo):
+    mo.md(
+        """
+        ## Native Tooling Gate
+
+        Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+
+        Save your raw operator proof in `build/day4/native_operator_evidence.json`.
+
+        Use Azure Portal, `az`, or `az rest` to capture the public-network and fail-closed
+        signal family before you patch. Append `-o json` to Azure CLI diagnostics so the
+        saved `observed_excerpt` is machine-readable and replayable.
+
+        Tools banned during this gate:
+
+        - `aegisap-lab`
+        - helper verification wrappers
+        - canned answer keys
+
+        Wrappers stay banned until the raw evidence file is complete. After that, they may
+        be used only for artifact rebuild, mastery, or reset flows.
         """
     )
     return

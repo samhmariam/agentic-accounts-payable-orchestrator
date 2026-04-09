@@ -18,6 +18,10 @@ def _bootstrap():
         if text not in sys.path:
             sys.path.insert(0, text)
 
+    from _shared.curriculum_scaffolds import deep_reload_modules
+
+    deep_reload_modules("aegisap")
+
     from aegisap.cache.cache_policy import evaluate_cache_policy
     from aegisap.cost.budget_gate import check_budget
     from aegisap.routing.routing_policy import route_task
@@ -199,9 +203,12 @@ def _production_patch(mo):
 
         Do not edit repo files from this notebook.
 
-        STOP. Close this notebook.
+        Edit the repo target in your IDE first.
 
-        Open the exact relative filepath listed below in your IDE. Write the durable patch there, not inside Marimo.
+        Rerun this notebook bootstrap cell after every repo edit so `deep_reload_modules(...)`
+        reloads the real package imports before you trust the notebook proof again.
+
+        Write the durable patch in the repo target below, not inside Marimo.
 
         Move into the real routing boundary and implement the repair in:
 

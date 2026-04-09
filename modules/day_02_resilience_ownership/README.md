@@ -28,6 +28,14 @@ If queue and retry controls drift under load, invoice SLAs slip and the customer
 
 - `uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py -q && uv run aegisap-lab artifact rebuild --day 02`
 
+## Active Inception
+
+- Delivery mode: triad roleplay
+- Facilitator script: `scenarios/day02/facilitator_script.yaml`
+- Role cards: `scenarios/day02/role_cards/`
+- Capture artifact: `docs/curriculum/artifacts/day02/ACTIVE_DISCOVERY_LOG.md`
+- Observer scorecard: `docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md`
+
 ## Chaos Gate
 
 - Failure signal: Retry policy and backpressure assumptions no longer match observed queue pressure and latency targets.
@@ -44,6 +52,7 @@ Do not edit code in this module folder.
 - Rosetta Stone Bridge: `notebooks/bridges/day02_resilience_controls.md`
 - Production Target: `src/aegisap/observability/retry_policy.py`
 - Production Target: `src/aegisap/resilience/backpressure.py`
+- Discovery Artifact: `docs/curriculum/artifacts/day02/ACTIVE_DISCOVERY_LOG.md`
 - Scenario Pack: `scenarios/day02`
 - Verification Command: `uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 02`

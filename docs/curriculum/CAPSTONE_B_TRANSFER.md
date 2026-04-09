@@ -56,7 +56,7 @@ Trainee-visible fixtures cover:
 |---|---|
 | `claim_001_routine.json` | Routine low-value DME claim, all fields present and valid |
 | `claim_002_high_value.json` | High-value claim above authorisation threshold — triggers HITL |
-| `claim_003_missing_auth.json` | Missing authorisation reference — must escalate or refuse |
+| `claim_003_missing_auth.json` | Missing prior-authorisation reference inside nested supportingInfo — must escalate or refuse |
 | `claim_004_code_mismatch.json` | Procedure code inconsistent with diagnosis — must flag |
 | `claim_005_duplicate.json` | Duplicate claim number — idempotency and deduplication test |
 
@@ -67,9 +67,10 @@ Trainee-visible fixtures cover:
 `fixtures/capstone_b/_assessor_only/claims_intake/claim_006_assessor_only.json`
 
 This case contains a subtle encoding inconsistency designed to test whether the
-trainee's pipeline handles an unfamiliar but structurally valid input without
-silently passing incorrect data downstream. Assessors provide this case after the
-trainee has demonstrated their pipeline with the five trainee cases.
+trainee's pipeline handles an unfamiliar but structurally valid nested Claim
+payload without silently passing incorrect data downstream. Assessors provide
+this case after the trainee has demonstrated their pipeline with the five
+trainee cases.
 
 **Do not distribute this file to trainees at any point before the defense.**
 

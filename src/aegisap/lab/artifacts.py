@@ -31,6 +31,7 @@ from aegisap.training.artifacts import build_root, write_json_artifact
 from aegisap.training.chaos import build_chaos_capstone_artifacts
 from aegisap.training.fixtures import day6_fixture_path, golden_thread_path
 from aegisap.training.checkpoints import (
+    build_day10_rollback_rehearsal,
     run_day10_gate_extension_checkpoint,
     run_day8_trace_extension_checkpoint,
 )
@@ -42,6 +43,7 @@ from aegisap.training.labs import (
     run_day4_case_artifact,
     run_day6_review_artifact_from_day4,
 )
+from aegisap.training.transfer import build_day7_claims_transfer_report
 
 
 class _ArtifactConnection:
@@ -545,6 +547,7 @@ def _rebuild_day7_artifact() -> dict[str, Any]:
         "gate_passed": True,
     }
     artifact_path = write_json_artifact(day7_root / "eval_report.json", artifact)
+    claims_transfer_path, claims_transfer_payload = build_day7_claims_transfer_report()
     synthetic_drift_path = day7_root / "synthetic_cases_drift.jsonl"
     malicious_drift_path = day7_root / "malicious_cases_drift.jsonl"
     synthetic_drift_path.write_text(
@@ -560,6 +563,8 @@ def _rebuild_day7_artifact() -> dict[str, Any]:
         "artifact_path": str(artifact_path),
         "payload": artifact,
         "supporting_artifacts": {
+            "claims_transfer_report_path": str(claims_transfer_path),
+            "claims_transfer_report": claims_transfer_payload,
             "synthetic_cases_drift_path": str(synthetic_drift_path),
             "malicious_cases_drift_path": str(malicious_drift_path),
         },
@@ -702,6 +707,7 @@ def _rebuild_day10_artifacts() -> dict[str, Any]:
     checkpoint_path, checkpoint_payload, release_path, release_envelope = (
         run_day10_gate_extension_checkpoint(base_results=base_results)
     )
+    rollback_rehearsal_path, rollback_rehearsal_payload = build_day10_rollback_rehearsal()
     return {
         "day": "10",
         "artifact_path": str(release_path),
@@ -709,6 +715,8 @@ def _rebuild_day10_artifacts() -> dict[str, Any]:
         "supporting_artifacts": {
             "checkpoint_gate_extension_path": str(checkpoint_path),
             "checkpoint_gate_extension": checkpoint_payload,
+            "rollback_rehearsal_path": str(rollback_rehearsal_path),
+            "rollback_rehearsal": rollback_rehearsal_payload,
             "base_gates": [
                 {
                     "name": gate.name,

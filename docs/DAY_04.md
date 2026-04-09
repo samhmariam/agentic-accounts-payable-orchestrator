@@ -33,11 +33,23 @@ uv run aegisap-lab incident start --day 04
 - `uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py -q && uv run aegisap-lab artifact rebuild --day 04`
 - `uv run aegisap-lab audit-production --day 04 --strict`
 
+## Native Tooling Gate
+
+- Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
+- Save raw proof to `build/day4/native_operator_evidence.json` before you patch production code.
+- Allowed: Azure Portal, `az`, `az rest`, `git`, `curl`, `nslookup` or `Resolve-DnsName`
+- Append `-o json` to Azure CLI diagnostics so the saved `observed_excerpt` is machine-readable.
+- Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
+- Until the raw evidence file is complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
+
 ## Stakeholder Inject
 
 - Executive sponsor request: bypass the HITL pause and auto-issue payments.
 - Required internal artifact: `adr/ADR-002_irreversible_actions_and_hitl.md`
 - Required sponsor-facing artifact: `docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md`
+- Delivery mode: triad roleplay using `scenarios/day04/facilitator_script.yaml`
+- Observer-scored negotiation log: `docs/curriculum/artifacts/day04/SPONSOR_NEGOTIATION_LOG.md`
+- Observer scorecard: `docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md`
 
 ## Verification Commands
 
@@ -55,6 +67,7 @@ uv run aegisap-lab artifact rebuild --day 04
 - `src/aegisap/day4/recommendation/recommendation_gate.py`
 - `adr/ADR-002_irreversible_actions_and_hitl.md`
 - `docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md`
+- `docs/curriculum/artifacts/day04/SPONSOR_NEGOTIATION_LOG.md`
 - `scenarios/day04`
 
 ## Automated Drill

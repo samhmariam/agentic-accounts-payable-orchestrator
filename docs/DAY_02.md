@@ -29,6 +29,17 @@ uv run aegisap-lab incident start --day 02
 
 - `uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py -q && uv run aegisap-lab artifact rebuild --day 02`
 
+## Active Inception
+
+- Delivery mode: triad roleplay
+- Facilitator script: `scenarios/day02/facilitator_script.yaml`
+- Role cards: `scenarios/day02/role_cards/`
+- Capture artifact: `docs/curriculum/artifacts/day02/ACTIVE_DISCOVERY_LOG.md`
+- Observer scorecard: `docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md`
+
+The interviewer must extract the hidden queue-safety NFR, the ownership boundary,
+and the rollback trigger before opening the repo targets.
+
 ## Verification Commands
 
 ```bash
@@ -43,6 +54,7 @@ uv run aegisap-lab artifact rebuild --day 02
 - `notebooks/bridges/day02_resilience_controls.md`
 - `src/aegisap/observability/retry_policy.py`
 - `src/aegisap/resilience/backpressure.py`
+- `docs/curriculum/artifacts/day02/ACTIVE_DISCOVERY_LOG.md`
 - `scenarios/day02`
 
 ## Automated Drill

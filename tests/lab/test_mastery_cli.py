@@ -175,15 +175,17 @@ def _write_native_operator_evidence(
     minimum_commands: int = 1,
     minimum_queries: int = 0,
     required: bool = False,
+    command_entries: list[dict] | None = None,
 ) -> None:
     payload = {
         "day": day,
-        "commands": [
+        "commands": command_entries
+        or [
             {
-                "command": f"az command {index}",
+                "command": f"az command {index} -o json",
                 "purpose": "prove state",
                 "expected_signal": "expected",
-                "observed_excerpt": "observed",
+                "observed_excerpt": '{"observed":"value"}',
             }
             for index in range(minimum_commands)
         ],
@@ -205,6 +207,57 @@ def _write_native_operator_evidence(
             "witnessed_by": "facilitator" if passed else "",
             "recorded_at": "2026-04-08T00:00:00Z" if passed else "",
         },
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _write_rollback_rehearsal(
+    path: Path,
+    *,
+    day: str,
+    traffic_command: str,
+    verification_command: str,
+    verification_excerpt: str,
+    traffic_restored_before_git: bool = True,
+    retry_policy: dict | None = None,
+    health_checks: list[dict] | None = None,
+) -> None:
+    payload = {
+        "day": day,
+        "rollback_unit": "aca_revision",
+        "traffic_restored_before_git": traffic_restored_before_git,
+        "stable_revision": "aegisap-worker--stable",
+        "failing_revision": "aegisap-worker--canary",
+        "traffic_shift": {
+            "command": traffic_command,
+            "observed_excerpt": '{"revisionName":"aegisap-worker--stable","weight":100}',
+            "verification_command": verification_command,
+            "verification_excerpt": verification_excerpt,
+        },
+        "readiness_retry_policy": retry_policy
+        or {
+            "initial_delay_seconds": 5,
+            "max_attempts": 5,
+            "backoff_multiplier": 2,
+        },
+        "health_checks": health_checks
+        or [
+            {
+                "name": "health_ready",
+                "command": "curl -sf https://aegisap.example/health/ready",
+                "attempts": 2,
+                "passed": True,
+                "observed_excerpt": "HTTP 200 after retry",
+            },
+            {
+                "name": "version_probe",
+                "command": "curl -sf https://aegisap.example/version",
+                "attempts": 1,
+                "passed": True,
+                "observed_excerpt": '{"revision":"aegisap-worker--stable"}',
+            },
+        ],
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")
@@ -326,6 +379,263 @@ def test_run_mastery_day9_native_evidence_passes_when_structurally_valid(monkeyp
     payload = mastery.run_mastery(day="09", repo_root=tmp_path)
 
     assert payload["overall_ok"] is True
+    assert payload["results"][-1]["status"] == mastery.PASS
+
+
+def test_run_mastery_day4_native_evidence_requires_signal_family_match(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": "04",
+                    "title": "Native signal day",
+                    "mastery_gates": [
+                        {
+                            "id": "day04_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["fail_closed_decisions"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "native_operator_evidence": {
+                        "artifact_path": "build/day4/native_operator_evidence.json",
+                        "mode": "blocking",
+                        "review_stage": "day04_closeout",
+                        "live_demo_required": False,
+                        "minimum_commands": 1,
+                        "minimum_queries": 0,
+                        "must_use_json_output": True,
+                        "required_signal_families": [
+                            {
+                                "name": "cloud_truth_network_posture",
+                                "command_patterns": [r"\baz cognitiveservices account show\b"],
+                                "output_patterns": [r"publicNetworkAccess"],
+                                "minimum_matches": 1,
+                                "must_use_json_output": True,
+                            }
+                        ],
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+    _write_native_operator_evidence(
+        tmp_path / "build" / "day4" / "native_operator_evidence.json",
+        day="04",
+        passed=False,
+        review_stage="day04_closeout",
+        minimum_commands=1,
+        command_entries=[
+            {
+                "command": "az account show -o json",
+                "purpose": "prove something generic",
+                "expected_signal": "expected",
+                "observed_excerpt": '{"tenantId":"123"}',
+            }
+        ],
+    )
+
+    payload = mastery.run_mastery(day="04", repo_root=tmp_path)
+
+    assert payload["overall_ok"] is False
+    assert payload["results"][-1]["status"] == mastery.FAIL
+    assert "Signal family `cloud_truth_network_posture` matched 0 command(s)" in payload["results"][-1]["detail"]
+
+
+def test_run_mastery_day4_native_evidence_requires_json_output(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": "04",
+                    "title": "Native signal day",
+                    "mastery_gates": [
+                        {
+                            "id": "day04_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["fail_closed_decisions"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "native_operator_evidence": {
+                        "artifact_path": "build/day4/native_operator_evidence.json",
+                        "mode": "blocking",
+                        "review_stage": "day04_closeout",
+                        "live_demo_required": False,
+                        "minimum_commands": 1,
+                        "minimum_queries": 0,
+                        "must_use_json_output": True,
+                        "required_signal_families": [
+                            {
+                                "name": "cloud_truth_network_posture",
+                                "command_patterns": [r"\baz cognitiveservices account show\b"],
+                                "output_patterns": [r"publicNetworkAccess"],
+                                "minimum_matches": 1,
+                                "must_use_json_output": True,
+                            }
+                        ],
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+    _write_native_operator_evidence(
+        tmp_path / "build" / "day4" / "native_operator_evidence.json",
+        day="04",
+        passed=False,
+        review_stage="day04_closeout",
+        minimum_commands=1,
+        command_entries=[
+            {
+                "command": "az cognitiveservices account show --name openai --resource-group rg",
+                "purpose": "prove network posture",
+                "expected_signal": "public network access state",
+                "observed_excerpt": '{"properties":{"publicNetworkAccess":"Disabled"}}',
+            }
+        ],
+    )
+
+    payload = mastery.run_mastery(day="04", repo_root=tmp_path)
+
+    assert payload["overall_ok"] is False
+    assert "`commands[0].command` must append `-o json`" in payload["results"][-1]["detail"]
+
+
+def test_run_mastery_day10_rollback_rehearsal_requires_cloud_truth(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": "10",
+                    "title": "Rollback rehearsal day",
+                    "persistent_constraints": [],
+                    "mastery_gates": [
+                        {
+                            "id": "day10_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["release_packet_before_prod"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "rollback_rehearsal": {
+                        "artifact_path": "build/day10/rollback_rehearsal.json",
+                        "traffic_shift_required": True,
+                        "command_patterns": [r"\baz containerapp ingress traffic set\b"],
+                        "verification_patterns": [r"revisionName", r'"weight":100'],
+                        "health_checks": ["health_ready", "version_probe"],
+                        "readiness_retry_policy": {
+                            "initial_delay_seconds": 5,
+                            "max_attempts": 5,
+                            "backoff_multiplier": 2,
+                        },
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+    _write_rollback_rehearsal(
+        tmp_path / "build" / "day10" / "rollback_rehearsal.json",
+        day="10",
+        traffic_command="git revert HEAD",
+        verification_command="az containerapp ingress traffic show --name aegisap-worker --resource-group rg -o json",
+        verification_excerpt='{"traffic":[{"revisionName":"aegisap-worker--stable","weight":100}]}',
+        traffic_restored_before_git=False,
+    )
+
+    payload = mastery.run_mastery(day="10", repo_root=tmp_path)
+
+    assert payload["overall_ok"] is False
+    assert payload["results"][-1]["gate_id"] == "day10_rollback_rehearsal"
+    assert payload["results"][-1]["status"] == mastery.FAIL
+    assert "traffic_restored_before_git" in payload["results"][-1]["detail"]
+
+
+def test_run_mastery_day10_rollback_rehearsal_passes_with_traffic_shift_and_readiness(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": "10",
+                    "title": "Rollback rehearsal day",
+                    "persistent_constraints": [],
+                    "mastery_gates": [
+                        {
+                            "id": "day10_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["release_packet_before_prod"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "rollback_rehearsal": {
+                        "artifact_path": "build/day10/rollback_rehearsal.json",
+                        "traffic_shift_required": True,
+                        "command_patterns": [r"\baz containerapp ingress traffic set\b"],
+                        "verification_patterns": [r"revisionName", r'"weight":100'],
+                        "health_checks": ["health_ready", "version_probe"],
+                        "readiness_retry_policy": {
+                            "initial_delay_seconds": 5,
+                            "max_attempts": 5,
+                            "backoff_multiplier": 2,
+                        },
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+    _write_rollback_rehearsal(
+        tmp_path / "build" / "day10" / "rollback_rehearsal.json",
+        day="10",
+        traffic_command=(
+            "az containerapp ingress traffic set --name aegisap-worker "
+            "--resource-group rg --revision-weight stable=100 -o json"
+        ),
+        verification_command=(
+            "az containerapp ingress traffic show --name aegisap-worker "
+            "--resource-group rg -o json"
+        ),
+        verification_excerpt='{"traffic":[{"revisionName":"stable","weight":100}]}',
+    )
+
+    payload = mastery.run_mastery(day="10", repo_root=tmp_path)
+
+    assert payload["overall_ok"] is True
+    assert payload["results"][-1]["gate_id"] == "day10_rollback_rehearsal"
     assert payload["results"][-1]["status"] == mastery.PASS
 
 

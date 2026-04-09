@@ -7,7 +7,7 @@ This is the fastest way to stay oriented during delivery.
 1. For Day 0, start with the portal bootstrap guide.
 2. For Days 1-14, start with the day module README under `modules/`.
 3. Run `uv run aegisap-lab incident start --day XX` only after you have read the customer context and file manifest.
-4. Use the notebook as the diagnostic lens, then stop and patch the durable repo targets in your IDE.
+4. Use the notebook as the diagnostic lens and reload harness, then patch the durable repo targets in your IDE and rerun the bootstrap cell before trusting the notebook proof.
 5. Inject or reset the daily drill from the module entrypoint when the session calls for a timed failure recovery.
 6. Run the canonical mastery gate after the verification commands.
 
@@ -44,7 +44,7 @@ This is the fastest way to stay oriented during delivery.
 ## Practical Rule
 
 - Start in `modules/` to understand the customer constraint and file manifest.
-- Use `notebooks/` to diagnose and prototype, not to write the durable patch.
+- Use `notebooks/` to diagnose and validate repo code, not to write the durable patch.
 - Use `src/`, `infra/`, and `scripts/` for the permanent fix.
 - Use `uv run aegisap-lab mastery --day XX` to prove the repair holds under the curriculum contract.
 

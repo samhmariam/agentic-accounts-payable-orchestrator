@@ -3,6 +3,25 @@ from __future__ import annotations
 from aegisap.lab.artifacts import rebuild_day_artifact
 
 
+def test_rebuild_day7_artifact_writes_eval_and_transfer_outputs() -> None:
+    result = rebuild_day_artifact("07")
+    assert result["day"] == "07"
+    assert result["payload"]["day"] == 7
+    assert "claims_transfer_report_path" in result["supporting_artifacts"]
+    transfer = result["supporting_artifacts"]["claims_transfer_report"]
+    assert transfer["total_cases"] == 5
+
+
+def test_rebuild_day10_artifact_writes_release_and_rollback_outputs() -> None:
+    result = rebuild_day_artifact("10")
+    assert result["day"] == "10"
+    assert "all_passed" in result["payload"]
+    assert "rollback_rehearsal_path" in result["supporting_artifacts"]
+    rollback = result["supporting_artifacts"]["rollback_rehearsal"]
+    assert rollback["traffic_restored_before_git"] is True
+    assert rollback["rollback_unit"] == "aca_revision"
+
+
 def test_rebuild_day11_artifact_writes_obo_contract() -> None:
     result = rebuild_day_artifact("11")
     assert result["day"] == "11"

@@ -187,17 +187,20 @@ def test_wave4_notebooks_use_incident_scaffold_and_markdown_only_patch_boundary(
         assert "markdown-only" in text
         assert "Do not edit repo files from this notebook" in text
         assert "List three specific ways this notebook logic fails in an Azure Container App." in text
-        assert "STOP. Close this notebook." in text
+        assert "Edit the repo target in your IDE first." in text
+        assert "deep_reload_modules" in text
+        assert "Rerun this notebook bootstrap cell" in text
         assert "### Export to Production" in text
         assert "What trade-off did I make today to satisfy the customer constraint?" in text
         assert "What is the blast radius if my code fails?" in text
         assert "How will I know it failed in production?" in text
         assert "cohort/<" in text
+        if day_id >= "04":
+            assert "## Native Tooling Gate" in text
+            assert f"build/day{int(day_id)}/native_operator_evidence.json" in text
         if day_id >= "05":
             assert "## KQL Evidence" in text
             assert f"build/day{int(day_id)}/kql_evidence.json" in text
-            assert "## Native Tooling Gate" in text
-            assert f"build/day{int(day_id)}/native_operator_evidence.json" in text
         if day_id >= "05":
             assert "Do not use the shared lab wrapper helpers in this phase." in text
 

@@ -5,6 +5,10 @@ Rollback is required when a new revision is operationally alive but fails Day 10
 business-safety gates such as compliance accuracy, mandatory escalation recall,
 structured refusal behavior, or replay safety.
 
+Do not start with `git revert`. Restore live traffic to the last-known-good ACA
+revision first, verify readiness, and only then decide whether a source-control
+revert is also required.
+
 ## Inputs
 
 - Azure subscription
@@ -24,13 +28,23 @@ az containerapp revision list \
 
 Choose the most recent previously healthy revision as the rollback target.
 
-## Activate the Prior Good Revision
+## Shift Live Traffic To The Prior Good Revision
 
 ```bash
-az containerapp revision activate \
+az containerapp ingress traffic set \
   --resource-group <resource-group> \
   --name <container-app-name> \
-  --revision <previous-good-revision>
+  --revision-weight <previous-good-revision>=100 \
+  -o json
+```
+
+Verify the routed revision identity:
+
+```bash
+az containerapp ingress traffic show \
+  --resource-group <resource-group> \
+  --name <container-app-name> \
+  -o json
 ```
 
 Deactivate the bad revision after traffic has moved:
@@ -44,7 +58,18 @@ az containerapp revision deactivate \
 
 ## Verification
 
-After rollback:
+After rollback, wait for replica readiness before you judge the data plane:
+
+```bash
+for attempt in 1 2 3 4 5; do
+  if curl -sf https://<app-host>/health/ready; then
+    break
+  fi
+  sleep $(( attempt * 5 ))
+done
+```
+
+Then verify:
 
 1. `GET /health/live`
 2. `GET /health/ready`
@@ -60,6 +85,7 @@ Capture:
 
 - bad revision name and SHA
 - rollback target revision name and SHA
+- traffic-shift command and verification command
 - failed gate or trigger condition
 - time rollback started
 - time rollback completed

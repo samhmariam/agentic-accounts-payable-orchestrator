@@ -40,6 +40,7 @@ If sensitive content leaks into audit material, the customer faces privacy escal
 
 - Policy source: `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 - Save raw proof to `build/day7/native_operator_evidence.json` before you patch production code.
+- Append `-o json` to Azure CLI diagnostics so the signal-family matcher can replay machine-readable output.
 - Allowed: Azure Portal, `az`, `az rest`, raw KQL, `git`, `curl`, `nslookup` or `Resolve-DnsName`
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
@@ -47,6 +48,12 @@ If sensitive content leaks into audit material, the customer faces privacy escal
 ## KQL Evidence
 
 Save `build/day7/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. Shadow-drift drills must still be diagnosed from current-day telemetry and evidence only.
+
+## Early Transfer Proof
+
+- Hostile fixtures: `fixtures/capstone_b/claims_intake/`
+- Adapter boundary: `src/aegisap/transfer/claims_adapter.py`
+- Transfer artifact: `build/day7/claims_transfer_report.json`
 
 ## Chaos Gate
 
@@ -67,6 +74,8 @@ Do not edit code in this module folder.
 - Production Target: `src/aegisap/audit/writer.py`
 - Drift Repair Target: `src/aegisap/day3/policies/source_authority_rules.yaml`
 - Drift Repair Target: `src/aegisap/day3/retrieval/authority_policy.py`
+- Transfer Adapter Target: `src/aegisap/transfer/claims_adapter.py`
+- Transfer Artifact: `build/day7/claims_transfer_report.json`
 - Scenario Pack: `scenarios/day07`
 - Verification Command: `uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 07`

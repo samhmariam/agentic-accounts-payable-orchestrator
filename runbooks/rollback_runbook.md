@@ -35,7 +35,8 @@ Note the revision names for **canary** (new, failing) and **stable** (previous, 
 az containerapp ingress traffic set \
   --name aegisap-worker \
   --resource-group $AZURE_RESOURCE_GROUP \
-  --revision-weight <STABLE_REVISION>=100
+  --revision-weight <STABLE_REVISION>=100 \
+  -o json
 ```
 
 Verify:
@@ -43,8 +44,12 @@ Verify:
 ```bash
 az containerapp ingress traffic show \
   --name aegisap-worker \
-  --resource-group $AZURE_RESOURCE_GROUP
+  --resource-group $AZURE_RESOURCE_GROUP \
+  -o json
 ```
+
+Do not move to source-control recovery yet. First prove the control-plane change
+has propagated and the stable revision is the only production target.
 
 ---
 
@@ -59,7 +64,21 @@ az containerapp revision deactivate \
 
 ---
 
-## Step 4 — Verify Recovery
+## Step 4 — Wait For Readiness Then Verify Recovery
+
+Traffic movement is a control-plane event. Replica readiness is a data-plane
+event and may lag behind routing. Use retry/backoff before you treat early 503s
+as rollback failure.
+
+```bash
+for attempt in 1 2 3 4 5; do
+  if curl -sf https://aegisap.example/health/ready; then
+    echo "Ready on attempt $attempt"
+    break
+  fi
+  sleep $(( attempt * 5 ))
+done
+```
 
 Run all gates to confirm the stable revision is passing:
 
@@ -72,6 +91,9 @@ All 17 gates must pass before closing the incident.
 ---
 
 ## Step 5 — Post-Incident
+
+Only after traffic is restored and readiness is confirmed should you decide
+whether `git revert` or a fix-forward PR is required.
 
 1. File an incident report with timeline and root cause.
 2. Update `evals/failure_drills/` if a new failure mode was encountered.

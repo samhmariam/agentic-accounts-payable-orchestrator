@@ -1,18 +1,75 @@
 {
   "_case": "claim_006_assessor_only",
-  "_description": "ASSESSOR USE ONLY. DO NOT DISTRIBUTE TO TRAINEES. This case contains a subtle encoding inconsistency: the billed_amount_usd uses a comma as a decimal separator (European locale). A pipeline that naively casts this string to float will either throw an exception or silently parse it as 4185 USD instead of 41.85 USD. The correct outcome is refused with reason code MALFORMED_AMOUNT_FIELD. Tests whether the trainee's validation layer handles locale-inconsistent numeric strings rather than trusting the raw JSON string value.",
-  "claim_number": "CL-100006",
-  "claimant_id": "PT-0099",
-  "provider_id": "DME-PROV-0031",
-  "service_date": "2026-03-11",
-  "procedure_codes": ["A4253"],
-  "diagnosis_codes": ["E11.9"],
-  "billed_amount_usd": "41,85",
-  "authorisation_ref": "AUTH-20260305-0099",
-  "payer_id": "PAYER-RED-002",
-  "submission_date": "2026-03-15",
-  "place_of_service": "12",
-  "_expected_outcome": "refused",
-  "_refusal_code": "MALFORMED_AMOUNT_FIELD",
-  "_trap_description": "billed_amount_usd uses comma decimal separator; silent cast to float gives 4185.0 instead of 41.85"
+  "_description": "ASSESSOR USE ONLY. Hostile Claim-style payload where total.value uses a European decimal separator. Expected outcome: refused with reason code MALFORMED_AMOUNT_FIELD.",
+  "resourceType": "Claim",
+  "identifier": [
+    {
+      "system": "https://payer.example/claims",
+      "value": "CL-100006",
+      "type": {
+        "coding": [
+          {
+            "code": "claim-number"
+          }
+        ]
+      }
+    }
+  ],
+  "status": "active",
+  "created": "2026-03-15",
+  "patient": {
+    "identifier": {
+      "value": "PT-0099"
+    }
+  },
+  "provider": {
+    "identifier": {
+      "value": "DME-PROV-0031"
+    }
+  },
+  "diagnosis": [
+    {
+      "sequence": 1,
+      "diagnosisCodeableConcept": {
+        "coding": [
+          {
+            "code": "E11.9"
+          }
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "sequence": 1,
+      "productOrService": {
+        "coding": [
+          {
+            "code": "A4253"
+          }
+        ]
+      }
+    }
+  ],
+  "supportingInfo": [
+    {
+      "sequence": 1,
+      "category": {
+        "coding": [
+          {
+            "code": "priorauth"
+          }
+        ]
+      },
+      "valueReference": {
+        "identifier": {
+          "value": "AUTH-20260305-0099"
+        }
+      }
+    }
+  ],
+  "total": {
+    "value": "41,85",
+    "currency": "USD"
+  }
 }

@@ -4,17 +4,24 @@ This policy governs the raw-operator evidence contract for Wave 3 and Wave 4.
 
 ## Purpose
 
-The curriculum stops rewarding wrapper memorization on Day 05. From Day 05 onward,
+The curriculum stops rewarding wrapper memorization on Day 04. From Day 04 onward,
 learners must prove they can find, interpret, and defend production signals with
 native tooling before they rely on any lab helper flow.
 
 ## Day Bands
 
+- Day 04: save at least 1 native command tied to the policy or posture failure domain.
 - Days 05-08: save at least 1 native command and 1 raw KQL query.
 - Days 09-14: save at least 2 native commands and 1 raw KQL query.
 - Days 12 and 14: the live-demo witness fields are mandatory.
 - Day 10 CAB review: the release packet is incomplete unless Days 05-09 native and
   KQL evidence are structurally valid and replay-ready.
+
+## Machine-Readable Diagnostic Hygiene
+
+- Azure CLI diagnostics must append `-o json` unless the day explicitly documents another machine-readable output format.
+- `observed_excerpt` is graded as diagnostic output, not as a free-form note.
+- Day contracts may enforce required command and output signal families; generic commands such as `az account show` do not count unless the day explicitly allows them.
 
 ## Allowed Tools
 
@@ -48,10 +55,10 @@ saved command text.
 
 ## Evidence Artifacts
 
-Each day from 05-14 must preserve:
+Each day from 04-14 must preserve:
 
 - `build/dayX/native_operator_evidence.json`
-- `build/dayX/kql_evidence.json`
+- `build/dayX/kql_evidence.json` on Days 05-14
 
 Those files must contain the literal commands and literal query text the learner
 used, plus the operator interpretation that explains why the evidence mattered.

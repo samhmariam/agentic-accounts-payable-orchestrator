@@ -5,7 +5,9 @@ the AegisAP FDE curriculum. The notebooks and
 [CURRICULUM_MANIFEST.yaml](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml)
 are the learner-visible source of truth for live delivery. Facilitator-only
 answer surfaces are loaded at runtime from the local instructor cache under
-`.aegisap-lab/cache/instructor/` and must not be committed to the repo.
+`.aegisap-lab/cache/instructor/` or, in remote mode, from cached day bundles
+under `.aegisap-lab/cache/assets/`. Live instructor assets must not be
+committed to the repo.
 
 Use [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md)
 as the single navigation layer for daily delivery. It tells you which notebook,
@@ -144,16 +146,27 @@ the cloud state now matches the code.
 
 ## Instructor Overlay Workflow
 
-Phase 1 answer separation is intentionally temporary: a maximum of 2 cohorts or
-60 days, whichever comes first.
+Phase 1 answer separation remains intentionally temporary: a maximum of 2
+cohorts or 60 days, whichever comes first. Phase 2 remote delivery is now
+supported and is the preferred production path.
 
 - Do not track a live instructor overlay file in git.
-- Facilitators import the secure overlay after clone with
+- Phase 1 local mode uses:
   `uv run aegisap-lab overlay import --file <secure-path>`.
-- The cached overlay lives under `.aegisap-lab/cache/instructor/overlay.yaml`.
+- Phase 2 remote mode uses:
+  `AEGISAP_ASSET_PROVIDER=remote`
+  `AEGISAP_ASSET_BASE_URL=<bundle-api-base-or-template>`
+  `AEGISAP_ASSET_TOKEN=<bearer-token>`
+- In remote mode, optionally warm the cache with
+  `uv run aegisap-lab overlay hydrate --day <day>`.
+- The cached Phase 1 overlay lives under `.aegisap-lab/cache/instructor/overlay.yaml`.
+- The cached Phase 2 day bundles live under `.aegisap-lab/cache/assets/days/dayXX/`.
 - Day 8 hint-ladder usage is recorded with
   `uv run aegisap-lab overlay hint --day 08 --level T+30 ...` or `T+60`.
 - Hint usage unblocks progression but forces `Diagnostic Independence = 0 / 15`.
+- If `AEGISAP_ASSET_BASE_URL` contains `{day}` or `{day_slug}`, those
+  placeholders are expanded at runtime. Otherwise the lab fetches
+  `<base>/days/dayXX.tar.gz`.
 
 ---
 
@@ -251,7 +264,7 @@ callouts rather than skipping a day.
 1. Read [TRAINER_OPERATIONS.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINER_OPERATIONS.md) before the cohort begins.
 2. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) and follow the day row for the session you are delivering.
 3. For Day 0, read `trainer/DAY_00_TRAINER.md` the evening before the session. For Days 01-14, start the incident first, then use the notebook and primary day doc as the live teaching path.
-4. Import the instructor overlay before Days 8-14 and verify `uv run aegisap-lab overlay status`.
+4. In local mode, import the instructor overlay before Days 8-14. In remote mode, hydrate the next day bundle if you want a warm cache. Then verify `uv run aegisap-lab overlay status`.
 5. Score learners with `docs/curriculum/templates/DAILY_SCORECARD.md`.
 6. Use [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md) for the unsignposted failure drill on Days 8-10 and the Day 14 chaos command review.
 7. Use [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md) and [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md) together for the final review.

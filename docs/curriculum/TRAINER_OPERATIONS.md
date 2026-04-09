@@ -29,7 +29,8 @@ The exact artifact filenames for each day are the authoritative source in
 1. Pre-brief: review the day's manifest entry, expected artifact filenames,
    checkpoint status, incident or bootstrap entrypoint, and any open remediation notes from the
    prior day. Run the facilitator day-start checklist before learners enter
-   the lab block.
+   the lab block. In remote-delivery cohorts, confirm the Phase 2 asset env vars
+   are present before learners sit down.
 2. Theory block: for Day 0, start with the portal-first bootstrap walkthrough.
    For Days 1-14, start with the incident, then use the notebook's portal
    investigation section to anchor the Azure evidence before learners patch the
@@ -196,3 +197,17 @@ graduation tier thresholds.
 
 Use `portal/README.md` and `DAY_00_PORTAL.md` only for the bootstrap exception.
 For Days 1-14, the live delivery path is `incident start -> portal investigation -> notebook proof -> codification bridge -> repo patch -> verification`.
+
+## Phase 2 Remote Asset Delivery
+
+Use this mode when instructor-only scenarios, drill metadata, and prompt pools
+are served from a private bundle API instead of being transferred manually.
+
+- Set `AEGISAP_ASSET_PROVIDER=remote`
+- Set `AEGISAP_ASSET_BASE_URL` to either:
+  a templated bundle URL containing `{day}` or `{day_slug}`, or a base URL that
+  serves bundles from `/days/dayXX.tar.gz`
+- Set `AEGISAP_ASSET_TOKEN` when the bundle API requires bearer auth
+- Warm the cache with `uv run aegisap-lab overlay hydrate --day XX` when you want the next incident ready before the session starts
+- Verify cache health with `uv run aegisap-lab overlay status`
+- Learner-facing commands stay unchanged; `incident start`, `drill inject`, and related flows resolve cached remote bundles automatically

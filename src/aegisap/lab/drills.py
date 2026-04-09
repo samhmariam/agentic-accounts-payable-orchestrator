@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from .assets import resolve_day_asset_path
 from .artifacts import rebuild_day_artifact
 from .curriculum import (
     constraint_lineage_for_day,
@@ -44,11 +45,11 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> str:
     return str(path)
 
 
-def _load_drill_metadata(repo_root: Path, drill: dict[str, Any]) -> dict[str, Any]:
+def _load_drill_metadata(repo_root: Path, day: str, drill: dict[str, Any]) -> dict[str, Any]:
     source_file = drill.get("source_file")
     if not source_file:
         return {}
-    path = repo_root / source_file
+    path = resolve_day_asset_path(day=day, relative_path=source_file, repo_root=repo_root)
     return _read_json(path)
 
 
@@ -581,7 +582,7 @@ def inject_drill(
             f"Day {normalized_day} already has an active drill. Reset it before injecting another."
         )
 
-    metadata = _load_drill_metadata(root, drill)
+    metadata = _load_drill_metadata(root, normalized_day, drill)
     mutated_files: list[str]
     if drill["mode"] == "incident":
         start_incident(day=normalized_day, repo_path=root)

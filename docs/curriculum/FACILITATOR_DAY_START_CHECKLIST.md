@@ -41,6 +41,20 @@ For Days 8-14, also verify the facilitator overlay is loaded:
 uv run aegisap-lab overlay status
 ```
 
+If the cohort uses Phase 2 remote assets, confirm these are present in the
+facilitator shell before learners arrive:
+
+```bash
+echo "$AEGISAP_ASSET_PROVIDER"
+echo "$AEGISAP_ASSET_BASE_URL"
+```
+
+If needed, warm the next day's bundle cache:
+
+```bash
+uv run aegisap-lab overlay hydrate --day XX
+```
+
 ## Cohort Control Check
 
 - Which learners are already `yellow` or `red` from the previous day?

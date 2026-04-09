@@ -66,7 +66,7 @@ def test_list_drills_reports_default_and_active(monkeypatch, tmp_path: Path, art
 
 def test_inject_artifact_drill_writes_state_and_reset_restores(monkeypatch, tmp_path: Path, artifact_manifest: dict) -> None:
     monkeypatch.setattr(drills, "load_manifest", lambda _root=None: artifact_manifest)
-    monkeypatch.setattr(drills, "_load_drill_metadata", lambda repo_root, drill: {})
+    monkeypatch.setattr(drills, "_load_drill_metadata", lambda repo_root, day, drill: {})
 
     target = tmp_path / "build" / "day12" / "private_network_posture.json"
 
@@ -215,7 +215,7 @@ def test_day7_prompt_authority_drift_writes_drift_cases_and_resets(monkeypatch, 
         }
 
     monkeypatch.setattr(drills, "load_manifest", lambda _root=None: manifest)
-    monkeypatch.setattr(drills, "_load_drill_metadata", lambda repo_root, drill: {})
+    monkeypatch.setattr(drills, "_load_drill_metadata", lambda repo_root, day, drill: {})
     monkeypatch.setattr(drills, "rebuild_day_artifact", fake_rebuild_day_artifact)
 
     injected = drills.inject_drill(day="07", repo_root=tmp_path)
@@ -365,7 +365,7 @@ def test_shadow_drills_record_metadata_and_only_mutate_current_day_artifacts(
         }
 
     monkeypatch.setattr(drills, "load_manifest", lambda _root=None: manifest)
-    monkeypatch.setattr(drills, "_load_drill_metadata", lambda repo_root, drill: {})
+    monkeypatch.setattr(drills, "_load_drill_metadata", lambda repo_root, day, drill: {})
     monkeypatch.setattr(drills, "rebuild_day_artifact", fake_rebuild_day_artifact)
 
     injected = drills.inject_drill(day=day_id, repo_root=tmp_path, drill_id=drill_id)

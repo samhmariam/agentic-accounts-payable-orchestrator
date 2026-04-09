@@ -14,7 +14,7 @@ from .engine import (
     start_incident,
     status_incident,
 )
-from .overlay import import_instructor_overlay, overlay_status, record_hint_usage
+from .overlay import hydrate_instructor_bundle, import_instructor_overlay, overlay_status, record_hint_usage
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -101,6 +101,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "--force",
         action="store_true",
         help="Replace an existing cached overlay if one is already present.",
+    )
+    overlay_hydrate = overlay_subparsers.add_parser(
+        "hydrate",
+        help="Fetch and cache the remote instructor bundle for a day when using the remote asset provider.",
+    )
+    overlay_hydrate.add_argument("--day", required=True, help="Two-digit day number, for example 08.")
+    overlay_hydrate.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-fetch and replace any cached bundle for the selected day.",
     )
     overlay_subparsers.add_parser("status", help="Show whether a cached instructor overlay is available.")
     overlay_hint = overlay_subparsers.add_parser("hint", help="Record hint-ladder usage for a learner day.")
@@ -233,6 +243,9 @@ def main() -> int:
             return 0
         if args.command == "overlay" and args.overlay_command == "import":
             _print_payload(import_instructor_overlay(source=args.file, repo_root=args.repo_root, force=args.force))
+            return 0
+        if args.command == "overlay" and args.overlay_command == "hydrate":
+            _print_payload(hydrate_instructor_bundle(day=args.day, repo_root=args.repo_root, force=args.force))
             return 0
         if args.command == "overlay" and args.overlay_command == "status":
             _print_payload(overlay_status(repo_root=args.repo_root))

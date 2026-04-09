@@ -14,6 +14,7 @@ import yaml
 
 from aegisap.common.paths import repo_root as resolve_repo_root_from_path
 
+from .assets import resolve_day_asset_path
 from .curriculum import get_day, load_manifest, normalize_day, scenario_relpath_from_asset_ref
 from .models import CommandReceipt, IncidentJournal, ScenarioContract, utc_now_iso
 from .overlay import overlay_day
@@ -59,12 +60,20 @@ def journal_path(repo_root: Path, day: str) -> Path:
 def scenario_dir(repo_root: Path, day: str) -> Path:
     overlay_entry = overlay_day(day, repo_root)
     if overlay_entry.get("scenario_dir"):
-        return (repo_root / str(overlay_entry["scenario_dir"])).resolve()
+        return resolve_day_asset_path(day=day, relative_path=str(overlay_entry["scenario_dir"]), repo_root=repo_root)
     try:
         day_entry = get_day(load_manifest(repo_root), day)
     except Exception:
-        return repo_root / "scenarios" / scenario_id(normalize_day(day))
-    return (repo_root / scenario_relpath_from_asset_ref(day_entry)).resolve()
+        return resolve_day_asset_path(
+            day=day,
+            relative_path=f"scenarios/{scenario_id(normalize_day(day))}",
+            repo_root=repo_root,
+        )
+    return resolve_day_asset_path(
+        day=day,
+        relative_path=scenario_relpath_from_asset_ref(day_entry),
+        repo_root=repo_root,
+    )
 
 
 def scenario_file(repo_root: Path, day: str) -> Path:

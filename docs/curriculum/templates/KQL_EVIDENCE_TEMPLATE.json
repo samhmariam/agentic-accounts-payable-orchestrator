@@ -2,9 +2,13 @@
   "day": "08",
   "queries": [
     {
+      "capture_order": 1,
+      "captured_before_patch": true,
       "query": "traces | where customDimensions.workflow_id == '<workflow-id>' | take 20",
       "workspace": "log-analytics-workspace-name",
       "signal_found": true,
+      "first_signal_or_followup": "first_signal",
+      "trace_reference": "correlation-id-or-trace-id-if-known",
       "purpose": "Prove the exact production footprint that triggered the repair.",
       "observed_excerpt": "workflow_id, gate_name, passed=false",
       "operator_interpretation": "Explain why this query proves the failure lives in the named Azure surface."

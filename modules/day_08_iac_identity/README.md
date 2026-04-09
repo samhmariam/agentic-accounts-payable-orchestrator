@@ -45,14 +45,16 @@ If runtime identity stays over-privileged, a single deployment drift can become 
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
 
+- Save `build/day8/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day8/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day8/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Chaos Gate
 
 - Failure signal: Role assignments or service posture drifted, and the runtime principal can mutate resources it should only read.
-- Diagnostic surface: Portal role assignments, Marimo Bicep bridge, and live audit-production probes.
+- Starting signal: A deployment-state break-glass recovery is blocked and the runtime identity still looks over-privileged.
 - Expected recovery artifact: `build/day8/deployment_design.json`
 - Time box: 30 minutes
 
@@ -63,14 +65,15 @@ Do not edit code in this module folder.
 - Diagnostic Notebook: `notebooks/day_8_cicd_iac_deployment.py`
 - Primary Day Doc: `docs/DAY_08.md`
 - Rosetta Stone Bridge: `notebooks/bridges/day08_identity_iac.md`
-- Production Target: `infra/modules/role_assignments.bicep`
-- Production Target: `infra/foundations/search_service.bicep`
-- Production Target: `infra/modules/container_app.bicep`
-- Scenario Pack: `scenarios/day08`
+- Repair Domain: `Role Assignments`
+- Repair Domain: `Search Service`
+- Repair Domain: `Container App`
+- Incident Asset Ref: `incident.day08`
 - Verification Command: `uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests/day8/test_security_and_context.py tests/day8/test_observability_contract.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 08`
 - Native Evidence Artifact: `build/day8/native_operator_evidence.json`
 - KQL Evidence Artifact: `build/day8/kql_evidence.json`
+- Diagnostic Timeline: `build/day8/diagnostic_timeline.md`
 
 ## Automated Drill
 

@@ -51,14 +51,16 @@ If public access returns, regulated data escapes the private boundary and securi
 - Day 12 evidence must include at least two literal native commands plus one raw KQL query.
 - Day 12 does not pass until the facilitator makes the learner rerun one saved proof live
 
+- Save `build/day12/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day12/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day12/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Chaos Gate
 
 - Failure signal: Private endpoint DNS or routing drift makes a production-bound service resolve publicly or appear publicly reachable.
-- Diagnostic surface: Network Watcher evidence, private endpoint probe cells, and live audit-production DNS posture checks.
+- Starting signal: Private-only posture is in doubt because DNS, endpoint reachability, or public fallback behavior disagrees.
 - Expected recovery artifact: `build/day12/private_network_posture.json`
 - Time box: 30 minutes
 
@@ -69,14 +71,16 @@ Do not edit code in this module folder.
 - Diagnostic Notebook: `notebooks/day_12_private_networking_constraints.py`
 - Primary Day Doc: `docs/DAY_12.md`
 - Rosetta Stone Bridge: `notebooks/bridges/day12_private_networking.md`
-- Production Target: `src/aegisap/network/bicep_policy_checker.py`
-- Production Target: `src/aegisap/network/private_endpoint_probe.py`
-- Production Target: `scripts/check_private_network_static.py`
-- Production Target: `scripts/verify_private_network_posture.py`
-- Scenario Pack: `scenarios/day12`
+- Repair Domain: `Bicep Policy Checker`
+- Repair Domain: `Private Endpoint Probe`
+- Repair Domain: `Check Private Network Static`
+- Repair Domain: `Verify Private Network Posture`
+- Incident Asset Ref: `incident.day12`
 - Verification Command: `uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 12`
 - Native Evidence Artifact: `build/day12/native_operator_evidence.json`
+- KQL Evidence Artifact: `build/day12/kql_evidence.json`
+- Diagnostic Timeline: `build/day12/diagnostic_timeline.md`
 
 ## Automated Drill
 

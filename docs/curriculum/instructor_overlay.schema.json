@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aegisap.local/instructor_overlay.schema.json",
+  "title": "AegisAP Instructor Overlay",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "phase1_limits",
+    "days"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "phase1_limits": {
+      "type": "object",
+      "required": [
+        "max_cohorts",
+        "max_age_days"
+      ],
+      "properties": {
+        "max_cohorts": {
+          "type": "integer",
+          "const": 2
+        },
+        "max_age_days": {
+          "type": "integer",
+          "const": 60
+        }
+      },
+      "additionalProperties": true
+    },
+    "days": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[0-9]{2}$": {
+          "type": "object",
+          "properties": {
+            "incident_asset_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "scenario_dir": {
+              "type": "string",
+              "minLength": 1
+            },
+            "production_targets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "path",
+                  "surface_type"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "surface_type": {
+                    "type": "string",
+                    "enum": [
+                      "application",
+                      "infrastructure",
+                      "ci_cd",
+                      "policy",
+                      "eval"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "oral_defense_prompt_pool": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "hint_ladder": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "after_minutes",
+                  "prompt"
+                ],
+                "properties": {
+                  "after_minutes": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "diagnostic_independence_penalty": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

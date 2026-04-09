@@ -143,7 +143,11 @@ def _kql_evidence(mo):
 
         Capture at least one literal Log Analytics query with:
 
+        - capture order
+        - captured_before_patch=true
         - workspace
+        - first_signal_or_followup
+        - correlation or trace reference when available
         - purpose
         - observed excerpt
         - operator interpretation
@@ -166,7 +170,7 @@ def _codification_bridge(mo):
 
         - Portal state: canary, rollback, or second-sink evidence disagrees with the Day 14 gate.
         - Notebook proof: the gate preview shows the false-green condition for private-network deployments.
-        - Permanent repo change: `src/aegisap/deploy/gates_v2.py`, `src/aegisap/traceability/correlation.py` or `scripts/verify_trace_correlation.py`, and, if needed, `scripts/run_chaos_capstone.py`.
+        - Durable repo boundary: the staged incident owner for network recovery first, identity recovery second, and correlation or canary truth third.
 
         Rosetta Stone: `notebooks/bridges/day14_elite_operations.md`
         """
@@ -191,11 +195,11 @@ def _production_patch(mo):
 
         Write the durable patch in the repo target below, not inside Marimo.
 
-        Move into the real elite-operations boundary and implement the repair in:
+        Move into the real elite-operations boundary and identify the durable owner of:
 
-        - `src/aegisap/deploy/gates_v2.py`
-        - `src/aegisap/traceability/correlation.py` or `scripts/verify_trace_correlation.py` if the trace evidence path is wrong
-        - `scripts/run_chaos_capstone.py` only if the Day 14 operational outputs are incomplete
+        - stage 1 network recovery that restores private connectivity
+        - stage 2 identity recovery that restores actor-bound approvals
+        - stage 3 canary and correlation truth before rollback or release decisions
 
         Then update the Day 14 evidence:
 
@@ -285,7 +289,7 @@ def _chaos_gate(mo):
 
         Failure signal: A breaking change brings down the orchestration path and the team must restore service without losing correlation or rollback readiness.
 
-        Diagnostic surface: Chaos drill evidence, trace correlation artifacts, rollback gates, and cloud-truth posture checks.
+        Starting signal: Customers report that nothing is processing; clear the network fault first, then the identity fault, then the canary and correlation fault.
 
         Expected recovery artifact: `build/day14/cto_trace_report.json`
 

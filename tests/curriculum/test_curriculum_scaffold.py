@@ -104,9 +104,9 @@ def test_portal_to_script_mapping_declared(day: dict) -> None:
     mapping = day.get("portal_to_script_mapping", {})
     assert mapping.get("portal_surface"), f"Day {day['id']} missing portal_surface"
     assert mapping.get("bridge_file"), f"Day {day['id']} missing bridge_file"
-    assert mapping.get("production_targets"), f"Day {day['id']} missing production_targets"
-    for target in mapping["production_targets"]:
-        assert target["path"], f"Day {day['id']} production target missing path"
+    assert mapping.get("repair_domains"), f"Day {day['id']} missing repair_domains"
+    for target in mapping["repair_domains"]:
+        assert target["name"], f"Day {day['id']} repair domain missing name"
         assert target["surface_type"] in {"application", "infrastructure", "ci_cd", "policy", "eval"}
 
 
@@ -167,6 +167,18 @@ def test_kql_evidence_contract_declared(day_id: str, days: list[dict]) -> None:
     assert contract, f"Day {day_id} missing kql_evidence"
     assert contract["artifact_path"] == f"build/day{int(day_id)}/kql_evidence.json"
     assert contract["minimum_queries"] >= 1
+    if day_id >= "08":
+        assert contract["minimum_pre_patch_queries"] >= 1
+
+
+@pytest.mark.parametrize("day_id", [f"{i:02d}" for i in range(8, 15)])
+def test_diagnostic_independence_contract_declared(day_id: str, days: list[dict]) -> None:
+    day = next(item for item in days if item["id"] == day_id)
+    contract = day.get("diagnostic_independence")
+    assert contract, f"Day {day_id} missing diagnostic_independence"
+    assert contract["mode"] == "advisory"
+    assert contract["timeline_artifact_path"] == f"build/day{int(day_id)}/diagnostic_timeline.md"
+    assert contract["hint_state_path"] == f".aegisap-lab/cache/instructor/interventions/day{day_id}.json"
 
 
 def test_day7_default_drill_targets_authority_drift(days: list[dict]) -> None:
@@ -262,7 +274,7 @@ def test_final_week_default_drills_include_two_non_application_layers(days: list
 
 
 def test_program_and_final_week_infra_target_ratios(days: list[dict]) -> None:
-    targets = [target for day in days for target in day["portal_to_script_mapping"]["production_targets"]]
+    targets = [target for day in days for target in day["portal_to_script_mapping"]["repair_domains"]]
     infra = [target for target in targets if target["surface_type"] in INFRA_SURFACE_TYPES]
     assert len(infra) / len(targets) >= 0.30
 
@@ -270,7 +282,7 @@ def test_program_and_final_week_infra_target_ratios(days: list[dict]) -> None:
         target
         for day in days
         if day["id"] >= "10"
-        for target in day["portal_to_script_mapping"]["production_targets"]
+        for target in day["portal_to_script_mapping"]["repair_domains"]
     ]
     final_infra = [target for target in final_targets if target["surface_type"] in INFRA_SURFACE_TYPES]
     assert len(final_infra) / len(final_targets) >= 0.50
@@ -328,19 +340,19 @@ def test_persistent_constraints_accumulate(day: dict, days: list[dict]) -> None:
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
                                  yaml.safe_load(MANIFEST_PATH.open())["days"]])
-def test_oral_defense_prompts_count(day: dict) -> None:
-    prompts = day["oral_defense_prompts"]
+def test_oral_defense_objectives_count(day: dict) -> None:
+    prompts = day["oral_defense_objectives"]
     assert len(prompts) >= 3, (
-        f"Day {day['id']} has {len(prompts)} oral defense prompt(s); need >= 3"
+        f"Day {day['id']} has {len(prompts)} oral defense objective(s); need >= 3"
     )
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
                                  yaml.safe_load(MANIFEST_PATH.open())["days"]])
-def test_oral_defense_prompts_non_empty(day: dict) -> None:
-    for i, prompt in enumerate(day["oral_defense_prompts"]):
+def test_oral_defense_objectives_non_empty(day: dict) -> None:
+    for i, prompt in enumerate(day["oral_defense_objectives"]):
         assert prompt and prompt.strip(), (
-            f"Day {day['id']} oral defense prompt {i} is blank"
+            f"Day {day['id']} oral defense objective {i} is blank"
         )
 
 

@@ -3,7 +3,9 @@
 This folder contains the incident-driven and notebook-led delivery materials for
 the AegisAP FDE curriculum. The notebooks and
 [CURRICULUM_MANIFEST.yaml](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml)
-are the operational source of truth for live delivery.
+are the learner-visible source of truth for live delivery. Facilitator-only
+answer surfaces are loaded at runtime from the local instructor cache under
+`.aegisap-lab/cache/instructor/` and must not be committed to the repo.
 
 Use [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md)
 as the single navigation layer for daily delivery. It tells you which notebook,
@@ -30,6 +32,9 @@ Wave 1-4 change:
 
 - Days 1-14 are now incident-driven labs with hidden scenario injection, atomic
   lab state, and markdown-only production patch sections inside the notebooks.
+- Days 1-7 stay guided on purpose.
+- Days 8-14 shift to symptom-led incident work: the learner sees the starting
+  signal and repair domain, not the exact answer path.
 
 Program-level operating guides live alongside the day materials:
 
@@ -95,7 +100,7 @@ Every day should leave the learner with five concrete outputs:
 
 - A hostile starting state or explicit bootstrap contract
 - A notebook-guided repair path that makes the failure mode legible
-- A codification bridge that names the exact permanent repo change
+- A codification bridge that names the durable repair domain and production owner
 - A terminal verification path that proves the real repo patch works
 - An artifact and defense packet that proves the learner can explain the design choice, not just run the code
 
@@ -128,7 +133,7 @@ The delivery sequence is strict:
 1. Incident: the system is broken.
 2. Portal Investigation: locate the broken state in Azure or operator evidence.
 3. Lab Repair: reproduce and prove the fix interactively.
-4. Codification Bridge: map the observed state to the exact repo files that must change.
+4. Codification Bridge: map the observed state to the durable repo boundary that must change.
 5. Production Patch: make the durable code or IaC change.
 6. Verification: prove tests, artifacts, and cloud state agree.
 7. PR Defense: explain the blast radius, tradeoff, and authority chain.
@@ -136,6 +141,19 @@ The delivery sequence is strict:
 The bridge notes live in `notebooks/bridges/README.md`. When Azure access is
 available, use `uv run aegisap-lab audit-production` after the repair to prove
 the cloud state now matches the code.
+
+## Instructor Overlay Workflow
+
+Phase 1 answer separation is intentionally temporary: a maximum of 2 cohorts or
+60 days, whichever comes first.
+
+- Do not track a live instructor overlay file in git.
+- Facilitators import the secure overlay after clone with
+  `uv run aegisap-lab overlay import --file <secure-path>`.
+- The cached overlay lives under `.aegisap-lab/cache/instructor/overlay.yaml`.
+- Day 8 hint-ladder usage is recorded with
+  `uv run aegisap-lab overlay hint --day 08 --level T+30 ...` or `T+60`.
+- Hint usage unblocks progression but forces `Diagnostic Independence = 0 / 15`.
 
 ---
 
@@ -233,10 +251,11 @@ callouts rather than skipping a day.
 1. Read [TRAINER_OPERATIONS.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINER_OPERATIONS.md) before the cohort begins.
 2. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) and follow the day row for the session you are delivering.
 3. For Day 0, read `trainer/DAY_00_TRAINER.md` the evening before the session. For Days 01-14, start the incident first, then use the notebook and primary day doc as the live teaching path.
-4. Score learners with `docs/curriculum/templates/DAILY_SCORECARD.md`.
-5. Use [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md) for the unsignposted failure drill on Days 8-10 and the Day 14 chaos command review.
-6. Use [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md) and [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md) together for the final review.
-7. Each trainer file ends with a **Next-Day Bridge** — use it to close the session.
+4. Import the instructor overlay before Days 8-14 and verify `uv run aegisap-lab overlay status`.
+5. Score learners with `docs/curriculum/templates/DAILY_SCORECARD.md`.
+6. Use [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md) for the unsignposted failure drill on Days 8-10 and the Day 14 chaos command review.
+7. Use [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md) and [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md) together for the final review.
+8. Each trainer file ends with a **Next-Day Bridge** — use it to close the session.
 
 ### For Trainees
 1. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) first and use it to find the current incident command, notebook, and primary day doc.

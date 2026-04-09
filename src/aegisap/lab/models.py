@@ -41,6 +41,16 @@ class ReviewContract(BaseModel):
     human_required: bool = True
 
 
+class CascadingStageContract(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    stage: int
+    label: str
+    first_visible_signal: str
+    masked_until_stage_complete: int = 0
+    reveals_next_signal: str = ""
+
+
 class ScenarioContract(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -53,6 +63,7 @@ class ScenarioContract(BaseModel):
     validation: ValidationContract
     teardown: TeardownContract
     review: ReviewContract
+    cascading_stages: list[CascadingStageContract] = Field(default_factory=list)
 
 
 class CommandReceipt(BaseModel):

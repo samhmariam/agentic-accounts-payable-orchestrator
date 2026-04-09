@@ -48,14 +48,16 @@ If routing and cost telemetry drift silently, runaway spend and untraceable fail
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
 - The Day 10 CAB board may replay one saved Day 9 proof live
 
+- Save `build/day9/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day9/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day9/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Chaos Gate
 
 - Failure signal: Routing or caching pushes the workload outside the cost ceiling while inherited infrastructure posture still has to hold.
-- Diagnostic surface: Azure Monitor or KQL evidence, routing notebook analysis, budget gates, and cloud-truth posture checks.
+- Starting signal: Routing telemetry shows risky work landing on the wrong tier while cost controls drift.
 - Expected recovery artifact: `build/day9/routing_report.json`
 - Time box: 25 minutes
 
@@ -66,13 +68,15 @@ Do not edit code in this module folder.
 - Diagnostic Notebook: `notebooks/day_9_scaling_monitoring_cost.py`
 - Primary Day Doc: `docs/DAY_09.md`
 - Rosetta Stone Bridge: `notebooks/bridges/day09_routing_cost.md`
-- Production Target: `src/aegisap/routing/routing_policy.py`
-- Production Target: `src/aegisap/cache/cache_policy.py`
-- Production Target: `src/aegisap/cost/budget_gate.py`
-- Scenario Pack: `scenarios/day09`
+- Repair Domain: `Routing Policy`
+- Repair Domain: `Cache Policy`
+- Repair Domain: `Budget Gate`
+- Incident Asset Ref: `incident.day09`
 - Verification Command: `uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_and_cost.py tests/day9/test_runtime_day9_contract.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 09`
 - Native Evidence Artifact: `build/day9/native_operator_evidence.json`
+- KQL Evidence Artifact: `build/day9/kql_evidence.json`
+- Diagnostic Timeline: `build/day9/diagnostic_timeline.md`
 
 ## Automated Drill
 

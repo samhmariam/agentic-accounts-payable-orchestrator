@@ -2,6 +2,9 @@
   "day": "12",
   "commands": [
     {
+      "capture_order": 1,
+      "captured_before_patch": true,
+      "machine_readable_output": true,
       "command": "az network private-endpoint list --resource-group <rg> -o json",
       "purpose": "Prove the expected private endpoint exists in Azure without curriculum helper tooling.",
       "expected_signal": "The target service shows a private endpoint in the approved subnet.",
@@ -10,6 +13,9 @@
   ],
   "queries": [
     {
+      "capture_order": 2,
+      "captured_before_patch": true,
+      "machine_readable_output": true,
       "query": "traces | where customDimensions.workflow_id == '<workflow-id>' | take 20",
       "purpose": "Show the live operator query or KQL used to validate the day objective.",
       "expected_signal": "The returned traces include the expected gate or routing signal.",

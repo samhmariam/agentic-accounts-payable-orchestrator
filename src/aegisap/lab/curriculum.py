@@ -31,10 +31,10 @@ SCAFFOLD_LEVELS = {
     "01": "guided",
     "02": "guided",
     "03": "guided",
-    "04": "reduced",
-    "05": "reduced",
-    "06": "reduced",
-    "07": "starter_only",
+    "04": "guided",
+    "05": "guided",
+    "06": "guided",
+    "07": "guided",
     "08": "starter_only",
     "09": "starter_only",
     "10": "starter_only",
@@ -64,6 +64,7 @@ PHASE1_GATE_MODES = {
 
 INFRA_SURFACE_TYPES = {"infrastructure", "ci_cd"}
 KQL_EVIDENCE_DAYS = tuple(f"{day:02d}" for day in range(5, 15))
+DIAGNOSTIC_INDEPENDENCE_DAYS = tuple(f"{day:02d}" for day in range(8, 15))
 RAW_SDK_NOTEBOOK_BAN_DAYS = tuple(f"{day:02d}" for day in range(5, 15))
 
 
@@ -111,11 +112,11 @@ def expected_scaffold_level(day: str | int) -> str:
 
 
 def production_targets_for_day_entry(day_entry: dict[str, Any]) -> list[dict[str, Any]]:
-    return day_entry.get("portal_to_script_mapping", {}).get("production_targets", [])
+    return day_entry.get("portal_to_script_mapping", {}).get("repair_domains", [])
 
 
 def production_target_paths(day_entry: dict[str, Any]) -> list[str]:
-    return [target["path"] for target in production_targets_for_day_entry(day_entry)]
+    return [target["name"] for target in production_targets_for_day_entry(day_entry)]
 
 
 def production_target_counts(day_entries: list[dict[str, Any]]) -> tuple[int, int]:
@@ -127,6 +128,22 @@ def production_target_counts(day_entries: list[dict[str, Any]]) -> tuple[int, in
             if target.get("surface_type") in INFRA_SURFACE_TYPES:
                 infra_targets += 1
     return infra_targets, total_targets
+
+
+def repair_domains_for_day_entry(day_entry: dict[str, Any]) -> list[dict[str, Any]]:
+    return production_targets_for_day_entry(day_entry)
+
+
+def incident_asset_ref_for_day_entry(day_entry: dict[str, Any]) -> str:
+    return str(day_entry.get("incident_asset_ref") or f"day{day_entry['id']}").strip()
+
+
+def scenario_relpath_from_asset_ref(day_entry: dict[str, Any]) -> str:
+    ref = incident_asset_ref_for_day_entry(day_entry)
+    normalized = normalize_day(day_entry["id"])
+    if ref in {f"day{normalized}", normalized}:
+        return f"scenarios/day{normalized}"
+    return ref
 
 
 def active_constraints_for_day(

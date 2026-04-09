@@ -35,6 +35,12 @@ az account show
 
 If you are teaching Day 0, also open `docs/curriculum/portal/DAY_00_PORTAL.md`.
 
+For Days 8-14, also verify the facilitator overlay is loaded:
+
+```bash
+uv run aegisap-lab overlay status
+```
+
 ## Cohort Control Check
 
 - Which learners are already `yellow` or `red` from the previous day?
@@ -52,11 +58,13 @@ Say these five things out loud before the lab begins:
 2. What artifact or evidence the day must leave behind.
 3. What counts as a blocker versus normal struggle.
 4. Which oral-defense prompts matter most today.
+   For Days 8-14, choose objectives and role pressure, not a published question list.
 5. Whether authoritative Azure evidence is expected today or preview mode is acceptable.
 
 ## Native Tooling Audit Rule
 
 - From Day 05 onward, native operator evidence and KQL evidence are blocking daily outputs.
+- From Day 08 onward, diagnostic independence is only scoreable when pre-patch telemetry and `diagnostic_timeline.md` are present.
 - During investigation and evidence capture, learners may not use `aegisap-lab` helper commands or canned verification wrappers to discover the answer.
 - After both evidence files are complete, wrappers may be used again only for artifact rebuild, mastery, and reset flows.
 - Facilitators may randomly require a learner to clear recent terminal-history context, rerun one saved raw command or KQL query live, and explain the interpretation before mastery is accepted.
@@ -72,6 +80,8 @@ Say these five things out loud before the lab begins:
 
 - Confirm the release/gate story is explicit, not just the IaC mechanics.
 - Confirm the rebuild path for missing `build/day8/regression_baseline.json`.
+- Confirm the break-glass hint ladder is ready: `T+30` deployment-state lease or corruption prompt, `T+60` exact lease-break command.
+- Confirm the learner knows hint-ladder use preserves progression but zeros `Diagnostic Independence`.
 
 ### Day 11
 
@@ -94,6 +104,7 @@ Say these five things out loud before the lab begins:
 - Confirm whether the cohort is expected to stay in preview mode or produce authoritative canary/trace evidence.
 - Confirm rollback, partial continuation, and gate-override language stays evidence-based.
 - Confirm the capstone CAB chair is ready to select one saved native proof for a live rerun.
+- Confirm the cascading crucible order: network signal first, identity signal second, correlation or regression signal third.
 
 ### Day 9
 
@@ -105,6 +116,7 @@ Say these five things out loud before the lab begins:
 - Check that learners can open the repo and activate the right shell.
 - Check that learners know Day 0 starts in the portal, while Days 1-14 start with `uv run aegisap-lab incident start --day XX`.
 - Check that learners know the notebook now includes a `Codification Bridge` step before the repo patch.
+- Check that learners on Days 8-14 know they must preserve telemetry before patching and may not start with repo search.
 - Confirm who already ran the trainee preflight and who did not.
 - Identify the first artifact or prerequisite that could stall the room.
 - State the fallback path before the first live command is run.

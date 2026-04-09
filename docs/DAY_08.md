@@ -46,9 +46,11 @@ uv run aegisap-lab incident start --day 08
 - Tools banned during this gate: `aegisap-lab`, helper verification wrappers, and canned answer keys
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
 
+- Save `build/day8/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day8/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day8/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 
@@ -57,15 +59,14 @@ uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests
 uv run aegisap-lab artifact rebuild --day 08
 ```
 
-## Key Files
+## Investigation Surfaces
 
-- `modules/day_08_iac_identity/README.md`
 - `notebooks/day_8_cicd_iac_deployment.py`
 - `notebooks/bridges/day08_identity_iac.md`
-- `infra/modules/role_assignments.bicep`
-- `infra/foundations/search_service.bicep`
-- `infra/modules/container_app.bicep`
-- `scenarios/day08`
+- Incident Asset Ref: `incident.day08`
+- Repair Domain: `Role Assignments`
+- Repair Domain: `Search Service`
+- Repair Domain: `Container App`
 
 ## Automated Drill
 

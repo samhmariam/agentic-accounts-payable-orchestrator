@@ -91,6 +91,33 @@ DEFAULT_DRILLS: tuple[dict[str, Any], ...] = (
     },
 )
 
+CASCADING_CRUCIBLE: tuple[dict[str, Any], ...] = (
+    {
+        "stage": 1,
+        "label": "Private DNS and routing recovery",
+        "visible_at_start": True,
+        "masked_until_stage_complete": 0,
+        "first_visible_signal": "Customer reports that nothing is processing and private endpoint resolution leaves RFC-1918 space.",
+        "reveal_after_recovery": "401/403 delegated-identity failures appear once network reachability is restored.",
+    },
+    {
+        "stage": 2,
+        "label": "Delegated identity and OBO recovery",
+        "visible_at_start": False,
+        "masked_until_stage_complete": 1,
+        "first_visible_signal": "OBO exchange and actor binding return 401/403 once the network path is healthy.",
+        "reveal_after_recovery": "A correlation-led canary regression becomes visible only after identity is repaired.",
+    },
+    {
+        "stage": 3,
+        "label": "Correlation-led canary regression",
+        "visible_at_start": False,
+        "masked_until_stage_complete": 2,
+        "first_visible_signal": "Trace continuity returns but the candidate revision regresses against the protected baseline.",
+        "reveal_after_recovery": "Rollback readiness and executive packet coherence remain the final release decision gate.",
+    },
+)
+
 
 def build_chaos_capstone_artifacts(
     *,
@@ -110,6 +137,11 @@ def build_chaos_capstone_artifacts(
         "mean_time_to_recovery_minutes": round(mean(mttr_values), 2),
         "max_time_to_recovery_minutes": max(mttr_values),
         "drills": drills,
+        "cascading_crucible": {
+            "mode": "sequential_unblock",
+            "initial_customer_signal": "Nothing is processing.",
+            "stages": [dict(stage) for stage in CASCADING_CRUCIBLE],
+        },
     }
     summary = {
         "generated_at": aggregate["generated_at"],
@@ -120,7 +152,8 @@ def build_chaos_capstone_artifacts(
             "mean_time_to_recovery_minutes": aggregate["mean_time_to_recovery_minutes"],
             "max_time_to_recovery_minutes": aggregate["max_time_to_recovery_minutes"],
         },
-        "command_expectation": "debug from the first signal, prove the repair, then update the executive packet",
+        "command_expectation": "debug from the first visible signal, clear the masking fault, then chase the next revealed stage before updating the executive packet",
+        "cascading_sequence": [dict(stage) for stage in CASCADING_CRUCIBLE],
     }
 
     drills_path = write_json_artifact(target_dir / "breaking_changes_drills.json", aggregate)

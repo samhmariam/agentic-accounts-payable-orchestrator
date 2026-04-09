@@ -182,6 +182,9 @@ def _write_native_operator_evidence(
         "commands": command_entries
         or [
             {
+                "capture_order": index + 1,
+                "captured_before_patch": True,
+                "machine_readable_output": True,
                 "command": f"az command {index} -o json",
                 "purpose": "prove state",
                 "expected_signal": "expected",
@@ -191,6 +194,9 @@ def _write_native_operator_evidence(
         ],
         "queries": [
             {
+                "capture_order": minimum_commands + index + 1,
+                "captured_before_patch": True,
+                "machine_readable_output": True,
                 "query": f"traces | take {index + 1}",
                 "purpose": "prove telemetry",
                 "expected_signal": "expected",
@@ -273,9 +279,13 @@ def _write_kql_evidence(
         "day": day,
         "queries": [
             {
+                "capture_order": index + 1,
+                "captured_before_patch": True,
                 "query": f"traces | take {index + 1}",
                 "workspace": "training-workspace",
                 "signal_found": True,
+                "first_signal_or_followup": "first_signal" if index == 0 else "followup",
+                "trace_reference": "trace-001" if index == 0 else "",
                 "purpose": "prove the production footprint",
                 "observed_excerpt": "gate_name, passed=false",
                 "operator_interpretation": "This proves the failure signal showed up in Log Analytics.",
@@ -917,3 +927,151 @@ def test_run_mastery_days_05_to_07_accept_valid_native_and_kql_evidence(
     assert payload["overall_ok"] is True
     assert payload["results"][-2]["status"] == mastery.PASS
     assert payload["results"][-1]["status"] == mastery.PASS
+
+
+def test_run_mastery_day8_marks_diagnostic_independence_advisory_pass(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": "08",
+                    "title": "Day 08",
+                    "persistent_constraints": [],
+                    "mastery_gates": [
+                        {
+                            "id": "day08_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["keyless_runtime_identity"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "native_operator_evidence": {
+                        "artifact_path": "build/day8/native_operator_evidence.json",
+                        "mode": "blocking",
+                        "review_stage": "day08_closeout",
+                        "live_demo_required": False,
+                        "minimum_commands": 1,
+                        "minimum_queries": 1,
+                        "minimum_pre_patch_commands": 1,
+                        "minimum_pre_patch_queries": 1,
+                    },
+                    "kql_evidence": {
+                        "artifact_path": "build/day8/kql_evidence.json",
+                        "minimum_queries": 1,
+                        "minimum_pre_patch_queries": 1,
+                        "review_stage": "day08_closeout",
+                    },
+                    "diagnostic_independence": {
+                        "mode": "advisory",
+                        "timeline_artifact_path": "build/day8/diagnostic_timeline.md",
+                        "review_stage": "day08_closeout",
+                        "hint_state_path": ".aegisap-lab/cache/instructor/interventions/day08.json",
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+    _write_native_operator_evidence(
+        tmp_path / "build" / "day8" / "native_operator_evidence.json",
+        day="08",
+        passed=False,
+        review_stage="day08_closeout",
+        minimum_commands=1,
+        minimum_queries=1,
+    )
+    _write_kql_evidence(
+        tmp_path / "build" / "day8" / "kql_evidence.json",
+        day="08",
+        minimum_queries=1,
+    )
+    timeline = tmp_path / "build" / "day8" / "diagnostic_timeline.md"
+    timeline.parent.mkdir(parents=True, exist_ok=True)
+    timeline.write_text(
+        "\n".join(
+            [
+                "First symptom: runtime identity can mutate search state.",
+                "First telemetry proof: App Insights trace showed privileged write activity.",
+                "Subsystem narrowed: runtime identity boundary.",
+                "Durable repair chosen: IaC repair in the least-privilege boundary.",
+                "Post-fix confirmation: native evidence and KQL agreed after rebuild.",
+                "Repo search before telemetry: no",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    payload = mastery.run_mastery(day="08", repo_root=tmp_path)
+
+    assert payload["overall_ok"] is True
+    assert payload["results"][-1]["gate_id"] == "day08_diagnostic_independence"
+    assert payload["results"][-1]["status"] == mastery.PASS
+
+
+def test_run_mastery_day8_marks_diagnostic_independence_fail_when_hint_used(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(
+        mastery,
+        "load_manifest",
+        lambda _repo_root=None: {
+            "days": [
+                {
+                    "id": "08",
+                    "title": "Day 08",
+                    "persistent_constraints": [],
+                    "mastery_gates": [
+                        {
+                            "id": "day08_repo_evidence",
+                            "mode": "blocking",
+                            "command": "echo ok",
+                            "success_marker": "ok",
+                            "covers_constraints": ["keyless_runtime_identity"],
+                            "evidence_source": "artifact",
+                        }
+                    ],
+                    "diagnostic_independence": {
+                        "mode": "advisory",
+                        "timeline_artifact_path": "build/day8/diagnostic_timeline.md",
+                        "review_stage": "day08_closeout",
+                        "hint_state_path": ".aegisap-lab/cache/instructor/interventions/day08.json",
+                    },
+                }
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(args, 0, "ok", ""),
+    )
+    timeline = tmp_path / "build" / "day8" / "diagnostic_timeline.md"
+    timeline.parent.mkdir(parents=True, exist_ok=True)
+    timeline.write_text(
+        "\n".join(
+            [
+                "First symptom: runtime identity can mutate search state.",
+                "First telemetry proof: App Insights trace showed privileged write activity.",
+                "Subsystem narrowed: runtime identity boundary.",
+                "Durable repair chosen: IaC repair in the least-privilege boundary.",
+                "Post-fix confirmation: native evidence and KQL agreed after rebuild.",
+                "Repo search before telemetry: no",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    hint_path = tmp_path / ".aegisap-lab" / "cache" / "instructor" / "interventions" / "day08.json"
+    hint_path.parent.mkdir(parents=True, exist_ok=True)
+    hint_path.write_text(json.dumps({"day": "08", "level": "T+30"}), encoding="utf-8")
+
+    payload = mastery.run_mastery(day="08", repo_root=tmp_path)
+
+    assert payload["overall_ok"] is True
+    assert payload["results"][-1]["gate_id"] == "day08_diagnostic_independence"
+    assert payload["results"][-1]["status"] == mastery.FAIL

@@ -117,12 +117,12 @@ def test_manifest_wave4_days_include_incident_contract_fields() -> None:
     for day_id in INCIDENT_NOTEBOOKS:
         day = days[day_id]
         assert day["phase"]
-        assert day["scenario_dir"]
+        assert day["incident_asset_ref"]
         assert day["injection_command"] == f"uv run aegisap-lab incident start --day {day_id}"
         assert day["revert_state"] == f".aegisap-lab/state/day{day_id}.json"
         assert day["verification_commands"]
         assert day["portal_to_script_mapping"]["bridge_file"]
-        assert day["portal_to_script_mapping"]["production_targets"]
+        assert day["portal_to_script_mapping"]["repair_domains"]
         assert day["cost_of_failure"]
         assert day["scaffold_level"]
         assert day["review_contract"]["human_required"] is True
@@ -144,6 +144,15 @@ def test_wave4_scenarios_expose_required_lifecycle_hooks() -> None:
         assert payload["review"]["evaluator_profile"]
         assert payload["baseline_track"]
         assert payload["baseline_reprovision_command"]
+        if day_id == "14":
+            stages = payload["cascading_stages"]
+            assert [stage["stage"] for stage in stages] == [1, 2, 3]
+            assert stages[0]["visible_at_start"] is True
+            assert stages[1]["visible_at_start"] is False
+            assert stages[2]["visible_at_start"] is False
+            assert stages[0]["masked_until_stage_complete"] == 0
+            assert stages[1]["masked_until_stage_complete"] == 1
+            assert stages[2]["masked_until_stage_complete"] == 2
 
 
 def test_wave4_scenario_patches_apply_cleanly_against_repo_index() -> None:
@@ -211,6 +220,37 @@ def test_wave4_notebooks_do_not_reference_retired_learner_entry_surfaces() -> No
         text = path.read_text(encoding="utf-8")
         for literal in RETIRED_LITERALS_BY_DAY[day_id]:
             assert literal not in text, f"{path.name} still references {literal}"
+
+
+def test_days_08_to_14_notebooks_do_not_leak_exact_repair_files() -> None:
+    for day_id, notebook_name in INCIDENT_NOTEBOOKS.items():
+        if day_id < "08":
+            continue
+        text = (REPO_ROOT / "notebooks" / notebook_name).read_text(encoding="utf-8")
+        assert "Permanent repo change:" not in text
+        assert "implement the repair in:" not in text
+
+
+def test_days_08_to_14_docs_and_modules_do_not_leak_named_drills_or_fixed_prompt_lists() -> None:
+    for day_id in ("08", "09", "10", "11", "12", "13", "14"):
+        doc_text = (REPO_ROOT / "docs" / f"DAY_{day_id}.md").read_text(encoding="utf-8")
+        module_text = (
+            REPO_ROOT
+            / "modules"
+            / f"day_{day_id}_{['iac_identity','observability_cost','production_acceptance','delegated_identity','private_networking','integration_boundary','elite_ops'][int(day_id)-8]}"
+            / "README.md"
+        ).read_text(encoding="utf-8")
+        for text in (doc_text, module_text):
+            assert "## Key Files" not in text
+            assert "drill_" not in text
+            assert "Prompt 1" not in text
+            assert "Prompt 2" not in text
+            assert "Prompt 3" not in text
+
+
+def test_repo_does_not_track_live_instructor_overlay_instance() -> None:
+    tracked_live_overlay = REPO_ROOT / "docs" / "curriculum" / "instructor" / "INSTRUCTOR_OVERLAY.yaml"
+    assert not tracked_live_overlay.exists()
 
 
 def test_learner_notebooks_do_not_mutate_repo_tracked_paths() -> None:

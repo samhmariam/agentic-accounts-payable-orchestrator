@@ -156,7 +156,11 @@ def _kql_evidence(mo):
 
         Capture at least one literal Log Analytics query with:
 
+        - capture order
+        - captured_before_patch=true
         - workspace
+        - first_signal_or_followup
+        - correlation or trace reference when available
         - purpose
         - observed excerpt
         - operator interpretation
@@ -179,7 +183,7 @@ def _codification_bridge(mo):
 
         - Portal state: the runtime principal is over-privileged or the identity wiring no longer matches the expected release boundary.
         - Notebook proof: the assignment preview and contract check show the runtime must stay reader-only.
-        - Permanent repo change: `infra/modules/role_assignments.bicep`, `infra/foundations/search_service.bicep`, and, if needed, `infra/modules/container_app.bicep`.
+        - Durable repo boundary: the least-privilege IaC owner inside the infrastructure boundary, plus the break-glass deployment-state recovery path if the lease or state is corrupt.
 
         Rosetta Stone: `notebooks/bridges/day08_identity_iac.md`
         """
@@ -204,11 +208,11 @@ def _production_patch(mo):
 
         Write the durable patch in the repo target below, not inside Marimo.
 
-        Move into the real infrastructure boundary and implement the repair in:
+        Move into the real infrastructure boundary and identify the durable owner of:
 
-        - `infra/modules/role_assignments.bicep`
-        - `infra/foundations/search_service.bicep` if local-auth posture drifted too
-        - `infra/modules/container_app.bicep` only if the runtime identity wiring is wrong
+        - least-privilege role assignment recovery
+        - search auth or no-public-endpoint posture if that drifted too
+        - deployment-state lease or state repair only if the break-glass path is blocked
 
         Then update the written Day 8 evidence:
 
@@ -292,7 +296,7 @@ def _chaos_gate(mo):
 
         Failure signal: Role assignments or service posture drifted, and the runtime principal can mutate resources it should only read.
 
-        Diagnostic surface: Portal role assignments, Marimo Bicep bridge, and live audit-production probes.
+        Starting signal: A deployment-state break-glass recovery is blocked and the runtime identity still looks over-privileged.
 
         Expected recovery artifact: `build/day8/deployment_design.json`
 

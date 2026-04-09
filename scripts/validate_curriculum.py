@@ -89,6 +89,7 @@ REQUIRED_DOCS = (
     "docs/curriculum/GRADUATE_PROFILE.md",
     "docs/curriculum/CURRICULUM_MANIFEST.yaml",
     "docs/curriculum/curriculum.schema.json",
+    "docs/curriculum/instructor_overlay.schema.json",
     "docs/curriculum/templates/DAILY_ARTIFACT_PACK.md",
     "docs/curriculum/templates/DAILY_SCORECARD.md",
     "docs/curriculum/templates/KQL_EVIDENCE_TEMPLATE.json",
@@ -656,10 +657,10 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 f"Manifest day {day['id']} rubric weights must sum to 100."
             )
 
-        prompts = day.get("oral_defense_prompts", [])
+        prompts = day.get("oral_defense_objectives", [])
         if len(prompts) != 3:
             errors.append(
-                f"Manifest day {day['id']} must declare exactly 3 oral defense prompts."
+                f"Manifest day {day['id']} must declare exactly 3 oral defense objectives."
             )
 
         if not day.get("customer_context"):
@@ -798,24 +799,20 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 errors.append(
                     f"Manifest day {day['id']} portal_to_script_mapping bridge missing: {bridge_rel}"
                 )
-            targets = mapping.get("production_targets", [])
+            targets = mapping.get("repair_domains", [])
             if not targets:
-                errors.append(f"Manifest day {day['id']} portal_to_script_mapping must declare production_targets.")
+                errors.append(f"Manifest day {day['id']} portal_to_script_mapping must declare repair_domains.")
             else:
                 for target in targets:
-                    target_path = target.get("path", "")
-                    if not target_path:
+                    target_name = target.get("name", "")
+                    if not target_name:
                         errors.append(
-                            f"Manifest day {day['id']} portal_to_script_mapping target missing `path`."
+                            f"Manifest day {day['id']} portal_to_script_mapping target missing `name`."
                         )
                         continue
                     if target.get("surface_type") not in {"application", "infrastructure", "ci_cd", "policy", "eval"}:
                         errors.append(
-                            f"Manifest day {day['id']} portal_to_script_mapping target `{target_path}` has an invalid surface_type."
-                        )
-                    if not (ROOT / target_path).exists():
-                        errors.append(
-                            f"Manifest day {day['id']} portal_to_script_mapping target missing: {target_path}"
+                            f"Manifest day {day['id']} portal_to_script_mapping target `{target_name}` has an invalid surface_type."
                         )
         constraints = day.get("persistent_constraints", [])
         if not constraints:
@@ -1012,11 +1009,12 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 f"Manifest day {day['id']} should not declare legacy_doc_files after the incident-driven redesign."
             )
 
-        scenario_rel = day.get("scenario_dir", "")
+        scenario_rel = str(day.get("incident_asset_ref", "")).strip()
         if day["id"] in {f"{i:02d}" for i in range(1, 15)} and not scenario_rel:
-            errors.append(f"Manifest day {day['id']} must declare a scenario_dir during incident-delivery waves.")
+            errors.append(f"Manifest day {day['id']} must declare an incident_asset_ref during incident-delivery waves.")
         if scenario_rel:
-            scenario_path = ROOT / scenario_rel / "scenario.yaml"
+            normalized_ref = scenario_rel.removeprefix("incident.")
+            scenario_path = ROOT / "scenarios" / normalized_ref / "scenario.yaml"
             if not scenario_path.exists():
                 errors.append(f"Manifest day {day['id']} scenario file missing: {scenario_path.relative_to(ROOT)}")
             else:

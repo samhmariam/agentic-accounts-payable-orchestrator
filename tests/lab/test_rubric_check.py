@@ -93,3 +93,51 @@ def test_render_rubric_check_markdown_contains_declared_weakness() -> None:
 
     assert "## Rubric Check" in markdown
     assert "Rollback proof is still thin." in markdown
+
+
+def test_run_rubric_check_uses_manifest_defined_dimensions_when_available(tmp_path: Path) -> None:
+    manifest_path = tmp_path / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        """
+days:
+  - id: "10"
+    rubric_weights:
+      technical_release_readiness: 20
+      evidence_pack_quality: 20
+      gate_exception_handling: 15
+      executive_communication: 15
+      oral_defense: 15
+      diagnostic_independence: 15
+""".strip(),
+        encoding="utf-8",
+    )
+
+    payload = run_rubric_check(
+        day="10",
+        repo_root=tmp_path,
+        learner_name="Taylor",
+        confidence="medium",
+        weakness="Needs tighter rollback proof.",
+        remediation="Rehearse the rollback path before CAB.",
+        scores={
+            "technical_release_readiness": 18,
+            "evidence_pack_quality": 17,
+            "gate_exception_handling": 12,
+            "executive_communication": 11,
+            "oral_defense": 10,
+            "diagnostic_independence": 0,
+        },
+        rationales={
+            "technical_release_readiness": "Release gate is accurate after the fix.",
+            "evidence_pack_quality": "CAB packet is complete.",
+            "gate_exception_handling": "Exception path is explicit.",
+            "executive_communication": "Brief is clear enough.",
+            "oral_defense": "Needs cleaner board-level phrasing.",
+            "diagnostic_independence": "Hint ladder was required.",
+        },
+        prompt_for_missing=False,
+    )
+
+    keys = [item["key"] for item in payload["payload"]["dimensions"]]
+    assert "diagnostic_independence" in keys

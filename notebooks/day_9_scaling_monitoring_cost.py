@@ -162,7 +162,11 @@ def _kql_evidence(mo):
 
         Capture at least one literal Log Analytics query with:
 
+        - capture order
+        - captured_before_patch=true
         - workspace
+        - first_signal_or_followup
+        - correlation or trace reference when available
         - purpose
         - observed excerpt
         - operator interpretation
@@ -185,7 +189,7 @@ def _codification_bridge(mo):
 
         - Portal state: risky work is staying on the wrong deployment tier.
         - Notebook proof: the routing, cache, and budget preview shows whether routing, cache policy, or budget framing drifted.
-        - Permanent repo change: `src/aegisap/routing/routing_policy.py`, `src/aegisap/cache/cache_policy.py`, and, if needed, `src/aegisap/cost/budget_gate.py`.
+        - Durable repo boundary: the routing-control owner in the observability, cache, or budget boundary that keeps risky work off the wrong tier.
 
         Rosetta Stone: `notebooks/bridges/day09_routing_cost.md`
         """
@@ -210,11 +214,11 @@ def _production_patch(mo):
 
         Write the durable patch in the repo target below, not inside Marimo.
 
-        Move into the real routing boundary and implement the repair in:
+        Move into the real routing boundary and identify the durable owner of:
 
-        - `src/aegisap/routing/routing_policy.py`
-        - `src/aegisap/cache/cache_policy.py` if cache bypass rules drifted too
-        - `src/aegisap/cost/budget_gate.py` only if the budget framing is wrong
+        - routing safety for the correct deployment tier
+        - cache behavior if stale or cheap-tier bypass is part of the failure
+        - budget framing only if the cost-control decision is wrong
 
         Then update the written Day 9 evidence:
 
@@ -309,7 +313,7 @@ def _chaos_gate(mo):
 
         Failure signal: Routing or caching pushes the workload outside the cost ceiling while inherited infrastructure posture still has to hold.
 
-        Diagnostic surface: Azure Monitor or KQL evidence, routing notebook analysis, budget gates, and cloud-truth posture checks.
+        Starting signal: Routing telemetry shows risky work landing on the wrong tier while cost controls drift.
 
         Expected recovery artifact: `build/day9/routing_report.json`
 

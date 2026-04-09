@@ -55,14 +55,16 @@ If elite-ops gates stay false-green during an incident, executives lose trustwor
 - Peer checklist file: `docs/curriculum/checklists/day14_peer_red_team.md`
 - Revert Proof: `docs/curriculum/artifacts/day14/REVERT_PROOF.md`
 
+- Save `build/day14/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day14/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day14/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Chaos Gate
 
 - Failure signal: A breaking change brings down the orchestration path and the team must restore service without losing correlation or rollback readiness.
-- Diagnostic surface: Chaos drill evidence, trace correlation artifacts, rollback gates, and cloud-truth posture checks.
+- Starting signal: Customers report that nothing is processing; clear the network fault first, then the identity fault, then the canary and correlation fault.
 - Expected recovery artifact: `build/day14/cto_trace_report.json`
 - Time box: 35 minutes
 
@@ -73,15 +75,17 @@ Do not edit code in this module folder.
 - Diagnostic Notebook: `notebooks/day_14_breaking_changes_elite_ops.py`
 - Primary Day Doc: `docs/DAY_14.md`
 - Rosetta Stone Bridge: `notebooks/bridges/day14_elite_operations.md`
-- Production Target: `src/aegisap/deploy/gates_v2.py`
-- Production Target: `src/aegisap/traceability/correlation.py`
-- Production Target: `scripts/verify_trace_correlation.py`
-- Production Target: `scripts/run_chaos_capstone.py`
-- Scenario Pack: `scenarios/day14`
+- Repair Domain: `Gates V2`
+- Repair Domain: `Correlation`
+- Repair Domain: `Verify Trace Correlation`
+- Repair Domain: `Run Chaos Capstone`
+- Incident Asset Ref: `incident.day14`
 - Verification Command: `uv run python -m pytest tests/day14/test_breaking_changes.py -q`
 - Verification Command: `uv run python scripts/run_chaos_capstone.py`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 14`
 - Native Evidence Artifact: `build/day14/native_operator_evidence.json`
+- KQL Evidence Artifact: `build/day14/kql_evidence.json`
+- Diagnostic Timeline: `build/day14/diagnostic_timeline.md`
 
 ## Automated Drill
 

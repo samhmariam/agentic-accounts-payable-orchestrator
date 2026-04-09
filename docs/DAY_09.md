@@ -49,9 +49,11 @@ uv run aegisap-lab incident start --day 09
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
 - The Day 10 CAB board may replay one saved Day 9 proof live
 
+- Save `build/day9/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day9/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day9/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 
@@ -60,16 +62,14 @@ uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_
 uv run aegisap-lab artifact rebuild --day 09
 ```
 
-## Key Files
+## Investigation Surfaces
 
-- `modules/day_09_observability_cost/README.md`
 - `notebooks/day_9_scaling_monitoring_cost.py`
 - `notebooks/bridges/day09_routing_cost.md`
-- `src/aegisap/routing/routing_policy.py`
-- `src/aegisap/cache/cache_policy.py`
-- `src/aegisap/cost/budget_gate.py`
-- `build/day9/native_operator_evidence.json`
-- `scenarios/day09`
+- Incident Asset Ref: `incident.day09`
+- Repair Domain: `Routing Policy`
+- Repair Domain: `Cache Policy`
+- Repair Domain: `Budget Gate`
 
 ## Automated Drill
 

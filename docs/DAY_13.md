@@ -52,9 +52,11 @@ uv run aegisap-lab incident start --day 13
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
 - Day 13 evidence must include at least two literal native commands plus one raw KQL query.
 
+- Save `build/day13/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day13/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day13/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 
@@ -63,20 +65,15 @@ uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_se
 uv run aegisap-lab artifact rebuild --day 13
 ```
 
-## Key Files
+## Investigation Surfaces
 
-- `modules/day_13_integration_boundary/README.md`
 - `notebooks/day_13_integration_boundary_and_mcp.py`
 - `notebooks/bridges/day13_integration_boundary.md`
-- `src/aegisap/mcp/server.py`
-- `src/aegisap/mcp/schemas.py`
-- `src/aegisap/integration/dlq_consumer.py`
-- `src/aegisap/integration/compensating_action.py`
-- `scenarios/day13`
-
-## CAPSTONE_B
-
-This day still feeds the transfer track and must preserve the inherited customer constraints while the second domain comes online.
+- Incident Asset Ref: `incident.day13`
+- Repair Domain: `Server`
+- Repair Domain: `Schemas`
+- Repair Domain: `Dlq Consumer`
+- Repair Domain: `Compensating Action`
 
 ## Automated Drill
 
@@ -84,3 +81,9 @@ This day still feeds the transfer track and must preserve the inherited customer
 - `uv run aegisap-lab drill inject --day 13`
 - `uv run aegisap-lab drill reset --day 13`
 - `uv run aegisap-lab mastery --day 13` writes `build/day13/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.
+
+## CAPSTONE_B Transfer Hook
+
+Transfer the same boundary-governance reasoning into the secondary domain. The
+review should still prove DLQ handling, compensating actions, and contract
+recovery from saved telemetry rather than notebook memory.

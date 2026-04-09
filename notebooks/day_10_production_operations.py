@@ -140,7 +140,11 @@ def _kql_evidence(mo):
 
         Capture at least one literal Log Analytics query with:
 
+        - capture order
+        - captured_before_patch=true
         - workspace
+        - first_signal_or_followup
+        - correlation or trace reference when available
         - purpose
         - observed excerpt
         - operator interpretation
@@ -166,7 +170,7 @@ def _codification_bridge(mo):
 
         - Portal state: the candidate revision or upstream gate is unhealthy even though the envelope looks releasable.
         - Notebook proof: the release-envelope preview shows the false-green aggregation path.
-        - Permanent repo change: `src/aegisap/deploy/gates.py`, `scripts/check_all_gates.py`, and, if needed, `src/aegisap/training/checkpoints.py`.
+        - Durable repo boundary: the release-decision owner in the gate aggregation or checkpoint packaging boundary that prevents false-green promotion.
 
         Rosetta Stone: `notebooks/bridges/day10_release_evidence.md`
         """
@@ -191,11 +195,11 @@ def _production_patch(mo):
 
         Write the durable patch in the repo target below, not inside Marimo.
 
-        Move into the real release boundary and implement the repair in:
+        Move into the real release boundary and identify the durable owner of:
 
-        - `src/aegisap/deploy/gates.py`
-        - `scripts/check_all_gates.py`
-        - `src/aegisap/training/checkpoints.py` only if the checkpoint packaging is wrong
+        - gate aggregation for the failing release path
+        - release-envelope proof that keeps failed evidence visible
+        - checkpoint packaging only if the upstream evidence chain is wrong
 
         Then update the written Day 10 evidence:
 
@@ -312,7 +316,7 @@ def _chaos_gate(mo):
 
         Failure signal: A release gate or evidence packet is incomplete, leaving production acceptance without defensible proof.
 
-        Diagnostic surface: Deployment gate outputs, checkpoint artifacts, release envelope evidence, and cloud-truth posture checks.
+        Starting signal: Release evidence looks green even though at least one upstream gate or revision is unhealthy.
 
         Expected recovery artifact: `build/day10/release_envelope.json`
 

@@ -14,7 +14,9 @@ import yaml
 
 from aegisap.common.paths import repo_root as resolve_repo_root_from_path
 
+from .curriculum import get_day, load_manifest, normalize_day, scenario_relpath_from_asset_ref
 from .models import CommandReceipt, IncidentJournal, ScenarioContract, utc_now_iso
+from .overlay import overlay_day
 
 
 STATE_DIR = Path(".aegisap-lab") / "state"
@@ -55,7 +57,14 @@ def journal_path(repo_root: Path, day: str) -> Path:
 
 
 def scenario_dir(repo_root: Path, day: str) -> Path:
-    return repo_root / "scenarios" / scenario_id(day)
+    overlay_entry = overlay_day(day, repo_root)
+    if overlay_entry.get("scenario_dir"):
+        return (repo_root / str(overlay_entry["scenario_dir"])).resolve()
+    try:
+        day_entry = get_day(load_manifest(repo_root), day)
+    except Exception:
+        return repo_root / "scenarios" / scenario_id(normalize_day(day))
+    return (repo_root / scenario_relpath_from_asset_ref(day_entry)).resolve()
 
 
 def scenario_file(repo_root: Path, day: str) -> Path:
@@ -316,6 +325,9 @@ def start_incident(*, day: str, repo_path: str | Path | None = None) -> Incident
         scenario_dir=str(scenario_root),
         original_branch=original_branch,
         incident_branch=incident_branch,
+        metadata={
+            "incident_asset_ref": overlay_day(day, root).get("incident_asset_ref", scenario_id(day)),
+        },
     )
 
     with InterruptGuard(journal=journal, journal_file=state_file):

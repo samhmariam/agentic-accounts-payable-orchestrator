@@ -71,9 +71,11 @@ uv run aegisap-lab incident start --day 10
 - The board may replay `build/day9/native_operator_evidence.json` live before approving the release packet
 - CAB approval is blocked if Days 05-09 native or KQL evidence is missing, structurally weak, or inconsistent with the release packet
 
+- Save `build/day10/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day10/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live. The CAB packet now statically validates the full Days 05-09 native and KQL evidence chain before board readiness is accepted.
+Save `build/day10/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live. The CAB packet now statically validates the full Days 05-09 native and KQL evidence chain before board readiness is accepted.
 
 ## Verification Commands
 
@@ -82,17 +84,14 @@ uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test
 uv run aegisap-lab artifact rebuild --day 10
 ```
 
-## Key Files
+## Investigation Surfaces
 
-- `modules/day_10_production_acceptance/README.md`
 - `notebooks/day_10_production_operations.py`
 - `notebooks/bridges/day10_release_evidence.md`
-- `src/aegisap/deploy/gates.py`
-- `scripts/check_all_gates.py`
-- `src/aegisap/training/checkpoints.py`
-- `runbooks/rollback.md`
-- `runbooks/rollback_runbook.md`
-- `scenarios/day10`
+- Incident Asset Ref: `incident.day10`
+- Repair Domain: `Gates`
+- Repair Domain: `Check All Gates`
+- Repair Domain: `Checkpoints`
 
 ## Automated Drill
 

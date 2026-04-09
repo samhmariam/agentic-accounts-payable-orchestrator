@@ -1,8 +1,8 @@
 # Assessor Calibration Guide
 
-This guide prevents inter-assessor scoring drift on the oral defense component.
-It provides anchor descriptions — **not answer keys** — for each scoring band
-across the five dimensions.
+This guide prevents inter-assessor scoring drift on the oral defense and
+diagnostic-independence components. It provides anchor descriptions — **not
+answer keys** — for each scoring band across the scored dimensions.
 
 Anchor descriptions describe the *quality of reasoning*, not the presence of
 specific keywords. Two sentences per anchor maximum. Read the anchor, then listen
@@ -25,6 +25,34 @@ two scores applies. Trainees should not benefit from assessor uncertainty.
 **Declaration:** Any assessor who coached the trainee on a capstone or worked
 directly with them on Day 13–14 artifacts must declare a conflict. A replacement
 assessor must be appointed.
+
+---
+
+## Prompt Selection Discipline
+
+- Days 1-7 may use the guided daily prompt trio.
+- Days 8-14 must use role-based prompt pools from the instructor overlay rather
+  than a fixed published question list.
+- Assessors must select exactly 3 prompts at runtime.
+- At least 1 selected prompt on Days 8-14 must include a hostile or
+  non-technical objection such as audit optics, release-board pressure, or a
+  CISO rejection concern.
+- Prompt choice is not a hint ladder. Do not reveal the next stage of an
+  incident while asking the question.
+
+---
+
+## Diagnostic Independence Review (Days 8-14)
+
+Assessors score `Diagnostic Independence` from saved evidence, not from how
+confidently the learner tells the story afterward.
+
+- Open `kql_evidence.json`, `native_operator_evidence.json`, and
+  `diagnostic_timeline.md` before scoring.
+- Confirm the first saved proof is pre-patch and precedes any repo repair.
+- Confirm the learner did not use repo search before first telemetry capture.
+- Replay at least one saved query or native command live.
+- If hint-ladder usage was recorded, set `Diagnostic Independence` to `0`.
 
 ---
 
@@ -96,6 +124,17 @@ or external auditor find this explanation sufficient?*
 
 ---
 
+## Dimension 6 — Diagnostic Independence (Days 8-14 only)
+
+| Band | What it looks like |
+|---|---|
+| **Exceptional (13–15)** | Saved evidence shows the trainee followed production signals in order, used telemetry before code search, and can replay the query or command that narrowed the fault. |
+| **Proficient (10–12)** | Evidence is telemetry-first and replayable, but one part of the chain is thin, such as missing correlation context or an incomplete operator interpretation. |
+| **Developing (6–9)** | The trainee found the right subsystem, but the timeline is incomplete, ordering is ambiguous, or some proof appears to have been reconstructed after the patch. |
+| **Beginning (0–5)** | Pre-patch telemetry is missing, only post-patch evidence exists, repo search came first, or a hint-ladder intervention was used. |
+
+---
+
 ## Common Scoring Errors to Avoid
 
 1. **Keyword credit.** Do not award points because the trainee used the right
@@ -116,7 +155,11 @@ or external auditor find this explanation sufficient?*
    (customer onboarding) is the primary scoring domain, not accounts payable.
    A trainee who answers only in AP terms scores as Developing on dimensions 2–5.
 
-6. **Rubber-stamping peer review.** A peer who asks weak questions or accepts
+6. **Mind-reading independence.** Do not award diagnostic-independence credit
+   because the trainee sounds like they investigated well. The saved evidence
+   must prove the ordering.
+
+7. **Rubber-stamping peer review.** A peer who asks weak questions or accepts
    claims without evidence is underperforming as a reviewer. Record
    `peer_reviewer_challenge_quality` explicitly; weak challenge quality blocks
    Top Talent until reviewer remediation is complete.

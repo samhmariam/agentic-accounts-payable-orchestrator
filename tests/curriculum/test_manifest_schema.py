@@ -107,15 +107,27 @@ def test_kql_evidence_contracts_exist_on_days_5_to_14() -> None:
         contract = days[day_id]["kql_evidence"]
         assert contract["artifact_path"] == f"build/day{int(day_id)}/kql_evidence.json"
         assert contract["minimum_queries"] >= 1
+        if day_id >= "08":
+            assert contract["minimum_pre_patch_queries"] >= 1
+
+
+def test_diagnostic_independence_contracts_exist_on_days_8_to_14() -> None:
+    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    days = {day["id"]: day for day in manifest["days"]}
+
+    for day_id in [f"{i:02d}" for i in range(8, 15)]:
+        contract = days[day_id]["diagnostic_independence"]
+        assert contract["mode"] == "advisory"
+        assert contract["timeline_artifact_path"] == f"build/day{int(day_id)}/diagnostic_timeline.md"
+        assert contract["hint_state_path"] == f".aegisap-lab/cache/instructor/interventions/day{day_id}.json"
 
 
 def test_scaffold_levels_follow_day_band() -> None:
     manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
     days = {day["id"]: day for day in manifest["days"]}
 
-    for day_id in ("01", "02", "03"):
+    for day_id in [f"{i:02d}" for i in range(1, 8)]:
         assert days[day_id]["scaffold_level"] == "guided"
-    for day_id in ("04", "05", "06"):
-        assert days[day_id]["scaffold_level"] == "reduced"
     for day_id in [f"{i:02d}" for i in range(7, 15)]:
-        assert days[day_id]["scaffold_level"] == "starter_only"
+        expected = "guided" if day_id == "07" else "starter_only"
+        assert days[day_id]["scaffold_level"] == expected

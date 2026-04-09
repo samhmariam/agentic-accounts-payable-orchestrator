@@ -67,11 +67,11 @@
           "persistent_constraints",
           "mastery_gates",
           "chaos_gate",
-          "oral_defense_prompts",
+          "oral_defense_objectives",
           "zero_tolerance",
           "capstone_flags",
           "phase",
-          "scenario_dir",
+          "incident_asset_ref",
           "injection_command",
           "revert_state",
           "verification_commands",
@@ -124,7 +124,7 @@
             "required": [
               "portal_surface",
               "bridge_file",
-              "production_targets"
+              "repair_domains"
             ],
             "properties": {
               "portal_surface": {
@@ -135,11 +135,11 @@
                 "type": "string",
                 "minLength": 1
               },
-              "production_targets": {
+              "repair_domains": {
                 "type": "array",
                 "minItems": 1,
                 "items": {
-                  "$ref": "#/$defs/productionTarget"
+                  "$ref": "#/$defs/repairDomain"
                 }
               }
             },
@@ -169,6 +169,9 @@
           "kql_evidence": {
             "$ref": "#/$defs/kqlEvidenceContract"
           },
+          "diagnostic_independence": {
+            "$ref": "#/$defs/diagnosticIndependenceContract"
+          },
           "rollback_rehearsal": {
             "$ref": "#/$defs/rollbackRehearsal"
           },
@@ -189,7 +192,7 @@
           "chaos_gate": {
             "$ref": "#/$defs/chaosGate"
           },
-          "oral_defense_prompts": {
+          "oral_defense_objectives": {
             "type": "array",
             "minItems": 3,
             "items": {
@@ -207,7 +210,7 @@
             "type": "string",
             "minLength": 1
           },
-          "scenario_dir": {
+          "incident_asset_ref": {
             "type": "string",
             "minLength": 1
           },
@@ -236,14 +239,14 @@
     }
   },
   "$defs": {
-    "productionTarget": {
+    "repairDomain": {
       "type": "object",
       "required": [
-        "path",
+        "name",
         "surface_type"
       ],
       "properties": {
-        "path": {
+        "name": {
           "type": "string",
           "minLength": 1
         },
@@ -396,6 +399,14 @@
           "type": "integer",
           "minimum": 0
         },
+        "minimum_pre_patch_commands": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minimum_pre_patch_queries": {
+          "type": "integer",
+          "minimum": 0
+        },
         "must_use_json_output": {
           "type": "boolean"
         },
@@ -425,9 +436,51 @@
           "type": "integer",
           "minimum": 1
         },
+        "minimum_pre_patch_queries": {
+          "type": "integer",
+          "minimum": 0
+        },
         "review_stage": {
           "type": "string",
           "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "diagnosticIndependenceContract": {
+      "type": "object",
+      "required": [
+        "mode",
+        "timeline_artifact_path",
+        "review_stage"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "advisory",
+            "blocking"
+          ]
+        },
+        "timeline_artifact_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_stage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hint_state_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_markers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       },
       "additionalProperties": true
@@ -436,7 +489,7 @@
       "type": "object",
       "required": [
         "failure_signal",
-        "diagnostic_surface",
+        "starting_signal",
         "expected_recovery_artifact",
         "time_box_minutes",
         "facilitator_intervention_rule"
@@ -446,7 +499,7 @@
           "type": "string",
           "minLength": 1
         },
-        "diagnostic_surface": {
+        "starting_signal": {
           "type": "string",
           "minLength": 1
         },

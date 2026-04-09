@@ -28,15 +28,28 @@ dayNN_<trainee_id>/
 **What goes here:** Code, configuration, diagrams, or analysis directly produced
 by the lab exercise. File formats vary by day (`.py`, `.bicep`, `.json`, `.md`).
 
+**Days 8-14 diagnostic proof requirement:** include a
+`LAB_OUTPUT/DIAGNOSTIC_PROOF/` folder containing:
+
+- `kql_evidence.json`
+- `native_operator_evidence.json`
+- `diagnostic_timeline.md`
+
 **Acceptance criteria:**
 - Runnable or parseable in the format specified by the day's lab instructions
 - Named exactly as specified in `CURRICULUM_MANIFEST.yaml artifact_files`
 - No placeholder content (TODO stubs count as incomplete)
+- On Days 8-14, at least one saved native command and one saved KQL query must be
+  captured before the code patch
+- On Days 8-14, `diagnostic_timeline.md` must name the first symptom, first telemetry
+  proof, subsystem narrowed, durable repair chosen, post-fix confirmation, and whether
+  repo search occurred before telemetry capture
 
 **Common failures:**
 - Notebook screenshots instead of actual code files
 - Portal screenshots with no named production file or IaC target
 - Renaming files to avoid overwriting previous day's work
+- On Days 8-14, submitting only post-fix telemetry or omitting the diagnostic timeline
 
 ---
 
@@ -99,6 +112,10 @@ data authority chart, change classification record.
 The pack is only accepted if all four output folders are present and non-empty.
 A missing folder counts as an incomplete submission. An incomplete submission
 blocks progression per the zero-tolerance policy on Days 7, 10, 11, 12, and 14.
+
+For Days 8-14, missing `LAB_OUTPUT/DIAGNOSTIC_PROOF/` or missing pre-patch telemetry
+evidence does not block day completion by itself, but it reduces
+`diagnostic_independence` to `0 / 15`.
 
 The `RUBRIC/` folder must contain the trainee's self-assessment against the
 daily rubric. Self-assessment scores are not binding but are reviewed during

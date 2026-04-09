@@ -51,14 +51,16 @@ If the integration contract drifts, partner systems fail unpredictably and compe
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
 - Day 13 evidence must include at least two literal native commands plus one raw KQL query.
 
+- Save `build/day13/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day13/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day13/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Chaos Gate
 
 - Failure signal: Boundary drift leaves partner traffic in the DLQ or exposes an incomplete MCP contract to the client.
-- Diagnostic surface: MCP client notebook flow, DLQ evidence, compensating-action code, and cloud-truth posture checks.
+- Starting signal: A governed integration boundary is dropping or mis-shaping traffic while compensation evidence drifts.
 - Expected recovery artifact: `build/day13/mcp_contract_report.json`
 - Time box: 30 minutes
 
@@ -69,15 +71,16 @@ Do not edit code in this module folder.
 - Diagnostic Notebook: `notebooks/day_13_integration_boundary_and_mcp.py`
 - Primary Day Doc: `docs/DAY_13.md`
 - Rosetta Stone Bridge: `notebooks/bridges/day13_integration_boundary.md`
-- Production Target: `src/aegisap/mcp/server.py`
-- Production Target: `src/aegisap/mcp/schemas.py`
-- Production Target: `src/aegisap/integration/dlq_consumer.py`
-- Production Target: `src/aegisap/integration/compensating_action.py`
-- Scenario Pack: `scenarios/day13`
+- Repair Domain: `Server`
+- Repair Domain: `Schemas`
+- Repair Domain: `Dlq Consumer`
+- Repair Domain: `Compensating Action`
+- Incident Asset Ref: `incident.day13`
 - Verification Command: `uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_server.py tests/day13/test_payment_hold.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 13`
 - Native Evidence Artifact: `build/day13/native_operator_evidence.json`
 - KQL Evidence Artifact: `build/day13/kql_evidence.json`
+- Diagnostic Timeline: `build/day13/diagnostic_timeline.md`
 
 ## Automated Drill
 

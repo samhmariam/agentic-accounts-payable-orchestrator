@@ -26,14 +26,17 @@ See `ASSESSOR_CALIBRATION.md` for band anchor descriptions before scoring.
 
 ## Prompt Log
 
-Record the exact prompt used for each oral defense question. Mark if a
-follow-up clarification was asked (add `[F]` suffix).
+Record the exact prompt used for each oral defense question. Days 8-14 must use
+runtime-selected prompts from the instructor overlay rather than a fixed public
+question list. Mark if a follow-up clarification was asked (add `[F]` suffix).
 
 | # | Prompt used | Follow-up asked (Y/N) |
 |---|---|---|
 | 1 | | |
 | 2 | | |
 | 3 | | |
+
+Hostile or non-technical objection included? Y / N
 
 ---
 
@@ -84,6 +87,9 @@ Zero-tolerance outcome: **PASS / FAIL** (circle one)
 Confirmed by lead assessor: _____ / _____
 
 This score is entered into the cohort tracker under column "Oral defense — Day NN".
+
+For Days 8-14, confirm the daily scorecard also records whether one saved KQL
+query or native command was replayed live before finalising the assessment.
 
 ---
 

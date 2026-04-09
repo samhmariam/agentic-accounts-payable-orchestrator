@@ -14,6 +14,7 @@ from .engine import (
     start_incident,
     status_incident,
 )
+from .overlay import import_instructor_overlay, overlay_status, record_hint_usage
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -91,6 +92,22 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="KEY=TEXT",
         help="Optional rubric rationale override, for example technical_correctness=Green gates after fix.",
     )
+
+    overlay = subparsers.add_parser("overlay", help="Manage facilitator-only instructor overlay assets.")
+    overlay_subparsers = overlay.add_subparsers(dest="overlay_command", required=True)
+    overlay_import = overlay_subparsers.add_parser("import", help="Import an instructor overlay into the local cache.")
+    overlay_import.add_argument("--file", required=True, help="Path to the secure overlay bundle to cache locally.")
+    overlay_import.add_argument(
+        "--force",
+        action="store_true",
+        help="Replace an existing cached overlay if one is already present.",
+    )
+    overlay_subparsers.add_parser("status", help="Show whether a cached instructor overlay is available.")
+    overlay_hint = overlay_subparsers.add_parser("hint", help="Record hint-ladder usage for a learner day.")
+    overlay_hint.add_argument("--day", required=True, help="Two-digit day number, for example 08.")
+    overlay_hint.add_argument("--level", required=True, help="Hint-ladder level such as T+30 or T+60.")
+    overlay_hint.add_argument("--prompt", default="", help="Prompt or command shared with the learner.")
+    overlay_hint.add_argument("--note", default="", help="Optional facilitator note.")
 
     return parser
 
@@ -213,6 +230,23 @@ def main() -> int:
             )
             print()
             print(payload["markdown"])
+            return 0
+        if args.command == "overlay" and args.overlay_command == "import":
+            _print_payload(import_instructor_overlay(source=args.file, repo_root=args.repo_root, force=args.force))
+            return 0
+        if args.command == "overlay" and args.overlay_command == "status":
+            _print_payload(overlay_status(repo_root=args.repo_root))
+            return 0
+        if args.command == "overlay" and args.overlay_command == "hint":
+            _print_payload(
+                record_hint_usage(
+                    day=args.day,
+                    level=args.level,
+                    prompt=args.prompt,
+                    note=args.note,
+                    repo_root=args.repo_root,
+                )
+            )
             return 0
     except IncidentError as exc:
         print(str(exc))

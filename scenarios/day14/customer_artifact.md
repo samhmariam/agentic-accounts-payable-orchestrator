@@ -1,13 +1,18 @@
 # Customer Escalation - Day 14
 
-Subject: Release board wants to proceed without complete trace evidence
+Subject: Nothing is processing and leadership wants an answer now
 
-The release candidate is under executive pressure, but operations cannot prove
-the private-network deployment has the second sink required for full trace
-correlation. The current gate is still reading green.
+We are getting an angry escalation from the client because nothing is
+processing through the private deployment path. Right now the only thing the
+customer can tell us is that the service looks down.
+
+Important constraint: do not assume this is a single fault. Restore the first
+visible failure, then keep tracing the same incident until you know whether a
+second or third masked failure is waiting behind it.
 
 What we need:
 
-- restore the gate so missing dual-sink evidence blocks promotion again
-- show rollback, canary, and trace evidence in one coherent incident packet
-- record the chaos drill outcome with MTTR before the CTO review
+- restore customer traffic through the private path first
+- keep the same correlation trail and prove whether identity or policy drift appears after network recovery
+- continue through the next revealed stage until canary or correlation truth is established
+- show rollback, canary, and trace evidence in one coherent incident packet before the CTO review

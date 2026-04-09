@@ -34,15 +34,17 @@ The exact artifact filenames for each day are the authoritative source in
    For Days 1-14, start with the incident, then use the notebook's portal
    investigation section to anchor the Azure evidence before learners patch the
    repo. Force the learner through the codification bridge before they open the
-   editor: what exact state did the portal show, what exact notebook proof
-   reproduced it, and what exact file must change? Introduce the three oral
-   defense prompts for the day so learners can build toward them during the lab.
+   editor: what exact state did the portal show, what notebook proof reproduced
+   it, and which production boundary owns the durable fix? For Days 1-7, the
+   guided prompt trio is fine. For Days 8-14, select three runtime oral-defense
+   prompts from the instructor overlay so learners cannot rehearse a published
+   answer list.
    On Days 02 and 04, run the active-inception triad before the learner opens
    the notebook so the hidden NFR or risk appetite has to be extracted verbally.
 3. Lab block: keep the room moving toward all four outputs (technical build,
    decision memo, corporate process artifact, oral defense prep). Notebook
    completion alone is not the goal. Require the learner to capture KQL evidence
-   before they patch, and require `uv run aegisap-lab rubric-check --day XX`
+   before they patch, require the diagnostic timeline on Days 8-14, and require `uv run aegisap-lab rubric-check --day XX`
    before they ask for review.
 4. Intervention sweep: scan for yellow/red learners every 10–15 minutes.
 5. Oral defense sessions: run after the lab block. Two assessors per trainee.
@@ -107,6 +109,17 @@ lead engineer under incident discipline, not a helper.
 - if the learner cannot navigate to the relevant logs or probes themselves, they
   fail the day and move into remediation
 
+### Hint Ladder Exception For Day 8
+
+Day 8 uses a mandatory break-glass hint ladder so a failed IaC recovery does not
+block the rest of the bootcamp.
+
+- `T+30`: ask whether the learner has checked the deployment-state blob lease or corruption path
+- `T+60`: provide the exact `az storage blob lease break ...` or equivalent command for the cohort setup
+- record any hint with `uv run aegisap-lab overlay hint --day 08 --level <level> --prompt "<shared guidance>"`
+- any recorded Day 8 hint forces `Diagnostic Independence = 0 / 15`
+- after the hint, keep the learner moving; do not strand them in remediation if they can finish the repair
+
 ## Naked Drill Protocol
 
 Use this protocol for the native-tool sections on Days 04-14. The source of
@@ -118,6 +131,9 @@ truth is `docs/curriculum/NATIVE_TOOLING_POLICY.md`.
 - learners must save literal commands and literal query text into `native_operator_evidence.json`
 - Azure CLI evidence must use `-o json` unless the day explicitly allows another machine-readable format
 - learners on Days 05-14 must also save literal Log Analytics proof into `kql_evidence.json`
+- learners on Days 08-14 must also save `diagnostic_timeline.md` proving the
+  first symptom, first telemetry proof, narrowed subsystem, durable repair, and
+  post-fix confirmation
 - trainers should reject generic evidence that does not match the day's required signal family
 - facilitators may ask the learner to clear recent terminal-history context, rerun one saved proof live, and explain the interpretation
 - if the learner cannot explain what the native proof shows, the gate does not pass
@@ -152,6 +168,7 @@ following are true:
 - `Security Reasoning` scored below 7 on any zero-tolerance day (Days 7, 10, 11, 12, 14)
 - learner cannot name the exact recovery command for their blocker
 - zero-tolerance hard-fail on a zero-tolerance day (score becomes 0 regardless of total)
+- Days 8-14 diagnostic proof missing or not replayable (score `Diagnostic Independence = 0`, plus remediation before Top Talent consideration)
 
 Scores are on the 100-point scale. The daily pass bar is **80**. The elite
 pass bar for Top Talent tier is **90**. See `docs/curriculum/ASSESSMENT_RUBRIC.md`

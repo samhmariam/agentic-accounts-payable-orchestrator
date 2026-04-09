@@ -1,5 +1,5 @@
 day: "14"
-title: "False-Green Dual-Sink Trace Gate"
+title: "Cascading Crucible - Network First, Identity Second, Correlation Last"
 phase: "phase_4_elite_operations"
 baseline_track: "full"
 baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track full --scenario day14"
@@ -10,6 +10,25 @@ setup:
 validation:
   reproduce_command: "uv run python -m pytest tests/day14/test_breaking_changes.py -q"
   ci_command: "uv run python -m pytest tests/day14/test_breaking_changes.py -q"
+cascading_stages:
+  - stage: 1
+    label: "Private DNS and routing recovery"
+    visible_at_start: true
+    masked_until_stage_complete: 0
+    first_visible_signal: "Customer traffic cannot reach the private service path and no delegated-identity signal is visible yet."
+    reveal_after_recovery: "401 or 403 delegated-identity failures appear once the network path is restored."
+  - stage: 2
+    label: "Delegated identity and OBO recovery"
+    visible_at_start: false
+    masked_until_stage_complete: 1
+    first_visible_signal: "OBO or actor-binding checks fail only after the private DNS or routing fault is cleared."
+    reveal_after_recovery: "Correlation-led canary or model-regression evidence appears only after identity is repaired."
+  - stage: 3
+    label: "Correlation-led canary regression"
+    visible_at_start: false
+    masked_until_stage_complete: 2
+    first_visible_signal: "Trace continuity returns, but the candidate revision regresses against the protected baseline."
+    reveal_after_recovery: "Rollback readiness and executive packet coherence remain as the final release decision proof."
 teardown:
   revert_diff: "seed/incident.patch"
   azure_script: "uv run python -m aegisap.lab.preview_azure --scenario day14 --action restore"

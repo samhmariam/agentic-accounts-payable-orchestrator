@@ -58,14 +58,16 @@ If release evidence goes false-green, the CAB can approve a broken deployment an
 - Wait for replica readiness with retry/backoff before judging `/health/ready` or `/version` probes.
 - A Git-only revert does not satisfy rollback proof.
 
+- Save `build/day10/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day10/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live. The CAB packet now statically validates the full Days 05-09 native and KQL evidence chain before board readiness is accepted.
+Save `build/day10/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live. The CAB packet now statically validates the full Days 05-09 native and KQL evidence chain before board readiness is accepted.
 
 ## Chaos Gate
 
 - Failure signal: A release gate or evidence packet is incomplete, leaving production acceptance without defensible proof.
-- Diagnostic surface: Deployment gate outputs, checkpoint artifacts, release envelope evidence, and cloud-truth posture checks.
+- Starting signal: Release evidence looks green even though at least one upstream gate or revision is unhealthy.
 - Expected recovery artifact: `build/day10/release_envelope.json`
 - Time box: 30 minutes
 
@@ -88,17 +90,15 @@ Do not edit code in this module folder.
 - Diagnostic Notebook: `notebooks/day_10_production_operations.py`
 - Primary Day Doc: `docs/DAY_10.md`
 - Rosetta Stone Bridge: `notebooks/bridges/day10_release_evidence.md`
-- Production Target: `src/aegisap/deploy/gates.py`
-- Production Target: `scripts/check_all_gates.py`
-- Production Target: `src/aegisap/training/checkpoints.py`
-- Rollback Runbook: `runbooks/rollback.md`
-- Rollback Runbook: `runbooks/rollback_runbook.md`
-- Scenario Pack: `scenarios/day10`
+- Repair Domain: `Gates`
+- Repair Domain: `Check All Gates`
+- Repair Domain: `Checkpoints`
+- Incident Asset Ref: `incident.day10`
 - Verification Command: `uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 10`
 - Native Evidence Artifact: `build/day10/native_operator_evidence.json`
 - KQL Evidence Artifact: `build/day10/kql_evidence.json`
-- Rollback Rehearsal Artifact: `build/day10/rollback_rehearsal.json`
+- Diagnostic Timeline: `build/day10/diagnostic_timeline.md`
 
 ## Automated Drill
 

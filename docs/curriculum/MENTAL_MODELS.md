@@ -96,19 +96,21 @@ section, process-fluency dimension of oral defense.
 | Authority and source-of-truth hierarchy | Day 2 | Days 3, 5, 6, 11 |
 | Control plane vs data plane | Day 4 | Days 6, 8, 10, 13 |
 | Reversible vs irreversible actions | Day 4 | Days 5, 7, 11, 12, 13, 14 |
-| Blast radius minimisation | Day 1 | All days (oral defense Q2) |
+| Blast radius minimisation | Day 1 | All days (oral defense blast-radius objective) |
 | Release evidence over intuition | Day 8 | Days 9, 10, 12, 14 |
-| "Who must approve this" before "how to code this" | Day 2 | All days (oral defense Q3) |
+| "Who must approve this" before "how to code this" | Day 2 | All days (oral defense approval objective) |
 
 ---
 
 ## How These Are Examined
 
-Each day's three oral defense prompts map directly to these models:
+Each day's oral-defense objectives map directly to these models. Days 1-7 may
+use a guided trio. Days 8-14 must pull runtime prompts from the instructor
+overlay so the defense remains unpredictable:
 
-- **Prompt 1** (rejected alternative) → Build an agent or not; Authority hierarchy; Control vs data plane
-- **Prompt 2** (blast radius) → Blast radius minimisation; Reversible vs irreversible
-- **Prompt 3** (who must approve) → "Who must approve this"; Release evidence over intuition; Zero-tolerance vs tunable
+- Rejected alternative objective → Build an agent or not; Authority hierarchy; Control vs data plane
+- Blast radius objective → Blast radius minimisation; Reversible vs irreversible
+- Approval and evidence objective → "Who must approve this"; Release evidence over intuition; Zero-tolerance vs tunable
 
 Zero-tolerance conditions (Days 7, 10, 11, 12, 14) are operationalisations of
 models 2, 5, and 8 — the highest-consequence failure modes in the programme.

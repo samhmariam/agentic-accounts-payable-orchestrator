@@ -1,5 +1,5 @@
 day: "08"
-title: "Runtime Search Identity Over-Privileged"
+title: "Break-Glass Lease Blocked and Runtime Search Identity Over-Privileged"
 phase: "phase_3_guardrails_eval_release"
 baseline_track: "core"
 baseline_reprovision_command: "uv run python -m aegisap.lab.baseline --track core --scenario day08"

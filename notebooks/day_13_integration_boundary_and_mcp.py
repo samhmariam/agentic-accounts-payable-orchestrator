@@ -138,7 +138,11 @@ def _kql_evidence(mo):
 
         Capture at least one literal Log Analytics query with:
 
+        - capture order
+        - captured_before_patch=true
         - workspace
+        - first_signal_or_followup
+        - correlation or trace reference when available
         - purpose
         - observed excerpt
         - operator interpretation
@@ -161,7 +165,7 @@ def _codification_bridge(mo):
 
         - Portal state: the published MCP contract no longer matches the intended governed write path.
         - Notebook proof: the capability preview shows which contract element should exist.
-        - Permanent repo change: `src/aegisap/mcp/server.py`, `src/aegisap/mcp/schemas.py`, and, if needed, the DLQ or compensating-action code.
+        - Durable repo boundary: the contract-boundary owner in the MCP, DLQ, or compensating-action path that restores governed delivery.
 
         Rosetta Stone: `notebooks/bridges/day13_integration_boundary.md`
         """
@@ -186,11 +190,11 @@ def _production_patch(mo):
 
         Write the durable patch in the repo target below, not inside Marimo.
 
-        Move into the real integration boundary and implement the repair in:
+        Move into the real integration boundary and identify the durable owner of:
 
-        - `src/aegisap/mcp/server.py`
-        - `src/aegisap/mcp/schemas.py` only if the contract object itself drifted
-        - `src/aegisap/integration/dlq_consumer.py` or `src/aegisap/integration/compensating_action.py` if the reliability path is also broken
+        - governed MCP contract behavior
+        - downstream DLQ recovery or compensating actions
+        - contract proof only if the evidence path is incomplete
 
         Then update the Day 13 evidence:
 
@@ -276,7 +280,7 @@ def _chaos_gate(mo):
 
         Failure signal: Boundary drift leaves partner traffic in the DLQ or exposes an incomplete MCP contract to the client.
 
-        Diagnostic surface: MCP client notebook flow, DLQ evidence, compensating-action code, and cloud-truth posture checks.
+        Starting signal: A governed integration boundary is dropping or mis-shaping traffic while compensation evidence drifts.
 
         Expected recovery artifact: `build/day13/mcp_contract_report.json`
 

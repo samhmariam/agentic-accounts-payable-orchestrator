@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .curriculum import (
+    DIAGNOSTIC_INDEPENDENCE_DAYS,
     PHASE1_GATE_MODES,
     constraint_lineage_for_day,
     get_day,
@@ -27,6 +28,7 @@ _KQL_QUERY_KEYS = (
     "query",
     "workspace",
     "purpose",
+    "first_signal_or_followup",
     "observed_excerpt",
     "operator_interpretation",
 )
@@ -117,6 +119,22 @@ def _validate_native_rows(
             errors.append(
                 f"`{label}[{index}]` is missing required field(s): {', '.join(missing)}."
             )
+    return errors
+
+
+def _validate_capture_metadata(*, entries: Any, label: str) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(entries, list):
+        return errors
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            continue
+        if not isinstance(entry.get("captured_before_patch"), bool):
+            errors.append(f"`{label}[{index}].captured_before_patch` must be a boolean.")
+        if not isinstance(entry.get("capture_order"), int) or int(entry.get("capture_order", -1)) < 1:
+            errors.append(f"`{label}[{index}].capture_order` must be an integer >= 1.")
+        if not isinstance(entry.get("machine_readable_output"), bool):
+            errors.append(f"`{label}[{index}].machine_readable_output` must be a boolean.")
     return errors
 
 
@@ -234,6 +252,8 @@ def _validate_native_operator_evidence(
             minimum=int(contract.get("minimum_queries", 0)),
         )
     )
+    errors.extend(_validate_capture_metadata(entries=payload.get("commands"), label="commands"))
+    errors.extend(_validate_capture_metadata(entries=payload.get("queries"), label="queries"))
 
     commands = payload.get("commands")
     if isinstance(commands, list):
@@ -251,6 +271,29 @@ def _validate_native_operator_evidence(
         elif len(commands) < minimum_commands:
             errors.append(
                 f"`commands` must contain at least {minimum_commands} entr{'y' if minimum_commands == 1 else 'ies'}."
+            )
+        minimum_pre_patch_commands = int(contract.get("minimum_pre_patch_commands", 0))
+        pre_patch_commands = [
+            entry
+            for entry in commands
+            if isinstance(entry, dict) and entry.get("captured_before_patch") is True
+        ]
+        if len(pre_patch_commands) < minimum_pre_patch_commands:
+            errors.append(
+                f"`commands` must contain at least {minimum_pre_patch_commands} pre-patch entr{'y' if minimum_pre_patch_commands == 1 else 'ies'}."
+            )
+
+    queries = payload.get("queries")
+    if isinstance(queries, list):
+        minimum_pre_patch_queries = int(contract.get("minimum_pre_patch_queries", 0))
+        pre_patch_queries = [
+            entry
+            for entry in queries
+            if isinstance(entry, dict) and entry.get("captured_before_patch") is True
+        ]
+        if len(pre_patch_queries) < minimum_pre_patch_queries:
+            errors.append(
+                f"`queries` must contain at least {minimum_pre_patch_queries} pre-patch entr{'y' if minimum_pre_patch_queries == 1 else 'ies'}."
             )
 
     live_demo = payload.get("live_demo")
@@ -470,6 +513,23 @@ def _validate_kql_evidence(
             signal_found = query.get("signal_found")
             if not isinstance(signal_found, bool):
                 errors.append(f"`queries[{index}].signal_found` must be a boolean.")
+            if not isinstance(query.get("captured_before_patch"), bool):
+                errors.append(f"`queries[{index}].captured_before_patch` must be a boolean.")
+            if not isinstance(query.get("capture_order"), int) or int(query.get("capture_order", -1)) < 1:
+                errors.append(f"`queries[{index}].capture_order` must be an integer >= 1.")
+            trace_reference = query.get("trace_reference")
+            if trace_reference is not None and not isinstance(trace_reference, str):
+                errors.append(f"`queries[{index}].trace_reference` must be a string when present.")
+        minimum_pre_patch = int(contract.get("minimum_pre_patch_queries", 0))
+        pre_patch_queries = [
+            query
+            for query in queries
+            if isinstance(query, dict) and query.get("captured_before_patch") is True
+        ]
+        if len(pre_patch_queries) < minimum_pre_patch:
+            errors.append(
+                f"`queries` must contain at least {minimum_pre_patch} pre-patch entr{'y' if minimum_pre_patch == 1 else 'ies'}."
+            )
 
     if errors:
         return GateResult(
@@ -498,6 +558,67 @@ def validate_kql_evidence_artifact(
     return _validate_kql_evidence(day_id=day_id, contract=contract, repo_root=repo_root)
 
 
+def _validate_diagnostic_independence(
+    *,
+    day_id: str,
+    contract: dict[str, Any],
+    repo_root: Path,
+) -> GateResult:
+    rel_path = contract["timeline_artifact_path"]
+    path = repo_root / rel_path
+    gate_id = f"day{day_id}_diagnostic_independence"
+    mode = contract.get("mode", "advisory")
+    if not path.exists():
+        return GateResult(
+            gate_id=gate_id,
+            mode=mode,
+            status=FAIL,
+            command=f"validate {rel_path}",
+            detail=f"Missing diagnostic timeline artifact `{rel_path}`.",
+        )
+
+    text = path.read_text(encoding="utf-8")
+    required_markers = contract.get(
+        "required_markers",
+        [
+            "First symptom:",
+            "First telemetry proof:",
+            "Subsystem narrowed:",
+            "Durable repair chosen:",
+            "Post-fix confirmation:",
+            "Repo search before telemetry:",
+        ],
+    )
+    errors = [
+        f"Diagnostic timeline is missing marker `{marker}`."
+        for marker in required_markers
+        if marker not in text
+    ]
+    if "Repo search before telemetry: no" not in text:
+        errors.append("Diagnostic timeline must explicitly record `Repo search before telemetry: no`.")
+
+    hint_state_rel = contract.get("hint_state_path", f".aegisap-lab/cache/instructor/interventions/day{day_id}.json")
+    hint_path = repo_root / hint_state_rel
+    if hint_path.exists():
+        errors.append("Hint-ladder usage was recorded, so diagnostic independence is forfeited for this day.")
+
+    if errors:
+        return GateResult(
+            gate_id=gate_id,
+            mode=mode,
+            status=FAIL,
+            command=f"validate {rel_path}",
+            detail="; ".join(errors),
+        )
+    return GateResult(
+        gate_id=gate_id,
+        mode=mode,
+        status=PASS,
+        command=f"validate {rel_path}",
+        detail=f"Diagnostic independence evidence validated from `{rel_path}`.",
+    )
+
+
 def _day0_gates(track: str) -> list[dict[str, str]]:
     return [
         {
@@ -521,6 +642,7 @@ def run_mastery(
     lineage_path: str | None = None
     kql_contract: dict[str, Any] | None = None
     rollback_contract: dict[str, Any] | None = None
+    diagnostic_contract: dict[str, Any] | None = None
     if day_id == "00":
         gates = _day0_gates(track)
         title = f"Bootstrap {track.title()} Environment"
@@ -534,6 +656,7 @@ def run_mastery(
         native_contract = day_entry.get("native_operator_evidence")
         kql_contract = day_entry.get("kql_evidence")
         rollback_contract = day_entry.get("rollback_rehearsal")
+        diagnostic_contract = day_entry.get("diagnostic_independence")
         lineage = constraint_lineage_for_day(manifest, day_id)
         target = root / "build" / f"day{day_id}" / "constraint_lineage.json"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -563,6 +686,14 @@ def run_mastery(
             _validate_kql_evidence(
                 day_id=day_id,
                 contract=kql_contract,
+                repo_root=root,
+            )
+        )
+    if day_id != "00" and diagnostic_contract is not None and day_id in DIAGNOSTIC_INDEPENDENCE_DAYS:
+        results.append(
+            _validate_diagnostic_independence(
+                day_id=day_id,
+                contract=diagnostic_contract,
                 repo_root=root,
             )
         )

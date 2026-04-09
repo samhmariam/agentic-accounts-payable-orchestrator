@@ -160,7 +160,11 @@ def _kql_evidence(mo):
 
         Capture at least one literal Log Analytics query with:
 
+        - capture order
+        - captured_before_patch=true
         - workspace
+        - first_signal_or_followup
+        - correlation or trace reference when available
         - purpose
         - observed excerpt
         - operator interpretation
@@ -183,7 +187,7 @@ def _codification_bridge(mo):
 
         - Portal state: private endpoint, DNS, or public-network posture evidence disagrees with the gate package.
         - Notebook proof: the static policy checker preview shows whether the bug lives in property inspection or live posture proof.
-        - Permanent repo change: `src/aegisap/network/bicep_policy_checker.py`, `src/aegisap/network/private_endpoint_probe.py`, and, if needed, the Day 12 verification scripts.
+        - Durable repo boundary: the private-network enforcement owner in the static policy or live posture boundary that keeps public fallback blocked.
 
         Rosetta Stone: `notebooks/bridges/day12_private_networking.md`
         """
@@ -208,11 +212,11 @@ def _production_patch(mo):
 
         Write the durable patch in the repo target below, not inside Marimo.
 
-        Move into the real network boundary and implement the repair in:
+        Move into the real network boundary and identify the durable owner of:
 
-        - `src/aegisap/network/bicep_policy_checker.py`
-        - `src/aegisap/network/private_endpoint_probe.py` if the live posture path is also wrong
-        - `scripts/check_private_network_static.py` or `scripts/verify_private_network_posture.py` only if the artifact contract is wrong
+        - static private-network policy enforcement
+        - live endpoint or DNS posture verification
+        - verification scripts only if the evidence contract is wrong
 
         Then update the Day 12 evidence:
 
@@ -301,7 +305,7 @@ def _chaos_gate(mo):
 
         Failure signal: Private endpoint DNS or routing drift makes a production-bound service resolve publicly or appear publicly reachable.
 
-        Diagnostic surface: Network Watcher evidence, private endpoint probe cells, and live audit-production DNS posture checks.
+        Starting signal: Private-only posture is in doubt because DNS, endpoint reachability, or public fallback behavior disagrees.
 
         Expected recovery artifact: `build/day12/private_network_posture.json`
 

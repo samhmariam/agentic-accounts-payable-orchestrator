@@ -36,80 +36,63 @@ days:
   - docs/curriculum/artifacts/day01/NO_AGENT_MEMO.md
   - docs/curriculum/artifacts/day01/FDE_MENTAL_MODELS.md
   portal_to_script_mapping:
-    portal_surface: Foundry or Azure OpenAI extraction payload and runtime endpoint
-      health
+    portal_surface: Foundry or Azure OpenAI extraction payload and runtime endpoint health
     bridge_file: notebooks/bridges/day01_trust_boundary.md
-    production_targets:
-    - path: src/aegisap/day_01/normalizers.py
+    repair_domains:
+    - name: Normalizers
       surface_type: application
-    - path: src/aegisap/day_01/service.py
+    - name: Service
       surface_type: application
-  oral_defense_prompts:
-  - What alternative automation approach did you reject for this pain point, and why
-    does the agent design win on this dimension?
-  - What is the blast radius if the agent acts on a misclassified invoice? Name the
-    downstream systems and approvers affected.
-  - Who in a real enterprise must sign off on introducing an agentic system into a
-    financial workflow, and what audit evidence would they demand before go-live?
   zero_tolerance: []
   capstone_flags:
     capstone_a: true
     capstone_b: false
   phase: phase_1_trust_boundary
-  scenario_dir: scenarios/day01
   injection_command: uv run aegisap-lab incident start --day 01
   revert_state: .aegisap-lab/state/day01.json
   verification_commands:
-  - uv run python -m pytest tests/test_day_01_money.py tests/test_day_01_fixtures.py
-    -q
+  - uv run python -m pytest tests/test_day_01_money.py tests/test_day_01_fixtures.py -q
   - uv run aegisap-lab artifact rebuild --day 01
   review_contract:
     evaluator_profile: wave1-day01-trust-boundary
     human_required: true
-  customer_context: A finance operations lead is blocking go-live after a valid European
-    supplier invoice was rejected. They want proof that the deterministic trust boundary
-    can be repaired without widening the blast radius.
+  customer_context: A finance operations lead is blocking go-live after a valid European supplier invoice was rejected. They want proof that the deterministic trust boundary can be repaired without widening the blast radius.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   mastery_gates:
   - id: day01_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/test_day_01_money.py tests/test_day_01_fixtures.py
-      -q && uv run aegisap-lab artifact rebuild --day 01
+    command: uv run python -m pytest tests/test_day_01_money.py tests/test_day_01_fixtures.py -q && uv run aegisap-lab artifact rebuild --day 01
     success_marker: '"day": "01"'
     covers_constraints:
     - regulated_invoice_auditability
     evidence_source: artifact
   chaos_gate:
-    failure_signal: A locale-formatted invoice amount is rejected even though the
-      extraction payload and endpoint health are clean.
-    diagnostic_surface: Foundry extraction payload, notebook fixture replay, and trust-boundary
-      parser behavior.
+    failure_signal: A locale-formatted invoice amount is rejected even though the extraction payload and endpoint health are clean.
     expected_recovery_artifact: build/day1/golden_thread_day1.json
     time_box_minutes: 20
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Foundry extraction payload, notebook fixture replay, and trust-boundary parser behavior.
   automation_drills:
   - id: day01_incident_replay
     default: true
     mode: incident
     name: Day 1 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: A locale-formatted invoice amount is rejected even though the
-      extraction payload and endpoint health are clean.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: A locale-formatted invoice amount is rejected even though the extraction payload and endpoint health are clean.
     drift_layers:
     - application
   scaffold_level: guided
-  cost_of_failure: Every hour this locale parsing failure survives, valid supplier
-    invoices remain unpaid and finance risks breach-of-contract escalation.
+  cost_of_failure: Every hour this locale parsing failure survives, valid supplier invoices remain unpaid and finance risks breach-of-contract escalation.
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day01
 - id: '02'
   title: Resilience Under Load, NFR Enforcement, and Ownership
   notebook_file: notebooks/day_2_requirements_architecture.py
@@ -128,32 +111,22 @@ days:
   - docs/curriculum/artifacts/day02/ADR_001_SCOPE_AND_BOUNDARIES.md
   - docs/curriculum/artifacts/day02/ACTIVE_DISCOVERY_LOG.md
   portal_to_script_mapping:
-    portal_surface: Azure OpenAI deployment metrics, retry telemetry, and queue pressure
-      evidence
+    portal_surface: Azure OpenAI deployment metrics, retry telemetry, and queue pressure evidence
     bridge_file: notebooks/bridges/day02_resilience_controls.md
-    production_targets:
-    - path: src/aegisap/observability/retry_policy.py
+    repair_domains:
+    - name: Retry Policy
       surface_type: application
-    - path: src/aegisap/resilience/backpressure.py
+    - name: Backpressure
       surface_type: application
-  oral_defense_prompts:
-  - Which NFR did you classify as zero-tolerance and why can it not be tuned post-launch
-    without a full change-board review?
-  - If the security stakeholder and the process owner disagree on latency vs control,
-    whose position wins and through what governance mechanism?
-  - Who must approve the scope ADR in production, what evidence section would they
-    challenge first, and what would trigger a rollback?
   zero_tolerance: []
   capstone_flags:
     capstone_a: true
     capstone_b: false
   phase: phase_1_trust_boundary
-  scenario_dir: scenarios/day02
   injection_command: uv run aegisap-lab incident start --day 02
   revert_state: .aegisap-lab/state/day02.json
   verification_commands:
-  - uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py
-    -q
+  - uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py -q
   - uv run aegisap-lab artifact rebuild --day 02
   review_contract:
     evaluator_profile: wave1-day02-resilience
@@ -161,8 +134,7 @@ days:
   stakeholder_inject:
     requester_role: Architecture board chair
     channel: live_discovery_interview
-    unsafe_request: Increase throughput immediately and relax queue protections unless
-      the learner proves which controls are zero-tolerance.
+    unsafe_request: Increase throughput immediately and relax queue protections unless the learner proves which controls are zero-tolerance.
     required_artifacts:
     - docs/curriculum/artifacts/day02/NFR_REGISTER.md
     - docs/curriculum/artifacts/day02/ADR_001_SCOPE_AND_BOUNDARIES.md
@@ -178,57 +150,49 @@ days:
     - What evidence would justify a rollback if the throughput change harms safe processing?
     capture_artifact: docs/curriculum/artifacts/day02/ACTIVE_DISCOVERY_LOG.md
     observer_scorecard: docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md
-  customer_context: The customer architecture board is pressing for throughput gains
-    during an invoice spike, but the service owner refuses any change that weakens
-    queue safety or approval lines.
+  customer_context: The customer architecture board is pressing for throughput gains during an invoice spike, but the service owner refuses any change that weakens queue safety or approval lines.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   mastery_gates:
   - id: day02_repo_evidence
     mode: advisory
-    command: uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py
-      -q && uv run aegisap-lab artifact rebuild --day 02
+    command: uv run python -m pytest tests/day2/test_resilience_controls.py tests/day8/test_retry_policy.py -q && uv run aegisap-lab artifact rebuild --day 02
     success_marker: '"day": "02"'
     covers_constraints:
     - regulated_invoice_auditability
     - latency_budget_guardrails
     evidence_source: artifact
   chaos_gate:
-    failure_signal: Retry policy and backpressure assumptions no longer match observed
-      queue pressure and latency targets.
-    diagnostic_surface: Azure OpenAI metrics, queue pressure notes, and the resilience
-      policy code paths.
+    failure_signal: Retry policy and backpressure assumptions no longer match observed queue pressure and latency targets.
     expected_recovery_artifact: build/day2/golden_thread_day2.json
     time_box_minutes: 20
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Azure OpenAI metrics, queue pressure notes, and the resilience policy code paths.
   automation_drills:
   - id: day02_incident_replay
     default: true
     mode: incident
     name: Day 2 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: Retry policy and backpressure assumptions no longer match observed
-      queue pressure and latency targets.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: Retry policy and backpressure assumptions no longer match observed queue pressure and latency targets.
     drift_layers:
     - application
   scaffold_level: guided
-  cost_of_failure: If queue and retry controls drift under load, invoice SLAs slip
-    and the customer loses confidence in the team's operational ownership.
+  cost_of_failure: If queue and retry controls drift under load, invoice SLAs slip and the customer loses confidence in the team's operational ownership.
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day02
 - id: '03'
   title: Retrieval Authority, Search Evidence, and Boundary Repair
   notebook_file: notebooks/day_3_azure_ai_services.py
@@ -247,62 +211,47 @@ days:
   portal_to_script_mapping:
     portal_surface: Azure AI Search index evidence and source-of-truth mismatch
     bridge_file: notebooks/bridges/day03_retrieval_authority.md
-    production_targets:
-    - path: src/aegisap/day3/policies/source_authority_rules.yaml
+    repair_domains:
+    - name: Source Authority Rules
       surface_type: policy
-    - path: src/aegisap/day3/retrieval/ranker.py
+    - name: Ranker
       surface_type: application
-    - path: src/aegisap/day3/retrieval/authority_policy.py
+    - name: Authority Policy
       surface_type: policy
-  oral_defense_prompts:
-  - You chose one framework and rejected three. Explain the single strongest argument
-    for each rejected alternative and why that argument was still insufficient.
-  - If your framework choice turns out to be wrong at Day 10 scale, what is the migration
-    blast radius in terms of state contracts and tool interfaces?
-  - Who in the enterprise approves a framework change after Day 3, and what evidence
-    of migration risk would they require before signing off?
   zero_tolerance: []
   capstone_flags:
     capstone_a: true
     capstone_b: false
   phase: phase_1_trust_boundary
-  scenario_dir: scenarios/day03
   injection_command: uv run aegisap-lab incident start --day 03
   revert_state: .aegisap-lab/state/day03.json
   verification_commands:
-  - uv run python -m pytest tests/day3/test_vendor_authority_ranking.py tests/day3/test_day3_exit_check.py
-    -q
+  - uv run python -m pytest tests/day3/test_vendor_authority_ranking.py tests/day3/test_day3_exit_check.py -q
   - uv run aegisap-lab artifact rebuild --day 03
   review_contract:
     evaluator_profile: wave2-day03-retrieval-authority
     human_required: true
-  customer_context: A procurement stakeholder discovered that the system cited an
-    outdated vendor record. They need you to prove which source is authoritative and
-    codify that boundary permanently.
+  customer_context: A procurement stakeholder discovered that the system cited an outdated vendor record. They need you to prove which source is authoritative and codify that boundary permanently.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   mastery_gates:
   - id: day03_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day3/test_vendor_authority_ranking.py tests/day3/test_day3_exit_check.py
-      -q && uv run aegisap-lab artifact rebuild --day 03
+    command: uv run python -m pytest tests/day3/test_vendor_authority_ranking.py tests/day3/test_day3_exit_check.py -q && uv run aegisap-lab artifact rebuild --day 03
     success_marker: '"day": "03"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -310,30 +259,27 @@ days:
     - authoritative_retrieval_sources
     evidence_source: artifact
   chaos_gate:
-    failure_signal: Search evidence disagrees with the source-of-truth policy and
-      the ranker surfaces the wrong authority.
-    diagnostic_surface: Azure AI Search index state, notebook retrieval proof, and
-      authority policy files under src/aegisap/day3/.
+    failure_signal: Search evidence disagrees with the source-of-truth policy and the ranker surfaces the wrong authority.
     expected_recovery_artifact: build/day3/golden_thread_day3.json
     time_box_minutes: 25
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Azure AI Search index state, notebook retrieval proof, and authority policy files under src/aegisap/day3/.
   automation_drills:
   - id: day03_incident_replay
     default: true
     mode: incident
     name: Day 3 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: Search evidence disagrees with the source-of-truth policy and
-      the ranker surfaces the wrong authority.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: Search evidence disagrees with the source-of-truth policy and the ranker surfaces the wrong authority.
     drift_layers:
     - application
   scaffold_level: guided
-  cost_of_failure: If stale or ambiguous evidence wins, the system can route payment
-    decisions against the wrong source of truth and trigger audit exposure.
+  cost_of_failure: If stale or ambiguous evidence wins, the system can route payment decisions against the wrong source of truth and trigger audit exposure.
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day03
 - id: '04'
   title: Single-Agent Loops, Policy Overlay, and Fail-Closed Repair
   notebook_file: notebooks/day_4_single_agent_loops.py
@@ -355,29 +301,20 @@ days:
   portal_to_script_mapping:
     portal_surface: Execution trace risk flags, invoice facts, and final routing outcome
     bridge_file: notebooks/bridges/day04_fail_closed_planning.md
-    production_targets:
-    - path: src/aegisap/day4/planning/policy_overlay.py
+    repair_domains:
+    - name: Policy Overlay
       surface_type: policy
-    - path: src/aegisap/day4/recommendation/recommendation_gate.py
+    - name: Recommendation Gate
       surface_type: application
-  oral_defense_prompts:
-  - Which action in your risk register did you classify as irreversible and what deterministic
-    policy prevents the model from triggering it?
-  - If the policy overlay fails open instead of closed, what is the blast radius across
-    financial controls and who absorbs the liability?
-  - Who must approve a change to the policy precedence rules, and what test evidence
-    would the approver require before accepting the change?
   zero_tolerance: []
   capstone_flags:
     capstone_a: true
     capstone_b: false
   phase: phase_2_agentic_state
-  scenario_dir: scenarios/day04
   injection_command: uv run aegisap-lab incident start --day 04
   revert_state: .aegisap-lab/state/day04.json
   verification_commands:
-  - uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py
-    -q
+  - uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py -q
   - uv run aegisap-lab artifact rebuild --day 04
   review_contract:
     evaluator_profile: wave2-day04-fail-open-planner
@@ -406,8 +343,7 @@ days:
   stakeholder_inject:
     requester_role: Executive sponsor
     channel: escalation_email
-    unsafe_request: Bypass the manual review pause and auto-issue payments so the
-      customer can accelerate financial close before the audit window.
+    unsafe_request: Bypass the manual review pause and auto-issue payments so the customer can accelerate financial close before the audit window.
     required_artifacts:
     - adr/ADR-002_irreversible_actions_and_hitl.md
     - docs/curriculum/artifacts/day04/SPONSOR_PUSHBACK_EMAIL.md
@@ -423,46 +359,37 @@ days:
     - What evidence would you require before approving any change to policy precedence?
     capture_artifact: docs/curriculum/artifacts/day04/SPONSOR_NEGOTIATION_LOG.md
     observer_scorecard: docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md
-  customer_context: The customer CISO banned public exposure for production-bound
-    AI services and wants proof that risky recommendation paths still stop for review
-    instead of acting optimistically.
+  customer_context: The customer CISO banned public exposure for production-bound AI services and wants proof that risky recommendation paths still stop for review instead of acting optimistically.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   mastery_gates:
   - id: day04_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py
-      tests/day4/unit/recommendation/test_recommendation_gate.py -q && uv run aegisap-lab
-      artifact rebuild --day 04
+    command: uv run python -m pytest tests/day4/unit/planning/test_policy_overlay.py tests/day4/unit/recommendation/test_recommendation_gate.py -q && uv run aegisap-lab artifact rebuild --day 04
     success_marker: '"day": "04"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -478,31 +405,28 @@ days:
     - no_public_endpoints
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: Execution traces show a risky recommendation escaping the policy
-      overlay while public exposure constraints stay in force.
-    diagnostic_surface: Execution traces, policy overlay cells, and live cloud posture
-      for AI and data endpoints.
+    failure_signal: Execution traces show a risky recommendation escaping the policy overlay while public exposure constraints stay in force.
     expected_recovery_artifact: build/day4/golden_thread_day4.json
     time_box_minutes: 25
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Execution traces, policy overlay cells, and live cloud posture for AI and data endpoints.
   automation_drills:
   - id: day04_incident_replay
     default: true
     mode: incident
     name: Day 4 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: Execution traces show a risky recommendation escaping the policy
-      overlay while public exposure constraints stay in force.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: Execution traces show a risky recommendation escaping the policy overlay while public exposure constraints stay in force.
     drift_layers:
     - application
     - ci_cd
-  scaffold_level: reduced
-  cost_of_failure: If risky invoices auto-progress, the customer can issue irreversible
-    payments without human approval and create immediate financial loss.
+  scaffold_level: guided
+  cost_of_failure: If risky invoices auto-progress, the customer can issue irreversible payments without human approval and create immediate financial loss.
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day04
 - id: '05'
   title: Multi-Agent Orchestration, Durable State, and Resume Safety
   notebook_file: notebooks/day_5_multi_agent_orchestration.py
@@ -521,29 +445,20 @@ days:
   portal_to_script_mapping:
     portal_surface: Approval-task state, checkpoint records, and failed-resume evidence
     bridge_file: notebooks/bridges/day05_durable_state.md
-    production_targets:
-    - path: src/aegisap/day5/workflow/resume_service.py
+    repair_domains:
+    - name: Resume Service
       surface_type: application
-    - path: src/aegisap/day5/workflow/checkpoint_manager.py
+    - name: Checkpoint Manager
       surface_type: application
-  oral_defense_prompts:
-  - Which HITL failure mode did you consider but choose not to handle in the contract,
-    and why is that an acceptable omission?
-  - If the system resumes from a checkpoint after an approver's decision has been
-    overtaken by events, what state fields are now stale and what is the blast radius?
-  - Who owns the approval contract SLA in production, and what evidence would they
-    need to audit a resume-after-timeout incident?
   zero_tolerance: []
   capstone_flags:
     capstone_a: true
     capstone_b: false
   phase: phase_2_agentic_state
-  scenario_dir: scenarios/day05
   injection_command: uv run aegisap-lab incident start --day 05
   revert_state: .aegisap-lab/state/day05.json
   verification_commands:
-  - uv run python -m pytest tests/day5/integration/test_resume_service.py tests/day5/integration/test_idempotent_recommendation_resume.py
-    -q
+  - uv run python -m pytest tests/day5/integration/test_resume_service.py tests/day5/integration/test_idempotent_recommendation_resume.py -q
   - uv run aegisap-lab artifact rebuild --day 05
   review_contract:
     evaluator_profile: wave2-day05-durable-state
@@ -570,52 +485,42 @@ days:
       - countDetails
       minimum_matches: 1
       must_use_json_output: true
-  customer_context: An approver reopened a paused invoice after a partial outage.
-    The customer wants the workflow resumed without duplicate approvals, duplicate
-    recommendations, or policy drift.
+  customer_context: An approver reopened a paused invoice after a partial outage. The customer wants the workflow resumed without duplicate approvals, duplicate recommendations, or policy drift.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   mastery_gates:
   - id: day05_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day5/integration/test_resume_service.py
-      tests/day5/integration/test_idempotent_recommendation_resume.py -q && uv run
-      aegisap-lab artifact rebuild --day 05
+    command: uv run python -m pytest tests/day5/integration/test_resume_service.py tests/day5/integration/test_idempotent_recommendation_resume.py -q && uv run aegisap-lab artifact rebuild --day 05
     success_marker: '"day": "05"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -632,35 +537,32 @@ days:
     - no_public_endpoints
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: The durable workflow stalls or resumes unsafely after interruption,
-      risking duplicate state transitions.
-    diagnostic_surface: Cosmos-style thread state, notebook resume prototype, and
-      the resume/checkpoint services.
+    failure_signal: The durable workflow stalls or resumes unsafely after interruption, risking duplicate state transitions.
     expected_recovery_artifact: build/day5/golden_thread_day5_resumed.json
     time_box_minutes: 25
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Cosmos-style thread state, notebook resume prototype, and the resume/checkpoint services.
   automation_drills:
   - id: day05_incident_replay
     default: true
     mode: incident
     name: Day 5 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: The durable workflow stalls or resumes unsafely after interruption,
-      risking duplicate state transitions.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: The durable workflow stalls or resumes unsafely after interruption, risking duplicate state transitions.
     drift_layers:
     - application
     - identity
-  scaffold_level: reduced
-  cost_of_failure: If stale resume tokens are accepted, duplicate or misrouted side
-    effects can hit downstream finance systems and create expensive manual cleanup.
+  scaffold_level: guided
+  cost_of_failure: If stale resume tokens are accepted, duplicate or misrouted side effects can hit downstream finance systems and create expensive manual cleanup.
   kql_evidence:
     artifact_path: build/day5/kql_evidence.json
     minimum_queries: 1
     review_stage: day05_closeout
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day05
 - id: '06'
   title: Data Authority, Review Boundaries, and Conflict Refusal
   notebook_file: notebooks/day_6_data_ml_integration.py
@@ -679,29 +581,20 @@ days:
   portal_to_script_mapping:
     portal_surface: Stored review evidence, claim ledger, and authority context
     bridge_file: notebooks/bridges/day06_review_boundary.md
-    production_targets:
-    - path: src/aegisap/day6/review/prompt_injection.py
+    repair_domains:
+    - name: Prompt Injection
       surface_type: policy
-    - path: src/aegisap/day6/review/authority_boundary.py
+    - name: Authority Boundary
       surface_type: policy
-  oral_defense_prompts:
-  - Which data source did you demote in the authority hierarchy, and what scenario
-    would cause a conflict between it and the authoritative source?
-  - If you classify a threshold change as a policy change rather than a model change,
-    what approval path changes and what is the blast radius of the wrong classification?
-  - Who in the enterprise owns the data authority chart, and what evidence would an
-    auditor require to prove it was followed during an incident?
   zero_tolerance: []
   capstone_flags:
     capstone_a: true
     capstone_b: false
   phase: phase_2_agentic_state
-  scenario_dir: scenarios/day06
   injection_command: uv run aegisap-lab incident start --day 06
   revert_state: .aegisap-lab/state/day06.json
   verification_commands:
-  - uv run python -m pytest tests/day6/test_review_gate.py tests/day6/test_training_runtime_integration.py
-    -q
+  - uv run python -m pytest tests/day6/test_review_gate.py tests/day6/test_training_runtime_integration.py -q
   - uv run aegisap-lab artifact rebuild --day 06
   review_contract:
     evaluator_profile: wave2-day06-review-boundary
@@ -726,58 +619,47 @@ days:
       - identity
       minimum_matches: 1
       must_use_json_output: true
-  customer_context: A reviewer found a conflict between ERP data and the extracted
-    invoice narrative, and the review model now returns schema-incomplete output on
-    edge cases. The customer expects the system to refuse or escalate unsafe blending
-    instead of normalising through the malformed response.
+  customer_context: A reviewer found a conflict between ERP data and the extracted invoice narrative, and the review model now returns schema-incomplete output on edge cases. The customer expects the system to refuse or escalate unsafe blending instead of normalising through the malformed response.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   - id: conflicting_authority_refusal
     type: business
-    description: Conflicting records or review evidence must trigger refusal rather
-      than silent blending.
+    description: Conflicting records or review evidence must trigger refusal rather than silent blending.
     introduced_on: '06'
     persists: true
   mastery_gates:
   - id: day06_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day6/test_review_gate.py tests/day6/test_training_runtime_integration.py
-      -q && uv run aegisap-lab artifact rebuild --day 06
+    command: uv run python -m pytest tests/day6/test_review_gate.py tests/day6/test_training_runtime_integration.py -q && uv run aegisap-lab artifact rebuild --day 06
     success_marker: '"day": "06"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -795,35 +677,32 @@ days:
     - no_public_endpoints
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: The review path accepts conflicting authority or schema-degraded
-      reviewer output instead of refusing or escalating the dispute.
-    diagnostic_surface: Review notebook evidence, malformed reviewer payload traces,
-      authority-boundary code, and refusal instrumentation.
+    failure_signal: The review path accepts conflicting authority or schema-degraded reviewer output instead of refusing or escalating the dispute.
     expected_recovery_artifact: build/day6/golden_thread_day6.json
     time_box_minutes: 25
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Review notebook evidence, malformed reviewer payload traces, authority-boundary code, and refusal instrumentation.
   automation_drills:
   - id: day06_incident_replay
     default: true
     mode: incident
     name: Day 6 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: The review path accepts conflicting authority instead of refusing
-      and escalating the dispute.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: The review path accepts conflicting authority instead of refusing and escalating the dispute.
     drift_layers:
     - application
     - identity
-  scaffold_level: reduced
-  cost_of_failure: If hostile review evidence is normalized incorrectly, unsafe approval
-    claims can leak through the control boundary and poison later decisions.
+  scaffold_level: guided
+  cost_of_failure: If hostile review evidence is normalized incorrectly, unsafe approval claims can leak through the control boundary and poison later decisions.
   kql_evidence:
     artifact_path: build/day6/kql_evidence.json
     minimum_queries: 1
     review_stage: day06_closeout
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day06
 - id: '07'
   title: Evaluation, Guardrails, Structured Refusal, and Slice Governance
   notebook_file: notebooks/day_7_testing_eval_guardrails.py
@@ -840,23 +719,15 @@ days:
   - docs/curriculum/artifacts/day07/SLICE_REGRESSION_DECISION_LOG.md
   - docs/curriculum/artifacts/day07/REFUSAL_REASON_CODE_CATALOG.md
   portal_to_script_mapping:
-    portal_surface: Application Insights or Log Analytics refusal evidence containing
-      leaked identifiers
+    portal_surface: Application Insights or Log Analytics refusal evidence containing leaked identifiers
     bridge_file: notebooks/bridges/day07_guardrail_redaction.md
-    production_targets:
-    - path: src/aegisap/security/redaction.py
+    repair_domains:
+    - name: Redaction
       surface_type: application
-    - path: src/aegisap/audit/events.py
+    - name: Events
       surface_type: policy
-    - path: src/aegisap/audit/writer.py
+    - name: Writer
       surface_type: application
-  oral_defense_prompts:
-  - The aggregate eval score improved but one critical slice regressed. Walk through
-    your decision to block or release and name the approver chain.
-  - If your refusal schema is incomplete for one action class, what is the blast radius
-    in terms of audit evidence gaps and regulatory exposure?
-  - Who must sign off on a release where a zero-tolerance metric is borderline, and
-    what evidence package is the minimum acceptable for that sign-off?
   zero_tolerance:
   - condition: mandatory_escalation_missed_on_critical_slice_regression
     consequence: hard_fail
@@ -866,12 +737,10 @@ days:
     capstone_a: true
     capstone_b: false
   phase: phase_3_guardrails_eval_release
-  scenario_dir: scenarios/day07
   injection_command: uv run aegisap-lab incident start --day 07
   revert_state: .aegisap-lab/state/day07.json
   verification_commands:
-  - uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py
-    -q
+  - uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q
   - uv run aegisap-lab artifact rebuild --day 07
   review_contract:
     evaluator_profile: wave3-day07-guardrail-leak
@@ -898,62 +767,52 @@ days:
       - WorkspaceResourceId
       minimum_matches: 1
       must_use_json_output: true
-  customer_context: The customer risk team wants evidence that prompt injection and
-    PII leakage are rejected before anything lands in logs or audit evidence.
+  customer_context: The customer risk team wants evidence that prompt injection and PII leakage are rejected before anything lands in logs or audit evidence.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   - id: conflicting_authority_refusal
     type: business
-    description: Conflicting records or review evidence must trigger refusal rather
-      than silent blending.
+    description: Conflicting records or review evidence must trigger refusal rather than silent blending.
     introduced_on: '06'
     persists: true
   - id: pii_redaction_before_audit
     type: process
-    description: Sensitive content must be redacted before logging, audit writes,
-      or downstream release evidence.
+    description: Sensitive content must be redacted before logging, audit writes, or downstream release evidence.
     introduced_on: '07'
     persists: true
   mastery_gates:
   - id: day07_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py
-      -q && uv run aegisap-lab artifact rebuild --day 07
+    command: uv run python -m pytest tests/day7/security/test_redaction.py tests/day7/audit/test_audit_row_written_for_sensitive_decision.py -q && uv run aegisap-lab artifact rebuild --day 07
     success_marker: '"day": "07"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -966,9 +825,7 @@ days:
     evidence_source: artifact
   - id: day07_prompt_drift_eval
     mode: blocking
-    command: uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/synthetic_cases_drift.jsonl
-      --malicious-cases build/day7/malicious_cases_drift.jsonl --thresholds evals/score_thresholds.yaml
-      --output build/day7/prompt_drift_report.json --enforce-thresholds
+    command: uv run python evals/run_eval_suite.py --suite all --synthetic-cases build/day7/synthetic_cases_drift.jsonl --malicious-cases build/day7/malicious_cases_drift.jsonl --thresholds evals/score_thresholds.yaml --output build/day7/prompt_drift_report.json --enforce-thresholds
     success_marker: '"all_passed": true'
     covers_constraints:
     - authoritative_retrieval_sources
@@ -983,25 +840,18 @@ days:
     - no_public_endpoints
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: A probabilistic authority drift keeps the app running while evaluation
-      evidence shows the source-of-truth policy is quietly being ignored.
-    diagnostic_surface: Content-safety notebook evidence, Day 7 guardrail artifacts,
-      Day 3 authority-policy files, and evaluation traces or reports.
+    failure_signal: A probabilistic authority drift keeps the app running while evaluation evidence shows the source-of-truth policy is quietly being ignored.
     expected_recovery_artifact: build/day7/prompt_drift_report.json
     time_box_minutes: 25
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Content-safety notebook evidence, Day 7 guardrail artifacts, Day 3 authority-policy files, and evaluation traces or reports.
   automation_drills:
   - id: drill_11_prompt_authority_drift
     default: true
     mode: artifact
     name: Probabilistic Prompt Authority Drift
-    description: Rebuilds the Day 7 eval bundle, then injects tougher authority-drift
-      cases so the learner must patch the durable authority policy and drive the evals
-      back under threshold.
-    expected_signal: The eval suite stays live but fails threshold enforcement because
-      authoritative evidence is no longer winning on the drift slice.
+    description: Rebuilds the Day 7 eval bundle, then injects tougher authority-drift cases so the learner must patch the durable authority policy and drive the evals back under threshold.
+    expected_signal: The eval suite stays live but fails threshold enforcement because authoritative evidence is no longer winning on the drift slice.
     source_file: evals/failure_drills/drill_11_prompt_authority_drift.json
     mutation: day07_prompt_authority_drift
     repair_targets:
@@ -1014,11 +864,8 @@ days:
     default: false
     mode: incident
     name: Day 7 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: A redaction or audit path leaks sensitive text into a Day 7 evaluation
-      artifact.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: A redaction or audit path leaks sensitive text into a Day 7 evaluation artifact.
     drift_layers:
     - application
   - id: drill_12_shadow_reviewer_payload
@@ -1026,69 +873,60 @@ days:
     mode: artifact
     source_file: evals/failure_drills/drill_12_shadow_reviewer_payload.json
     name: Shadow Drift - Reviewer Payload Fallback Leak
-    description: Rebuilds the Day 7 guardrail artifacts, then injects a downstream
-      redaction failure where a degraded review payload is leaking through a fallback
-      audit summary.
-    expected_signal: Guardrail evidence shows raw review payload fragments surfacing
-      in audit output even though the primary refusal path still looks online.
+    description: Rebuilds the Day 7 guardrail artifacts, then injects a downstream redaction failure where a degraded review payload is leaking through a fallback audit summary.
+    expected_signal: Guardrail evidence shows raw review payload fragments surfacing in audit output even though the primary refusal path still looks online.
     mutation: day07_shadow_reviewer_payload
     shadow_origin_day: '06'
-    secondary_failure_signal: A fallback audit summary now carries raw review-payload
-      fragments tied to the same correlation trail.
+    secondary_failure_signal: A fallback audit summary now carries raw review-payload fragments tied to the same correlation trail.
     drift_layers:
     - application
     - ci_cd
-  scaffold_level: starter_only
-  cost_of_failure: If sensitive content leaks into audit material, the customer faces
-    privacy escalation, frozen releases, and possible regulator notification.
+  scaffold_level: guided
+  cost_of_failure: If sensitive content leaks into audit material, the customer faces privacy escalation, frozen releases, and possible regulator notification.
   kql_evidence:
     artifact_path: build/day7/kql_evidence.json
     minimum_queries: 1
     review_stage: day07_closeout
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day07
 - id: 08
   title: IaC, Identity Planes, and Secure Release Ownership
   notebook_file: notebooks/day_8_cicd_iac_deployment.py
   primary_doc_file: docs/DAY_08.md
   legacy_doc_files: []
   rubric_weights:
-    iac_correctness: 25
-    identity_security_reasoning: 25
-    ownership_clarity: 20
+    iac_correctness: 20
+    identity_security_reasoning: 20
+    ownership_clarity: 15
     review_packet_quality: 15
     oral_defense: 15
+    diagnostic_independence: 15
   artifact_files:
   - docs/curriculum/artifacts/day08/RELEASE_OWNERSHIP_MAP.md
   - docs/curriculum/artifacts/day08/SECURITY_REVIEW_PACKET.md
   - docs/curriculum/artifacts/day08/DRIFT_RESPONSE_PLAYBOOK.md
   portal_to_script_mapping:
-    portal_surface: Azure AI Search IAM, Container App managed identity, and release-role
-      drift
+    portal_surface: Azure AI Search IAM, Container App managed identity, and release-role drift
     bridge_file: notebooks/bridges/day08_identity_iac.md
-    production_targets:
-    - path: infra/modules/role_assignments.bicep
+    repair_domains:
+    - name: Role Assignments
       surface_type: infrastructure
-    - path: infra/foundations/search_service.bicep
+    - name: Search Service
       surface_type: infrastructure
-    - path: infra/modules/container_app.bicep
+    - name: Container App
       surface_type: infrastructure
-  oral_defense_prompts:
-  - Which IaC pattern did you choose over an alternative and what is the security
-    consequence of the rejected approach?
-  - If federated credentials drift and the pipeline loses access at 2am, what is the
-    blast radius and who is the first call?
-  - Who owns the release machinery in production, and what evidence would a platform
-    team require before granting break-glass access?
   zero_tolerance: []
   capstone_flags:
     capstone_a: true
     capstone_b: false
   phase: phase_3_guardrails_eval_release
-  scenario_dir: scenarios/day08
   injection_command: uv run aegisap-lab incident start --day 08
   revert_state: .aegisap-lab/state/day08.json
   verification_commands:
-  - uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests/day8/test_security_and_context.py
-    tests/day8/test_observability_contract.py -q
+  - uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests/day8/test_security_and_context.py tests/day8/test_observability_contract.py -q
   - uv run aegisap-lab artifact rebuild --day 08
   review_contract:
     evaluator_profile: wave3-day08-identity-drift
@@ -1112,56 +950,48 @@ days:
       - Search Index Data
       minimum_matches: 1
       must_use_json_output: true
-  customer_context: A rogue admin changed runtime permissions and the customer now
-    suspects the search tier is over-privileged. You must restore least privilege
-    without violating the no-public-endpoints rule inherited from Day 4.
+    minimum_pre_patch_commands: 1
+    minimum_pre_patch_queries: 1
+  customer_context: A rogue admin changed runtime permissions and the customer now suspects the search tier is over-privileged. You must restore least privilege without violating the no-public-endpoints rule inherited from Day 4.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   - id: conflicting_authority_refusal
     type: business
-    description: Conflicting records or review evidence must trigger refusal rather
-      than silent blending.
+    description: Conflicting records or review evidence must trigger refusal rather than silent blending.
     introduced_on: '06'
     persists: true
   - id: pii_redaction_before_audit
     type: process
-    description: Sensitive content must be redacted before logging, audit writes,
-      or downstream release evidence.
+    description: Sensitive content must be redacted before logging, audit writes, or downstream release evidence.
     introduced_on: '07'
     persists: true
   - id: search_token_auth_only
@@ -1171,16 +1001,13 @@ days:
     persists: true
   - id: keyless_runtime_identity
     type: identity
-    description: Runtime identity should prefer managed identity or delegated flows
-      over embedded credentials.
+    description: Runtime identity should prefer managed identity or delegated flows over embedded credentials.
     introduced_on: 08
     persists: true
   mastery_gates:
   - id: day08_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day7/security/test_search_token_auth_only.py
-      tests/day8/test_security_and_context.py tests/day8/test_observability_contract.py
-      -q && uv run aegisap-lab artifact rebuild --day 08
+    command: uv run python -m pytest tests/day7/security/test_search_token_auth_only.py tests/day8/test_security_and_context.py tests/day8/test_observability_contract.py -q && uv run aegisap-lab artifact rebuild --day 08
     success_marker: '"day": "08"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -1201,25 +1028,18 @@ days:
     - search_token_auth_only
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: Role assignments or service posture drifted, and the runtime principal
-      can mutate resources it should only read.
-    diagnostic_surface: Portal role assignments, Marimo Bicep bridge, and live audit-production
-      probes.
+    failure_signal: Role assignments or service posture drifted, and the runtime principal can mutate resources it should only read.
     expected_recovery_artifact: build/day8/deployment_design.json
     time_box_minutes: 30
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Role assignments or service posture drifted, and the runtime principal can mutate resources it should only read.
   automation_drills:
   - id: day08_incident_replay
     default: true
     mode: incident
     name: Day 8 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: Role assignments or service posture drifted, and the runtime
-      principal can mutate resources it should only read.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: Role assignments or service posture drifted, and the runtime principal can mutate resources it should only read.
     drift_layers:
     - identity
     - iac
@@ -1229,69 +1049,74 @@ days:
     mode: artifact
     source_file: evals/failure_drills/drill_13_shadow_resume_identity_fallback.json
     name: Shadow Drift - Break-Glass Identity Fallback
-    description: Rebuilds the Day 8 evidence bundle, then injects a downstream release
-      symptom where a resumed workflow path is forcing an unapproved identity fallback.
-    expected_signal: Identity evidence shows an unexpected privileged fallback path
-      appearing in release traces even though the primary deployment still starts.
+    description: Rebuilds the Day 8 evidence bundle, then injects a downstream release symptom where a resumed workflow path is forcing an unapproved identity fallback.
+    expected_signal: Identity evidence shows an unexpected privileged fallback path appearing in release traces even though the primary deployment still starts.
     mutation: day08_shadow_resume_identity_fallback
     shadow_origin_day: '05'
-    secondary_failure_signal: Release traces now show a break-glass credential fallback
-      tied to the same workflow correlation chain.
+    secondary_failure_signal: Release traces now show a break-glass credential fallback tied to the same workflow correlation chain.
     drift_layers:
     - identity
     - iac
     - ci_cd
   scaffold_level: starter_only
-  cost_of_failure: If runtime identity stays over-privileged, a single deployment
-    drift can become cross-service data access and immediate CAB rejection.
+  cost_of_failure: If runtime identity stays over-privileged, a single deployment drift can become cross-service data access and immediate CAB rejection.
   kql_evidence:
     artifact_path: build/day8/kql_evidence.json
     minimum_queries: 1
     review_stage: day08_closeout
+    minimum_pre_patch_queries: 1
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day08
+  diagnostic_independence:
+    mode: advisory
+    timeline_artifact_path: build/day8/diagnostic_timeline.md
+    review_stage: day08_closeout
+    hint_state_path: .aegisap-lab/cache/instructor/interventions/day08.json
+    required_markers:
+    - 'First symptom:'
+    - 'First telemetry proof:'
+    - 'Subsystem narrowed:'
+    - 'Durable repair chosen:'
+    - 'Post-fix confirmation:'
+    - 'Repo search before telemetry:'
 - id: 09
   title: Observability, Routing, Cost, and Economic Control
   notebook_file: notebooks/day_9_scaling_monitoring_cost.py
   primary_doc_file: docs/DAY_09.md
   legacy_doc_files: []
   rubric_weights:
-    routing_correctness: 25
-    cost_reasoning: 25
-    observability_as_control: 20
+    routing_correctness: 20
+    cost_reasoning: 20
+    observability_as_control: 15
     finance_communication_quality: 15
     oral_defense: 15
+    diagnostic_independence: 15
   artifact_files:
   - docs/curriculum/artifacts/day09/CAPABILITY_ALLOCATION_MEMO.md
   - docs/curriculum/artifacts/day09/COST_GOVERNANCE_POLICY.md
   - docs/curriculum/artifacts/day09/PTU_PAYG_DECISION_NOTE.md
   portal_to_script_mapping:
-    portal_surface: Application Insights routing telemetry, deployment-tier selection,
-      and cost signals
+    portal_surface: Application Insights routing telemetry, deployment-tier selection, and cost signals
     bridge_file: notebooks/bridges/day09_routing_cost.md
-    production_targets:
-    - path: src/aegisap/routing/routing_policy.py
+    repair_domains:
+    - name: Routing Policy
       surface_type: application
-    - path: src/aegisap/cache/cache_policy.py
+    - name: Cache Policy
       surface_type: application
-    - path: src/aegisap/cost/budget_gate.py
+    - name: Budget Gate
       surface_type: policy
-  oral_defense_prompts:
-  - Which capability did you route to the mini model and what is the quality degradation
-    risk if that routing decision is wrong?
-  - Finance demands a 30% cost cut. Walk through which lever you would pull first
-    and what zero-tolerance controls you would not touch.
-  - Who approves a PTU commitment in your enterprise, and what observability evidence
-    would they require before signing a two-year reservation?
   zero_tolerance: []
   capstone_flags:
     capstone_a: true
     capstone_b: false
   phase: phase_3_guardrails_eval_release
-  scenario_dir: scenarios/day09
   injection_command: uv run aegisap-lab incident start --day 09
   revert_state: .aegisap-lab/state/day09.json
   verification_commands:
-  - uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_and_cost.py
-    tests/day9/test_runtime_day9_contract.py -q
+  - uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_and_cost.py tests/day9/test_runtime_day9_contract.py -q
   - uv run aegisap-lab artifact rebuild --day 09
   review_contract:
     evaluator_profile: wave3-day09-routing-drift
@@ -1318,56 +1143,48 @@ days:
       - total
       minimum_matches: 1
       must_use_json_output: true
-  customer_context: A finance sponsor is alarmed by rising token spend and wants a
-    defensible routing and cache policy that respects the same infrastructure and
-    identity constraints already in force.
+    minimum_pre_patch_commands: 1
+    minimum_pre_patch_queries: 1
+  customer_context: A finance sponsor is alarmed by rising token spend and wants a defensible routing and cache policy that respects the same infrastructure and identity constraints already in force.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   - id: conflicting_authority_refusal
     type: business
-    description: Conflicting records or review evidence must trigger refusal rather
-      than silent blending.
+    description: Conflicting records or review evidence must trigger refusal rather than silent blending.
     introduced_on: '06'
     persists: true
   - id: pii_redaction_before_audit
     type: process
-    description: Sensitive content must be redacted before logging, audit writes,
-      or downstream release evidence.
+    description: Sensitive content must be redacted before logging, audit writes, or downstream release evidence.
     introduced_on: '07'
     persists: true
   - id: search_token_auth_only
@@ -1377,22 +1194,18 @@ days:
     persists: true
   - id: keyless_runtime_identity
     type: identity
-    description: Runtime identity should prefer managed identity or delegated flows
-      over embedded credentials.
+    description: Runtime identity should prefer managed identity or delegated flows over embedded credentials.
     introduced_on: 08
     persists: true
   - id: cost_ceiling_enforced
     type: business
-    description: Economic controls must prevent runaway routing, caching, or model-selection
-      cost drift.
+    description: Economic controls must prevent runaway routing, caching, or model-selection cost drift.
     introduced_on: 09
     persists: true
   mastery_gates:
   - id: day09_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_and_cost.py
-      tests/day9/test_runtime_day9_contract.py -q && uv run aegisap-lab artifact rebuild
-      --day 09
+    command: uv run python -m pytest tests/day9/test_routing_policy.py tests/day9/test_cache_and_cost.py tests/day9/test_runtime_day9_contract.py -q && uv run aegisap-lab artifact rebuild --day 09
     success_marker: '"day": "09"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -1414,25 +1227,18 @@ days:
     - search_token_auth_only
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: Routing or caching pushes the workload outside the cost ceiling
-      while inherited infrastructure posture still has to hold.
-    diagnostic_surface: Azure Monitor or KQL evidence, routing notebook analysis,
-      budget gates, and cloud-truth posture checks.
+    failure_signal: Routing or caching pushes the workload outside the cost ceiling while inherited infrastructure posture still has to hold.
     expected_recovery_artifact: build/day9/routing_report.json
     time_box_minutes: 25
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Routing or caching pushes the workload outside the cost ceiling while inherited infrastructure posture still has to hold.
   automation_drills:
   - id: day09_incident_replay
     default: true
     mode: incident
     name: Day 9 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: Routing or caching pushes the workload outside the cost ceiling
-      while inherited infrastructure posture still has to hold.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: Routing or caching pushes the workload outside the cost ceiling while inherited infrastructure posture still has to hold.
     drift_layers:
     - application
     - ci_cd
@@ -1441,59 +1247,65 @@ days:
     mode: artifact
     source_file: evals/failure_drills/drill_14_shadow_resume_cost_surge.json
     name: Shadow Drift - Replay Cost Surge
-    description: Rebuilds the Day 9 routing report, then injects a downstream cost
-      spike caused by replay traffic re-entering the expensive path.
-    expected_signal: Routing telemetry shows a budget surge and duplicate high-cost
-      work on one correlation trail even though the router rules still look syntactically
-      valid.
+    description: Rebuilds the Day 9 routing report, then injects a downstream cost spike caused by replay traffic re-entering the expensive path.
+    expected_signal: Routing telemetry shows a budget surge and duplicate high-cost work on one correlation trail even though the router rules still look syntactically valid.
     mutation: day09_shadow_resume_cost_surge
     shadow_origin_day: '05'
-    secondary_failure_signal: The same correlation trail is now generating duplicate
-      high-tier spend and cache misses.
+    secondary_failure_signal: The same correlation trail is now generating duplicate high-tier spend and cache misses.
     drift_layers:
     - application
     - ci_cd
   scaffold_level: starter_only
-  cost_of_failure: If routing and cost telemetry drift silently, runaway spend and
-    untraceable failures can continue until finance or operations halts rollout.
+  cost_of_failure: If routing and cost telemetry drift silently, runaway spend and untraceable failures can continue until finance or operations halts rollout.
   kql_evidence:
     artifact_path: build/day9/kql_evidence.json
     minimum_queries: 1
     review_stage: day09_closeout
+    minimum_pre_patch_queries: 1
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day09
+  diagnostic_independence:
+    mode: advisory
+    timeline_artifact_path: build/day9/diagnostic_timeline.md
+    review_stage: standard
+    hint_state_path: .aegisap-lab/cache/instructor/interventions/day09.json
+    required_markers:
+    - 'First symptom:'
+    - 'First telemetry proof:'
+    - 'Subsystem narrowed:'
+    - 'Durable repair chosen:'
+    - 'Post-fix confirmation:'
+    - 'Repo search before telemetry:'
 - id: '10'
   title: Production Acceptance, Release Evidence, and Change Board Readiness
   notebook_file: notebooks/day_10_production_operations.py
   primary_doc_file: docs/DAY_10.md
   legacy_doc_files: []
   rubric_weights:
-    technical_release_readiness: 25
-    evidence_pack_quality: 25
-    gate_exception_handling: 20
+    technical_release_readiness: 20
+    evidence_pack_quality: 20
+    gate_exception_handling: 15
     executive_communication: 15
     oral_defense: 15
+    diagnostic_independence: 15
   artifact_files:
   - docs/curriculum/artifacts/day10/CAB_PACKET.md
   - docs/curriculum/artifacts/day10/EXECUTIVE_RELEASE_BRIEF.md
   - docs/curriculum/artifacts/day10/GATE_EXCEPTION_POLICY.md
   - docs/curriculum/artifacts/day10/REVERT_PROOF.md
   portal_to_script_mapping:
-    portal_surface: Candidate revision health, gate evidence, and false-green release
-      summaries
+    portal_surface: Candidate revision health, gate evidence, and false-green release summaries
     bridge_file: notebooks/bridges/day10_release_evidence.md
-    production_targets:
-    - path: src/aegisap/deploy/gates.py
+    repair_domains:
+    - name: Gates
       surface_type: ci_cd
-    - path: scripts/check_all_gates.py
+    - name: Check All Gates
       surface_type: ci_cd
-    - path: src/aegisap/training/checkpoints.py
+    - name: Checkpoints
       surface_type: policy
-  oral_defense_prompts:
-  - Walk through one gate in your CAB packet that almost failed and explain what evidence
-    tipped the decision.
-  - A late executive wants to override one gate for business urgency. What is your
-    response and what is the blast radius if you comply?
-  - Who chairs the CAB for this system, what quorum is required, and what documented
-    evidence must exist before the chair can approve?
   zero_tolerance:
   - condition: pass_declared_when_gate_evidence_is_absent
     consequence: hard_fail
@@ -1503,13 +1315,10 @@ days:
     capstone_a: true
     capstone_b: false
   phase: phase_4_elite_operations
-  scenario_dir: scenarios/day10
   injection_command: uv run aegisap-lab incident start --day 10
   revert_state: .aegisap-lab/state/day10.json
   verification_commands:
-  - uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py
-    tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py
-    -q
+  - uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py -q
   - uv run aegisap-lab artifact rebuild --day 10
   review_contract:
     evaluator_profile: wave3-day10-release-board
@@ -1540,6 +1349,8 @@ days:
       - active
       minimum_matches: 1
       must_use_json_output: true
+    minimum_pre_patch_commands: 1
+    minimum_pre_patch_queries: 1
   rollback_rehearsal:
     artifact_path: build/day10/rollback_rehearsal.json
     traffic_shift_required: true
@@ -1555,56 +1366,46 @@ days:
       initial_delay_seconds: 5
       max_attempts: 5
       backoff_multiplier: 2
-  customer_context: The customer CAB will not approve rollout without a release packet
-    that proves security posture, ownership, rollback readiness, and cost governance
-    survived the repair.
+  customer_context: The customer CAB will not approve rollout without a release packet that proves security posture, ownership, rollback readiness, and cost governance survived the repair.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   - id: conflicting_authority_refusal
     type: business
-    description: Conflicting records or review evidence must trigger refusal rather
-      than silent blending.
+    description: Conflicting records or review evidence must trigger refusal rather than silent blending.
     introduced_on: '06'
     persists: true
   - id: pii_redaction_before_audit
     type: process
-    description: Sensitive content must be redacted before logging, audit writes,
-      or downstream release evidence.
+    description: Sensitive content must be redacted before logging, audit writes, or downstream release evidence.
     introduced_on: '07'
     persists: true
   - id: search_token_auth_only
@@ -1614,28 +1415,23 @@ days:
     persists: true
   - id: keyless_runtime_identity
     type: identity
-    description: Runtime identity should prefer managed identity or delegated flows
-      over embedded credentials.
+    description: Runtime identity should prefer managed identity or delegated flows over embedded credentials.
     introduced_on: 08
     persists: true
   - id: cost_ceiling_enforced
     type: business
-    description: Economic controls must prevent runaway routing, caching, or model-selection
-      cost drift.
+    description: Economic controls must prevent runaway routing, caching, or model-selection cost drift.
     introduced_on: 09
     persists: true
   - id: release_packet_before_prod
     type: process
-    description: Production acceptance requires a release packet, explicit ownership,
-      and rollback-ready evidence.
+    description: Production acceptance requires a release packet, explicit ownership, and rollback-ready evidence.
     introduced_on: '10'
     persists: true
   mastery_gates:
   - id: day10_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py
-      tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py
-      -q && uv run aegisap-lab artifact rebuild --day 10
+    command: uv run python -m pytest tests/day10/test_deployment_contract.py tests/day10/test_release_security.py tests/day10/test_release_envelope.py tests/training/test_checkpoints.py tests/api/test_app.py -q && uv run aegisap-lab artifact rebuild --day 10
     success_marker: '"day": "10"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -1658,25 +1454,18 @@ days:
     - search_token_auth_only
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: A release gate or evidence packet is incomplete, leaving production
-      acceptance without defensible proof.
-    diagnostic_surface: Deployment gate outputs, checkpoint artifacts, release envelope
-      evidence, and cloud-truth posture checks.
+    failure_signal: A release gate or evidence packet is incomplete, leaving production acceptance without defensible proof.
     expected_recovery_artifact: build/day10/release_envelope.json
     time_box_minutes: 30
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: A release gate or evidence packet is incomplete, leaving production acceptance without defensible proof.
   automation_drills:
   - id: day10_incident_replay
     default: true
     mode: incident
     name: Day 10 incident replay
-    description: Uses the existing incident scenario as the Phase 2 automated drill
-      so the learner must debug from the first signal and restore the repo-backed
-      repair path.
-    expected_signal: A release gate or evidence packet is incomplete, leaving production
-      acceptance without defensible proof.
+    description: Uses the existing incident scenario as the Phase 2 automated drill so the learner must debug from the first signal and restore the repo-backed repair path.
+    expected_signal: A release gate or evidence packet is incomplete, leaving production acceptance without defensible proof.
     drift_layers:
     - iac
     - ci_cd
@@ -1685,58 +1474,64 @@ days:
     mode: artifact
     source_file: evals/failure_drills/drill_15_shadow_evidence_chain_gap.json
     name: Shadow Drift - Upstream Evidence Chain Gap
-    description: Rebuilds the Day 10 release envelope, then injects a downstream
-      board-packet failure where prerequisite operator proof is incomplete for a
-      dependent control.
-    expected_signal: CAB evidence aggregation reports a missing upstream proof chain
-      even though the local release gates still appear close to green.
+    description: Rebuilds the Day 10 release envelope, then injects a downstream board-packet failure where prerequisite operator proof is incomplete for a dependent control.
+    expected_signal: CAB evidence aggregation reports a missing upstream proof chain even though the local release gates still appear close to green.
     mutation: day10_shadow_evidence_chain_gap
-    shadow_origin_day: '08'
-    secondary_failure_signal: The release packet now shows an incomplete prerequisite
-      operator proof chain for one dependent control.
+    shadow_origin_day: 08
+    secondary_failure_signal: The release packet now shows an incomplete prerequisite operator proof chain for one dependent control.
     drift_layers:
     - ci_cd
     - iac
   scaffold_level: starter_only
-  cost_of_failure: If release evidence goes false-green, the CAB can approve a broken
-    deployment and force an emergency rollback under executive scrutiny.
+  cost_of_failure: If release evidence goes false-green, the CAB can approve a broken deployment and force an emergency rollback under executive scrutiny.
   kql_evidence:
     artifact_path: build/day10/kql_evidence.json
     minimum_queries: 1
     review_stage: day10_cab_board
+    minimum_pre_patch_queries: 1
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day10
+  diagnostic_independence:
+    mode: advisory
+    timeline_artifact_path: build/day10/diagnostic_timeline.md
+    review_stage: cab_board
+    hint_state_path: .aegisap-lab/cache/instructor/interventions/day10.json
+    required_markers:
+    - 'First symptom:'
+    - 'First telemetry proof:'
+    - 'Subsystem narrowed:'
+    - 'Durable repair chosen:'
+    - 'Post-fix confirmation:'
+    - 'Repo search before telemetry:'
 - id: '11'
   title: Delegated Identity, OBO, and Authority Confusion Defense
   notebook_file: notebooks/day_11_delegated_identity_obo.py
   primary_doc_file: docs/DAY_11.md
   legacy_doc_files: []
   rubric_weights:
-    obo_correctness: 30
-    threat_model_completeness: 20
-    delegated_authority_boundary_understanding: 20
+    obo_correctness: 25
+    threat_model_completeness: 15
+    delegated_authority_boundary_understanding: 15
     audit_explanation_quality: 15
     oral_defense: 15
+    diagnostic_independence: 15
   artifact_files:
   - docs/curriculum/artifacts/day11/APPROVAL_AUTHORITY_MODEL.md
   - docs/curriculum/artifacts/day11/OBO_THREAT_MODEL.md
   - docs/curriculum/artifacts/day11/IDENTITY_EXCEPTION_REQUEST_RESPONSE.md
   portal_to_script_mapping:
-    portal_surface: Entra app registrations, approver-group membership, and delegated-identity
-      evidence
+    portal_surface: Entra app registrations, approver-group membership, and delegated-identity evidence
     bridge_file: notebooks/bridges/day11_delegated_identity.md
-    production_targets:
-    - path: src/aegisap/identity/actor_verifier.py
+    repair_domains:
+    - name: Actor Verifier
       surface_type: application
-    - path: src/aegisap/identity/obo.py
+    - name: Obo
       surface_type: application
-    - path: scripts/verify_delegated_identity_contract.py
+    - name: Verify Delegated Identity Contract
       surface_type: ci_cd
-  oral_defense_prompts:
-  - Walk through the authority confusion attack path you modelled and explain exactly
-    which control in the OBO flow breaks the chain.
-  - A team asks to skip OBO for integration speed. What is the blast radius of granting
-    that exception, and what compensating controls would you require?
-  - Who in the enterprise must approve an identity architecture exception, and what
-    audit evidence would a security reviewer demand at the six-month review?
   zero_tolerance:
   - condition: actor_binding_broken_payload_identity_accepted_without_obo
     consequence: hard_fail
@@ -1746,12 +1541,10 @@ days:
     capstone_a: true
     capstone_b: false
   phase: phase_4_elite_operations
-  scenario_dir: scenarios/day11
   injection_command: uv run aegisap-lab incident start --day 11
   revert_state: .aegisap-lab/state/day11.json
   verification_commands:
-  - uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py
-    tests/day11/test_obo_simulation.py -q
+  - uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q
   - uv run aegisap-lab artifact rebuild --day 11
   review_contract:
     evaluator_profile: wave4-day11-actor-binding
@@ -1776,56 +1569,48 @@ days:
       - expiresOn
       minimum_matches: 1
       must_use_json_output: true
-  customer_context: The security team caught an approval path that may be acting as
-    the app instead of the user. You must repair the actor binding without regressing
-    release or network controls.
+    minimum_pre_patch_commands: 1
+    minimum_pre_patch_queries: 1
+  customer_context: The security team caught an approval path that may be acting as the app instead of the user. You must repair the actor binding without regressing release or network controls.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   - id: conflicting_authority_refusal
     type: business
-    description: Conflicting records or review evidence must trigger refusal rather
-      than silent blending.
+    description: Conflicting records or review evidence must trigger refusal rather than silent blending.
     introduced_on: '06'
     persists: true
   - id: pii_redaction_before_audit
     type: process
-    description: Sensitive content must be redacted before logging, audit writes,
-      or downstream release evidence.
+    description: Sensitive content must be redacted before logging, audit writes, or downstream release evidence.
     introduced_on: '07'
     persists: true
   - id: search_token_auth_only
@@ -1835,34 +1620,28 @@ days:
     persists: true
   - id: keyless_runtime_identity
     type: identity
-    description: Runtime identity should prefer managed identity or delegated flows
-      over embedded credentials.
+    description: Runtime identity should prefer managed identity or delegated flows over embedded credentials.
     introduced_on: 08
     persists: true
   - id: cost_ceiling_enforced
     type: business
-    description: Economic controls must prevent runaway routing, caching, or model-selection
-      cost drift.
+    description: Economic controls must prevent runaway routing, caching, or model-selection cost drift.
     introduced_on: 09
     persists: true
   - id: release_packet_before_prod
     type: process
-    description: Production acceptance requires a release packet, explicit ownership,
-      and rollback-ready evidence.
+    description: Production acceptance requires a release packet, explicit ownership, and rollback-ready evidence.
     introduced_on: '10'
     persists: true
   - id: actor_bound_approvals
     type: identity
-    description: Approval and impersonation flows must remain bound to the real human
-      actor.
+    description: Approval and impersonation flows must remain bound to the real human actor.
     introduced_on: '11'
     persists: true
   mastery_gates:
   - id: day11_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py
-      tests/day11/test_obo_simulation.py -q && uv run aegisap-lab artifact rebuild
-      --day 11
+    command: uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q && uv run aegisap-lab artifact rebuild --day 11
     success_marker: '"day": "11"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -1886,24 +1665,18 @@ days:
     - search_token_auth_only
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: The OBO path loses actor fidelity, making approvals or downstream
-      actions look like app-only activity.
-    diagnostic_surface: Entra or app registration evidence, OBO notebook proof, actor
-      verifier code, and cloud-truth posture checks.
+    failure_signal: The OBO path loses actor fidelity, making approvals or downstream actions look like app-only activity.
     expected_recovery_artifact: build/day11/obo_contract.json
     time_box_minutes: 30
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: The OBO path loses actor fidelity, making approvals or downstream actions look like app-only activity.
   automation_drills:
   - id: drill_01_iam_drift
     default: true
     mode: artifact
     name: IAM Drift - Managed Identity deleted
-    description: Rebuilds the Day 11 artifacts, then flips actor binding proof to
-      a failing state so the learner must restore delegated identity evidence.
-    expected_signal: gate_actor_binding fails because actor binding no longer matches
-      the required approver group.
+    description: Rebuilds the Day 11 artifacts, then flips actor binding proof to a failing state so the learner must restore delegated identity evidence.
+    expected_signal: gate_actor_binding fails because actor binding no longer matches the required approver group.
     source_file: evals/failure_drills/drill_01_iam_drift.json
     mutation: day11_iam_drift
     drift_layers:
@@ -1913,10 +1686,8 @@ days:
     default: false
     mode: artifact
     name: OBO Scope Mismatch
-    description: Rebuilds the Day 11 artifacts, then breaks the delegated token exchange
-      evidence to simulate a scope mismatch.
-    expected_signal: gate_obo_exchange fails because the delegated token exchange
-      lost the correct audience or scope.
+    description: Rebuilds the Day 11 artifacts, then breaks the delegated token exchange evidence to simulate a scope mismatch.
+    expected_signal: gate_obo_exchange fails because the delegated token exchange lost the correct audience or scope.
     source_file: evals/failure_drills/drill_02_obo_scope_mismatch.json
     mutation: day11_obo_scope_mismatch
     drift_layers:
@@ -1927,59 +1698,66 @@ days:
     mode: artifact
     source_file: evals/failure_drills/drill_16_shadow_dependency_forbidden.json
     name: Shadow Drift - Downstream Dependency Forbidden
-    description: Rebuilds the Day 11 contract bundle, then injects a downstream 403
-      symptom where actor claims vanish before a dependent operation completes.
-    expected_signal: Actor-bound operations now fail with a downstream forbidden response
-      on the same correlation trail even though the app identity still looks healthy.
+    description: Rebuilds the Day 11 contract bundle, then injects a downstream 403 symptom where actor claims vanish before a dependent operation completes.
+    expected_signal: Actor-bound operations now fail with a downstream forbidden response on the same correlation trail even though the app identity still looks healthy.
     mutation: day11_shadow_dependency_forbidden
     shadow_origin_day: '10'
-    secondary_failure_signal: A dependent operation now returns forbidden because the
-      actor claims disappear before the boundary call completes.
+    secondary_failure_signal: A dependent operation now returns forbidden because the actor claims disappear before the boundary call completes.
     drift_layers:
     - identity
     - ci_cd
   scaffold_level: starter_only
-  cost_of_failure: If actor binding fails, the system can accept the wrong human as
-    an approver and invalidate the authority model for production changes.
+  cost_of_failure: If actor binding fails, the system can accept the wrong human as an approver and invalidate the authority model for production changes.
   kql_evidence:
     artifact_path: build/day11/kql_evidence.json
     minimum_queries: 1
     review_stage: day11_closeout
+    minimum_pre_patch_queries: 1
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day11
+  diagnostic_independence:
+    mode: advisory
+    timeline_artifact_path: build/day11/diagnostic_timeline.md
+    review_stage: day11_closeout
+    hint_state_path: .aegisap-lab/cache/instructor/interventions/day11.json
+    required_markers:
+    - 'First symptom:'
+    - 'First telemetry proof:'
+    - 'Subsystem narrowed:'
+    - 'Durable repair chosen:'
+    - 'Post-fix confirmation:'
+    - 'Repo search before telemetry:'
 - id: '12'
   title: Private Networking, Egress Control, and Security Dependency Management
   notebook_file: notebooks/day_12_private_networking_constraints.py
   primary_doc_file: docs/DAY_12.md
   legacy_doc_files: []
   rubric_weights:
-    network_posture_design: 30
-    static_vs_live_proof_understanding: 20
-    dependency_management_realism: 20
+    network_posture_design: 25
+    static_vs_live_proof_understanding: 15
+    dependency_management_realism: 15
     security_exception_handling: 15
     oral_defense: 15
+    diagnostic_independence: 15
   artifact_files:
   - docs/curriculum/artifacts/day12/NETWORK_DEPENDENCY_REGISTER.md
   - docs/curriculum/artifacts/day12/SECURITY_EXCEPTION_REQUEST.md
   - docs/curriculum/artifacts/day12/EGRESS_CONTROL_POLICY.md
   portal_to_script_mapping:
-    portal_surface: Private endpoint, DNS, Network Watcher, and public-network posture
-      evidence
+    portal_surface: Private endpoint, DNS, Network Watcher, and public-network posture evidence
     bridge_file: notebooks/bridges/day12_private_networking.md
-    production_targets:
-    - path: src/aegisap/network/bicep_policy_checker.py
+    repair_domains:
+    - name: Bicep Policy Checker
       surface_type: infrastructure
-    - path: src/aegisap/network/private_endpoint_probe.py
+    - name: Private Endpoint Probe
       surface_type: infrastructure
-    - path: scripts/check_private_network_static.py
+    - name: Check Private Network Static
       surface_type: ci_cd
-    - path: scripts/verify_private_network_posture.py
+    - name: Verify Private Network Posture
       surface_type: ci_cd
-  oral_defense_prompts:
-  - Which network dependency has the longest lead time and what is your plan if it
-    is not resolved before production cutover?
-  - You temporarily enable a public endpoint in dev. Walk through every compensating
-    control, the expiry date, and who holds the removal obligation.
-  - Who approves a security exception in your enterprise, what evidence is mandatory
-    in the request, and what happens at expiry if no renewal is filed?
   zero_tolerance:
   - condition: public_endpoint_described_as_acceptable_in_production
     consequence: hard_fail
@@ -1989,12 +1767,10 @@ days:
     capstone_a: true
     capstone_b: true
   phase: phase_4_elite_operations
-  scenario_dir: scenarios/day12
   injection_command: uv run aegisap-lab incident start --day 12
   revert_state: .aegisap-lab/state/day12.json
   verification_commands:
-  - uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py
-    -q
+  - uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q
   - uv run aegisap-lab artifact rebuild --day 12
   review_contract:
     evaluator_profile: wave4-day12-network-isolation
@@ -2021,56 +1797,48 @@ days:
       - subnet
       minimum_matches: 1
       must_use_json_output: true
-  customer_context: The customer CISO escalated a DNS drift concern. You must prove
-    that the VNet, private endpoints, and DNS links keep the agent invisible to the
-    public internet.
+    minimum_pre_patch_commands: 1
+    minimum_pre_patch_queries: 1
+  customer_context: The customer CISO escalated a DNS drift concern. You must prove that the VNet, private endpoints, and DNS links keep the agent invisible to the public internet.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   - id: conflicting_authority_refusal
     type: business
-    description: Conflicting records or review evidence must trigger refusal rather
-      than silent blending.
+    description: Conflicting records or review evidence must trigger refusal rather than silent blending.
     introduced_on: '06'
     persists: true
   - id: pii_redaction_before_audit
     type: process
-    description: Sensitive content must be redacted before logging, audit writes,
-      or downstream release evidence.
+    description: Sensitive content must be redacted before logging, audit writes, or downstream release evidence.
     introduced_on: '07'
     persists: true
   - id: search_token_auth_only
@@ -2080,39 +1848,33 @@ days:
     persists: true
   - id: keyless_runtime_identity
     type: identity
-    description: Runtime identity should prefer managed identity or delegated flows
-      over embedded credentials.
+    description: Runtime identity should prefer managed identity or delegated flows over embedded credentials.
     introduced_on: 08
     persists: true
   - id: cost_ceiling_enforced
     type: business
-    description: Economic controls must prevent runaway routing, caching, or model-selection
-      cost drift.
+    description: Economic controls must prevent runaway routing, caching, or model-selection cost drift.
     introduced_on: 09
     persists: true
   - id: release_packet_before_prod
     type: process
-    description: Production acceptance requires a release packet, explicit ownership,
-      and rollback-ready evidence.
+    description: Production acceptance requires a release packet, explicit ownership, and rollback-ready evidence.
     introduced_on: '10'
     persists: true
   - id: actor_bound_approvals
     type: identity
-    description: Approval and impersonation flows must remain bound to the real human
-      actor.
+    description: Approval and impersonation flows must remain bound to the real human actor.
     introduced_on: '11'
     persists: true
   - id: private_dns_resolution
     type: infrastructure
-    description: Private endpoints must resolve privately and block public fallback
-      through DNS and routing.
+    description: Private endpoints must resolve privately and block public fallback through DNS and routing.
     introduced_on: '12'
     persists: true
   mastery_gates:
   - id: day12_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py
-      -q && uv run aegisap-lab artifact rebuild --day 12
+    command: uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bicep_policy_checker.py -q && uv run aegisap-lab artifact rebuild --day 12
     success_marker: '"day": "12"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -2137,24 +1899,18 @@ days:
     - private_dns_resolution
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: Private endpoint DNS or routing drift makes a production-bound
-      service resolve publicly or appear publicly reachable.
-    diagnostic_surface: Network Watcher evidence, private endpoint probe cells, and
-      live audit-production DNS posture checks.
+    failure_signal: Private endpoint DNS or routing drift makes a production-bound service resolve publicly or appear publicly reachable.
     expected_recovery_artifact: build/day12/private_network_posture.json
     time_box_minutes: 30
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Private endpoint DNS or routing drift makes a production-bound service resolve publicly or appear publicly reachable.
   automation_drills:
   - id: drill_03_dns_misconfiguration
     default: true
     mode: artifact
     name: Private Endpoint DNS Misconfiguration
-    description: Rebuilds the Day 12 posture bundle, then forces private DNS resolution
-      to fail so the learner must restore the private-only boundary.
-    expected_signal: gate_private_network_posture fails because a service resolves
-      publicly instead of privately.
+    description: Rebuilds the Day 12 posture bundle, then forces private DNS resolution to fail so the learner must restore the private-only boundary.
+    expected_signal: gate_private_network_posture fails because a service resolves publicly instead of privately.
     source_file: evals/failure_drills/drill_03_dns_misconfiguration.json
     mutation: day12_dns_misconfiguration
     drift_layers:
@@ -2164,10 +1920,8 @@ days:
     default: false
     mode: artifact
     name: Public Endpoint Re-enabled
-    description: Rebuilds the Day 12 static analysis artifact, then injects a publicNetworkAccess
-      violation into the posture evidence.
-    expected_signal: gate_private_network_static fails because the static analysis
-      now reports a public endpoint violation.
+    description: Rebuilds the Day 12 static analysis artifact, then injects a publicNetworkAccess violation into the posture evidence.
+    expected_signal: gate_private_network_static fails because the static analysis now reports a public endpoint violation.
     source_file: evals/failure_drills/drill_04_public_endpoint_reenabled.json
     mutation: day12_public_endpoint_reenabled
     drift_layers:
@@ -2178,70 +1932,75 @@ days:
     mode: artifact
     source_file: evals/failure_drills/drill_17_shadow_egress_detour.json
     name: Shadow Drift - Unapproved Egress Detour
-    description: Rebuilds the Day 12 posture evidence, then injects a downstream reachability
-      symptom where one dependency now exits through an unapproved route.
-    expected_signal: Network posture evidence shows one dependency taking an unexpected
-      route even though the private endpoints still exist.
+    description: Rebuilds the Day 12 posture evidence, then injects a downstream reachability symptom where one dependency now exits through an unapproved route.
+    expected_signal: Network posture evidence shows one dependency taking an unexpected route even though the private endpoints still exist.
     mutation: day12_shadow_egress_detour
     shadow_origin_day: '11'
-    secondary_failure_signal: One dependency now detours through an unapproved route
-      on the same incident correlation trail.
+    secondary_failure_signal: One dependency now detours through an unapproved route on the same incident correlation trail.
     drift_layers:
     - networking
     - iac
   scaffold_level: starter_only
-  cost_of_failure: If public access returns, regulated data escapes the private boundary
-    and security approval is revoked immediately.
+  cost_of_failure: If public access returns, regulated data escapes the private boundary and security approval is revoked immediately.
   kql_evidence:
     artifact_path: build/day12/kql_evidence.json
     minimum_queries: 1
     review_stage: day12_closeout
+    minimum_pre_patch_queries: 1
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day12
+  diagnostic_independence:
+    mode: advisory
+    timeline_artifact_path: build/day12/diagnostic_timeline.md
+    review_stage: standard
+    hint_state_path: .aegisap-lab/cache/instructor/interventions/day12.json
+    required_markers:
+    - 'First symptom:'
+    - 'First telemetry proof:'
+    - 'Subsystem narrowed:'
+    - 'Durable repair chosen:'
+    - 'Post-fix confirmation:'
+    - 'Repo search before telemetry:'
 - id: '13'
   title: Integration Boundaries, Async Reliability, and Contract Management
   notebook_file: notebooks/day_13_integration_boundary_and_mcp.py
   primary_doc_file: docs/DAY_13.md
   legacy_doc_files: []
   rubric_weights:
-    boundary_architecture_correctness: 25
-    reliability_design: 20
-    contract_versioning_quality: 20
+    boundary_architecture_correctness: 20
+    reliability_design: 15
+    contract_versioning_quality: 15
     external_stakeholder_communication: 20
     oral_defense: 15
+    diagnostic_independence: 15
   artifact_files:
   - docs/curriculum/artifacts/day13/EXTERNAL_CONTRACT_POLICY.md
   - docs/curriculum/artifacts/day13/COMPENSATING_ACTION_CATALOG.md
   - docs/curriculum/artifacts/day13/API_CHANGE_COMMUNICATION_PLAN.md
   portal_to_script_mapping:
-    portal_surface: Hosted MCP contract, partner-visible capabilities, and async reliability
-      evidence
+    portal_surface: Hosted MCP contract, partner-visible capabilities, and async reliability evidence
     bridge_file: notebooks/bridges/day13_integration_boundary.md
-    production_targets:
-    - path: src/aegisap/mcp/server.py
+    repair_domains:
+    - name: Server
       surface_type: application
-    - path: src/aegisap/mcp/schemas.py
+    - name: Schemas
       surface_type: policy
-    - path: src/aegisap/integration/dlq_consumer.py
+    - name: Dlq Consumer
       surface_type: application
-    - path: src/aegisap/integration/compensating_action.py
+    - name: Compensating Action
       surface_type: application
-  oral_defense_prompts:
-  - A partner demands direct access to the orchestrator. Walk through your boundary
-    defense and what you offer instead.
-  - If a compensating action fails silently, what is the blast radius and what is
-    your detection and recovery path?
-  - Who approves a breaking change to an external API contract, what is the minimum
-    notice period, and what evidence must accompany the deprecation notice?
   zero_tolerance: []
   capstone_flags:
     capstone_a: true
     capstone_b: true
   phase: phase_4_elite_operations
-  scenario_dir: scenarios/day13
   injection_command: uv run aegisap-lab incident start --day 13
   revert_state: .aegisap-lab/state/day13.json
   verification_commands:
-  - uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_server.py
-    tests/day13/test_payment_hold.py -q
+  - uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_server.py tests/day13/test_payment_hold.py -q
   - uv run aegisap-lab artifact rebuild --day 13
   review_contract:
     evaluator_profile: wave4-day13-boundary-contract
@@ -2265,56 +2024,48 @@ days:
       - enabled
       minimum_matches: 1
       must_use_json_output: true
-  customer_context: A line-of-business integration is dropping events at the boundary.
-    The customer expects the MCP surface and DLQ path to recover without breaking
-    inherited identity or network controls.
+    minimum_pre_patch_commands: 1
+    minimum_pre_patch_queries: 1
+  customer_context: A line-of-business integration is dropping events at the boundary. The customer expects the MCP surface and DLQ path to recover without breaking inherited identity or network controls.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   - id: conflicting_authority_refusal
     type: business
-    description: Conflicting records or review evidence must trigger refusal rather
-      than silent blending.
+    description: Conflicting records or review evidence must trigger refusal rather than silent blending.
     introduced_on: '06'
     persists: true
   - id: pii_redaction_before_audit
     type: process
-    description: Sensitive content must be redacted before logging, audit writes,
-      or downstream release evidence.
+    description: Sensitive content must be redacted before logging, audit writes, or downstream release evidence.
     introduced_on: '07'
     persists: true
   - id: search_token_auth_only
@@ -2324,46 +2075,38 @@ days:
     persists: true
   - id: keyless_runtime_identity
     type: identity
-    description: Runtime identity should prefer managed identity or delegated flows
-      over embedded credentials.
+    description: Runtime identity should prefer managed identity or delegated flows over embedded credentials.
     introduced_on: 08
     persists: true
   - id: cost_ceiling_enforced
     type: business
-    description: Economic controls must prevent runaway routing, caching, or model-selection
-      cost drift.
+    description: Economic controls must prevent runaway routing, caching, or model-selection cost drift.
     introduced_on: 09
     persists: true
   - id: release_packet_before_prod
     type: process
-    description: Production acceptance requires a release packet, explicit ownership,
-      and rollback-ready evidence.
+    description: Production acceptance requires a release packet, explicit ownership, and rollback-ready evidence.
     introduced_on: '10'
     persists: true
   - id: actor_bound_approvals
     type: identity
-    description: Approval and impersonation flows must remain bound to the real human
-      actor.
+    description: Approval and impersonation flows must remain bound to the real human actor.
     introduced_on: '11'
     persists: true
   - id: private_dns_resolution
     type: infrastructure
-    description: Private endpoints must resolve privately and block public fallback
-      through DNS and routing.
+    description: Private endpoints must resolve privately and block public fallback through DNS and routing.
     introduced_on: '12'
     persists: true
   - id: integration_contract_compensations
     type: process
-    description: External contracts require DLQ handling and compensating actions
-      rather than silent drops.
+    description: External contracts require DLQ handling and compensating actions rather than silent drops.
     introduced_on: '13'
     persists: true
   mastery_gates:
   - id: day13_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_server.py
-      tests/day13/test_payment_hold.py -q && uv run aegisap-lab artifact rebuild --day
-      13
+    command: uv run python -m pytest tests/day13/test_dlq_consumer.py tests/day13/test_mcp_server.py tests/day13/test_payment_hold.py -q && uv run aegisap-lab artifact rebuild --day 13
     success_marker: '"day": "13"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -2389,24 +2132,18 @@ days:
     - private_dns_resolution
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: Boundary drift leaves partner traffic in the DLQ or exposes an
-      incomplete MCP contract to the client.
-    diagnostic_surface: MCP client notebook flow, DLQ evidence, compensating-action
-      code, and cloud-truth posture checks.
+    failure_signal: Boundary drift leaves partner traffic in the DLQ or exposes an incomplete MCP contract to the client.
     expected_recovery_artifact: build/day13/mcp_contract_report.json
     time_box_minutes: 30
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: Boundary drift leaves partner traffic in the DLQ or exposes an incomplete MCP contract to the client.
   automation_drills:
   - id: drill_05_dlq_overflow
     default: true
     mode: artifact
     name: Service Bus DLQ Overflow
-    description: Rebuilds the Day 13 reports, then injects DLQ and webhook failures
-      so the learner must restore compensating-action coverage.
-    expected_signal: gate_dlq_drain_health fails because DLQ processing now records
-      errors and unhandled messages.
+    description: Rebuilds the Day 13 reports, then injects DLQ and webhook failures so the learner must restore compensating-action coverage.
+    expected_signal: gate_dlq_drain_health fails because DLQ processing now records errors and unhandled messages.
     source_file: evals/failure_drills/drill_05_dlq_overflow.json
     mutation: day13_dlq_overflow
     drift_layers:
@@ -2417,10 +2154,8 @@ days:
     default: false
     mode: artifact
     name: MCP Tool Removed - Contract Break
-    description: Rebuilds the Day 13 contract report, then removes a required MCP
-      capability from the evidence bundle.
-    expected_signal: gate_mcp_contract_integrity fails because query_invoice_status
-      is missing from the MCP contract.
+    description: Rebuilds the Day 13 contract report, then removes a required MCP capability from the evidence bundle.
+    expected_signal: gate_mcp_contract_integrity fails because query_invoice_status is missing from the MCP contract.
     source_file: evals/failure_drills/drill_06_mcp_contract_break.json
     mutation: day13_mcp_contract_break
     drift_layers:
@@ -2431,37 +2166,51 @@ days:
     mode: artifact
     source_file: evals/failure_drills/drill_18_shadow_actor_claim_loss.json
     name: Shadow Drift - Partner 403 At Boundary
-    description: Rebuilds the Day 13 boundary evidence, then injects a downstream
-      forbidden response where partner traffic reaches the boundary without the expected
-      actor context.
-    expected_signal: Boundary telemetry shows partner requests failing with forbidden
-      on the same correlation trail while the contract shape still looks present.
+    description: Rebuilds the Day 13 boundary evidence, then injects a downstream forbidden response where partner traffic reaches the boundary without the expected actor context.
+    expected_signal: Boundary telemetry shows partner requests failing with forbidden on the same correlation trail while the contract shape still looks present.
     mutation: day13_shadow_actor_claim_loss
     shadow_origin_day: '11'
-    secondary_failure_signal: Partner-bound traffic now reaches the boundary without
-      the expected actor context and is rejected downstream.
+    secondary_failure_signal: Partner-bound traffic now reaches the boundary without the expected actor context and is rejected downstream.
     drift_layers:
     - application
     - identity
     - ci_cd
   scaffold_level: starter_only
-  cost_of_failure: If the integration contract drifts, partner systems fail unpredictably
-    and compensating-action load spikes across the boundary.
+  cost_of_failure: If the integration contract drifts, partner systems fail unpredictably and compensating-action load spikes across the boundary.
   kql_evidence:
     artifact_path: build/day13/kql_evidence.json
     minimum_queries: 1
     review_stage: day13_closeout
+    minimum_pre_patch_queries: 1
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day13
+  diagnostic_independence:
+    mode: advisory
+    timeline_artifact_path: build/day13/diagnostic_timeline.md
+    review_stage: day13_closeout
+    hint_state_path: .aegisap-lab/cache/instructor/interventions/day13.json
+    required_markers:
+    - 'First symptom:'
+    - 'First telemetry proof:'
+    - 'Subsystem narrowed:'
+    - 'Durable repair chosen:'
+    - 'Post-fix confirmation:'
+    - 'Repo search before telemetry:'
 - id: '14'
   title: Elite Operations, Breaking Changes, and Executive Incident Leadership
   notebook_file: notebooks/day_14_breaking_changes_elite_ops.py
   primary_doc_file: docs/DAY_14.md
   legacy_doc_files: []
   rubric_weights:
-    operational_correctness: 30
-    prioritisation_under_pressure: 20
-    executive_communication: 20
+    operational_correctness: 25
+    prioritisation_under_pressure: 15
+    executive_communication: 15
     evidence_gates_in_decision_making: 15
     final_oral_defense: 15
+    diagnostic_independence: 15
   artifact_files:
   - docs/curriculum/artifacts/day14/INCIDENT_COMMAND_PLAYBOOK.md
   - docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md
@@ -2470,23 +2219,15 @@ days:
   portal_to_script_mapping:
     portal_surface: Canary health, rollback markers, and dual-sink trace evidence
     bridge_file: notebooks/bridges/day14_elite_operations.md
-    production_targets:
-    - path: src/aegisap/deploy/gates_v2.py
+    repair_domains:
+    - name: Gates V2
       surface_type: ci_cd
-    - path: src/aegisap/traceability/correlation.py
+    - name: Correlation
       surface_type: application
-    - path: scripts/verify_trace_correlation.py
+    - name: Verify Trace Correlation
       surface_type: ci_cd
-    - path: scripts/run_chaos_capstone.py
+    - name: Run Chaos Capstone
       surface_type: ci_cd
-  oral_defense_prompts:
-  - During the war-game, three failures arrive simultaneously. Walk through your triage
-    order, the mental model driving each decision, and the first action you would
-    not take.
-  - You recommend a partial-service continuation. What is the blast radius of that
-    choice, which gates are you explicitly bypassing, and who must countersign?
-  - The CTO asks for a one-page incident brief in ten minutes. Walk through exactly
-    what goes in it, what you leave out, and who reviews it before it is sent.
   zero_tolerance:
   - condition: continue_service_recommended_when_binary_gates_are_failing
     consequence: hard_fail
@@ -2496,7 +2237,6 @@ days:
     capstone_a: true
     capstone_b: true
   phase: phase_4_elite_operations
-  scenario_dir: scenarios/day14
   injection_command: uv run aegisap-lab incident start --day 14
   revert_state: .aegisap-lab/state/day14.json
   verification_commands:
@@ -2534,56 +2274,48 @@ days:
       - connectionString
       minimum_matches: 1
       must_use_json_output: true
-  customer_context: A downstream SAP schema change created a severity-1 incident.
-    Leadership needs a rollback-capable repair path that preserves traceability, network
-    posture, and release evidence.
+    minimum_pre_patch_commands: 1
+    minimum_pre_patch_queries: 1
+  customer_context: A downstream SAP schema change created a severity-1 incident. Leadership needs a rollback-capable repair path that preserves traceability, network posture, and release evidence.
   persistent_constraints:
   - id: regulated_invoice_auditability
     type: process
-    description: Every financial decision path must leave auditable evidence that
-      survives hostile review.
+    description: Every financial decision path must leave auditable evidence that survives hostile review.
     introduced_on: '01'
     persists: true
   - id: latency_budget_guardrails
     type: application
-    description: Queue, retry, and latency controls must be explicit enough to defend
-      under customer SLA pressure.
+    description: Queue, retry, and latency controls must be explicit enough to defend under customer SLA pressure.
     introduced_on: '02'
     persists: true
   - id: authoritative_retrieval_sources
     type: business
-    description: Retrieval must prefer authoritative source systems over stale or
-      ambiguous evidence.
+    description: Retrieval must prefer authoritative source systems over stale or ambiguous evidence.
     introduced_on: '03'
     persists: true
   - id: no_public_endpoints
     type: infrastructure
-    description: Production-bound AI and data services must not expose public network
-      access.
+    description: Production-bound AI and data services must not expose public network access.
     introduced_on: '04'
     persists: true
   - id: fail_closed_decisions
     type: application
-    description: Risky automation paths must fail closed and require explicit human
-      review.
+    description: Risky automation paths must fail closed and require explicit human review.
     introduced_on: '04'
     persists: true
   - id: durable_resume_idempotency
     type: application
-    description: Durable state recovery must resume safely without duplicating side
-      effects.
+    description: Durable state recovery must resume safely without duplicating side effects.
     introduced_on: '05'
     persists: true
   - id: conflicting_authority_refusal
     type: business
-    description: Conflicting records or review evidence must trigger refusal rather
-      than silent blending.
+    description: Conflicting records or review evidence must trigger refusal rather than silent blending.
     introduced_on: '06'
     persists: true
   - id: pii_redaction_before_audit
     type: process
-    description: Sensitive content must be redacted before logging, audit writes,
-      or downstream release evidence.
+    description: Sensitive content must be redacted before logging, audit writes, or downstream release evidence.
     introduced_on: '07'
     persists: true
   - id: search_token_auth_only
@@ -2593,52 +2325,43 @@ days:
     persists: true
   - id: keyless_runtime_identity
     type: identity
-    description: Runtime identity should prefer managed identity or delegated flows
-      over embedded credentials.
+    description: Runtime identity should prefer managed identity or delegated flows over embedded credentials.
     introduced_on: 08
     persists: true
   - id: cost_ceiling_enforced
     type: business
-    description: Economic controls must prevent runaway routing, caching, or model-selection
-      cost drift.
+    description: Economic controls must prevent runaway routing, caching, or model-selection cost drift.
     introduced_on: 09
     persists: true
   - id: release_packet_before_prod
     type: process
-    description: Production acceptance requires a release packet, explicit ownership,
-      and rollback-ready evidence.
+    description: Production acceptance requires a release packet, explicit ownership, and rollback-ready evidence.
     introduced_on: '10'
     persists: true
   - id: actor_bound_approvals
     type: identity
-    description: Approval and impersonation flows must remain bound to the real human
-      actor.
+    description: Approval and impersonation flows must remain bound to the real human actor.
     introduced_on: '11'
     persists: true
   - id: private_dns_resolution
     type: infrastructure
-    description: Private endpoints must resolve privately and block public fallback
-      through DNS and routing.
+    description: Private endpoints must resolve privately and block public fallback through DNS and routing.
     introduced_on: '12'
     persists: true
   - id: integration_contract_compensations
     type: process
-    description: External contracts require DLQ handling and compensating actions
-      rather than silent drops.
+    description: External contracts require DLQ handling and compensating actions rather than silent drops.
     introduced_on: '13'
     persists: true
   - id: rollback_traceability
     type: process
-    description: Breaking-change response must preserve rollback readiness and end-to-end
-      trace correlation.
+    description: Breaking-change response must preserve rollback readiness and end-to-end trace correlation.
     introduced_on: '14'
     persists: true
   mastery_gates:
   - id: day14_repo_evidence
     mode: blocking
-    command: uv run python -m pytest tests/day14/test_breaking_changes.py -q && uv
-      run python scripts/run_chaos_capstone.py && uv run aegisap-lab artifact rebuild
-      --day 14
+    command: uv run python -m pytest tests/day14/test_breaking_changes.py -q && uv run python scripts/run_chaos_capstone.py && uv run aegisap-lab artifact rebuild --day 14
     success_marker: '"day": "14"'
     covers_constraints:
     - regulated_invoice_auditability
@@ -2665,24 +2388,18 @@ days:
     - private_dns_resolution
     evidence_source: cloud_probe
   chaos_gate:
-    failure_signal: A breaking change brings down the orchestration path and the team
-      must restore service without losing correlation or rollback readiness.
-    diagnostic_surface: Chaos drill evidence, trace correlation artifacts, rollback
-      gates, and cloud-truth posture checks.
+    failure_signal: A breaking change brings down the orchestration path and the team must restore service without losing correlation or rollback readiness.
     expected_recovery_artifact: build/day14/cto_trace_report.json
     time_box_minutes: 35
-    facilitator_intervention_rule: If the learner misses the time box, the facilitator
-      must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only
-      topology, network, RBAC, and log-evidence questions.
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: A breaking change brings down the orchestration path and the team must restore service without losing correlation or rollback readiness.
   automation_drills:
   - id: drill_07_model_regression
     default: false
     mode: artifact
     name: Model Version Changed - F1 Regression
-    description: Rebuilds the Day 14 release artifacts, then injects a canary regression
-      into the protected baseline comparison.
-    expected_signal: gate_canary_regression fails because the canary F1 drops below
-      the protected baseline.
+    description: Rebuilds the Day 14 release artifacts, then injects a canary regression into the protected baseline comparison.
+    expected_signal: gate_canary_regression fails because the canary F1 drops below the protected baseline.
     source_file: evals/failure_drills/drill_07_model_regression.json
     mutation: day14_canary_regression
     drift_layers:
@@ -2691,10 +2408,8 @@ days:
     default: false
     mode: artifact
     name: Data Residency Violation - Wrong Region
-    description: Rebuilds the Day 14 residency report, then injects a non-compliant
-      resource location into the evidence chain.
-    expected_signal: gate_data_residency fails because at least one resource now violates
-      the approved region.
+    description: Rebuilds the Day 14 residency report, then injects a non-compliant resource location into the evidence chain.
+    expected_signal: gate_data_residency fails because at least one resource now violates the approved region.
     source_file: evals/failure_drills/drill_08_data_residency_violation.json
     mutation: day14_data_residency_violation
     drift_layers:
@@ -2704,10 +2419,8 @@ days:
     default: false
     mode: artifact
     name: Correlation ID Not Propagated - Trace Gap
-    description: Rebuilds the Day 14 trace report, then drops correlation coverage
-      so the learner must restore trace continuity.
-    expected_signal: gate_trace_correlation fails because at least one trace no longer
-      carries correlation_id.
+    description: Rebuilds the Day 14 trace report, then drops correlation coverage so the learner must restore trace continuity.
+    expected_signal: gate_trace_correlation fails because at least one trace no longer carries correlation_id.
     source_file: evals/failure_drills/drill_09_correlation_gap.json
     mutation: day14_correlation_gap
     drift_layers:
@@ -2717,10 +2430,8 @@ days:
     default: true
     mode: artifact
     name: Rollback Failure - Invalid Image Manifest
-    description: Rebuilds the Day 14 release bundle, then erases rollback readiness
-      so the learner must restore the stable revision path.
-    expected_signal: gate_rollback_readiness fails because the stable revision and
-      runbook are no longer available.
+    description: Rebuilds the Day 14 release bundle, then erases rollback readiness so the learner must restore the stable revision path.
+    expected_signal: gate_rollback_readiness fails because the stable revision and runbook are no longer available.
     source_file: evals/failure_drills/drill_10_rollback_failure.json
     mutation: day14_rollback_failure
     drift_layers:
@@ -2731,33 +2442,44 @@ days:
     mode: artifact
     source_file: evals/failure_drills/drill_19_shadow_compensation_backlog.json
     name: Shadow Drift - Compensation Replay Trace Gap
-    description: Rebuilds the Day 14 trace evidence, then injects a downstream trace
-      gap caused by replay traffic arriving without complete compensation markers.
-    expected_signal: Executive incident evidence now shows one replay path without
-      complete trace continuity even though the primary rollback path still exists.
+    description: Rebuilds the Day 14 trace evidence, then injects a downstream trace gap caused by replay traffic arriving without complete compensation markers.
+    expected_signal: Executive incident evidence now shows one replay path without complete trace continuity even though the primary rollback path still exists.
     mutation: day14_shadow_compensation_backlog
     shadow_origin_day: '13'
-    secondary_failure_signal: One replay path now arrives without complete compensation
-      markers or trace continuity.
+    secondary_failure_signal: One replay path now arrives without complete compensation markers or trace continuity.
     drift_layers:
     - application
     - ci_cd
   scaffold_level: starter_only
-  cost_of_failure: If elite-ops gates stay false-green during an incident, executives
-    lose trustworthy go/no-go evidence exactly when recovery decisions matter most.
+  cost_of_failure: If elite-ops gates stay false-green during an incident, executives lose trustworthy go/no-go evidence exactly when recovery decisions matter most.
   kql_evidence:
     artifact_path: build/day14/kql_evidence.json
     minimum_queries: 1
     review_stage: capstone_cab_board
+    minimum_pre_patch_queries: 1
+  oral_defense_objectives:
+  - Defend the chosen repair path against a credible rejected alternative.
+  - Name the blast radius, recovery condition, and evidence that would change the decision.
+  - Name the approver role and the artifact or proof that role would require.
+  incident_asset_ref: incident.day14
+  diagnostic_independence:
+    mode: advisory
+    timeline_artifact_path: build/day14/diagnostic_timeline.md
+    review_stage: cab_board
+    hint_state_path: .aegisap-lab/cache/instructor/interventions/day14.json
+    required_markers:
+    - 'First symptom:'
+    - 'First telemetry proof:'
+    - 'Subsystem narrowed:'
+    - 'Durable repair chosen:'
+    - 'Post-fix confirmation:'
+    - 'Repo search before telemetry:'
 customer_profile:
   name: Northwind Treasury Services
-  operating_context: Regulated financial customer running invoice and claims automation
-    under CAB control, strict auditability, no public production endpoints, and named
-    release ownership.
+  operating_context: Regulated financial customer running invoice and claims automation under CAB control, strict auditability, no public production endpoints, and named release ownership.
   non_negotiables:
   - No public endpoints for production-bound AI and data services.
   - Every durable change must be codified in repo-owned Python or Bicep.
   - CAB evidence must exist before production acceptance or exception approval.
-  - PII handling, delegated identity, and blast-radius analysis must be defensible
-    under review.
+  - PII handling, delegated identity, and blast-radius analysis must be defensible under review.
   - Cost controls and rollback evidence remain in force even during incidents.

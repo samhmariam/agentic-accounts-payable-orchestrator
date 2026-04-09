@@ -50,9 +50,11 @@ uv run aegisap-lab incident start --day 11
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
 - Day 11 evidence must include at least two literal native commands plus one raw KQL query.
 
+- Save `build/day11/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day11/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day11/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 
@@ -61,15 +63,14 @@ uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_
 uv run aegisap-lab artifact rebuild --day 11
 ```
 
-## Key Files
+## Investigation Surfaces
 
-- `modules/day_11_delegated_identity/README.md`
 - `notebooks/day_11_delegated_identity_obo.py`
 - `notebooks/bridges/day11_delegated_identity.md`
-- `src/aegisap/identity/actor_verifier.py`
-- `src/aegisap/identity/obo.py`
-- `scripts/verify_delegated_identity_contract.py`
-- `scenarios/day11`
+- Incident Asset Ref: `incident.day11`
+- Repair Domain: `Actor Verifier`
+- Repair Domain: `Obo`
+- Repair Domain: `Verify Delegated Identity Contract`
 
 ## Automated Drill
 

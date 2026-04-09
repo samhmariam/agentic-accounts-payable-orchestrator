@@ -5,10 +5,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .curriculum import normalize_day, resolve_repo_root
+from .curriculum import get_day, load_manifest, normalize_day, resolve_repo_root
 
 
-RUBRIC_DIMENSIONS: tuple[tuple[str, str, int], ...] = (
+DEFAULT_RUBRIC_DIMENSIONS: tuple[tuple[str, str, int], ...] = (
     ("technical_correctness", "Technical Correctness", 35),
     ("trade_off_reasoning", "Trade-off Reasoning", 20),
     ("process_fluency", "Process Fluency", 15),
@@ -81,16 +81,33 @@ def _prompt_score(label: str, max_points: int) -> tuple[int, str]:
     return value, rationale
 
 
+def _label_for_dimension(key: str) -> str:
+    return key.replace("_", " ").title().replace("Obo", "OBO").replace("Iac", "IaC")
+
+
+def _dimension_contracts(*, day_id: str, repo_root: str | Path | None = None) -> list[tuple[str, str, int]]:
+    try:
+        day_entry = get_day(load_manifest(repo_root), day_id)
+    except Exception:
+        return list(DEFAULT_RUBRIC_DIMENSIONS)
+    weights = day_entry.get("rubric_weights", {})
+    if not isinstance(weights, dict) or not weights:
+        return list(DEFAULT_RUBRIC_DIMENSIONS)
+    return [(key, _label_for_dimension(key), int(points)) for key, points in weights.items()]
+
+
 def _normalize_scores(
     scores: dict[str, int] | None,
     rationales: dict[str, str] | None,
     *,
+    day_id: str,
+    repo_root: str | Path | None = None,
     prompt_for_missing: bool,
 ) -> list[dict[str, Any]]:
     score_map = scores or {}
     rationale_map = rationales or {}
     normalized: list[dict[str, Any]] = []
-    for key, label, max_points in RUBRIC_DIMENSIONS:
+    for key, label, max_points in _dimension_contracts(day_id=day_id, repo_root=repo_root):
         score = score_map.get(key)
         rationale = rationale_map.get(key, "").strip()
         if score is None and prompt_for_missing:
@@ -153,6 +170,8 @@ def run_rubric_check(
     dimensions = _normalize_scores(
         scores,
         rationales,
+        day_id=day_id,
+        repo_root=root,
         prompt_for_missing=prompt_for_missing,
     )
     payload = {

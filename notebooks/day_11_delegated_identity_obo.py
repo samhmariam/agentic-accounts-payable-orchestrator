@@ -145,7 +145,11 @@ def _kql_evidence(mo):
 
         Capture at least one literal Log Analytics query with:
 
+        - capture order
+        - captured_before_patch=true
         - workspace
+        - first_signal_or_followup
+        - correlation or trace reference when available
         - purpose
         - observed excerpt
         - operator interpretation
@@ -168,7 +172,7 @@ def _codification_bridge(mo):
 
         - Portal state: the required approver group and the acting user are no longer being bound together safely.
         - Notebook proof: the actor-binding preview shows whether the runtime is trusting payload identity instead of group-backed evidence.
-        - Permanent repo change: `src/aegisap/identity/actor_verifier.py`, `src/aegisap/identity/obo.py`, and, if needed, `scripts/verify_delegated_identity_contract.py`.
+        - Durable repo boundary: the delegated-identity owner in the actor-binding or token-exchange boundary that restores human-bound approval.
 
         Rosetta Stone: `notebooks/bridges/day11_delegated_identity.md`
         """
@@ -193,11 +197,11 @@ def _production_patch(mo):
 
         Write the durable patch in the repo target below, not inside Marimo.
 
-        Move into the real identity boundary and implement the repair in:
+        Move into the real identity boundary and identify the durable owner of:
 
-        - `src/aegisap/identity/actor_verifier.py`
-        - `src/aegisap/identity/obo.py` only if the delegated token path is also wrong
-        - `scripts/verify_delegated_identity_contract.py` if the artifact contract no longer reflects the repaired check
+        - actor binding for the real human approver
+        - delegated token exchange and authority scoping
+        - contract verification only if the evidence path is wrong
 
         Then update the Day 11 evidence:
 
@@ -281,7 +285,7 @@ def _chaos_gate(mo):
 
         Failure signal: The OBO path loses actor fidelity, making approvals or downstream actions look like app-only activity.
 
-        Diagnostic surface: Entra or app registration evidence, OBO notebook proof, actor verifier code, and cloud-truth posture checks.
+        Starting signal: Delegated approval begins failing with actor-binding or OBO symptoms once real identity checks run.
 
         Expected recovery artifact: `build/day11/obo_contract.json`
 

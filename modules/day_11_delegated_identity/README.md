@@ -49,14 +49,16 @@ If actor binding fails, the system can accept the wrong human as an approver and
 - Until both raw evidence files are complete, wrappers stay banned. After that, wrappers are allowed only for artifact rebuild, mastery, or reset flows.
 - Day 11 evidence must include at least two literal native commands plus one raw KQL query.
 
+- Save `build/day11/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day11/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day11/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Chaos Gate
 
 - Failure signal: The OBO path loses actor fidelity, making approvals or downstream actions look like app-only activity.
-- Diagnostic surface: Entra or app registration evidence, OBO notebook proof, actor verifier code, and cloud-truth posture checks.
+- Starting signal: Delegated approval begins failing with actor-binding or OBO symptoms once real identity checks run.
 - Expected recovery artifact: `build/day11/obo_contract.json`
 - Time box: 30 minutes
 
@@ -67,14 +69,15 @@ Do not edit code in this module folder.
 - Diagnostic Notebook: `notebooks/day_11_delegated_identity_obo.py`
 - Primary Day Doc: `docs/DAY_11.md`
 - Rosetta Stone Bridge: `notebooks/bridges/day11_delegated_identity.md`
-- Production Target: `src/aegisap/identity/actor_verifier.py`
-- Production Target: `src/aegisap/identity/obo.py`
-- Production Target: `scripts/verify_delegated_identity_contract.py`
-- Scenario Pack: `scenarios/day11`
+- Repair Domain: `Actor Verifier`
+- Repair Domain: `Obo`
+- Repair Domain: `Verify Delegated Identity Contract`
+- Incident Asset Ref: `incident.day11`
 - Verification Command: `uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_obo_flow.py tests/day11/test_obo_simulation.py -q`
 - Verification Command: `uv run aegisap-lab artifact rebuild --day 11`
 - Native Evidence Artifact: `build/day11/native_operator_evidence.json`
 - KQL Evidence Artifact: `build/day11/kql_evidence.json`
+- Diagnostic Timeline: `build/day11/diagnostic_timeline.md`
 
 ## Automated Drill
 

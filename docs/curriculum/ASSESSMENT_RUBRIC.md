@@ -11,7 +11,10 @@ model; the manifest defines per-day dimension names and weights.
 
 ## Scoring Model
 
-Each day is scored out of **100 points** across five dimensions.
+Each day is scored out of **100 points** across five base dimensions. Days 8-14
+replace 15 points of generic weighting with `Diagnostic Independence`, so the
+learner is scored on how they found the fault before they are scored on how
+smoothly they defended the fix.
 
 | Dimension | Points | What it measures |
 |---|---|---|
@@ -24,6 +27,18 @@ Each day is scored out of **100 points** across five dimensions.
 Note: per-day variant weights (e.g. Day 1 weights agent-fit signals at 25 points
 rather than the generic Technical Correctness label) are defined in
 `CURRICULUM_MANIFEST.yaml → days[n].rubric_weights`.
+
+### Diagnostic Independence (Days 8-14 only, max 15)
+
+This dimension is scored from saved evidence, not assessor intuition.
+
+| Band | Points | Observable behavior |
+|---|---|---|
+| Full | 13–15 | Learner captures pre-patch telemetry first, narrows the subsystem from native evidence or KQL, and records a replayable timeline before touching the repo patch. |
+| Strong | 10–12 | Learner uses telemetry first but the saved evidence is thin in one place, such as a missing correlation reference or an incomplete interpretation note. |
+| Developing | 6–9 | Learner eventually finds the right subsystem, but the evidence chain is partial, out of order, or not clearly pre-patch. |
+| At risk | 1–5 | Learner relies on local repo search, memory, or post-patch screenshots more than saved telemetry. |
+| Insufficient | 0 | No pre-patch telemetry proof, only post-patch evidence, hint ladder used, or repo search occurred before first telemetry capture. |
 
 ## Pass Bars
 
@@ -101,6 +116,17 @@ Explaining the portal is not enough. A passing learner must be able to say:
 If the learner can inspect the portal but cannot codify the fix, score
 `Technical Correctness` and `Process Fluency` down accordingly.
 
+For Days 8-14, diagnostic independence is only scoreable when the artifact pack
+contains:
+
+- `LAB_OUTPUT/DIAGNOSTIC_PROOF/kql_evidence.json`
+- `LAB_OUTPUT/DIAGNOSTIC_PROOF/native_operator_evidence.json`
+- `LAB_OUTPUT/DIAGNOSTIC_PROOF/diagnostic_timeline.md`
+
+Assessors must be able to verify from saved evidence that the learner captured
+the first telemetry signal before patching. If that proof is absent, assign
+`Diagnostic Independence = 0 / 15` even if the learner repaired the issue.
+
 ## Zero-Tolerance Conditions
 
 The following conditions hard-fail the day regardless of numeric total.
@@ -137,6 +163,11 @@ See `docs/curriculum/GRADUATION_RUBRIC.md` for full tier definitions.
   existence and gate behavior. They are separate from the 100-point rubric and tested by
   `tests/training/test_checkpoints.py`.
 - Trainers must record the first exact failure signal before offering help.
+- Day 8 break-glass recovery uses a mandatory hint ladder. `T+30` and `T+60`
+  hints unblock progression but force `Diagnostic Independence = 0 / 15`.
+- Day 14 is scored as a cascading crucible: network first, identity second,
+  correlation or regression third. Later-stage evidence should not appear until
+  the earlier masking fault is cleared.
 - Capstone A (AegisAP production defence): full technical and governance pack across Days 1–14.
 - Capstone B (transfer domain): Days 12–14 applied to a second domain. See `CAPSTONE_B_TRANSFER.md`.
 - Release-style oral defense is required. A green notebook alone is not a pass.

@@ -99,17 +99,11 @@ def test_bridge_file_exists(day: dict) -> None:
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS])
-def test_bridge_targets_exist(day: dict) -> None:
+def test_repair_domains_exist(day: dict) -> None:
     mapping = day["portal_to_script_mapping"]
-    missing = []
-    for target in mapping["production_targets"]:
-        rel_path = target["path"]
-        if not (REPO_ROOT / rel_path).exists():
-            missing.append(rel_path)
-    assert not missing, (
-        f"Day {day['id']} production_targets missing:\n"
-        + "\n".join(f"  {p}" for p in missing)
-    )
+    domains = mapping["repair_domains"]
+    assert domains, f"Day {day['id']} repair_domains missing"
+    assert all(target["name"].strip() for target in domains)
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS])

@@ -8,9 +8,15 @@
 - checkpoint_status: not_applicable / pass / fail
 - incident_drill_result: not_run / pass / partial / fail
 - technical_correctness:
-- debugging_discipline:
-- security_reasoning:
-- production_readiness_judgment:
+- trade_off_reasoning:
+- process_fluency:
+- artifact_quality:
+- oral_defense:
+- diagnostic_independence: not_applicable / 0-15
+- diagnostic_evidence_replayed_live: yes / no / not_applicable
+- pre_patch_telemetry_present: yes / no / not_applicable
+- repo_search_before_telemetry: yes / no / unknown
+- hint_ladder_used: no / T+30 / T+60 / other
 - review_response_quality: not_applicable / weak / acceptable / strong
 - peer_reviewer_challenge_quality: not_applicable / 1 / 2 / 3 / 4 / 5
 - remediation_assigned:

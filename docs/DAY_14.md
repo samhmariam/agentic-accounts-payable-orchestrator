@@ -56,9 +56,11 @@ uv run aegisap-lab incident start --day 14
 - Peer checklist file: `docs/curriculum/checklists/day14_peer_red_team.md`
 - Revert Proof: `docs/curriculum/artifacts/day14/REVERT_PROOF.md`
 
+- Save `build/day14/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day14/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day14/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 
@@ -68,21 +70,15 @@ uv run python scripts/run_chaos_capstone.py
 uv run aegisap-lab artifact rebuild --day 14
 ```
 
-## Key Files
+## Investigation Surfaces
 
-- `modules/day_14_elite_ops/README.md`
 - `notebooks/day_14_breaking_changes_elite_ops.py`
 - `notebooks/bridges/day14_elite_operations.md`
-- `src/aegisap/deploy/gates_v2.py`
-- `src/aegisap/traceability/correlation.py`
-- `scripts/verify_trace_correlation.py`
-- `scripts/run_chaos_capstone.py`
-- `build/day14/native_operator_evidence.json`
-- `scenarios/day14`
-
-## CAPSTONE_B
-
-This day still feeds the transfer track and must preserve the inherited customer constraints while the second domain comes online.
+- Incident Asset Ref: `incident.day14`
+- Repair Domain: `Gates V2`
+- Repair Domain: `Correlation`
+- Repair Domain: `Verify Trace Correlation`
+- Repair Domain: `Run Chaos Capstone`
 
 ## Automated Drill
 
@@ -90,3 +86,10 @@ This day still feeds the transfer track and must preserve the inherited customer
 - `uv run aegisap-lab drill inject --day 14`
 - `uv run aegisap-lab drill reset --day 14`
 - `uv run aegisap-lab mastery --day 14` writes `build/day14/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.
+
+## CAPSTONE_B Transfer Hook
+
+In the transfer capstone, preserve the same cascading-crucible discipline:
+restore the first visible network fault, follow the newly revealed identity
+signal, then prove the final correlation or regression decision with replayable
+telemetry and rollback-ready evidence.

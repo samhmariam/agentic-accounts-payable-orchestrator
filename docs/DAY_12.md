@@ -52,9 +52,11 @@ uv run aegisap-lab incident start --day 12
 - Day 12 evidence must include at least two literal native commands plus one raw KQL query.
 - Day 12 does not pass until the facilitator makes the learner rerun one saved proof live
 
+- Save `build/day12/diagnostic_timeline.md` while you investigate so the scoring panel can verify the first symptom, first telemetry proof, subsystem narrowed, durable repair, and post-fix confirmation.
+
 ## KQL Evidence
 
-Save `build/day12/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query with workspace, expected signal, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
+Save `build/day12/kql_evidence.json` before you patch production code. Capture at least one literal Log Analytics query before the repo patch with capture order, `captured_before_patch=true`, workspace, `first_signal_or_followup`, correlation or trace reference when available, observed excerpt, and operator interpretation. The facilitator or CAB reviewer may replay one saved query live.
 
 ## Verification Commands
 
@@ -63,21 +65,15 @@ uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bic
 uv run aegisap-lab artifact rebuild --day 12
 ```
 
-## Key Files
+## Investigation Surfaces
 
-- `modules/day_12_private_networking/README.md`
 - `notebooks/day_12_private_networking_constraints.py`
 - `notebooks/bridges/day12_private_networking.md`
-- `src/aegisap/network/bicep_policy_checker.py`
-- `src/aegisap/network/private_endpoint_probe.py`
-- `scripts/check_private_network_static.py`
-- `scripts/verify_private_network_posture.py`
-- `build/day12/native_operator_evidence.json`
-- `scenarios/day12`
-
-## CAPSTONE_B
-
-This day still feeds the transfer track and must preserve the inherited customer constraints while the second domain comes online.
+- Incident Asset Ref: `incident.day12`
+- Repair Domain: `Bicep Policy Checker`
+- Repair Domain: `Private Endpoint Probe`
+- Repair Domain: `Check Private Network Static`
+- Repair Domain: `Verify Private Network Posture`
 
 ## Automated Drill
 
@@ -85,3 +81,9 @@ This day still feeds the transfer track and must preserve the inherited customer
 - `uv run aegisap-lab drill inject --day 12`
 - `uv run aegisap-lab drill reset --day 12`
 - `uv run aegisap-lab mastery --day 12` writes `build/day12/constraint_lineage.json` so later reviews can see the inherited rules this day still carries.
+
+## CAPSTONE_B Transfer Hook
+
+Carry the same private-network proof into the transfer domain. The assessor is
+looking for telemetry-first diagnosis, explicit dependency mapping, and a
+customer-safe argument for why public fallback remains unacceptable.

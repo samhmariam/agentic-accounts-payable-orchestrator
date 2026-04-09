@@ -19,6 +19,98 @@ graduation_tiers:
     security_communication: true
     ops_communication: true
     correct_go_nogo_under_pressure: true
+bootstrap_day:
+  id: '00'
+  title: Bootstrap Incident, Portal Evidence, and Environment Contract Recovery
+  notebook_file: notebooks/day_0_bootstrap_incident.py
+  primary_doc_file: docs/DAY_00_AZURE_BOOTSTRAP.md
+  legacy_doc_files: []
+  rubric_weights:
+    bootstrap_contract_recovery: 20
+    identity_model_accuracy: 20
+    portal_to_automation_bridge: 20
+    reproducibility_reasoning: 20
+    oral_defense: 20
+  artifact_files:
+  - docs/curriculum/artifacts/day00/BOOTSTRAP_RECOVERY_NOTE.md
+  portal_to_script_mapping:
+    portal_surface: Subscription, resource group, deployment names, and state-file truth for the selected bootstrap track
+    bridge_file: notebooks/bridges/day00_bootstrap_contract.md
+    repair_domains:
+    - name: Day 0 State Contract
+      surface_type: infrastructure
+    - name: Setup Env Loader
+      surface_type: ci_cd
+    - name: Provisioning Scripts
+      surface_type: infrastructure
+  zero_tolerance: []
+  capstone_flags:
+    capstone_a: false
+    capstone_b: false
+  phase: phase_0_bootstrap_contract
+  incident_asset_ref: incident.day00
+  injection_command: uv run aegisap-lab incident start --day 00 --track core
+  track_options:
+  - core
+  - full
+  revert_state: .aegisap-lab/state/day00.json
+  verification_commands:
+  - bash -lc "source ./scripts/setup-env.sh core && uv run python scripts/verify_env.py --track core"
+  - bash -lc "source ./scripts/setup-env.sh full && uv run python scripts/verify_env.py --track full"
+  review_contract:
+    evaluator_profile: day00-bootstrap-contract
+    human_required: true
+  customer_context: The Azure bootstrap contract drifted, and the cohort can no longer trust the environment reload path or the identity boundary inherited by later days.
+  persistent_constraints:
+  - id: bootstrap_contract_reproducibility
+    type: infrastructure
+    description: The Day 0 environment must be reloadable from repo-backed state rather than remembered shell state.
+    introduced_on: '00'
+    persists: true
+  - id: keyless_runtime_identity
+    type: identity
+    description: The bootstrap path must keep Azure access keyless and explainable through DefaultAzureCredential and RBAC.
+    introduced_on: '00'
+    persists: true
+  mastery_gates:
+  - id: day00_core_env
+    mode: blocking
+    command: bash -lc "source ./scripts/setup-env.sh core && uv run python scripts/verify_env.py --track core"
+    success_marker: '[PASS] FDE Environment Validated'
+    covers_constraints:
+    - bootstrap_contract_reproducibility
+    - keyless_runtime_identity
+    evidence_source: bootstrap
+  - id: day00_full_env
+    mode: blocking
+    command: bash -lc "source ./scripts/setup-env.sh full && uv run python scripts/verify_env.py --track full"
+    success_marker: '[PASS] FDE Environment Validated'
+    covers_constraints:
+    - bootstrap_contract_reproducibility
+    - keyless_runtime_identity
+    evidence_source: bootstrap
+  chaos_gate:
+    failure_signal: The Day 0 state file no longer matches the selected bootstrap track, so the environment cannot be reloaded safely.
+    expected_recovery_artifact: .day0/core.json
+    time_box_minutes: 20
+    facilitator_intervention_rule: If the learner misses the time box, the facilitator must use FDE_DEBUGGING_FRAMEWORK.md, keep hands off the keyboard, and ask only topology, network, RBAC, and log-evidence questions.
+    starting_signal: scripts/setup-env.sh or verify_env.py fails because the Day 0 state contract is missing, corrupt, or pointed at the wrong deployment.
+  automation_drills:
+  - id: day00_bootstrap_contract_drift
+    default: true
+    mode: incident
+    name: Day 00 bootstrap contract drift
+    description: Corrupts the track-specific Day 0 state file so the learner must recover the bootstrap contract before the cohort can trust Azure access.
+    expected_signal: The chosen track can no longer reload the environment contract from .day0/<track>.json.
+    drift_layers:
+    - infrastructure
+    - identity
+  scaffold_level: guided
+  cost_of_failure: If Day 0 drifts, every later lab inherits a false environment contract and the cohort loses the ability to distinguish Azure truth from local shell luck.
+  oral_defense_objectives:
+  - Defend why the bootstrap fix belongs in repo-tracked automation rather than in remembered shell steps.
+  - Name the identity boundary and the evidence that proves the selected track is valid again.
+  - Name the first recovery command you would run if the Day 0 contract drifted again.
 days:
 - id: '01'
   title: Agentic Systems Fundamentals, Business Value, and FDE Judgment
@@ -1549,6 +1641,26 @@ days:
   review_contract:
     evaluator_profile: wave4-day11-actor-binding
     human_required: true
+  stakeholder_inject:
+    requester_role: client_ciso
+    channel: hostile_identity_review
+    unsafe_request: Approve the OBO path quickly and skip the actor-binding proof so rollout can continue.
+    required_artifacts:
+    - docs/curriculum/artifacts/day11/APPROVAL_AUTHORITY_MODEL.md
+    - docs/curriculum/artifacts/day11/OBO_THREAT_MODEL.md
+    - docs/curriculum/artifacts/day11/IDENTITY_EXCEPTION_REQUEST_RESPONSE.md
+    delivery_mode: triad_roleplay
+    script_path: scenarios/day11/facilitator_script.yaml
+    role_cards:
+      interviewer: scenarios/day11/role_cards/interviewer.md
+      stakeholder: scenarios/day11/role_cards/stakeholder.md
+      observer_scribe: scenarios/day11/role_cards/observer_scribe.md
+    required_questions:
+    - Where is the real human actor preserved instead of collapsed into app-only activity?
+    - Why is the delegated audience or scope narrow enough for this boundary?
+    - Who can approve an exception, how long does it last, and what evidence must they see first?
+    capture_artifact: docs/curriculum/artifacts/day11/IDENTITY_EXCEPTION_REQUEST_RESPONSE.md
+    observer_scorecard: docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md
   native_operator_evidence:
     artifact_path: build/day11/native_operator_evidence.json
     mode: blocking
@@ -1778,6 +1890,26 @@ days:
     review_mode: standard
     required_review_roles:
     - facilitator
+  stakeholder_inject:
+    requester_role: network_security_architect
+    channel: hostile_infosec_review
+    unsafe_request: Allow temporary public fallback and defer the private-only fix until after the release.
+    required_artifacts:
+    - docs/curriculum/artifacts/day12/NETWORK_DEPENDENCY_REGISTER.md
+    - docs/curriculum/artifacts/day12/SECURITY_EXCEPTION_REQUEST.md
+    - docs/curriculum/artifacts/day12/EGRESS_CONTROL_POLICY.md
+    delivery_mode: triad_roleplay
+    script_path: scenarios/day12/facilitator_script.yaml
+    role_cards:
+      interviewer: scenarios/day12/role_cards/interviewer.md
+      stakeholder: scenarios/day12/role_cards/stakeholder.md
+      observer_scribe: scenarios/day12/role_cards/observer_scribe.md
+    required_questions:
+    - Why is public fallback unacceptable even if it would unblock the rollout today?
+    - Which static and live signals prove the dependency still stays private-only?
+    - If an exception is required, who approves it, when does it expire, and what compensating control keeps the customer safe?
+    capture_artifact: docs/curriculum/artifacts/day12/SECURITY_EXCEPTION_REQUEST.md
+    observer_scorecard: docs/curriculum/templates/ACTIVE_INCEPTION_OBSERVER_SCORECARD.md
   native_operator_evidence:
     artifact_path: build/day12/native_operator_evidence.json
     mode: blocking
@@ -2216,6 +2348,7 @@ days:
   - docs/curriculum/artifacts/day14/EXECUTIVE_INCIDENT_BRIEF.md
   - docs/curriculum/artifacts/day14/ELITE_READINESS_SCORECARD.md
   - docs/curriculum/artifacts/day14/REVERT_PROOF.md
+  - docs/curriculum/artifacts/day14/BLANK_SLATE_ARCHITECTURE_DRILL.md
   portal_to_script_mapping:
     portal_surface: Canary health, rollback markers, and dual-sink trace evidence
     bridge_file: notebooks/bridges/day14_elite_operations.md
@@ -2254,6 +2387,18 @@ days:
     requires_kql_replay: true
     requires_revert_proof: true
     peer_checklist_file: docs/curriculum/checklists/day14_peer_red_team.md
+  blank_slate_drill:
+    artifact_path: LAB_OUTPUT/architecture_rebuild/blank_slate_architecture.md
+    scored_with_day: '14'
+    required_sections:
+    - system diagram
+    - trust boundaries
+    - identity and token path
+    - network and egress posture
+    - MCP or governed write-path boundary
+    - IaC skeleton
+    - rollback and governance plan
+    - one rejected alternative
   native_operator_evidence:
     artifact_path: build/day14/native_operator_evidence.json
     mode: blocking

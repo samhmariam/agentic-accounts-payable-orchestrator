@@ -62,6 +62,12 @@ Save `build/day11/kql_evidence.json` before you patch production code. Capture a
 - Expected recovery artifact: `build/day11/obo_contract.json`
 - Time box: 30 minutes
 
+## Hostile Identity Review
+
+Run the Day 11 triad before the notebook patch work starts. The learner must
+defend actor binding, OBO scope or audience, approval authority, and exception
+handling against a hostile identity reviewer.
+
 ## Day X File Manifest
 
 Do not edit code in this module folder.

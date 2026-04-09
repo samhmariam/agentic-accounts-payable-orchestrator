@@ -11,7 +11,7 @@ operational readiness.
 
 | Day | Objective | New Architectural Layer | Azure Services | Command | Artifact | Exit Check |
 | --- | --- | --- | --- | --- | --- | --- |
-| Day 0 | Bootstrap a keyless Azure substrate | Provisioning + RBAC | Microsoft Foundry, Azure AI Search, Blob Storage, optional PostgreSQL, Key Vault, App Insights, Container Apps | `uv run python scripts/verify_env.py --track core` or `--track full` | `.day0/core.json` or `.day0/full.json` | Foundry inference plus Azure services reachable with `DefaultAzureCredential` |
+| Day 0 | Recover the bootstrap contract before the cohort trusts Azure again | Provisioning + RBAC | Microsoft Foundry, Azure AI Search, Blob Storage, optional PostgreSQL, Key Vault, App Insights, Container Apps | `uv run aegisap-lab incident start --day 00 --track core` or `--track full` | `.day0/core.json` or `.day0/full.json` | The selected track can be reloaded from `.day0/<track>.json` and re-verified with `DefaultAzureCredential` |
 | Day 1 | Canonicalize invoice intake | Tool-grounded extraction | Azure OpenAI | `uv run aegisap-lab incident start --day 01` | `build/day1/golden_thread_day1.json` | Canonical invoice emitted or rejected deterministically |
 | Day 2 | Route a trusted invoice through explicit state | Stateful control flow | Azure OpenAI substrate from Day 0 | `uv run aegisap-lab incident start --day 02` | `build/day2/golden_thread_day2.json` | Workflow state records route, evidence, and recommendations |
 | Day 3 | Retrieve evidence and rank authority | Multi-agent retrieval with hostile authority ranking | Azure AI Search, Blob Storage | `uv run aegisap-lab incident start --day 03` | `build/day3/golden_thread_day3.json` | Structured authority outranks stale evidence again |
@@ -21,16 +21,16 @@ operational readiness.
 | Day 7 | Repair a guardrail breach before it becomes an audit finding | Redaction boundaries, refusal evidence, eval governance | Managed Identity, Key Vault RBAC, Azure AI Search RBAC, Log Analytics, PostgreSQL audit store | `uv run aegisap-lab incident start --day 07` | `build/day7/eval_report.json` | Sensitive audit evidence is redacted again before persistence |
 | Day 8 | Repair runtime identity drift and re-prove least privilege | IaC role assignments, secure release ownership, trace evidence | Application Insights, Azure Monitor, Bicep, GitHub OIDC | `uv run aegisap-lab incident start --day 08` | `build/day8/deployment_design.json`, `build/day8/regression_baseline.json`, `build/day8/checkpoint_trace_extension.json` | Runtime search access is least-privilege again and release evidence is regenerated |
 | Day 9 | Repair routing and budget drift before finance notices | Model router, workflow cost ledger, conservative cache | Azure OpenAI deployments, Azure Monitor, Application Insights | `uv run aegisap-lab incident start --day 09` | `build/day9/routing_report.json` | Risky work routes back to the strong tier and cost controls stay intact |
-| Day 10 | Prove go/no-go discipline under false-green release pressure | Release envelope integrity, acceptance gates, CAB packet | Azure Container Apps, ACR, Key Vault, Application Insights, GitHub Actions | `uv run aegisap-lab incident start --day 10` | `build/day10/release_envelope.json`, `build/day10/checkpoint_gate_extension.json` | Any failing gate blocks release readiness again |
+| Day 10 | Establish the Capstone A foundation packet under false-green release pressure | Release envelope integrity, acceptance gates, CAB packet | Azure Container Apps, ACR, Key Vault, Application Insights, GitHub Actions | `uv run aegisap-lab incident start --day 10` | `build/day10/release_envelope.json`, `build/day10/checkpoint_gate_extension.json`, `build/capstone/<trainee_id>/release_packet.json` | Any failing gate blocks the Capstone A foundation packet again |
 | Day 11 | Repair delegated identity before authority confusion reaches production | OBO token exchange, actor binding, MSAL token verification | Azure AD, Managed Identity, Azure OpenAI | `uv run aegisap-lab incident start --day 11` | `build/day11/obo_contract.json` | Actor-bound approval only passes when the required group evidence matches the OBO actor |
 | Day 12 | Restore private-network truth when the checker goes blind | VNET injection, Private Endpoints, Private DNS, external-sink guard | Azure Virtual Network, Private Endpoints, Private DNS, Azure Container Apps | `uv run aegisap-lab incident start --day 12` | `build/day12/static_bicep_analysis.json`, `build/day12/private_network_posture.json`, `build/day12/external_sink_disabled.json` | Static and live network evidence agree that the AI surface is private-only |
 | Day 13 | Recover a governed integration boundary under contract drift | Azure Functions, Service Bus, DLQ compensating actions, MCP contract | Azure Functions (Flex Consumption), Azure Service Bus Premium, Azure Container Apps | `uv run aegisap-lab incident start --day 13` | `build/day13/dlq_drain_report.json`, `build/day13/mcp_contract_report.json`, `build/day13/webhook_reliability_report.json` | The MCP contract exposes the governed write path again and compensating-action evidence is intact |
-| Day 14 | Lead the war room through trace, rollback, and chaos evidence | Canary regression, data residency ARM check, trace correlation, chaos capstone, CTO report | Azure Container Apps, Azure Resource Manager, Application Insights, all prior services | `uv run aegisap-lab incident start --day 14` | `build/day14/canary_regression_report.json`, `build/day14/data_residency_report.json`, `build/day14/trace_correlation_report.json`, `build/day14/breaking_changes_drills.json`, `build/day14/cto_trace_report.json` | The elite-ops gates, chaos drill evidence, and CTO packet all agree on the safe decision |
+| Day 14 | Close Capstone A with the final CAB defense, blank-slate drill, and chaos evidence | Canary regression, data residency ARM check, trace correlation, chaos capstone, CTO report | Azure Container Apps, Azure Resource Manager, Application Insights, all prior services | `uv run aegisap-lab incident start --day 14` | `build/day14/canary_regression_report.json`, `build/day14/data_residency_report.json`, `build/day14/trace_correlation_report.json`, `build/day14/breaking_changes_drills.json`, `build/day14/cto_trace_report.json`, `build/capstone/<trainee_id>/final_packet.json` | The elite-ops gates, final CAB packet, blank-slate drill, and chaos evidence all agree on the safe decision |
 
 ## Start Here
 
 1. Read [Training Journey](/workspaces/agentic-accounts-payable-orchestrator/docs/TRAINING_JOURNEY.md).
-2. Provision Azure with [Day 0 Azure Bootstrap](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md).
+2. Start the Day 0 bootstrap incident with [Day 0 Azure Bootstrap](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md) and `uv run aegisap-lab incident start --day 00 --track core` or `--track full`.
 3. Run the golden-thread lab for each day in order.
 4. Use [Curriculum Delivery Map](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) as the single navigation layer for notebook, doc, script, and artifact selection.
 5. Use the notebooks for walkthroughs and the scripts for repeatable execution.
@@ -55,6 +55,7 @@ operational readiness.
 
 ## Notebooks
 
+- `notebooks/day_0_bootstrap_incident.py`
 - `notebooks/day_1_agentic_fundamentals.py`
 - `notebooks/day_2_requirements_architecture.py`
 - `notebooks/day_3_azure_ai_services.py`
@@ -175,4 +176,8 @@ uv run aegisap-lab artifact rebuild --day 07
 uv run aegisap-lab artifact rebuild --day 08
 uv run aegisap-lab artifact rebuild --day 09
 uv run aegisap-lab artifact rebuild --day 10
+uv run aegisap-lab artifact rebuild --day 11
+uv run aegisap-lab artifact rebuild --day 12
+uv run aegisap-lab artifact rebuild --day 13
+uv run aegisap-lab artifact rebuild --day 14
 ```

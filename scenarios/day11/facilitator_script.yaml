@@ -1,0 +1,8 @@
+scenario: day11_hostile_identity_review
+requester_role: client_ciso
+delivery_mode: triad_roleplay
+objective: Force the learner to defend actor binding, OBO audience, and exception handling under hostile review pressure.
+prompts:
+  - Show me exactly where the user identity is preserved instead of collapsed into app-only activity.
+  - Why is this audience or scope correct, and what breaks if it is wider?
+  - Who can approve an exception, for how long, and what evidence must they see first?

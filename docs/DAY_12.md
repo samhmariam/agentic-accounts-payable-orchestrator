@@ -65,6 +65,12 @@ uv run python -m pytest tests/day12/test_network_posture.py tests/day12/test_bic
 uv run aegisap-lab artifact rebuild --day 12
 ```
 
+## Hostile InfoSec Review
+
+Run the Day 12 triad before the notebook patch work starts. The learner must
+defend private-only posture, DNS truth, egress routing, public fallback
+rejection, and exception expiry under hostile InfoSec pressure.
+
 ## Investigation Surfaces
 
 - `notebooks/day_12_private_networking_constraints.py`

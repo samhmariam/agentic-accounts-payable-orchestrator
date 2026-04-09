@@ -64,6 +64,12 @@ Save `build/day12/kql_evidence.json` before you patch production code. Capture a
 - Expected recovery artifact: `build/day12/private_network_posture.json`
 - Time box: 30 minutes
 
+## Hostile InfoSec Review
+
+Run the Day 12 triad before the notebook patch work starts. The learner must
+defend private-only posture, DNS truth, egress routing, public fallback
+rejection, and exception expiry under hostile InfoSec pressure.
+
 ## Day X File Manifest
 
 Do not edit code in this module folder.

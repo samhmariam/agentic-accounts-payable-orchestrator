@@ -6,6 +6,7 @@
   "required": [
     "daily_pass_bar",
     "elite_pass_bar",
+    "bootstrap_day",
     "customer_profile",
     "days"
   ],
@@ -18,6 +19,30 @@
     },
     "graduation_tiers": {
       "type": "object"
+    },
+    "bootstrap_day": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "notebook_file",
+        "primary_doc_file",
+        "artifact_files",
+        "portal_to_script_mapping",
+        "customer_context",
+        "automation_drills",
+        "persistent_constraints",
+        "mastery_gates",
+        "chaos_gate",
+        "oral_defense_objectives",
+        "phase",
+        "incident_asset_ref",
+        "injection_command",
+        "revert_state",
+        "verification_commands",
+        "review_contract"
+      ],
+      "additionalProperties": true
     },
     "customer_profile": {
       "type": "object",

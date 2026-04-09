@@ -87,7 +87,31 @@ The same case now becomes release-governed. A new container revision is not
 “good” because it starts; it is good only if health, trace correlation, cost,
 synthetic accuracy, refusal behavior, and replay safety all hold after deploy.
 The release unit is an immutable ACA revision, and rollback is part of the
-design rather than an afterthought.
+design rather than an afterthought. Day 10 now establishes the Capstone A
+foundation packet instead of closing the capstone.
+
+### Day 11
+
+The same case now becomes actor-bound. The system must prove that delegated
+actions remain tied to the real human actor rather than collapsing into
+app-only authority.
+
+### Day 12
+
+The same case now becomes network-reviewable. Private endpoints, DNS, and egress
+controls must agree on a private-only truth that can survive hostile InfoSec review.
+
+### Day 13
+
+The same case now becomes boundary-governed. External traffic, MCP contracts,
+DLQs, and compensating actions must all recover together without dropping the
+identity or network posture established in Days 11 and 12.
+
+### Day 14
+
+The same case now becomes executive-operable. The learner must clear a
+cascading incident, complete a blank-slate architecture drill, and defend the
+full Day 10-14 evidence chain in the final Capstone A CAB review.
 
 ## Learning Contract
 
@@ -97,6 +121,17 @@ Every day should end with:
 - one artifact to inspect
 - one exit condition to prove
 - one Azure concept that becomes more concrete than the day before
+
+## Capstone A — AegisAP Production Defense
+
+Capstone A now spans the full production-readiness arc:
+
+- Day 10 foundation packet and release checkpoint
+- Days 11-13 enterprise evidence accrual
+- Day 14 final CAB defense and blank-slate architecture drill
+
+The final board operates on the Day 10 foundation packet plus the Day 11-14
+enterprise artifacts.
 
 ## Capstone B — Transfer Domain (Days 12–14)
 
@@ -117,6 +152,7 @@ seen. The trainee is informed this case exists but has not seen its contents.
 
 Capstone B scoring follows the same 100-point rubric. Days 12, 13, and 14 each
 require the CAPSTONE_B marker in their primary doc and in the oral defense session.
+Capstone B remains a Top Talent assessment, not a base graduation requirement.
 
 ## Eight Mental Models
 

@@ -42,6 +42,26 @@ def _title(mo):
 
 
 @app.cell
+def _rubric_helper(repo_root):
+    import sys
+
+    notebooks_root = repo_root / "notebooks"
+    text = str(notebooks_root)
+    if text not in sys.path:
+        sys.path.insert(0, text)
+
+    from _shared.curriculum_scaffolds import render_daily_rubric_callout
+
+    return (render_daily_rubric_callout,)
+
+
+@app.cell
+def _rubric_surface(mo, render_daily_rubric_callout, repo_root):
+    render_daily_rubric_callout(mo, day="08", repo_root=repo_root)
+    return
+
+
+@app.cell
 def _incident(mo):
     mo.md(
         """

@@ -168,6 +168,8 @@ See `docs/curriculum/GRADUATION_RUBRIC.md` for full tier definitions.
 - Day 14 is scored as a cascading crucible: network first, identity second,
   correlation or regression third. Later-stage evidence should not appear until
   the earlier masking fault is cleared.
-- Capstone A (AegisAP production defence): full technical and governance pack across Days 1–14.
-- Capstone B (transfer domain): Days 12–14 applied to a second domain. See `CAPSTONE_B_TRANSFER.md`.
+- Capstone A foundation packet is built on Day 10 and closed on Day 14 with the final CAB packet.
+- Capstone A (AegisAP production defence): full technical and governance pack across Days 1–14, with required Day 10-14 evidence continuity.
+- Day 14 also scores the blank-slate architecture drill under the existing Day 14 reasoning and process dimensions.
+- Capstone B (transfer domain): Days 12–14 applied to a second domain for Top Talent evaluation. See `capstone/CAPSTONE_B.md`.
 - Release-style oral defense is required. A green notebook alone is not a pass.

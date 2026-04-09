@@ -63,6 +63,12 @@ uv run python -m pytest tests/day11/test_actor_verification.py tests/day11/test_
 uv run aegisap-lab artifact rebuild --day 11
 ```
 
+## Hostile Identity Review
+
+Run the Day 11 triad before the notebook patch work starts. The learner must
+defend actor binding, OBO scope or audience, approval authority, and exception
+handling against a hostile identity reviewer.
+
 ## Investigation Surfaces
 
 - `notebooks/day_11_delegated_identity_obo.py`

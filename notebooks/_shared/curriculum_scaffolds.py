@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import importlib
 import sys
+from pathlib import Path
+
+import yaml
 
 
 def deep_reload_modules(*module_prefixes: str) -> list[str]:
@@ -91,4 +94,36 @@ def render_unscaffolded_block(
 """
         ),
         kind="warn",
+    )
+
+
+def render_daily_rubric_callout(
+    mo,
+    *,
+    day: str,
+    repo_root: str | Path | None = None,
+):
+    root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[2]
+    manifest_path = root / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    day_id = f"{int(day):02d}"
+    day_entry = next(item for item in manifest.get("days", []) if str(item["id"]) == day_id)
+    weights = day_entry.get("rubric_weights", {})
+    rows = "\n".join(f"| `{key}` | {value} |" for key, value in weights.items())
+    rubric_path = root / "docs" / "curriculum" / "ASSESSMENT_RUBRIC.md"
+    manifest_link = root / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
+    return mo.callout(
+        mo.md(
+            f"""
+## How You'll Be Scored Today
+
+| Dimension | Points |
+|---|---:|
+{rows}
+
+See [ASSESSMENT_RUBRIC.md]({rubric_path}) for band descriptors and
+[CURRICULUM_MANIFEST.yaml]({manifest_link}) for the authoritative day contract.
+"""
+        ),
+        kind="info",
     )

@@ -1,12 +1,23 @@
 # Day 0 - Azure Bootstrap
 
-Day 0 establishes the Azure substrate that every later lab assumes. The default
-goal is a keyless developer experience built on `DefaultAzureCredential`.
+Primary learner entrypoint: `modules/day_00_bootstrap/README.md`.
 
-Start with the Day 0 portal guide in
+Day 0 now begins as a bootstrap incident. Start with:
+
+```bash
+uv run aegisap-lab incident start --day 00 --track core
+```
+
+or
+
+```bash
+uv run aegisap-lab incident start --day 00 --track full
+```
+
+Use the portal guide in
 [docs/curriculum/portal/DAY_00_PORTAL.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/DAY_00_PORTAL.md)
-so the learner touches the Azure control plane before the repo abstracts it.
-Then return here for the repeatable, declarative path.
+as an evidence surface inside that incident flow, then return here for the
+repeatable, declarative repair path.
 
 ## Tracks
 
@@ -77,10 +88,11 @@ uv run python scripts/verify_env.py --track full
 
 Use Day 0 as one explicit chain:
 
-1. `Portal first`: complete the manual Day 0 walkthrough in [DAY_00_PORTAL.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/DAY_00_PORTAL.md) so the control plane is visible and named.
-2. `Middle surface second`: use this bootstrap doc to interpret what those Azure objects mean, which roles matter, and how the repo models them declaratively.
-3. `Automation third`: run `scripts/provision-core.ps1` or `scripts/provision-full.ps1`, then `scripts/setup-env.sh`, then `scripts/verify_env.py`.
-4. `Evidence last`: compare the live portal estate, `.day0/core.json` or `.day0/full.json`, and the verification output. They should all describe the same Foundry-first environment.
+1. `Incident first`: start the Day 00 incident for the chosen track.
+2. `Portal second`: complete the Day 0 portal walkthrough so the control plane is visible and named.
+3. `Middle surface third`: use this bootstrap doc to interpret what those Azure objects mean, which roles matter, and how the repo models them declaratively.
+4. `Automation fourth`: run `scripts/provision-core.ps1` or `scripts/provision-full.ps1`, then `scripts/setup-env.sh`, then `scripts/verify_env.py`.
+5. `Evidence last`: compare the live portal estate, `.day0/core.json` or `.day0/full.json`, and the verification output. They should all describe the same Foundry-first environment.
 
 ## Roles to Expect
 

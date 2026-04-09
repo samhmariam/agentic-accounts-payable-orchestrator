@@ -10,6 +10,11 @@ Release acceptance is where technical fixes become enterprise commitments. An FD
 
 The customer CAB will not approve rollout without a release packet that proves security posture, ownership, rollback readiness, and cost governance survived the repair.
 
+## Capstone A Position
+
+Day 10 is the Capstone A foundation checkpoint. The release packet built here is
+required input to the final Day 14 CAB defense; it is not the capstone closeout.
+
 ## Cost of Failure
 
 If release evidence goes false-green, the CAB can approve a broken deployment and force an emergency rollback under executive scrutiny.

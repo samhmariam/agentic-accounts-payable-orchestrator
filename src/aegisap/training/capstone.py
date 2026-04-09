@@ -15,6 +15,15 @@ CAPSTONE_MINIMUM_DIMENSION_SCORES = {
     "Technical Correctness": 3,
     "Security Reasoning": 3,
 }
+CAPSTONE_FINAL_REQUIRED_ARTIFACTS = {
+    "foundation_packet": "build/capstone/{trainee_id}/release_packet.json",
+    "day11_obo_contract": "build/day11/obo_contract.json",
+    "day12_private_network_posture": "build/day12/private_network_posture.json",
+    "day13_mcp_contract_report": "build/day13/mcp_contract_report.json",
+    "day14_cto_trace_report": "build/day14/cto_trace_report.json",
+    "day14_chaos_capstone_report": "build/day14/chaos_capstone_report.json",
+}
+CAPSTONE_FINAL_REVERT_PROOF = "docs/curriculum/artifacts/day14/REVERT_PROOF.md"
 
 
 def build_capstone_release_packet(
@@ -63,6 +72,96 @@ def build_capstone_release_packet(
     }
     target = Path(out_path) if out_path is not None else (
         root / "build" / "capstone" / trainee_id / "release_packet.json"
+    )
+    if not target.is_absolute():
+        target = root / target
+    return write_json_artifact(target, payload), payload
+
+
+def _resolve_required_path(
+    *,
+    root: Path,
+    path_like: str | Path,
+) -> Path:
+    path = Path(path_like)
+    if not path.is_absolute():
+        path = root / path
+    return path
+
+
+def build_capstone_final_packet(
+    *,
+    trainee_id: str,
+    summary: str,
+    foundation_packet_path: str | Path | None = None,
+    out_path: str | Path | None = None,
+    revert_proof_path: str | Path = CAPSTONE_FINAL_REVERT_PROOF,
+) -> tuple[Path, dict[str, Any]]:
+    root = repo_root(__file__)
+    foundation_rel = foundation_packet_path or CAPSTONE_FINAL_REQUIRED_ARTIFACTS["foundation_packet"].format(
+        trainee_id=trainee_id
+    )
+    foundation_path = _resolve_required_path(root=root, path_like=foundation_rel)
+    if not foundation_path.exists():
+        raise ValueError(
+            "Capstone A final packet requires the Day 10 foundation release packet first: "
+            f"{foundation_path}"
+        )
+
+    foundation_payload = load_json(foundation_path)
+    if not foundation_payload.get("release_envelope", {}).get("all_passed", False):
+        raise ValueError(
+            "Capstone A final packet requires a passing Day 10 foundation packet with green release evidence."
+        )
+
+    supporting_artifacts: dict[str, dict[str, Any]] = {}
+    missing: list[str] = []
+    for key, template in CAPSTONE_FINAL_REQUIRED_ARTIFACTS.items():
+        if key == "foundation_packet":
+            continue
+        artifact_rel = template.format(trainee_id=trainee_id)
+        artifact_path = _resolve_required_path(root=root, path_like=artifact_rel)
+        if not artifact_path.exists():
+            missing.append(str(artifact_path))
+            continue
+        supporting_artifacts[key] = {
+            "path": str(artifact_path),
+            "payload": load_json(artifact_path),
+        }
+
+    revert_path = _resolve_required_path(root=root, path_like=revert_proof_path)
+    if not revert_path.exists():
+        missing.append(str(revert_path))
+
+    if missing:
+        raise ValueError(
+            "Capstone A final packet requires the full Day 11-14 enterprise evidence set: "
+            + ", ".join(missing)
+        )
+
+    payload = {
+        "trainee_id": trainee_id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "summary": summary,
+        "capstone_a_stage": "day14_final_cab_defense",
+        "final_review_packet": True,
+        "foundation_packet_path": str(foundation_path),
+        "foundation_packet": foundation_payload,
+        "required_artifacts": {
+            key: template.format(trainee_id=trainee_id)
+            for key, template in CAPSTONE_FINAL_REQUIRED_ARTIFACTS.items()
+        },
+        "supporting_artifacts": supporting_artifacts,
+        "revert_proof_path": str(revert_path),
+        "review_contract": {
+            "kickoff_checkpoint_day": "10",
+            "final_defense_day": "14",
+            "required_evidence_days": ["10", "11", "12", "13", "14"],
+            "capstone_b_days": ["12", "13", "14"],
+        },
+    }
+    target = Path(out_path) if out_path is not None else (
+        root / "build" / "capstone" / trainee_id / "final_packet.json"
     )
     if not target.is_absolute():
         target = root / target

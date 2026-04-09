@@ -1,23 +1,22 @@
 # Portal-First Bootstrap Guide
 
-This folder now exists only for the Day 0 bootstrap exception.
+This folder now supports the Day 0 bootstrap incident.
 
-Use it when learners need to build the Azure mental model from the control
-plane before IaC, incident injection, and notebook-led repair become the normal
-delivery path.
+Use it when learners need to inspect the Azure control plane as part of the
+bootstrap evidence chain before they repair the Day 0 contract in the repo.
 
 ## Working Order
 
 Use this sequence for Day 0 only:
 
-1. Open `docs/curriculum/portal/DAY_00_PORTAL.md`.
-2. Complete the manual Azure bootstrap step.
+1. Start `uv run aegisap-lab incident start --day 00 --track <core|full>`.
+2. Open `docs/curriculum/portal/DAY_00_PORTAL.md`.
 3. Capture the evidence listed in the guide.
-4. Return to the primary bootstrap doc.
-5. Only then use scripts or modules to see how the repo abstracts the same work.
+4. Return to the primary bootstrap doc and notebook.
+5. Repair the repo-backed state and verification path.
 
-This preserves the learner's attention on Azure concepts before they are hidden
-behind automation.
+This preserves the learner's attention on Azure concepts while still keeping the
+bootstrap recovery grounded in repo-backed automation.
 
 ## Later Days
 

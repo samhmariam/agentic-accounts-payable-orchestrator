@@ -18,6 +18,7 @@ MANIFEST_PATH = REPO_ROOT / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
 
 DAYS_WITH_ZERO_TOLERANCE = {"07", "10", "11", "12", "14"}
 DAYS_WITH_CAPSTONE_B = {"12", "13", "14"}
+TRIAD_DAYS = {"02", "04", "11", "12"}
 
 
 @pytest.fixture(scope="module")
@@ -58,6 +59,14 @@ def test_customer_profile_declared(manifest: dict) -> None:
     assert profile["non_negotiables"]
 
 
+def test_bootstrap_day_declared(manifest: dict) -> None:
+    bootstrap = manifest["bootstrap_day"]
+    assert bootstrap["id"] == "00"
+    assert bootstrap["notebook_file"] == "notebooks/day_0_bootstrap_incident.py"
+    assert bootstrap["primary_doc_file"] == "docs/DAY_00_AZURE_BOOTSTRAP.md"
+    assert bootstrap["track_options"] == ["core", "full"]
+
+
 # ---------------------------------------------------------------------------
 # Per-day rubric weights
 # ---------------------------------------------------------------------------
@@ -95,7 +104,7 @@ def test_all_artifact_files_exist(day: dict) -> None:
 
 def test_total_artifact_count(days: list[dict]) -> None:
     total = sum(len(d["artifact_files"]) for d in days)
-    assert total == 49, f"Expected 49 artifact files across all days, got {total}"
+    assert total == 50, f"Expected 50 artifact files across all days, got {total}"
 
 
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in
@@ -122,7 +131,7 @@ def test_phase1_metadata_contract_declared(day: dict) -> None:
     assert day["chaos_gate"], f"Day {day['id']} missing chaos_gate"
 
 
-@pytest.mark.parametrize("day_id", ["02", "04"])
+@pytest.mark.parametrize("day_id", sorted(TRIAD_DAYS))
 def test_triads_days_declare_stakeholder_inject(day_id: str, days: list[dict]) -> None:
     day = next(item for item in days if item["id"] == day_id)
     inject = day["stakeholder_inject"]
@@ -224,6 +233,13 @@ def test_day10_and_day14_use_cab_board_review_mode(days: list[dict]) -> None:
     assert day14["review_contract"]["requires_kql_replay"] is True
     assert day14["review_contract"]["requires_revert_proof"] is True
     assert day14["review_contract"]["peer_checklist_file"] == "docs/curriculum/checklists/day14_peer_red_team.md"
+
+
+def test_day14_declares_blank_slate_drill(days: list[dict]) -> None:
+    day14 = next(item for item in days if item["id"] == "14")
+    drill = day14["blank_slate_drill"]
+    assert drill["artifact_path"] == "LAB_OUTPUT/architecture_rebuild/blank_slate_architecture.md"
+    assert len(drill["required_sections"]) >= 8
 
 
 def test_day10_declares_rollback_rehearsal_contract(days: list[dict]) -> None:

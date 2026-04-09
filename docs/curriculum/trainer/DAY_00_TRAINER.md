@@ -9,7 +9,7 @@
 ## Session Goals
 
 By the end of Day 0, every learner should be able to:
-- Walk the Day 0 portal surface and name the Azure resources before the scripts create or verify them
+- Start from the Day 00 incident, then walk the portal surface and name the Azure resources before the scripts create or verify them
 - Run `az deployment sub create` against the `core` Bicep template
 - Verify a deployed environment using `verify_env.py` without portal access
 - Explain why Managed Identity replaces API keys in Azure AI workloads

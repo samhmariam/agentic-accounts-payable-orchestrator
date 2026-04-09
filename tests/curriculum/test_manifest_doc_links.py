@@ -39,6 +39,24 @@ _DAYS = _load_days()
 # ---------------------------------------------------------------------------
 
 
+def test_bootstrap_day_files_exist() -> None:
+    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    bootstrap = manifest["bootstrap_day"]
+    for rel_path in (
+        bootstrap["notebook_file"],
+        bootstrap["primary_doc_file"],
+        bootstrap["portal_to_script_mapping"]["bridge_file"],
+        "modules/day_00_bootstrap/README.md",
+    ):
+        assert (REPO_ROOT / rel_path).exists(), f"Bootstrap contract path missing: {rel_path}"
+
+
+def test_bootstrap_day_docs_point_to_module_and_incident() -> None:
+    content = (REPO_ROOT / "docs" / "DAY_00_AZURE_BOOTSTRAP.md").read_text(encoding="utf-8")
+    assert "modules/day_00_bootstrap/README.md" in content
+    assert "incident start --day 00" in content
+
+
 @pytest.mark.parametrize("day", [pytest.param(d, id=f"day-{d['id']}") for d in _DAYS])
 def test_notebook_file_exists(day: dict) -> None:
     path = REPO_ROOT / day["notebook_file"]
@@ -211,6 +229,13 @@ def test_cab_docs_reference_revert_proof_and_peer_checklist(rel_path: str, check
     content = (REPO_ROOT / rel_path).read_text(encoding="utf-8")
     assert "Revert Proof" in content
     assert checklist_rel in content
+
+
+def test_day14_blank_slate_artifact_doc_exists() -> None:
+    path = REPO_ROOT / "docs/curriculum/artifacts/day14/BLANK_SLATE_ARCHITECTURE_DRILL.md"
+    assert path.exists()
+    content = path.read_text(encoding="utf-8")
+    assert "LAB_OUTPUT/architecture_rebuild/blank_slate_architecture.md" in content
 
 
 @pytest.mark.parametrize(

@@ -84,6 +84,12 @@ REQUIRED_DOCS = (
     "docs/curriculum/CAPSTONE_REVIEW.md",
     "docs/curriculum/CAPSTONE_PR_REVIEW.md",
     "docs/curriculum/CAPSTONE_B_TRANSFER.md",
+    "docs/curriculum/capstone/README.md",
+    "docs/curriculum/capstone/CAPSTONE_A.md",
+    "docs/curriculum/capstone/CAPSTONE_B.md",
+    "docs/curriculum/capstone/REQUIRED_ARTIFACTS.md",
+    "docs/curriculum/capstone/PR_REVIEW.md",
+    "docs/curriculum/capstone/RUBRIC.md",
     "docs/curriculum/INCIDENT_DRILL_RUNBOOK.md",
     "docs/curriculum/PILOT_MEASUREMENT_PLAN.md",
     "docs/curriculum/GRADUATE_PROFILE.md",
@@ -110,9 +116,12 @@ STRICT_VALIDATION_DOCS = (
     "docs/curriculum/TRAINER_OPERATIONS.md",
     "docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md",
     "docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md",
-    "docs/curriculum/CAPSTONE_REVIEW.md",
-    "docs/curriculum/CAPSTONE_PR_REVIEW.md",
-    "docs/curriculum/CAPSTONE_B_TRANSFER.md",
+    "docs/curriculum/capstone/README.md",
+    "docs/curriculum/capstone/CAPSTONE_A.md",
+    "docs/curriculum/capstone/CAPSTONE_B.md",
+    "docs/curriculum/capstone/REQUIRED_ARTIFACTS.md",
+    "docs/curriculum/capstone/PR_REVIEW.md",
+    "docs/curriculum/capstone/RUBRIC.md",
     "docs/curriculum/INCIDENT_DRILL_RUNBOOK.md",
     "docs/curriculum/PILOT_MEASUREMENT_PLAN.md",
     "docs/curriculum/GRADUATE_PROFILE.md",
@@ -135,6 +144,9 @@ README_REQUIRED_SNIPPETS = (
     "build/day10/checkpoint_gate_extension.json",
     "## Capstone Review Flow",
     "build/capstone/<trainee_id>/release_packet.json",
+    "build/capstone/<trainee_id>/final_packet.json",
+    "scripts/build_capstone_final_packet.py",
+    "incident start --day 00",
     "CURRICULUM_MANIFEST.yaml",
 )
 
@@ -200,6 +212,19 @@ MODULE_REQUIRED_HEADINGS = (
     "## Mastery Gate",
     "## Chaos Gate",
     "## Day X File Manifest",
+)
+
+BOOTSTRAP_NOTEBOOK_REQUIRED_SNIPPETS = (
+    "## Incident",
+    "## Portal Investigation",
+    "## Lab Repair",
+    "## Why This Fails In Prod",
+    "## Codification Bridge",
+    "## Production Patch",
+    "## Verification",
+    "## Chaos Gate",
+    "## Map the Gap",
+    "## PR Defense",
 )
 
 WHY_FAILS_PROMPT = (
@@ -499,24 +524,25 @@ def main() -> int:
     )
     _expect_snippets(
         errors,
-        ROOT / "docs" / "curriculum" / "CAPSTONE_PR_REVIEW.md",
+        ROOT / "docs" / "curriculum" / "capstone" / "PR_REVIEW.md",
         (
-            "peer_reviewer_challenge_quality",
             "skeptical questions",
             "concrete evidence artifact",
             "rerun the selected native proof live",
+            "Day 10 foundation packet reference",
+            "Day 14 final packet reference",
         ),
         "Capstone PR review guide is missing the adversarial CAB contract",
     )
     _expect_snippets(
         errors,
-        ROOT / "docs" / "curriculum" / "CAPSTONE_REVIEW.md",
+        ROOT / "docs" / "curriculum" / "capstone" / "CAPSTONE_A.md",
         (
-            "cab_board",
-            "peer_reviewer_challenge_quality",
-            "rerun the selected native proof live",
+            "Day 10 foundation packet",
+            "Day 14 final CAB",
+            "build/capstone/<trainee_id>/final_packet.json",
         ),
-        "Capstone review guide is missing the live CAB review contract",
+        "Capstone review guide is missing the Day 10 kickoff or Day 14 closeout contract",
     )
     _expect_snippets(
         errors,
@@ -614,7 +640,54 @@ def _validate_manifest_schema(errors: list[str], manifest: dict) -> None:
         errors.append(f"Manifest schema violation at {path}: {issue.message}")
 
 
+def _validate_bootstrap_day(errors: list[str], manifest: dict) -> None:
+    bootstrap = manifest.get("bootstrap_day")
+    if not bootstrap:
+        errors.append("Curriculum manifest must declare bootstrap_day.")
+        return
+    if str(bootstrap.get("id", "")) != "00":
+        errors.append("Curriculum manifest bootstrap_day must declare id `00`.")
+    for key in ("notebook_file", "primary_doc_file", "incident_asset_ref", "injection_command", "revert_state"):
+        if not bootstrap.get(key):
+            errors.append(f"Curriculum manifest bootstrap_day must declare `{key}`.")
+    if bootstrap.get("track_options") != ["core", "full"]:
+        errors.append("Curriculum manifest bootstrap_day must declare `track_options: [core, full]`.")
+    notebook_rel = bootstrap.get("notebook_file", "")
+    notebook_path = ROOT / notebook_rel
+    if not notebook_rel or not notebook_path.exists():
+        errors.append(f"Bootstrap day notebook missing: {notebook_rel}")
+    else:
+        _expect_snippets(
+            errors,
+            notebook_path,
+            BOOTSTRAP_NOTEBOOK_REQUIRED_SNIPPETS,
+            "Bootstrap day notebook is missing the incident-driven bootstrap scaffold",
+        )
+    primary_doc_rel = bootstrap.get("primary_doc_file", "")
+    primary_doc_path = ROOT / primary_doc_rel
+    if not primary_doc_rel or not primary_doc_path.exists():
+        errors.append(f"Bootstrap day primary doc missing: {primary_doc_rel}")
+    module_rel = module_readme_relpath("00")
+    module_path = ROOT / module_rel
+    if not module_path.exists():
+        errors.append(f"Bootstrap day module README missing: {module_rel}")
+    else:
+        _expect_headings(
+            errors,
+            module_path,
+            MODULE_REQUIRED_HEADINGS,
+            "Bootstrap module README is missing the learner-entry wormhole contract",
+        )
+    scenario_rel = str(bootstrap.get("incident_asset_ref", "")).strip().removeprefix("incident.")
+    scenario_path = ROOT / "scenarios" / scenario_rel / "scenario.yaml"
+    if not scenario_path.exists():
+        errors.append(f"Bootstrap day scenario file missing: {scenario_path.relative_to(ROOT)}")
+    else:
+        _validate_scenario_file(errors, scenario_path)
+
+
 def _validate_manifest(errors: list[str], manifest: dict) -> None:
+    _validate_bootstrap_day(errors, manifest)
     days = manifest.get("days", [])
     if len(days) != 14:
         errors.append("Curriculum manifest should declare exactly 14 days.")
@@ -742,6 +815,7 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                     "What trade-off did I make today to satisfy the customer constraint?",
                     "What is the blast radius if my code fails?",
                     "How will I know it failed in production?",
+                    "render_daily_rubric_callout",
                 ),
                 f"Day {day_id} notebook is missing the markdown-only production patch boundary",
             )
@@ -926,7 +1000,7 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                         "Manifest day 14 review_contract must declare `peer_checklist_file: docs/curriculum/checklists/day14_peer_red_team.md`."
                     )
         stakeholder_inject = day.get("stakeholder_inject")
-        if day_id_str in {"02", "04"} and not stakeholder_inject:
+        if day_id_str in {"02", "04", "11", "12"} and not stakeholder_inject:
             errors.append(f"Manifest day {day['id']} must declare stakeholder_inject.")
         if stakeholder_inject:
             for artifact_rel in stakeholder_inject.get("required_artifacts", []):
@@ -941,9 +1015,9 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
             for role_path in (stakeholder_inject.get("role_cards") or {}).values():
                 if role_path and not (ROOT / role_path).exists():
                     errors.append(f"Manifest day {day['id']} stakeholder role card missing: {role_path}")
-            if day_id_str in {"02", "04"} and stakeholder_inject.get("delivery_mode") != "triad_roleplay":
+            if day_id_str in {"02", "04", "11", "12"} and stakeholder_inject.get("delivery_mode") != "triad_roleplay":
                 errors.append(f"Manifest day {day['id']} stakeholder_inject must declare `delivery_mode: triad_roleplay`.")
-            if day_id_str in {"02", "04"} and len(stakeholder_inject.get("required_questions", [])) < 3:
+            if day_id_str in {"02", "04", "11", "12"} and len(stakeholder_inject.get("required_questions", [])) < 3:
                 errors.append(f"Manifest day {day['id']} stakeholder_inject must declare at least 3 required_questions.")
         native_operator = day.get("native_operator_evidence")
         expected_native = NATIVE_OPERATOR_EVIDENCE_DAYS.get(day_id_str)
@@ -1143,6 +1217,17 @@ def _validate_manifest(errors: list[str], manifest: dict) -> None:
                 errors.append(
                     "Manifest day 07 must use `drill_11_prompt_authority_drift` as the default automation drill."
                 )
+        if day_id_str == "14":
+            blank_slate = day.get("blank_slate_drill")
+            if not blank_slate:
+                errors.append("Manifest day 14 must declare blank_slate_drill.")
+            else:
+                if blank_slate.get("artifact_path") != "LAB_OUTPUT/architecture_rebuild/blank_slate_architecture.md":
+                    errors.append(
+                        "Manifest day 14 blank_slate_drill artifact_path must be `LAB_OUTPUT/architecture_rebuild/blank_slate_architecture.md`."
+                    )
+                if len(blank_slate.get("required_sections", [])) < 8:
+                    errors.append("Manifest day 14 blank_slate_drill must declare the required section checklist.")
 
     infra_targets, total_targets = production_target_counts(ratio_days)
     if total_targets and infra_targets / total_targets < 0.30:

@@ -28,6 +28,12 @@ def _build_parser() -> argparse.ArgumentParser:
     for name in ("start", "reset", "status", "nuke"):
         sub = incident_subparsers.add_parser(name, help=f"{name.capitalize()} an incident.")
         sub.add_argument("--day", required=True, help="Two-digit day number, for example 01.")
+        sub.add_argument(
+            "--track",
+            choices=("core", "full"),
+            default=None,
+            help="Bootstrap track for day 00 incident flows. Ignored for days 01-14.",
+        )
 
     artifact = subparsers.add_parser("artifact", help="Rebuild day artifacts from the fixed reference path.")
     artifact_subparsers = artifact.add_subparsers(dest="artifact_command", required=True)
@@ -132,19 +138,19 @@ def main() -> int:
 
     try:
         if args.command == "incident" and args.incident_command == "start":
-            journal = start_incident(day=args.day, repo_path=args.repo_root)
+            journal = start_incident(day=args.day, repo_path=args.repo_root, track=args.track)
             _print_payload(journal.model_dump(mode="json"))
             return 0
         if args.command == "incident" and args.incident_command == "reset":
-            journal = reset_incident(day=args.day, repo_path=args.repo_root)
+            journal = reset_incident(day=args.day, repo_path=args.repo_root, track=args.track)
             _print_payload(journal.model_dump(mode="json"))
             return 0
         if args.command == "incident" and args.incident_command == "nuke":
-            journal = nuke_incident(day=args.day, repo_path=args.repo_root)
+            journal = nuke_incident(day=args.day, repo_path=args.repo_root, track=args.track)
             _print_payload(journal.model_dump(mode="json"))
             return 0
         if args.command == "incident" and args.incident_command == "status":
-            journal = status_incident(day=args.day, repo_path=args.repo_root)
+            journal = status_incident(day=args.day, repo_path=args.repo_root, track=args.track)
             if journal is None:
                 _print_payload({"day": f"{int(args.day):02d}", "status": "idle"})
             else:

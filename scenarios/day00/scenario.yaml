@@ -1,0 +1,20 @@
+day: "00"
+title: "Bootstrap contract drift on the Day 0 state file"
+phase: "phase_0_bootstrap_contract"
+baseline_track: "core"
+baseline_reprovision_command: "uv run python -m aegisap.lab.bootstrap_incident --action restore --track {track} && uv run python -m aegisap.lab.baseline --track {track} --scenario day00"
+setup:
+  apply_diff: ""
+  azure_script: "uv run python -m aegisap.lab.bootstrap_incident --action break --track {track}"
+  customer_drop: "customer_artifact.md"
+validation:
+  reproduce_command: "bash -lc 'source ./scripts/setup-env.sh {track} && uv run python scripts/verify_env.py --track {track}'"
+  ci_command: "bash -lc 'source ./scripts/setup-env.sh {track} && uv run python scripts/verify_env.py --track {track}'"
+teardown:
+  revert_diff: ""
+  azure_script: "uv run python -m aegisap.lab.bootstrap_incident --action restore --track {track}"
+  cleanup:
+    - "customer_artifact.md"
+review:
+  evaluator_profile: "day00-bootstrap-contract"
+  human_required: true

@@ -27,7 +27,9 @@ For checkpoint days, also collect:
 
 ## Capstone Data
 
-- capstone pass rate
+- Day 10 foundation packet pass rate
+- Day 14 final CAB pass rate
+- blank-slate architecture drill pass rate
 - common PR review findings
 - average review response score
 - average defense score

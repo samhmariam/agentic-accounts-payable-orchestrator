@@ -4,7 +4,7 @@ This is the fastest way to stay oriented during delivery.
 
 ## Focus Order
 
-1. For Day 0, start with the portal bootstrap guide.
+1. For Day 0, start with the day module README under `modules/`, then launch the bootstrap incident for the chosen track.
 2. For Days 1-14, start with the day module README under `modules/`.
 3. Run `uv run aegisap-lab incident start --day XX` only after you have read the customer context and file manifest.
 4. Use the notebook as the diagnostic lens and reload harness, then patch the durable repo targets in your IDE and rerun the bootstrap cell before trusting the notebook proof.
@@ -25,7 +25,7 @@ This is the fastest way to stay oriented during delivery.
 
 | Day | Open First | Notebook | Primary Day Doc | Mastery Gate | Main Output |
 |---|---|---|---|---|---|
-| 0 | [DAY_00_PORTAL.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/DAY_00_PORTAL.md) | Day 0 is doc-led rather than notebook-led | [DAY_00_AZURE_BOOTSTRAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md) | `uv run aegisap-lab mastery --day 00 --track core` or `--track full` | `.day0/core.json` or `.day0/full.json` |
+| 0 | `modules/day_00_bootstrap/README.md` | `notebooks/day_0_bootstrap_incident.py` | [DAY_00_AZURE_BOOTSTRAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md) | `uv run aegisap-lab mastery --day 00 --track core` or `--track full` | `.day0/core.json` or `.day0/full.json` |
 | 1 | `modules/day_01_trust_boundary/README.md` | `notebooks/day_1_agentic_fundamentals.py` | `docs/DAY_01.md` | `uv run aegisap-lab mastery --day 01` | `build/day1/golden_thread_day1.json` |
 | 2 | `modules/day_02_resilience_ownership/README.md` | `notebooks/day_2_requirements_architecture.py` | `docs/DAY_02.md` | `uv run aegisap-lab mastery --day 02` | `build/day2/golden_thread_day2.json` |
 | 3 | `modules/day_03_retrieval_authority/README.md` | `notebooks/day_3_azure_ai_services.py` | `docs/DAY_03.md` | `uv run aegisap-lab mastery --day 03` | `build/day3/golden_thread_day3.json` |
@@ -43,7 +43,7 @@ This is the fastest way to stay oriented during delivery.
 
 ## Practical Rule
 
-- Start in `modules/` to understand the customer constraint and file manifest.
+- Start in `modules/` to understand the customer constraint and file manifest, including Day 00.
 - Use `notebooks/` to diagnose and validate repo code, not to write the durable patch.
 - Use `src/`, `infra/`, and `scripts/` for the permanent fix.
 - Use `uv run aegisap-lab mastery --day XX` to prove the repair holds under the curriculum contract.

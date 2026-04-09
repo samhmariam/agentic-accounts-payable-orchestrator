@@ -1,0 +1,8 @@
+scenario: day12_hostile_infosec_review
+requester_role: network_security_architect
+delivery_mode: triad_roleplay
+objective: Force the learner to defend private-only posture, DNS truth, egress controls, and time-bounded exceptions under hostile InfoSec pressure.
+prompts:
+  - Why is public fallback unacceptable here even if it would unblock the rollout today?
+  - Show me which DNS or route evidence proves the dependency stays private-only.
+  - If you must request an exception, who approves it, when does it expire, and what compensating control keeps the customer safe?

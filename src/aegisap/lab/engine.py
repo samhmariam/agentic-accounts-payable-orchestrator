@@ -37,6 +37,20 @@ def scenario_id(day: str) -> str:
     return f"day{int(day):02d}"
 
 
+def _effective_track(*, day: str, track: str | None, journal: IncidentJournal | None = None) -> str:
+    if track:
+        return track
+    if journal is not None:
+        stored = str(journal.metadata.get("track", "")).strip()
+        if stored:
+            return stored
+    return "core"
+
+
+def _render_command_template(command: str, *, day: str, track: str) -> str:
+    return command.format(day=f"{int(day):02d}", track=track)
+
+
 def resolve_repo_root(repo_path: str | Path | None = None) -> Path:
     if repo_path is not None:
         return Path(repo_path).resolve()
@@ -314,8 +328,10 @@ def _copy_customer_artifact(*, repo_root: Path, scenario_root: Path, relative_so
     return destination
 
 
-def start_incident(*, day: str, repo_path: str | Path | None = None) -> IncidentJournal:
+def start_incident(*, day: str, repo_path: str | Path | None = None, track: str | None = None) -> IncidentJournal:
     root = resolve_repo_root(repo_path)
+    normalized_day = normalize_day(day)
+    effective_track = _effective_track(day=normalized_day, track=track)
     scenario_root = scenario_dir(root, day)
     scenario = load_scenario(root, day)
     ensure_clean_worktree(root)
@@ -336,6 +352,7 @@ def start_incident(*, day: str, repo_path: str | Path | None = None) -> Incident
         incident_branch=incident_branch,
         metadata={
             "incident_asset_ref": overlay_day(day, root).get("incident_asset_ref", scenario_id(day)),
+            "track": effective_track,
         },
     )
 
@@ -364,7 +381,11 @@ def start_incident(*, day: str, repo_path: str | Path | None = None) -> Incident
 
         if scenario.setup.azure_script:
             _begin_step(journal=journal, journal_file=state_file, step_name="azure_break_applied")
-            receipt = run_command(repo_root=root, command=scenario.setup.azure_script, expect_success=True)
+            receipt = run_command(
+                repo_root=root,
+                command=_render_command_template(scenario.setup.azure_script, day=normalized_day, track=effective_track),
+                expect_success=True,
+            )
             _record_step(
                 journal=journal,
                 journal_file=state_file,
@@ -385,7 +406,11 @@ def start_incident(*, day: str, repo_path: str | Path | None = None) -> Incident
         _begin_step(journal=journal, journal_file=state_file, step_name="failure_reproduced")
         reproduce_receipt = run_command(
             repo_root=root,
-            command=scenario.validation.reproduce_command,
+            command=_render_command_template(
+                scenario.validation.reproduce_command,
+                day=normalized_day,
+                track=effective_track,
+            ),
             expect_success=False,
         )
         _record_step(
@@ -409,13 +434,15 @@ def _restore_cleanup_paths(*, repo_root: Path, cleanup_paths: list[str]) -> None
             shutil.rmtree(candidate)
 
 
-def reset_incident(*, day: str, repo_path: str | Path | None = None) -> IncidentJournal:
+def reset_incident(*, day: str, repo_path: str | Path | None = None, track: str | None = None) -> IncidentJournal:
     root = resolve_repo_root(repo_path)
     scenario = load_scenario(root, day)
     state_file = journal_path(root, day)
     journal = load_journal(root, day)
     if journal is None:
         raise IncidentError(f"No incident state found for Day {day}.")
+    normalized_day = normalize_day(day)
+    effective_track = _effective_track(day=normalized_day, track=track, journal=journal)
 
     with InterruptGuard(journal=journal, journal_file=state_file):
         journal.status = "preparing"
@@ -424,7 +451,15 @@ def reset_incident(*, day: str, repo_path: str | Path | None = None) -> Incident
 
         if "azure_break_applied" in journal.completed_steps and scenario.teardown.azure_script:
             _begin_step(journal=journal, journal_file=state_file, step_name="azure_restore_applied")
-            receipt = run_command(repo_root=root, command=scenario.teardown.azure_script, expect_success=True)
+            receipt = run_command(
+                repo_root=root,
+                command=_render_command_template(
+                    scenario.teardown.azure_script,
+                    day=normalized_day,
+                    track=effective_track,
+                ),
+                expect_success=True,
+            )
             _record_step(
                 journal=journal,
                 journal_file=state_file,
@@ -453,11 +488,14 @@ def reset_incident(*, day: str, repo_path: str | Path | None = None) -> Incident
     return journal
 
 
-def nuke_incident(*, day: str, repo_path: str | Path | None = None) -> IncidentJournal:
+def nuke_incident(*, day: str, repo_path: str | Path | None = None, track: str | None = None) -> IncidentJournal:
     root = resolve_repo_root(repo_path)
     scenario_root = scenario_dir(root, day)
     scenario = load_scenario(root, day)
     state_file = journal_path(root, day)
+    normalized_day = normalize_day(day)
+    journal = load_journal(root, day)
+    effective_track = _effective_track(day=normalized_day, track=track, journal=journal)
     current_branch = git_current_branch(root)
     target_branch = default_branch(root)
     if current_branch != target_branch:
@@ -474,7 +512,11 @@ def nuke_incident(*, day: str, repo_path: str | Path | None = None) -> IncidentJ
                 continue
     run_command(
         repo_root=root,
-        command=scenario.baseline_reprovision_command,
+        command=_render_command_template(
+            scenario.baseline_reprovision_command,
+            day=normalized_day,
+            track=effective_track,
+        ),
         expect_success=True,
     )
     _restore_cleanup_paths(
@@ -490,11 +532,15 @@ def nuke_incident(*, day: str, repo_path: str | Path | None = None) -> IncidentJ
         original_branch=target_branch,
         incident_branch="",
         completed_steps=["baseline_reprovisioned", "workspace_cleanup_complete"],
+        metadata={"track": effective_track},
     )
     save_journal(state_file, journal)
     return journal
 
 
-def status_incident(*, day: str, repo_path: str | Path | None = None) -> IncidentJournal | None:
+def status_incident(*, day: str, repo_path: str | Path | None = None, track: str | None = None) -> IncidentJournal | None:
     root = resolve_repo_root(repo_path)
-    return load_journal(root, day)
+    journal = load_journal(root, day)
+    if journal is not None and track:
+        journal.metadata["track"] = _effective_track(day=normalize_day(day), track=track, journal=journal)
+    return journal

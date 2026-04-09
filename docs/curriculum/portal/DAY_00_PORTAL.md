@@ -1,7 +1,7 @@
-# Day 00 — Portal-First Azure Bootstrap
+# Day 00 — Portal Investigation for the Bootstrap Incident
 
 > **Portal mode:** `Configure`  
-> **Intent:** understand the Azure substrate by touching the control plane before the repo provisions it declaratively.
+> **Intent:** use the Azure control plane as evidence while recovering the Day 0 bootstrap contract.
 
 ## Portal-First Outcome
 
@@ -10,9 +10,9 @@ exists, and describe which exact Bicep or script step later recreates it.
 
 ## Portal Mode
 
-Use Day 0 to manually create or inspect the smallest possible training
-substrate. This is a bounded learning exercise, not the recommended production
-delivery model. For repeatability, Bicep remains the source of truth.
+Use Day 0 to inspect the smallest possible training substrate while recovering
+the state-file and verification contract. For repeatability, Bicep remains the
+source of truth.
 
 ## Azure Portal Path
 

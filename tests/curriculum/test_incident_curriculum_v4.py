@@ -204,6 +204,7 @@ def test_wave4_notebooks_use_incident_scaffold_and_markdown_only_patch_boundary(
         assert "What is the blast radius if my code fails?" in text
         assert "How will I know it failed in production?" in text
         assert "cohort/<" in text
+        assert "render_daily_rubric_callout" in text
         if day_id >= "04":
             assert "## Native Tooling Gate" in text
             assert f"build/day{int(day_id)}/native_operator_evidence.json" in text
@@ -251,6 +252,13 @@ def test_days_08_to_14_docs_and_modules_do_not_leak_named_drills_or_fixed_prompt
 def test_repo_does_not_track_live_instructor_overlay_instance() -> None:
     tracked_live_overlay = REPO_ROOT / "docs" / "curriculum" / "instructor" / "INSTRUCTOR_OVERLAY.yaml"
     assert not tracked_live_overlay.exists()
+
+
+def test_bootstrap_day_incident_assets_exist() -> None:
+    assert (REPO_ROOT / "notebooks" / "day_0_bootstrap_incident.py").exists()
+    assert (REPO_ROOT / "modules" / "day_00_bootstrap" / "README.md").exists()
+    assert (REPO_ROOT / "scenarios" / "day00" / "scenario.yaml").exists()
+    assert (REPO_ROOT / "scenarios" / "day00" / "customer_artifact.md").exists()
 
 
 def test_learner_notebooks_do_not_mutate_repo_tracked_paths() -> None:

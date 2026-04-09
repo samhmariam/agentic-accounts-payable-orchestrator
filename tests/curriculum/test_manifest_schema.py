@@ -72,6 +72,27 @@ def test_triads_days_stakeholder_inject_declared(day_index: int) -> None:
     assert inject["observer_scorecard"]
 
 
+@pytest.mark.parametrize("day_id", ["11", "12"])
+def test_late_stage_hostile_reviews_declared(day_id: str) -> None:
+    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    day_entry = next(day for day in manifest["days"] if day["id"] == day_id)
+    inject = day_entry["stakeholder_inject"]
+
+    assert inject["delivery_mode"] == "triad_roleplay"
+    assert len(inject["required_questions"]) >= 3
+    assert inject["script_path"]
+    assert inject["role_cards"]
+
+
+def test_bootstrap_day_schema_contract_declared() -> None:
+    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    bootstrap = manifest["bootstrap_day"]
+
+    assert bootstrap["id"] == "00"
+    assert bootstrap["incident_asset_ref"] == "incident.day00"
+    assert bootstrap["track_options"] == ["core", "full"]
+
+
 def test_native_operator_evidence_contracts_exist_on_days_04_to_14() -> None:
     manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
     days = {day["id"]: day for day in manifest["days"]}
@@ -120,6 +141,15 @@ def test_diagnostic_independence_contracts_exist_on_days_8_to_14() -> None:
         assert contract["mode"] == "advisory"
         assert contract["timeline_artifact_path"] == f"build/day{int(day_id)}/diagnostic_timeline.md"
         assert contract["hint_state_path"] == f".aegisap-lab/cache/instructor/interventions/day{day_id}.json"
+
+
+def test_day14_blank_slate_contract_declared() -> None:
+    manifest = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    day14 = next(day for day in manifest["days"] if day["id"] == "14")
+    drill = day14["blank_slate_drill"]
+
+    assert drill["artifact_path"] == "LAB_OUTPUT/architecture_rebuild/blank_slate_architecture.md"
+    assert len(drill["required_sections"]) >= 8
 
 
 def test_scaffold_levels_follow_day_band() -> None:

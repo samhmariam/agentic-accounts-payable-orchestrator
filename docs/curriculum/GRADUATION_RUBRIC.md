@@ -68,8 +68,8 @@ pre-loading.
 
 1. Daily scores are recorded by trainer in `docs/curriculum/templates/DAILY_SCORECARD.md`
 2. Zero-tolerance judgments are logged per day with condition, evidence, and trainer signature
-3. Capstone A review is conducted per `CAPSTONE_REVIEW.md`
-4. Capstone B is conducted per `CAPSTONE_B_TRANSFER.md`
+3. Capstone A review is conducted per `capstone/CAPSTONE_A.md`
+4. Capstone B is conducted per `capstone/CAPSTONE_B.md`
 5. Final tier determination is made by programme lead with evidence from all 14 days
 6. Reviewer accountability and any remediation for weak `peer_reviewer_challenge_quality`
    must be resolved before a Top Talent decision is finalized

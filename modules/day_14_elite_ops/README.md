@@ -8,6 +8,11 @@ Elite operations is executive engineering under pressure. FDEs must manage break
 
 A downstream SAP schema change created a severity-1 incident. Leadership needs a rollback-capable repair path that preserves traceability, network posture, and release evidence.
 
+## Capstone A Closeout
+
+Day 14 is the final Capstone A CAB defense. The board now operates on the Day
+10 foundation packet plus the required Day 11-14 enterprise evidence.
+
 ## Cost of Failure
 
 If elite-ops gates stay false-green during an incident, executives lose trustworthy go/no-go evidence exactly when recovery decisions matter most.
@@ -93,3 +98,11 @@ Do not edit code in this module folder.
 - Inject default drill: `uv run aegisap-lab drill inject --day 14`
 - Reset active drill: `uv run aegisap-lab drill reset --day 14`
 - Constraint lineage artifact after mastery: `build/day14/constraint_lineage.json`
+
+## Blank-Slate Architecture Drill
+
+Before the final CAB defense, complete the Day 14 blank-slate architecture
+drill and submit `LAB_OUTPUT/architecture_rebuild/blank_slate_architecture.md`
+with the required system diagram, trust boundaries, identity and token path,
+network posture, MCP boundary, IaC skeleton, rollback plan, and one rejected
+alternative.

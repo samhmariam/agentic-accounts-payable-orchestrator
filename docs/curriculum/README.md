@@ -13,14 +13,16 @@ Use [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/cur
 as the single navigation layer for daily delivery. It tells you which notebook,
 primary doc, incident command, and artifact matter for each day.
 
-The only remaining manual-first Azure layer is the Day 0 bootstrap exception in
-[portal/README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/README.md).
-Days 1-14 now start with `uv run aegisap-lab incident start --day XX`, then use
-the notebook as the primary learner surface. Portal investigation still exists,
-but it is now embedded inside the notebook flow rather than split across a
-separate day guide. The notebook is a repo-first reload harness: learners edit
-`src/`, `infra/`, or `scripts/` first, rerun the bootstrap cell, and then use
-Marimo to validate the external code.
+Day 0 is now a bootstrap incident rather than a manual exception. The learner
+starts with `uv run aegisap-lab incident start --day 00 --track <core|full>`,
+uses portal inspection as one evidence surface, and then restores the bootstrap
+contract through the repo-backed Day 0 flow. Days 1-14 continue to start with
+`uv run aegisap-lab incident start --day XX`, then use the notebook as the
+primary learner surface. Portal investigation still exists, but it is now
+embedded inside the notebook flow rather than split across a separate day guide.
+The notebook is a repo-first reload harness: learners edit `src/`, `infra/`, or
+`scripts` first, rerun the bootstrap cell, and then use Marimo to validate the
+external code.
 
 Day 0 keeps its dedicated bootstrap companions:
 
@@ -44,7 +46,9 @@ Program-level operating guides live alongside the day materials:
 - [TRAINEE_PREFLIGHT_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINEE_PREFLIGHT_CHECKLIST.md)
 - [FACILITATOR_DAY_START_CHECKLIST.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FACILITATOR_DAY_START_CHECKLIST.md)
 - [FDE_DEBUGGING_FRAMEWORK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/FDE_DEBUGGING_FRAMEWORK.md)
-- [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md)
+- [portal/README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/README.md)
+- [capstone/README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/README.md)
+- [capstone/PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/PR_REVIEW.md)
 - [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md)
 - [PILOT_MEASUREMENT_PLAN.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/PILOT_MEASUREMENT_PLAN.md)
 - [GRADUATE_PROFILE.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/GRADUATE_PROFILE.md)
@@ -225,7 +229,8 @@ artifacts as hard blockers unless a recovery command is supplied.
 | 12 | `build/day12/static_bicep_analysis.json`, `build/day12/private_network_posture.json` | Day 14 trace-mode and residency decisions |
 | 13 | `build/day13/dlq_drain_report.json`, `build/day13/mcp_contract_report.json`, `build/day13/webhook_reliability_report.json` | Day 14 reliability and CTO evidence |
 | 14 | `build/day14/breaking_changes_drills.json`, `build/day14/cto_trace_report.json` | Capstone review and final readiness defense |
-| Capstone | `build/capstone/<trainee_id>/release_packet.json` | Trainer scoring and release-style defense |
+| Capstone A Foundation | `build/capstone/<trainee_id>/release_packet.json` | Day 14 final packet and CAB defense |
+| Capstone A Final | `build/capstone/<trainee_id>/final_packet.json` | Trainer scoring and final CAB defense |
 
 ---
 
@@ -263,17 +268,17 @@ callouts rather than skipping a day.
 ### For Trainers
 1. Read [TRAINER_OPERATIONS.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/TRAINER_OPERATIONS.md) before the cohort begins.
 2. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) and follow the day row for the session you are delivering.
-3. For Day 0, read `trainer/DAY_00_TRAINER.md` the evening before the session. For Days 01-14, start the incident first, then use the notebook and primary day doc as the live teaching path.
+3. For Day 0, read `trainer/DAY_00_TRAINER.md`, then start the bootstrap incident first. For Days 01-14, start the incident first, then use the notebook and primary day doc as the live teaching path.
 4. In local mode, import the instructor overlay before Days 8-14. In remote mode, hydrate the next day bundle if you want a warm cache. Then verify `uv run aegisap-lab overlay status`.
 5. Score learners with `docs/curriculum/templates/DAILY_SCORECARD.md`.
 6. Use [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md) for the unsignposted failure drill on Days 8-10 and the Day 14 chaos command review.
-7. Use [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md) and [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md) together for the final review.
+7. Use [capstone/PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/PR_REVIEW.md) and [capstone/CAPSTONE_A.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/CAPSTONE_A.md) together for the final review.
 8. Each trainer file ends with a **Next-Day Bridge** — use it to close the session.
 
 ### For Trainees
 1. Open [DELIVERY_MAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/DELIVERY_MAP.md) first and use it to find the current incident command, notebook, and primary day doc.
-2. For Days 01-14, start with `uv run aegisap-lab incident start --day XX`, then let the notebook direct any portal investigation.
-3. For Day 0, read `trainee/DAY_00_TRAINEE.md` before the session starts. For Days 01-14, use the notebook and primary day doc.
+2. For Days 00-14, start with the incident command for the current day, then let the notebook direct any portal investigation.
+3. For Day 0, read `trainee/DAY_00_TRAINEE.md` before the session starts and use the bootstrap module, notebook, and primary day doc.
 4. The **Check Your Understanding** questions at the end are not graded — they are
    designed to reveal gaps before you hit them in the notebook.
 5. Refer back to the **Glossary** and **Azure Best Practices** sections while
@@ -286,13 +291,13 @@ callouts rather than skipping a day.
 The bootcamp closes with a production-readiness review rather than a green-check
 demo. A successful learner should be able to:
 
-- Walk the golden thread from Day 0 to Day 10 without hand-waving missing controls
+- Walk the golden thread from Day 0 to Day 14 without hand-waving missing controls
 - Explain where Azure identity, policy, observability, and cost controls are enforced
 - Diagnose a failed gate or missing artifact with an exact recovery command
 - Defend at least one tradeoff they made between speed, safety, and cost
 
 The detailed scoring and deliverables are defined in
-[CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md).
+[capstone/CAPSTONE_A.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/CAPSTONE_A.md).
 
 The learner-to-role handoff is defined in
 [GRADUATE_PROFILE.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/GRADUATE_PROFILE.md).
@@ -301,14 +306,15 @@ The learner-to-role handoff is defined in
 
 ## Capstone Review Flow
 
-The capstone starts at the end of Day 9 and closes on Day 10.
+Capstone A now starts with the Day 10 foundation packet and closes on Day 14.
 
-1. Choose one bounded enhancement from the approved menu in [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md).
+1. Choose one bounded enhancement from [capstone/CAPSTONE_A.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/CAPSTONE_A.md).
 2. Submit a one-page design brief naming scope, risk, tests, rollback, expected artifacts, and the assumption used to resolve the built-in ambiguity.
-3. Complete the PR-style review cycle in [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md).
-4. Implement the enhancement and keep all required release checks green.
-5. Build `build/capstone/<trainee_id>/release_packet.json` with `scripts/build_capstone_release_packet.py`.
-6. Pass a release-style defense scored against [ASSESSMENT_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/ASSESSMENT_RUBRIC.md).
+3. Complete the PR-style review cycle in [capstone/PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/PR_REVIEW.md).
+4. Build the Day 10 foundation packet at `build/capstone/<trainee_id>/release_packet.json` with `scripts/build_capstone_release_packet.py`.
+5. Accumulate the required Day 11-14 enterprise evidence and complete the Day 14 blank-slate architecture drill.
+6. Build `build/capstone/<trainee_id>/final_packet.json` with `scripts/build_capstone_final_packet.py`.
+7. Pass the Day 14 final CAB defense scored against [ASSESSMENT_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/ASSESSMENT_RUBRIC.md).
 
 ---
 

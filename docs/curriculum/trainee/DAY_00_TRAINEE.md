@@ -2,7 +2,7 @@
 
 > **WAF Pillars:** Security · Operational Excellence  
 > **Time to read:** 25 min  
-> **Primary entrypoint:** [docs/curriculum/portal/DAY_00_PORTAL.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/DAY_00_PORTAL.md), then [DAY_00_AZURE_BOOTSTRAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md), then `scripts/provision-*.ps1` and `scripts/verify_env.py`
+> **Primary entrypoint:** `uv run aegisap-lab incident start --day 00 --track <core|full>`, then [docs/curriculum/portal/DAY_00_PORTAL.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/portal/DAY_00_PORTAL.md), then [DAY_00_AZURE_BOOTSTRAP.md](/workspaces/agentic-accounts-payable-orchestrator/docs/DAY_00_AZURE_BOOTSTRAP.md)
 
 ---
 

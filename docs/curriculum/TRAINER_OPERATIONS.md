@@ -31,17 +31,19 @@ The exact artifact filenames for each day are the authoritative source in
    prior day. Run the facilitator day-start checklist before learners enter
    the lab block. In remote-delivery cohorts, confirm the Phase 2 asset env vars
    are present before learners sit down.
-2. Theory block: for Day 0, start with the portal-first bootstrap walkthrough.
-   For Days 1-14, start with the incident, then use the notebook's portal
+2. Theory block: for Day 0, start with the bootstrap incident, then use the
+   portal as one evidence surface inside the notebook and bootstrap doc. For
+   Days 1-14, start with the incident, then use the notebook's portal
    investigation section to anchor the Azure evidence before learners patch the
    repo. Force the learner through the codification bridge before they open the
    editor: what exact state did the portal show, what notebook proof reproduced
    it, and which production boundary owns the durable fix? For Days 1-7, the
    guided prompt trio is fine. For Days 8-14, select three runtime oral-defense
    prompts from the instructor overlay so learners cannot rehearse a published
-   answer list.
-   On Days 02 and 04, run the active-inception triad before the learner opens
-   the notebook so the hidden NFR or risk appetite has to be extracted verbally.
+   answer list. On Days 02, 04, 11, and 12, run the triad before the learner
+   opens the notebook so the hidden NFR, authority, or security pressure has to
+   be extracted verbally. On Day 14, run the blank-slate architecture drill
+   before the final CAB defense.
 3. Lab block: keep the room moving toward all four outputs (technical build,
    decision memo, corporate process artifact, oral defense prep). Notebook
    completion alone is not the goal. Require the learner to capture KQL evidence
@@ -53,8 +55,8 @@ The exact artifact filenames for each day are the authoritative source in
    band anchors in `docs/curriculum/ASSESSOR_CALIBRATION.md`.
 6. Exit-ticket scoring: record artifact status, 100-point rubric scores, and
    remediation in `docs/curriculum/templates/DAILY_SCORECARD.md`. Mandatory
-   checkpoint days are Day 4, Day 8, and Day 10 — gate evidence must be
-   complete before the trainee enters capstone review.
+   checkpoint days are Day 4, Day 8, and Day 10. Day 10 is the Capstone A
+   foundation checkpoint; Day 14 is the final CAB closeout.
 7. Zero-tolerance verification (Days 7, 10, 11, 12, 14): complete the
    zero-tolerance check in the scorecard before finalising any score for
    those days. A hard-fail overrides the total to 0.
@@ -80,7 +82,7 @@ The exact artifact filenames for each day are the authoritative source in
 
 ## Active Inception Triads
 
-Days 02 and 04 use triads by default:
+Days 02, 04, 11, and 12 use triads by default:
 
 - `interviewer`: extracts the hidden NFR, authority boundary, or risk appetite
 - `stakeholder`: plays from the scripted role card and does not volunteer the answer
@@ -146,7 +148,9 @@ truth is `docs/curriculum/NATIVE_TOOLING_POLICY.md`.
 - If a learner misses a checkpoint day, they must complete the checkpoint
   artifact before continuing to the next mandatory checkpoint
 - If a learner misses Day 8, Day 9, or Day 10 evidence, they do not enter the
-  capstone review flow until the missing release inputs are rebuilt
+  Capstone A foundation flow until the missing release inputs are rebuilt
+- If a learner misses Day 11, Day 12, Day 13, or Day 14 evidence, they do not
+  enter the final Day 14 CAB defense until the missing enterprise inputs are rebuilt
 
 ## Trainer Handoff Template
 
@@ -188,15 +192,17 @@ graduation tier thresholds.
 - [GRADUATION_RUBRIC.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/GRADUATION_RUBRIC.md)
 - [MENTAL_MODELS.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/MENTAL_MODELS.md)
 - [ASSESSOR_CALIBRATION.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/ASSESSOR_CALIBRATION.md)
-- [CAPSTONE_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_REVIEW.md)
-- [CAPSTONE_PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CAPSTONE_PR_REVIEW.md)
+- [capstone/README.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/README.md)
+- [capstone/CAPSTONE_A.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/CAPSTONE_A.md)
+- [capstone/PR_REVIEW.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/capstone/PR_REVIEW.md)
 - [INCIDENT_DRILL_RUNBOOK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/INCIDENT_DRILL_RUNBOOK.md)
 - [templates/ORAL_DEFENSE_SCORECARD.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/ORAL_DEFENSE_SCORECARD.md)
 - [templates/DAILY_ARTIFACT_PACK.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/DAILY_ARTIFACT_PACK.md)
 - [templates/DAILY_SCORECARD.md](/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/templates/DAILY_SCORECARD.md)
 
-Use `portal/README.md` and `DAY_00_PORTAL.md` only for the bootstrap exception.
-For Days 1-14, the live delivery path is `incident start -> portal investigation -> notebook proof -> codification bridge -> repo patch -> verification`.
+Use `portal/README.md` and `DAY_00_PORTAL.md` as portal-investigation support for
+Day 00, not as the authoritative entrypoint. For Days 00-14, the live delivery
+path is `incident start -> portal investigation -> notebook proof -> codification bridge -> repo patch -> verification`.
 
 ## Phase 2 Remote Asset Delivery
 

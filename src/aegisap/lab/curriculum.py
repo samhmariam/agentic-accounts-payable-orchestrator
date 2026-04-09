@@ -11,6 +11,7 @@ MANIFEST_PATH = ROOT / "docs" / "curriculum" / "CURRICULUM_MANIFEST.yaml"
 SCHEMA_PATH = ROOT / "docs" / "curriculum" / "curriculum.schema.json"
 
 MODULE_SLUGS = {
+    "00": "day_00_bootstrap",
     "01": "day_01_trust_boundary",
     "02": "day_02_resilience_ownership",
     "03": "day_03_retrieval_authority",
@@ -28,6 +29,7 @@ MODULE_SLUGS = {
 }
 
 SCAFFOLD_LEVELS = {
+    "00": "guided",
     "01": "guided",
     "02": "guided",
     "03": "guided",
@@ -91,7 +93,11 @@ def load_manifest(repo_root: str | Path | None = None) -> dict[str, Any]:
 
 
 def day_map(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    return {str(day["id"]): day for day in manifest.get("days", [])}
+    mapping = {str(day["id"]): day for day in manifest.get("days", [])}
+    bootstrap_day = manifest.get("bootstrap_day")
+    if bootstrap_day:
+        mapping[str(bootstrap_day["id"])] = bootstrap_day
+    return mapping
 
 
 def get_day(manifest: dict[str, Any], day: str | int) -> dict[str, Any]:

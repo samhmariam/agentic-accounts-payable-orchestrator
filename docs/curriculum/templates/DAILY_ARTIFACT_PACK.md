@@ -28,6 +28,10 @@ dayNN_<trainee_id>/
 **What goes here:** Code, configuration, diagrams, or analysis directly produced
 by the lab exercise. File formats vary by day (`.py`, `.bicep`, `.json`, `.md`).
 
+**Day 14 addition:** include
+`LAB_OUTPUT/architecture_rebuild/blank_slate_architecture.md` for the final
+blank-slate architecture drill.
+
 **Days 8-14 diagnostic proof requirement:** include a
 `LAB_OUTPUT/DIAGNOSTIC_PROOF/` folder containing:
 

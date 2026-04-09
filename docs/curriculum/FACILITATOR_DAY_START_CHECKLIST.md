@@ -33,7 +33,7 @@ az account show
 - `docs/curriculum/NATIVE_TOOLING_POLICY.md`
 - the prior day's handoff notes
 
-If you are teaching Day 0, also open `docs/curriculum/portal/DAY_00_PORTAL.md`.
+If you are teaching Day 0, also open `docs/curriculum/portal/DAY_00_PORTAL.md` and `modules/day_00_bootstrap/README.md`.
 
 For Days 8-14, also verify the facilitator overlay is loaded:
 
@@ -101,12 +101,14 @@ Say these five things out loud before the lab begins:
 
 - Confirm learners understand preview-mode OBO artifacts do not satisfy live delegated-identity proof.
 - Confirm Key Vault / client-secret handling expectations are clear before the lab starts.
+- Confirm the hostile identity triad roles are assigned before the notebook opens.
 
 ### Day 12
 
 - Confirm the difference between static proof and live posture proof is stated before learners run cells.
 - Confirm the room knows that public fallback is not an acceptable production shortcut.
 - Confirm learners know the native-tool gate bans helper CLI commands, requires `build/day12/native_operator_evidence.json`, and includes a live rerun.
+- Confirm the hostile InfoSec triad is ready before the notebook opens.
 
 ### Day 13
 
@@ -119,6 +121,7 @@ Say these five things out loud before the lab begins:
 - Confirm rollback, partial continuation, and gate-override language stays evidence-based.
 - Confirm the capstone CAB chair is ready to select one saved native proof for a live rerun.
 - Confirm the cascading crucible order: network signal first, identity signal second, correlation or regression signal third.
+- Confirm the blank-slate architecture drill prompt is ready before the final CAB defense.
 
 ### Day 9
 
@@ -128,7 +131,7 @@ Say these five things out loud before the lab begins:
 ## First 15 Minutes Of The Session
 
 - Check that learners can open the repo and activate the right shell.
-- Check that learners know Day 0 starts in the portal, while Days 1-14 start with `uv run aegisap-lab incident start --day XX`.
+- Check that learners know Day 0 starts with `uv run aegisap-lab incident start --day 00 --track <core|full>`, then uses the portal as an evidence surface.
 - Check that learners know the notebook now includes a `Codification Bridge` step before the repo patch.
 - Check that learners on Days 8-14 know they must preserve telemetry before patching and may not start with repo search.
 - Confirm who already ran the trainee preflight and who did not.

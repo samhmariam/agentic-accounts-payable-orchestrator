@@ -1,0 +1,48 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "75d084db26c9159b743271909a8751ae",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "b62d3a70782689d524224555c230ca91",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-00-bootstrap-incident-portal-evidence-and-environment-contract-recovery\">Day 00 - Bootstrap Incident, Portal Evidence, and Environment Contract Recovery</h1>\n<span class=\"paragraph\">Primary learner entrypoint: <code>modules/day_00_bootstrap/README.md</code>. Start the incident first, then use this notebook and the bootstrap doc to recover the Day 0 contract safely.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "1a7786dc4a468735dd78a77a61576ac9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"incident\">Incident</h2>\n<span class=\"paragraph\">The Day 0 state file no longer matches the selected bootstrap track, so the cohort cannot trust the environment reload path.</span>\n<span class=\"paragraph\"><strong>What success looks like</strong></span>\n<ul>\n<li><code>setup-env.sh</code> can reload the chosen track from <code>.day0/&lt;track&gt;.json</code></li>\n<li><code>verify_env.py</code> proves the Day 0 contract again</li>\n<li>you can explain which Azure identity and environment facts the state file must carry forward</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

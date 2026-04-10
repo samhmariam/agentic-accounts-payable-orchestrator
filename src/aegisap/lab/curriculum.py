@@ -147,7 +147,7 @@ def incident_asset_ref_for_day_entry(day_entry: dict[str, Any]) -> str:
 def scenario_relpath_from_asset_ref(day_entry: dict[str, Any]) -> str:
     ref = incident_asset_ref_for_day_entry(day_entry)
     normalized = normalize_day(day_entry["id"])
-    if ref in {f"day{normalized}", normalized}:
+    if ref in {f"day{normalized}", normalized, f"incident.day{normalized}"}:
         return f"scenarios/day{normalized}"
     return ref
 
@@ -201,7 +201,8 @@ def get_drill(
     try:
         return drill_map_for_day(manifest, day)[drill_id]
     except KeyError as exc:
-        raise ValueError(f"Unknown drill `{drill_id}` for day {normalize_day(day)}") from exc
+        raise ValueError(
+            f"Unknown drill `{drill_id}` for day {normalize_day(day)}") from exc
 
 
 def constraint_lineage_for_day(

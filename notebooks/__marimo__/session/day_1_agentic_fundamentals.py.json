@@ -1,0 +1,178 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "1ad87da8452022d3894c3ab4f2e0d36a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "4338a215f8ae6d88f136d6a2dc186ac3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"day-1-agentic-systems-fundamentals-business-value-and-fde-judgment\">Day 1 - Agentic Systems Fundamentals, Business Value, and FDE Judgment</h1>\n<span class=\"paragraph\">Primary learner entrypoint: <code>modules/day_01_trust_boundary/README.md</code>. Read the customer context and file manifest there before you start the incident.</span>\n<span class=\"paragraph\">Day 1 is no longer a conceptual tour. You are responding to a real intake failure,\nproving where the break lives, prototyping the repair in the notebook, and then\nshipping the fix in the production codebase.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "69e315499ab120b5291eeedce9509509",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "481e8021dff0a1312d4c3696be568ceb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;h2 id=&#92;&quot;how-youll-be-scored-today&#92;&quot;&gt;How You&#x27;ll Be Scored Today&lt;/h2&gt;&#92;n&lt;table&gt;&#92;n&lt;thead&gt;&#92;n&lt;tr&gt;&#92;n&lt;th&gt;Dimension&lt;/th&gt;&#92;n&lt;th style=&#92;&quot;text-align: right;&#92;&quot;&gt;Points&lt;/th&gt;&#92;n&lt;/tr&gt;&#92;n&lt;/thead&gt;&#92;n&lt;tbody&gt;&#92;n&lt;tr&gt;&#92;n&lt;td&gt;&lt;code&gt;agent_fit_signals&lt;/code&gt;&lt;/td&gt;&#92;n&lt;td style=&#92;&quot;text-align: right;&#92;&quot;&gt;25&lt;/td&gt;&#92;n&lt;/tr&gt;&#92;n&lt;tr&gt;&#92;n&lt;td&gt;&lt;code&gt;rejection_criteria&lt;/code&gt;&lt;/td&gt;&#92;n&lt;td style=&#92;&quot;text-align: right;&#92;&quot;&gt;20&lt;/td&gt;&#92;n&lt;/tr&gt;&#92;n&lt;tr&gt;&#92;n&lt;td&gt;&lt;code&gt;waf_trust_tradeoff&lt;/code&gt;&lt;/td&gt;&#92;n&lt;td style=&#92;&quot;text-align: right;&#92;&quot;&gt;20&lt;/td&gt;&#92;n&lt;/tr&gt;&#92;n&lt;tr&gt;&#92;n&lt;td&gt;&lt;code&gt;business_framing&lt;/code&gt;&lt;/td&gt;&#92;n&lt;td style=&#92;&quot;text-align: right;&#92;&quot;&gt;15&lt;/td&gt;&#92;n&lt;/tr&gt;&#92;n&lt;tr&gt;&#92;n&lt;td&gt;&lt;code&gt;oral_defense&lt;/code&gt;&lt;/td&gt;&#92;n&lt;td style=&#92;&quot;text-align: right;&#92;&quot;&gt;20&lt;/td&gt;&#92;n&lt;/tr&gt;&#92;n&lt;/tbody&gt;&#92;n&lt;/table&gt;&#92;n&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;See &lt;a href=&#92;&quot;/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/ASSESSMENT_RUBRIC.md&#92;&quot;&gt;ASSESSMENT_RUBRIC.md&lt;/a&gt; for band descriptors and&#92;n&lt;a href=&#92;&quot;/workspaces/agentic-accounts-payable-orchestrator/docs/curriculum/CURRICULUM_MANIFEST.yaml&#92;&quot;&gt;CURRICULUM_MANIFEST.yaml&lt;/a&gt; for the authoritative day contract.&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;info&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "6e6cac7ae916d6ca47ab5a7bbfa5a2d2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"incident\">Incident</h2>\n<span class=\"paragraph\">A valid European supplier invoice is being rejected at the trust boundary after a\nrecent change. The finance team does not care about the theory. They care that a\nreal invoice with mixed separators like <code>1.250,00 EUR</code> no longer crosses the\nboundary safely.</span>\n<span class=\"paragraph\"><strong>What success looks like</strong></span>\n<ul>\n<li>you can prove the failure is deterministic Python, not the model prompt</li>\n<li>the repaired path still rejects malformed amounts and accepts valid locale input</li>\n<li>the production tests are green before AP retries the invoice</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "ce07d5356e5b51126d9b1e23adf15ef5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"portal-investigation\">Portal Investigation</h2>\n<span class=\"paragraph\">Start in Azure before you blame the parser.</span>\n<ol>\n<li>Open the Foundry or Azure OpenAI deployment and confirm the extractor still returns the expected Day 1 candidate keys.</li>\n<li>Compare one raw model payload with the failing finance case. Capture the exact amount string the model produced.</li>\n<li>Confirm IAM and endpoint health are unchanged so you do not misclassify an identity or networking problem as a parsing bug.</li>\n<li>Write down the exact amount literal that crosses from extraction into deterministic normalization.</li>\n</ol>\n<span class=\"paragraph\"><strong>Infrastructure-first debugging rule</strong></span>\n<ul>\n<li>Check identity and endpoint health before changing prompts.</li>\n<li>Check data shape before changing policy.</li>\n<li>Blame the model only after the deterministic boundary is proven correct.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "7a57fb011f93a90333fade8b6b08937d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"lab-repair\">Lab Repair</h2>\n<span class=\"paragraph\">Use this section as a scratchpad only. The goal is to prove a safe fix reactively\nbefore you touch the production files.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "7be1193f045046d2ae36db6b8d743716",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='SFPL-0' random-id='23f61194-cf19-5aa9-7ecc-7a3e7aff3e23'><marimo-text data-initial-value='&quot;1.250,00 EUR&quot;' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Prototype with the amount string from the customer incident&lt;/span&gt;&lt;/span&gt;&quot;' data-placeholder='&quot;&quot;' data-kind='&quot;text&quot;' data-full-width='false' data-disabled='false' data-debounce='true'></marimo-text></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "f5459945b4f710e5cdf3376f81fab028",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;The prototype failed with:&lt;/span&gt;&#92;n&lt;div class=&#92;&quot;language-text codehilite&#92;&quot;&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ambiguous mixed-separator amount, reject at boundary: &amp;#39;1.250,00 EUR&amp;#39;&#92;n&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/span&gt;&quot;' data-kind='&quot;danger&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "977a058e4f37bb5768ad030a421c5ada",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-callout-output data-html='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;The fixture is currently rejected:&lt;/span&gt;&#92;n&lt;div class=&#92;&quot;language-text codehilite&#92;&quot;&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;invoice rejected at intake boundary: ambiguous mixed-separator amount, reject at boundary: &amp;#39;1.000,00 EUR&amp;#39;&#92;n&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/span&gt;&quot;' data-kind='&quot;danger&quot;'></marimo-callout-output>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "2c7e6dad05f3e6b857be328709776d28",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"why-this-fails-in-prod\">Why This Fails In Prod</h2>\n<span class=\"paragraph\">List three specific ways this notebook logic fails in an Azure Container App. You must reference at least one Azure limit (memory, timeout, or ephemeral storage) and one concurrency issue.</span>\n<h2 id=\"codification-bridge\">Codification Bridge</h2>\n<span class=\"paragraph\">Treat the portal and notebook as evidence, not as the fix.</span>\n<ul>\n<li>Portal state: the extractor and endpoint health are fine, but the locale-formatted amount crossing the deterministic boundary is not handled safely.</li>\n<li>Notebook proof: <code>parse_money(...)</code> and the fixture walkthrough prove whether the break lives in normalization or the reject path.</li>\n<li>Permanent repo change: <code>src/aegisap/day_01/normalizers.py</code> and, if needed, <code>src/aegisap/day_01/service.py</code>.</li>\n</ul>\n<span class=\"paragraph\">Rosetta Stone: <code>notebooks/bridges/day01_trust_boundary.md</code></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "1fae7450d33c2a2a7530ad3cd32cef0a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"production-patch\">Production Patch</h2>\n<span class=\"paragraph\">This section is <strong>markdown-only</strong>.</span>\n<span class=\"paragraph\">Do not edit repo files from this notebook.</span>\n<span class=\"paragraph\">Edit the repo target in your IDE first.</span>\n<span class=\"paragraph\">Rerun this notebook bootstrap cell after every repo edit so <code>deep_reload_modules(...)</code>\nreloads the real package imports before you trust the notebook proof again.</span>\n<span class=\"paragraph\">Write the durable patch in the repo target below, not inside Marimo.</span>\n<span class=\"paragraph\">Your prototype is only a hypothesis until the real code changes land in the repo.\nOpen the production files in your editor, implement the fix there, and then\nreturn here to verify the external code:</span>\n<ul>\n<li><code>src/aegisap/day_01/normalizers.py</code></li>\n<li><code>src/aegisap/day_01/service.py</code> if the rejection path or exception handling needs adjustment</li>\n</ul>\n<h3 id=\"export-to-production\">Export to Production</h3>\n<ul>\n<li>Which exact amount literal caused the failure?</li>\n<li>What exact normalization or rejection rule must change in <code>src/aegisap/day_01/normalizers.py</code> or <code>src/aegisap/day_01/service.py</code>?</li>\n<li>Which test and rebuilt artifact prove the change is permanent?</li>\n</ul>\n<span class=\"paragraph\">After the code change, run the terminal verification commands below. Do not proceed\nuntil the tests are green.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "b2f4ce0d80241bdb85c9e2de41beb94c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"verification\">Verification</h2>\n<span class=\"paragraph\">Run these commands in the terminal, not in this notebook:</span>\n<div class=\"language-bash codehilite\"><pre><span></span><code>uv<span class=\"w\"> </span>run<span class=\"w\"> </span>python<span class=\"w\"> </span>-m<span class=\"w\"> </span>pytest<span class=\"w\"> </span>tests/test_day_01_money.py<span class=\"w\"> </span>tests/test_day_01_fixtures.py<span class=\"w\"> </span>-q\nuv<span class=\"w\"> </span>run<span class=\"w\"> </span>aegisap-lab<span class=\"w\"> </span>artifact<span class=\"w\"> </span>rebuild<span class=\"w\"> </span>--day<span class=\"w\"> </span><span class=\"m\">01</span>\n</code></pre></div>\n<span class=\"paragraph\">Current artifact present: <code>build/day1/golden_thread_day1.json</code></span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

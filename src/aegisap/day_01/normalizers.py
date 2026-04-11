@@ -52,9 +52,11 @@ def _has_structured_boundaries(raw_value: str, haystack: str) -> bool:
         after_idx = idx + len(needle)
         after = hay[after_idx] if after_idx < len(hay) else ""
 
-        start_ok = not _is_alnum(needle[0]) or not before or not _is_alnum(before)
+        start_ok = not _is_alnum(
+            needle[0]) or not before or not _is_alnum(before)
         end_char = needle[-1]
-        end_needs_boundary = _is_alnum(end_char) or _is_identifier_joiner(end_char)
+        end_needs_boundary = _is_alnum(
+            end_char) or _is_identifier_joiner(end_char)
         end_ok = not end_needs_boundary or not after or not _is_alnum(after)
 
         if start_ok and end_ok:
@@ -78,7 +80,8 @@ def _assert_present(raw_value: str, haystack: str, field_name: str, *, structure
         else _collapse_ws(raw_value) in _collapse_ws(haystack)
     )
     if not present:
-        raise ValueError(f"{field_name} evidence not found in source text: {raw_value!r}")
+        raise ValueError(
+            f"{field_name} evidence not found in source text: {raw_value!r}")
 
 
 def _require_text(
@@ -136,7 +139,8 @@ def parse_money(raw: str, *, allow_zero: bool = False) -> Decimal:
         raise ValueError(f"invalid amount format: {raw!r}")
 
     if match.group("prefix") and match.group("suffix"):
-        raise ValueError(f"amount must contain at most one currency token: {raw!r}")
+        raise ValueError(
+            f"amount must contain at most one currency token: {raw!r}")
 
     s = match.group("number")
 
@@ -147,9 +151,23 @@ def parse_money(raw: str, *, allow_zero: bool = False) -> Decimal:
         raise ValueError(f"negative amounts not allowed on Day 1: {raw!r}")
 
     if "," in s and "." in s:
-        decimal_sep = "," if s.rfind(",") > s.rfind(".") else "."
-        thousand_sep = "." if decimal_sep == "," else ","
-        s = s.replace(thousand_sep, "").replace(decimal_sep, ".")
+        # Detect which is decimal by checking which comes last
+        last_comma = s.rfind(",")
+        last_dot = s.rfind(".")
+        if last_comma > last_dot:
+            # Comma is decimal, dot is thousand separator
+            if len(s) - last_comma - 1 == 2 and all(len(p) == 3 for p in s.split(".")[1:-1]) and len(s.split(".")[-1].split(",")[0]) == 3:
+                s = s.replace(".", "").replace(",", ".")
+            else:
+                raise ValueError(
+                    f"ambiguous mixed-separator amount, reject at boundary: {raw!r}")
+        else:
+            # Dot is decimal, comma is thousand separator
+            if len(s) - last_dot - 1 == 2 and all(len(p) == 3 for p in s.split(",")[1:]) and len(s.split(",")[0].split(".")[0]) == 1 or (len(s.split(",")[0].split(".")[0]) <= 3 and all(len(p) == 3 for p in s.split(",")[0].split(".")[1:])):
+                s = s.replace(",", "")
+            else:
+                raise ValueError(
+                    f"ambiguous mixed-separator amount, reject at boundary: {raw!r}")
     elif "," in s:
         parts = s.split(",")
         if len(parts) == 2 and len(parts[1]) == 2:
@@ -213,7 +231,8 @@ def reconcile_amount(
         values.add(parse_money(evidence.pdf_text, allow_zero=allow_zero))
 
     if evidence.email_text:
-        _assert_present(evidence.email_text, email_text, f"{field_name}.email_text")
+        _assert_present(evidence.email_text, email_text,
+                        f"{field_name}.email_text")
         values.add(parse_money(evidence.email_text, allow_zero=allow_zero))
 
     if not values:
@@ -221,7 +240,8 @@ def reconcile_amount(
 
     if len(values) > 1:
         normalized = ", ".join(sorted(str(v) for v in values))
-        raise ValueError(f"{field_name} mismatch between sources: {normalized}")
+        raise ValueError(
+            f"{field_name} mismatch between sources: {normalized}")
 
     return next(iter(values))
 
@@ -230,15 +250,18 @@ def to_canonical_invoice(
     candidate: ExtractedInvoiceCandidate,
     package: InvoicePackageInput,
 ) -> CanonicalInvoice:
-    supplier_name = _require_text(candidate.supplier_name_text, package, "supplier_name_text")
+    supplier_name = _require_text(
+        candidate.supplier_name_text, package, "supplier_name_text")
     invoice_number = _require_text(
         candidate.invoice_number_text, package, "invoice_number_text", structured=True
     )
     invoice_date_text = _require_text(
         candidate.invoice_date_text, package, "invoice_date_text", structured=True
     )
-    currency_text = _require_text(candidate.currency_text, package, "currency_text", structured=True)
-    po_reference = _require_text(candidate.po_reference_text, package, "po_reference_text", structured=True)
+    currency_text = _require_text(
+        candidate.currency_text, package, "currency_text", structured=True)
+    po_reference = _require_text(
+        candidate.po_reference_text, package, "po_reference_text", structured=True)
     bank_details_text = _require_text(
         candidate.bank_details_text, package, "bank_details_text", structured=True
     )
@@ -248,9 +271,12 @@ def to_canonical_invoice(
         invoice_number=invoice_number,
         invoice_date=parse_invoice_date(invoice_date_text),
         currency=normalize_currency(currency_text),
-        net_amount=reconcile_amount(candidate.net_amount, package, field_name="net_amount"),
-        vat_amount=reconcile_amount(candidate.vat_amount, package, field_name="vat_amount", allow_zero=True),
-        gross_amount=reconcile_amount(candidate.gross_amount, package, field_name="gross_amount"),
+        net_amount=reconcile_amount(
+            candidate.net_amount, package, field_name="net_amount"),
+        vat_amount=reconcile_amount(
+            candidate.vat_amount, package, field_name="vat_amount", allow_zero=True),
+        gross_amount=reconcile_amount(
+            candidate.gross_amount, package, field_name="gross_amount"),
         po_reference=po_reference,
         bank_details_hash=hash_bank_details(bank_details_text),
     )
